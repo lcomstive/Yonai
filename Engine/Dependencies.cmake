@@ -15,21 +15,17 @@ endif()
 
 # GLM
 find_package(glm)
-include_directories(${GLM_INCLUDE_DIRS})
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
 
 # SPDLog
 find_package(spdlog)
-include_directories(${SPDLOG_INCLUDE_DIRS})
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS spdlog::spdlog)
 
 # STB
-include_directories(${STB_INCLUDE_DIRS})
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
 
 # Assimp
 find_package(assimp)
-include_directories(${ASSIMP_INCLUDE_DIRS})
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp::assimp)
 
 # Glad

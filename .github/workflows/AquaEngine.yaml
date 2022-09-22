@@ -52,23 +52,23 @@ jobs:
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build/static -DCMAKE_BUILD_TYPE=${{ secrets[env.BUILD_CONFIG_NAME] }}
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ secrets[env.BUILD_CONFIG_NAME] }}
 
     # Build engine
     - name: Build Engine
-      run: cmake --build ${{ github.workspace }}/build/static -t AquaEngine --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
+      run: cmake --build ${{ github.workspace }}/build -t AquaEngine --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
 
     # Testing
     - name: Build Test
-      run: cmake --build ${{ github.workspace }}/build/static -t AquaEngineTest --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
+      run: cmake --build ${{ github.workspace }}/build -t AquaEngineTest --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
 
     - name: Run Test [Windows]
       if: matrix.config.os == 'windows-latest'
-      run: ${{ github.workspace }}/build/static/bin/${{ secrets[env.BUILD_CONFIG_NAME] }}/AquaEngineTest
+      run: ${{ github.workspace }}/build/bin/${{ secrets[env.BUILD_CONFIG_NAME] }}/AquaEngineTest
 
     - name: Run Test
       if: matrix.config.os != 'windows-latest'
-      run: ${{ github.workspace }}/build/static/bin/AquaEngineTest
+      run: ${{ github.workspace }}/build/bin/AquaEngineTest
 
     # Read engine version from text file
     - uses: juliangruber/read-file-action@v1

@@ -31,7 +31,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${AQUA_ENGINE_DEPENDENCY_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${AQUA_ENGINE_DEPENDENCY_LIBS})
 
 if(NOT WIN32)
 	include(GNUInstallDirs)
