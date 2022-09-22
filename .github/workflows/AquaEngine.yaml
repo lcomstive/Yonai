@@ -42,7 +42,7 @@ jobs:
     - name: VCPKG
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgDirectory: '${{ github.workspace }}/Vendor/Engine/vcpkg'
+        vcpkgDirectory: '${{ github.workspace }}/Engine/Vendor/vcpkg'
 
     # Get GitHub secret based on branch.
     # Used for CMake configuration output (e.g. Debug, Release)
