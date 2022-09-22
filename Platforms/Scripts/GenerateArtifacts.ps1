@@ -18,7 +18,7 @@ $ARTIFACT="AquaEngine-$ProjectVersion.zip"
 $OUTPUT_DIR="Build/bin/$CONFIG"
 
 # Add .exe files
-Compress-Archive -Path $OUTPUT_DIR/*.exe -DestinationPath $ARTIFACT
+Compress-Archive -Path $OUTPUT_DIR/*.exe -Force -DestinationPath $ARTIFACT
 
 # Add .dll files
 Compress-Archive -Path $OUTPUT_DIR/*.dll -Update -DestinationPath $ARTIFACT

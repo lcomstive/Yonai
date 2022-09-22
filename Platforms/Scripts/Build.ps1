@@ -28,9 +28,9 @@ Write-Output "	Output:      $BUILD_DIR"
 Write-Output ""
 
 # Configure CMake
-Start-Process cmake -ArgumentList "-S $SRC_DIR -B $BUILD_DIR -DCMAKE_BUILD_TYPE=$CONFIG $CONFIG_ARGS" -Wait -NoNewWindow -PassThru
+Start-Process cmake -ArgumentList "-S $SRC_DIR -B $BUILD_DIR -DCMAKE_BUILD_TYPE=$CONFIG $CONFIG_ARGS" -NoNewWindow -PassThru
 
 Write-Output "\n\n"
 
 # Build project
-Start-Process cmake -ArgumentList "--build $BUILD_DIR --config $CONFIG $BUILD_ARGS" -Wait -NoNewWindow -PassThru
+Start-Process cmake -ArgumentList "--build $BUILD_DIR --config $CONFIG $BUILD_ARGS" -NoNewWindow -PassThru
