@@ -1,0 +1,12 @@
+{
+	"name": "aqua-engine",
+	"version-string": "0.0.1",
+	"dependencies": [
+		"glfw3",
+		"assimp",
+		"gtest",
+		"glm",
+		"stb",
+		"spdlog"
+	]
+}

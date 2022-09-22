@@ -8,32 +8,29 @@ find_package(OpenGL REQUIRED)
 
 # GLFW
 if(AQUA_DESKTOP_PLATFORM)
-    set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
-    set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
-    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
-
-    add_subdirectory(Vendor/glfw)
-    list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glfw)
-    list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw/include")
+	find_package(glfw3)
+	include_directories(${GLFW_INCLUDE_DIRS})
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glfw)
 endif()
 
 # GLM
-list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glm")
-
-# Cereal
-list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/cereal/include")
+find_package(glm)
+include_directories(${GLM_INCLUDE_DIRS})
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
 
 # SPDLog
-list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/spdlog/include")
+find_package(spdlog)
+include_directories(${SPDLOG_INCLUDE_DIRS})
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS spdlog::spdlog)
 
 # STB
-list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/stb")
+include_directories(${STB_INCLUDE_DIRS})
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
 
 # Assimp
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "")
-add_subdirectory(Vendor/assimp)
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp)
-list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp/include")
+find_package(assimp)
+include_directories(${ASSIMP_INCLUDE_DIRS})
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp::assimp)
 
 # Glad
 if(AQUA_DESKTOP_PLATFORM)
