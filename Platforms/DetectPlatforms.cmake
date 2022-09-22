@@ -1,0 +1,7 @@
+if(ANDROID OR iOS)
+    set(AQUA_MOBILE_PLATFORM true)
+elseif (UNIX OR APPLE OR WIN32)
+    set(AQUA_DESKTOP_PLATFORM true)
+else()
+    message("Unable to determine if compiling for mobile or desktop platform")
+endif ()

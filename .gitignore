@@ -1,0 +1,13 @@
+# Mac OS Meta
+.DS_Store
+
+# Visual Studio & VS Code
+.vs/
+.vscode/
+
+# Generated Documentation
+Docs/html/
+
+# Generated files & artifacts
+[Bb]uild/
+AquaEngine*.zip

@@ -1,0 +1,162 @@
+#include <AquaEngine/IO/VFS.hpp>
+#include <AquaEngine/IO/VFS/VFSPhysicalFile.hpp>
+
+using namespace std;
+using namespace AquaEngine::IO;
+
+unordered_map<string, list<VFSMapping*>> VFS::m_Mappings;
+
+VFSMapping* VFS::Mount(string mountPoint) { return Mount<VFSPhysicalFileMapping>(mountPoint); }
+VFSMapping* VFS::Mount(string mountPoint, string mountPath) { return Mount<VFSPhysicalFileMapping>(mountPoint, mountPath); }
+
+void VFS::Unmount(string mountPoint, string mountPath)
+{
+	if (m_Mappings.find(mountPoint) == m_Mappings.end())
+		return; // Mount point isn't mapped
+
+	for (auto it : m_Mappings[mountPoint])
+	{
+		if (it->GetMountPath().compare(mountPath) == 0)
+		{
+			m_Mappings[mountPoint].remove(it);
+			delete it;
+			break;
+		}
+	}
+}
+
+filesystem::path VFS::GetCurrentDirectory() { return filesystem::current_path(); }
+bool VFS::HasMount(string mountPath) { return m_Mappings.find(mountPath) != m_Mappings.end(); }
+
+bool VFS::Exists(string path)
+{
+	for (auto& mounts : m_Mappings)
+	{
+		// Check if path starts with mount
+		if (path.rfind(mounts.first, 0) != 0)
+			continue;
+		for (auto& mapping : mounts.second)
+			if (mapping->Exists(mapping->GetMountedPath(path)))
+				return true;
+	}
+	return false;
+}
+
+VFSMapping* VFS::GetMapping(string path, bool needExistingFile, FilePermissions requiredPerms)
+{
+	for (auto& mounts : m_Mappings)
+	{
+		// Check if path starts with mount
+		if (path.rfind(mounts.first, 0) != 0)
+			continue;
+		for (auto& mapping : mounts.second)
+		{
+			if (!needExistingFile && ((unsigned int)mapping->GetPermissions() & (unsigned int)requiredPerms) != 0) // Valid mapping found
+				return mapping;
+			if (needExistingFile && mapping->Exists(mapping->GetMountedPath(path))) // Valid file found inside mapping
+				return mapping;
+		}
+	}
+	return nullptr;
+}
+
+vector<VFSMapping*> VFS::GetMappings(string path, bool needExistingFile, FilePermissions requiredPerms)
+{
+	vector<VFSMapping*> mappings;
+
+	for (auto& mounts : m_Mappings)
+	{
+		// Check if path starts with mount
+		if (path.rfind(mounts.first, 0) != 0)
+			continue;
+		for (auto& mapping : mounts.second)
+		{
+			if (!needExistingFile && ((unsigned char)mapping->GetPermissions() & (unsigned char)requiredPerms) != 0) // Valid writeable mapping found
+				mappings.emplace_back(mapping);
+			if (needExistingFile && mapping->Exists(mapping->GetMountedPath(path))) // Valid file found inside mapping
+				mappings.emplace_back(mapping);
+		}
+	}
+	return mappings;
+}
+
+void VFS::Unmount(string mountPoint)
+{
+	if (m_Mappings.find(mountPoint) == m_Mappings.end())
+		return;
+
+	for (auto it : m_Mappings[mountPoint])
+		delete it;
+	m_Mappings[mountPoint].clear();
+}
+
+string VFS::ReadText(string path)
+{
+	VFSMapping* mapping = GetMapping(path);
+	if (!mapping)
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+	return mapping ? mapping->ReadText(mapping->GetMountedPath(path)) : "";
+}
+
+vector<unsigned char> VFS::Read(string path)
+{
+	VFSMapping* mapping = GetMapping(path);
+	if (!mapping)
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+	return mapping ? mapping->Read(mapping->GetMountedPath(path)) : vector<unsigned char>();
+}
+
+void VFS::WriteText(string path, string contents)
+{
+	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
+
+	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+		return;
+	}
+
+	mapping->WriteText(mapping->GetMountedPath(path), contents);
+}
+
+void VFS::Write(string path, vector<unsigned char> contents)
+{
+	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
+	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+		return;
+	}
+
+	mapping->Write(mapping->GetMountedPath(path), contents);
+}
+
+void VFS::Copy(string originalPath, string copyPath)
+{
+	VFSMapping* mapping = GetMapping(originalPath, false, FilePermissions::Write);
+	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", originalPath);
+		return;
+	}
+
+	mapping->Copy(mapping->GetMountedPath(originalPath), mapping->GetMountedPath(copyPath));
+}
+
+vector<VFSFile> VFS::GetFiles(string directory, bool recursive)
+{
+	vector<VFSFile> files;
+	for (auto& mapping : GetMappings(directory))
+		mapping->GetFiles(directory, files, recursive);
+	return files;
+}
+
+string VFS::GetAbsolutePath(string path)
+{
+	VFSMapping* mapping = GetMapping(path, false);
+	if (mapping)
+		return mapping->GetMountedPath(path);
+
+	spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+	return path;
+}

@@ -1,0 +1,51 @@
+include(./Dependencies.cmake)
+
+# Aqua Engine Core
+project(AquaEngine)
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
+file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
+
+set(AQUA_ENGINE_BUILD_STATIC ON CACHE BOOL "")
+set(AQUA_ENGINE_BUILD_TESTS  ON CACHE BOOL "")
+
+if(AQUA_ENGINE_BUILD_STATIC)
+	add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+	add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
+
+	target_compile_definitions(${PROJECT_NAME} PUBLIC  BUILD_SHARED_LIBS)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE AQUA_ENGINE_EXPORT_DLL)
+endif()
+
+set_target_properties(
+	${PROJECT_NAME} PROPERTIES
+	VERSION ${VERSION_STRING}
+)
+
+# Group source files inside IDE
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source"  FILES ${SOURCE_FILES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${HEADER_FILES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+	Include
+	${AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS}
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${AQUA_ENGINE_DEPENDENCY_LIBS})
+
+if(NOT WIN32)
+	include(GNUInstallDirs)
+
+	install(
+		TARGETS ${PROJECT_NAME}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+	target_compile_options(${PROJECT_NAME} PUBLIC -Wno-delete-incomplete)
+endif()
+
+if(AQUA_ENGINE_BUILD_TESTS)
+	add_subdirectory(./Tests)
+endif()
