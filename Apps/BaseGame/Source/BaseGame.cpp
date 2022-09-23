@@ -196,3 +196,14 @@ void BaseGame::OnUpdate()
 		cameraTransform->Rotation = normalize(pitch * yaw);
 	}
 }
+
+#include <imgui.h>
+void BaseGame::OnDraw()
+{
+	static bool showDemoWindow = true;
+	// ImGui::ShowDemoWindow(&showDemoWindow);
+
+	ImGui::Begin("FPS");
+	ImGui::Text("FPS: %.2f", Time::FPS());
+	ImGui::End();
+}

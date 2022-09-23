@@ -40,6 +40,10 @@ target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/i
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glad)
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include")
 
+# ImGUI
+find_package(imgui)
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui::imgui)
+
 # X11 on Linux
 if(LINUX)
     list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS X11)

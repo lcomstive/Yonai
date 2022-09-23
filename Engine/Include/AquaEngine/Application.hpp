@@ -51,6 +51,9 @@ namespace AquaEngine
 	/// </summary>
 	class WindowedApplication : public Application
 	{
+	protected:
+		AquaAPI virtual void OnDraw() { }
+
 	public:
 		AquaAPI virtual void Setup() override;
 		AquaAPI virtual void Cleanup() override;

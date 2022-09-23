@@ -11,6 +11,7 @@
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Systems/SceneSystem.hpp>
 #include <AquaEngine/Systems/RenderSystem.hpp>
+#include <AquaEngine/Systems/ImGUISystem.hpp>
 
 // Virtual File System //
 #include <AquaEngine/IO/VFS.hpp>
@@ -156,12 +157,14 @@ void WindowedApplication::Setup()
 {
 	Application::Setup();
 	SystemManager::Add<RenderSystem>();
+	SystemManager::Add<ImGUISystem>();
 }
 
 void WindowedApplication::Cleanup()
 {
 	Application::Cleanup();
 	SystemManager::Remove<RenderSystem>();
+	SystemManager::Remove<ImGUISystem>();
 }
 
 void WindowedApplication::Run()
@@ -183,6 +186,7 @@ void WindowedApplication::Run()
 		OnUpdate();
 		SystemManager::Update();
 		SystemManager::Draw();
+		OnDraw();
 
 		Window::SwapBuffers();
 		Window::PollEvents();

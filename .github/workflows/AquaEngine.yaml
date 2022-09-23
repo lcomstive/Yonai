@@ -88,16 +88,16 @@ jobs:
         path: ./Version.txt
 
     # Copy desired artifacts to output folder
-    - run: |
+    - name: Gather artifacts
+      run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/BaseGame* ${{ github.workspace }}/build/artifact/
         cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
-        cp ${{ env.BINARY_DIR }}/*.so ${{ github.workspace }}/build/artifact/
-        cp ${{ env.BINARY_DIR }}/*.dll ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
       with:
         if-no-files-found: error
         name: ${{ matrix.config.artifact }}-${{ steps.readFile.outputs.content }}
-        path: ${{ github.workspace }}/build/lib/*
+        path: ${{ github.workspace }}/build/artifact/
