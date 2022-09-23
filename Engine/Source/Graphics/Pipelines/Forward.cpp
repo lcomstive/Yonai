@@ -19,6 +19,8 @@ using namespace AquaEngine::Graphics::Pipelines;
 
 ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 {
+	glEnable(GL_CULL_FACE);
+
 	FramebufferSpec framebufferSpecs = { Window::GetResolution() };
 	framebufferSpecs.Attachments =
 	{
@@ -32,6 +34,8 @@ ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 
 ForwardRenderPipeline::~ForwardRenderPipeline()
 {
+	// Restore 
+	glDisable(GL_CULL_FACE);
 	delete m_Framebuffer;
 }
 
@@ -70,6 +74,9 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	glViewport(0, 0, currentResolution.x, currentResolution.y);
 	m_Framebuffer->SetResolution(currentResolution);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	// Draw objects
 	for (MeshRenderer* renderer : meshes)
 	{
@@ -90,6 +97,8 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 		Shader* shader = material->PrepareShader();
 		DrawMesh(mesh, shader, transform, camera, currentResolution);
 	}
+
+	glDisable(GL_CULL_FACE);
 
 	// Draw sprites
 	vector<SpriteRenderer*> sprites = camera->Entity.GetWorld()->GetComponents<SpriteRenderer>();

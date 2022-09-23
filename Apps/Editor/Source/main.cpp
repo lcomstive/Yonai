@@ -22,6 +22,9 @@ class EditorApp : public WindowedApplication
 #if !defined(NDEBUG)
 int main()
 #else
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous, LPSTR lpCmdLine, int nShowCmd)
 #endif
 {

@@ -23,7 +23,7 @@ namespace AquaEngine::Systems
 		AquaAPI Graphics::RenderPipeline* GetPipeline();
 
 		template<typename T>
-		AquaAPI void SetPipeline()
+		void SetPipeline()
 		{
 			if (m_Pipeline)
 				delete m_Pipeline;

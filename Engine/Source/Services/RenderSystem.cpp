@@ -36,6 +36,8 @@ void RenderSystem::OnEnabled()
 	}
 }
 
+RenderPipeline* RenderSystem::GetPipeline() { return m_Pipeline; }
+
 void RenderSystem::Draw()
 {
 	if (!m_SceneSystem || !m_SceneSystem->IsEnabled())

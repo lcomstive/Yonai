@@ -44,37 +44,49 @@ jobs:
       with:
         vcpkgDirectory: '${{ github.workspace }}/Engine/Vendor/vcpkg'
 
-    # Get GitHub secret based on branch.
-    # Used for CMake configuration output (e.g. Debug, Release)
-    - uses: noliran/branch-based-secrets@v1
-      with:
-        secrets: BUILD_CONFIG # Debug, Release, MinSizeRel or ReleaseWithDeb
+    # Set CMake configuration based on branch
+    - if: github.ref == 'refs/head/main'
+      run: |
+        "CMAKE_CONFIG=Release" >> $GITHUB_ENV
+
+    - if: github.ref != 'refs/head/main'
+      run: |
+        "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
+
+    # Set binary directory based on OS
+    - if: matrix.config.os == 'windows-latest'
+      run: |
+        "BINARY_DIR=${{ github.workspace }}/build/bin/$CMAKE_CONFIG"
+
+    - if: matrix.config.os != 'windows-latest'
+      run: |
+        "BINARY_DIR=${{ github.workspace }}/build/bin/"
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ secrets[env.BUILD_CONFIG_NAME] }}
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=$CMAKE_CONFIG
 
-    # Build engine
-    - name: Build Engine
-      run: cmake --build ${{ github.workspace }}/build -t AquaEngine --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
+    # Build
+    - name: Build
+      run: cmake --build ${{ github.workspace }}/build --config $CMAKE_CONFIG
 
-    # Testing
-    - name: Build Test
-      run: cmake --build ${{ github.workspace }}/build -t AquaEngineTest --config ${{ secrets[env.BUILD_CONFIG_NAME] }}
-
-    - name: Run Test [Windows]
-      if: matrix.config.os == 'windows-latest'
-      run: ${{ github.workspace }}/build/bin/${{ secrets[env.BUILD_CONFIG_NAME] }}/AquaEngineTest
-
+    # Test
     - name: Run Test
-      if: matrix.config.os != 'windows-latest'
-      run: ${{ github.workspace }}/build/bin/AquaEngineTest
+      run: $BINARY_DIR/AquaEngineTest
 
     # Read engine version from text file
     - uses: juliangruber/read-file-action@v1
       id: readFile
       with:
         path: ./Version.txt
+
+    # Copy desired artifacts to output folder
+    - run: |
+        mkdir -p ${{ github.workspace }}/build/artifact
+        cp $BINARY_DIR/BaseGame* ${{ github.workspace }}/build/artifact/
+        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
+        cp $BINARY_DIR/*.so ${{ github.workspace }}/build/artifact/
+        cp $BINARY_DIR/*.dll ${{ github.workspace }}/build/artifact/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3

@@ -16,7 +16,7 @@ using namespace AquaEngine::Graphics::Pipelines;
 
 void FillLightInfo(Shader* shader, vector<pair<Light*, Transform*>>& lights);
 
-DeferredRenderPipeline::DeferredRenderPipeline() : RenderPipeline()
+DeferredRenderPipeline::DeferredRenderPipeline() : RenderPipeline(), m_CurrentCamera(nullptr), m_CurrentResolution(0, 0)
 {
 	FramebufferSpec framebufferSpecs = { Window::GetResolution() };
 
@@ -52,6 +52,8 @@ DeferredRenderPipeline::DeferredRenderPipeline() : RenderPipeline()
 
 	// Get Quad mesh //
 	m_QuadMesh = Resource::Get<Mesh>(Mesh::Quad());
+
+	glEnable(GL_CULL_FACE);
 }
 
 DeferredRenderPipeline::~DeferredRenderPipeline()
@@ -61,6 +63,8 @@ DeferredRenderPipeline::~DeferredRenderPipeline()
 	delete m_LightingFB;
 
 	delete m_LightingShader;
+	
+	glDisable(GL_CULL_FACE);
 }
 
 void DeferredRenderPipeline::Draw(Camera* camera)
@@ -105,6 +109,8 @@ void DeferredRenderPipeline::MeshPass()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glCullFace(GL_BACK);
 
 	m_MeshFB->Bind();
 
@@ -173,6 +179,8 @@ void DeferredRenderPipeline::LightingPass()
 
 void DeferredRenderPipeline::ForwardPass()
 {
+	glCullFace(GL_NONE);
+	
 	m_ForwardFB->Bind();
 
 	// Blit the colour info from the lighting pass

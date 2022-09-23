@@ -120,15 +120,19 @@ namespace AquaEngine
 		KP_ADD = 334,
 		KP_ENTER = 335,
 		KP_EQUAL = 336,
-		LEFT_SHIFT = 340,
-		LEFT_CONTROL = 341,
-		LEFT_ALT = 342,
-		LEFT_SUPER = 343,
-		RIGHT_SHIFT = 344,
-		RIGHT_CONTROL = 345,
-		RIGHT_ALT = 346,
-		RIGHT_SUPER = 347,
+		LeftShift = 340,
+		LeftControl = 341,
+		LeftAlt = 342,
+		LeftSuper = 343,
+		RightShift = 344,
+		RightControl = 345,
+		RightAlt = 346,
+		RightSuper = 347,
 		MENU = 348,
+
+		Shift = LeftShift | RightShift,
+		Control = LeftControl | RightControl,
+		Super = LeftSuper | RightSuper
 	};
 
 	enum class GamepadButton : int
@@ -175,5 +179,12 @@ namespace AquaEngine
 		AxisRightY = 3,
 		AxisLeftTrigger = 4,
 		AxisRightTrigger = 5
+	};
+
+	enum MouseButton : unsigned char
+	{
+		Left	= 0,
+		Right	= 1,
+		Middle	= 2
 	};
 }

@@ -15,7 +15,10 @@ const vec3 WorldUp = { 0, 1, 0 };
 mat4 Camera::GetViewMatrix()
 {
 	Transform* transform = Entity.GetComponent<Transform>();
-	return lookAt(transform->Position, transform->Position + transform->Forward(), transform->Up());
+	quat rotation = transform->Rotation;
+	vec3 up = vec3(0, 1, 0) * rotation;
+	vec3 forward = vec3(0, 0, 1) * rotation;
+	return lookAt(transform->Position, transform->Position + forward, up);
 }
 
 mat4 Camera::GetProjectionMatrix(int resolutionWidth, int resolutionHeight)

@@ -32,7 +32,7 @@ void BaseGame::Setup()
 	WindowedApplication::Setup();
 
 	Window::SetTitle("Base Game");
-	Window::SetVSync(false);
+	Window::SetVSync(true);
 
 	Scene = new World();
 
@@ -43,8 +43,8 @@ void BaseGame::Setup()
 			"/Assets/Shaders/Sprite.vert",
 			"/Assets/Shaders/Sprite.frag"
 		});
-	const unsigned int spriteRows = 20;
-	const unsigned int spriteColumns = 20;
+	const unsigned int spriteRows = 10;
+	const unsigned int spriteColumns = 10;
 	for (unsigned int x = 0; x < spriteRows; x++)
 	{
 		for (unsigned int y = 0; y < spriteColumns; y++)
@@ -54,7 +54,6 @@ void BaseGame::Setup()
 			Transform* transform = entity.AddComponent<Transform>();
 			transform->Position = { x - (spriteRows / 2.0f), y - (spriteColumns / 2.0f), 0 };
 			transform->Scale = { 0.15f, 0.15f, 0.15f };
-			transform->Rotation = quat(vec3(3.14159f, 0, 0));
 
 			SpriteRenderer* sprite = entity.AddComponent<SpriteRenderer>();
 			sprite->Sprite = textureID;
@@ -63,8 +62,8 @@ void BaseGame::Setup()
 	}
 
 	// 3D Model Load Test
-	const int rows = 20;
-	const int columns = 20;
+	const int rows = 10;
+	const int columns = 10;
 	for(int x = 0; x < rows; x++)
 	{
 		for(int y = 0; y < rows; y++)
@@ -96,6 +95,7 @@ void BaseGame::Setup()
 	Entity cameraEntity = Scene->CreateEntity();
 	cameraTransform = cameraEntity.AddComponent<Transform>();
 	cameraTransform->Position = { 0, 0, -10 };
+	cameraTransform->Rotation = quat(vec3(0, 0, 0));
 	camera = cameraEntity.AddComponent<Camera>();
 	camera->Orthographic = false;
 
@@ -122,15 +122,22 @@ bool IsQuitKeyPressed()
 	return false;
 }
 
+const float ScrollSpeed = 30.0f;
 const float ControllerDeadzone = 0.1f;
-glm::vec2 GetPlayerMovement()
+glm::vec3 GetPlayerMovement(float deltaTime)
 {
-	glm::vec2 movement = { 0, 0 };
+	glm::vec3 movement = { 0, 0, 0 };
 
-	if (Input::IsKeyDown(Key::W) || Input::IsKeyDown(Key::ArrowUp)) 	movement.y += 1;
-	if (Input::IsKeyDown(Key::A) || Input::IsKeyDown(Key::ArrowLeft)) 	movement.x -= 1;
-	if (Input::IsKeyDown(Key::S) || Input::IsKeyDown(Key::ArrowDown)) 	movement.y -= 1;
-	if (Input::IsKeyDown(Key::D) || Input::IsKeyDown(Key::ArrowRight)) 	movement.x += 1;
+	if (Input::IsKeyDown(Key::W) || Input::IsKeyDown(Key::ArrowUp)) 	movement.z += deltaTime;
+	if (Input::IsKeyDown(Key::S) || Input::IsKeyDown(Key::ArrowDown)) 	movement.z -= deltaTime;
+	if (Input::IsKeyDown(Key::A) || Input::IsKeyDown(Key::ArrowLeft)) 	movement.x += deltaTime;
+	if (Input::IsKeyDown(Key::D) || Input::IsKeyDown(Key::ArrowRight)) 	movement.x -= deltaTime;
+	if (Input::IsKeyDown(Key::E)) 										movement.y += deltaTime;
+	if (Input::IsKeyDown(Key::Q)) 										movement.y -= deltaTime;
+
+	float scrollDelta = Input::GetScrollDelta();
+	if (!camera->Orthographic && abs(scrollDelta) > 0.1f)
+		movement.z += ScrollSpeed * scrollDelta * deltaTime;
 
 	// Check if a gamepad is connected
 	if (Input::IsGamepadConnected(0))
@@ -149,6 +156,8 @@ glm::vec2 GetPlayerMovement()
 
 void BaseGame::OnUpdate()
 {
+	float deltaTime = (float)Time::DeltaTime();
+
 	Window::SetTitle("Base Game [" + to_string((int)Time::FPS()) + " FPS]");
 
 	// Quit Key //
@@ -160,13 +169,30 @@ void BaseGame::OnUpdate()
 		Window::SetFullscreen(Window::GetFullscreen() == FullscreenMode::None ?
 			FullscreenMode::Borderless : FullscreenMode::None);
 
+	// Toggle Orthographic //
+	if (Input::IsKeyPressed(Key::Space))
+		camera->Orthographic = !camera->Orthographic;
+
+	float speedMultiplier = Input::IsKeyDown(Key::LeftShift) ? 2.0f : 1.0f;
+
 	if (camera->Orthographic)
-		camera->OrthographicSize -= Input::GetScrollDelta();
-	else
-		cameraTransform->Position.z += Input::GetScrollDelta();
+		camera->OrthographicSize -= ScrollSpeed * Input::GetScrollDelta() * deltaTime * speedMultiplier;
 
 	// Player Movement //
-	glm::vec2 movement = GetPlayerMovement() * (float)Time::DeltaTime();
-	cameraTransform->Position.x += movement.x;
-	cameraTransform->Position.y -= movement.y;
+	cameraTransform->Position += inverse(cameraTransform->Rotation) * GetPlayerMovement(deltaTime) * speedMultiplier;
+
+	Input::ShowMouse(!Input::IsMouseDown(MouseButton::Right));
+	if (Input::IsMouseDown(MouseButton::Right))
+	{
+		static float xRot = 0, yRot = 0;
+
+		vec2 mouseDelta = Input::GetMouseDelta() * deltaTime;
+		xRot -= mouseDelta.y;
+		yRot += mouseDelta.x;
+
+		quat pitch	= angleAxis(xRot, vec3(1, 0, 0));
+		quat yaw	= angleAxis(yRot, vec3(0, 1, 0));
+
+		cameraTransform->Rotation = normalize(pitch * yaw);
+	}
 }
