@@ -46,17 +46,15 @@ jobs:
 
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/head/main'
-      run: |
-        "CMAKE_CONFIG=Release" >> $GITHUB_ENV
+      run: echo "CMAKE_CONFIG=Release" >> $GITHUB_ENV
 
     - if: github.ref != 'refs/head/main'
-      run: |
-        "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
+      run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
 
     # Set binary directory based on OS
     - if: matrix.config.os == 'windows-latest'
       run: |
-        "BINARY_DIR=${{ github.workspace }}/build/bin/$CMAKE_CONFIG"
+        "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}"
 
     - if: matrix.config.os != 'windows-latest'
       run: |
@@ -64,11 +62,11 @@ jobs:
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=$CMAKE_CONFIG
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }}
 
     # Build
     - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config $CMAKE_CONFIG
+      run: cmake --build ${{ github.workspace }}/build --config ${{ env.CMAKE_CONFIG }}
 
     # Test
     - name: Run Test
