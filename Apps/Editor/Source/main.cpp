@@ -19,13 +19,13 @@ class EditorApp : public WindowedApplication
 	}
 };
 
-#if !defined(NDEBUG)
-int main()
-#else
+#if defined(NDEBUG) && defined(AQUA_PLATFORM_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous, LPSTR lpCmdLine, int nShowCmd)
+#else
+int main()
 #endif
 {
 	EditorApp app;

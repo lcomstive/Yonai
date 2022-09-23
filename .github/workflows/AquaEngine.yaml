@@ -13,16 +13,19 @@ jobs:
         - {
             name: "Windows",
             os: windows-latest,
+            triplet: 'x64-windows-static',
             artifact: "AquaEngine_Windows.zip"
           }
         - {
             name: "Linux",
             os: ubuntu-latest,
+            triplet: 'x64-linux',
             artifact: "AquaEngine_Linux.txz"
           }
         - {
             name: "MacOS",
             os: macos-latest,
+            triplet: 'arm64-osx',
             artifact: "AquaEngine_MacOS.txz"
           }
 
@@ -43,20 +46,28 @@ jobs:
       uses: lukka/run-vcpkg@v10
       with:
         vcpkgDirectory: '${{ github.workspace }}/Engine/Vendor/vcpkg'
+      env:
+        VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     # Set CMake configuration based on branch
-    - if: github.ref == 'refs/head/main'
+    - if: github.ref == 'refs/heads/main' && matrix.config.os != 'windows-latest'
       run: echo "CMAKE_CONFIG=Release" >> $GITHUB_ENV
 
-    - if: github.ref != 'refs/head/main'
+    - if: github.ref != 'refs/heads/main' && matrix.config.os != 'windows-latest'
       run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
+
+    - if: github.ref == 'refs/heads/main' && matrix.config.os == 'windows-latest'
+      run: echo "CMAKE_CONFIG=Release" >> $env:GITHUB_ENV
+
+    - if: github.ref != 'refs/heads/main' && matrix.config.os == 'windows-latest'
+      run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $env:GITHUB_ENV
 
     # Set binary directory based on OS
     - if: matrix.config.os == 'windows-latest'
-      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}"
+      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}" >> $env:GITHUB_ENV
 
     - if: matrix.config.os != 'windows-latest'
-      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/"
+      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/" >> $GITHUB_ENV
 
     # Configure CMake
     - name: Configure
