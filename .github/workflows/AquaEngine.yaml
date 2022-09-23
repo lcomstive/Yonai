@@ -53,12 +53,10 @@ jobs:
 
     # Set binary directory based on OS
     - if: matrix.config.os == 'windows-latest'
-      run: |
-        "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}"
+      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}"
 
     - if: matrix.config.os != 'windows-latest'
-      run: |
-        "BINARY_DIR=${{ github.workspace }}/build/bin/"
+      run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/"
 
     # Configure CMake
     - name: Configure
@@ -70,7 +68,7 @@ jobs:
 
     # Test
     - name: Run Test
-      run: $BINARY_DIR/AquaEngineTest
+      run: ${{ env.BINARY_DIR }}/AquaEngineTest
 
     # Read engine version from text file
     - uses: juliangruber/read-file-action@v1
@@ -81,10 +79,10 @@ jobs:
     # Copy desired artifacts to output folder
     - run: |
         mkdir -p ${{ github.workspace }}/build/artifact
-        cp $BINARY_DIR/BaseGame* ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/BaseGame* ${{ github.workspace }}/build/artifact/
         cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
-        cp $BINARY_DIR/*.so ${{ github.workspace }}/build/artifact/
-        cp $BINARY_DIR/*.dll ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/*.so ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/*.dll ${{ github.workspace }}/build/artifact/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
