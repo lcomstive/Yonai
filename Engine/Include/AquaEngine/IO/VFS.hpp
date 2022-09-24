@@ -74,9 +74,9 @@ namespace AquaEngine::IO
 			replace(mountPoint.begin(), mountPoint.end(), '\\', '/');
 
 			// Remove end slashes
-			if (mountPoint[mountPoint.size() - 1] == '/')
+			if (mountPoint[mountPoint.size() - 1] == '/' && mountPoint.size() > 1)
 				mountPoint.erase(mountPoint.size() - 1);
-			if (mountPath[mountPath.size() - 1] == '/')
+			if (mountPath[mountPath.size() - 1] == '/' && mountPath.size() > 1)
 				mountPath.erase(mountPath.size() - 1);
 
 			// Check that template type derives from the VFSMapping class

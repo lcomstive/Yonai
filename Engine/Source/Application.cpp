@@ -23,7 +23,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
-string LogFile = "/PersistentData/Logs/Engine.txt";
+string LogFile = ".aqua/Logs/Engine.txt";
 void Application::InitLogger()
 {
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -35,7 +35,7 @@ void Application::InitLogger()
 	consoleSink->set_level(spdlog::level::info);
 #endif
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(VFS::GetAbsolutePath(LogFile), 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -46,8 +46,6 @@ void Application::InitLogger()
 
 void Application::InitVFS()
 {
-	VFS::Mount("/Assets/", "./assets/");
-
 	VFSMapping* mapping = VFS::Mount("/PersistentData/",
 #if defined(AQUA_PLATFORM_WINDOWS)
 #pragma warning(disable : 4996) // "This function may be unsafe"
@@ -62,17 +60,22 @@ void Application::InitVFS()
 
 #if !defined(NDEBUG) // Debug mode
 	#if defined(AQUA_PLATFORM_WINDOWS) 
-		AquaEngine::IO::VFS::Mount("/Assets/", "../../../Apps/Assets/");
+		AquaEngine::IO::VFS::Mount("/Assets", "../../../Apps/Assets");
 	#else
-		AquaEngine::IO::VFS::Mount("/Assets/", "../../Apps/Assets/");
+		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
 	#endif
 #endif
+
+	// TODO: Map '/' to project root
+	VFS::Mount("/Assets", "Assets");
+
+	VFS::Mount("/Cache", ".aqua");
 }
 
 Application::Application()
 {
-	InitVFS();
 	InitLogger();
+	InitVFS();
 
 #pragma region Log engine information
 	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
@@ -85,7 +88,7 @@ Application::Application()
 	);
 	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
 	spdlog::info("");
-	spdlog::info("{:>12}: {}", "Log File", VFS::GetAbsolutePath(LogFile));
+	spdlog::info("{:>12}: {}", "Log File", LogFile);
 #ifdef AQUA_PLATFORM_DESKTOP
 	spdlog::info("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
 #endif
@@ -156,8 +159,8 @@ void Application::Exit() { m_Running = false; }
 void WindowedApplication::Setup()
 {
 	Application::Setup();
-	SystemManager::Add<RenderSystem>();
 	SystemManager::Add<ImGUISystem>();
+	SystemManager::Add<RenderSystem>();
 }
 
 void WindowedApplication::Cleanup()
@@ -174,6 +177,11 @@ void WindowedApplication::Run()
 #endif
 
 	Window::Create();
+
+	// Check if window was created successfully
+	if(!Window::GetNativeHandle())
+		return;
+
 	Setup();
 	SystemManager::Initialize();
 
@@ -183,6 +191,17 @@ void WindowedApplication::Run()
 #endif
 	while (IsRunning() && !Window::RequestedToClose())
 	{
+		// if OpenGL
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+#if defined(AQUA_PLATFORM_DESKTOP)
+		glm::ivec2 resolution;
+		glfwGetFramebufferSize(Window::GetNativeHandle(), &resolution.x, &resolution.y);
+#else
+		ivec2 resolution = Window::GetResolution();
+#endif
+		// glViewport(0, 0, resolution.x, resolution.y);
+
 		OnUpdate();
 		SystemManager::Update();
 		SystemManager::Draw();

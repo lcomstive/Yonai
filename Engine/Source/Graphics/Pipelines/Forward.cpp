@@ -70,7 +70,7 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 
 	vector<MeshRenderer*> meshes = camera->Entity.GetWorld()->GetComponents<MeshRenderer>();
 
-	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : Window::GetResolution();
+	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : Window::GetFramebufferResolution();
 	glViewport(0, 0, currentResolution.x, currentResolution.y);
 	m_Framebuffer->SetResolution(currentResolution);
 

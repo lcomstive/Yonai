@@ -51,7 +51,7 @@ void ImGUISystem::EndFrame()
 {
 	ImGui::Render();
 
-	ivec2 resolution = Window::GetResolution();
+	ivec2 resolution = Window::GetFramebufferResolution();
 	glViewport(0, 0, resolution.x, resolution.y);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

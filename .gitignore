@@ -11,3 +11,6 @@ Docs/html/
 # Generated files & artifacts
 [Bb]uild/
 AquaEngine*.zip
+
+# VCPKG packages
+vcpkg_installed

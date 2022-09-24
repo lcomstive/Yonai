@@ -115,9 +115,14 @@ namespace AquaEngine
 		AquaAPI static void SetTitle(std::string title);
 		AquaAPI static void SetTitle(const char* title);
 
+		/// <returns>Size of the window, in pixels</returns>
 		AquaAPI static glm::ivec2 GetResolution();
+
 		AquaAPI static void SetResolution(glm::ivec2 resolution);
 		AquaAPI static void SetResolution(uint32_t width, uint32_t height);
+
+		/// <returns>Size of the window's framebuffer to draw to, in pixels</returns>
+		AquaAPI static glm::ivec2 GetFramebufferResolution();
 
 		AquaAPI static FullscreenMode GetFullscreen();
 		AquaAPI static void SetFullscreen(FullscreenMode mode);

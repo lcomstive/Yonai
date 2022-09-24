@@ -20,6 +20,7 @@ using namespace AquaEngine;
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
 
+void GLFWErrorCallback(int error, const char* message);
 void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
 
 Window::Window() :
@@ -52,7 +53,8 @@ Window::Window() :
 #else
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
 
 #if !defined(NDEBUG)
@@ -60,12 +62,20 @@ Window::Window() :
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
+	glfwSetErrorCallback(GLFWErrorCallback);
+
 	m_Handle = glfwCreateWindow(
 		m_Resolution.x,
 		m_Resolution.y,
 		m_Title.c_str(),
 		nullptr, nullptr // Monitor, share (?)
 	);
+
+	if(!m_Handle)
+	{
+		spdlog::critical("Failed to create window!");
+		return;
+	}
 
 	// Register GLFW callbacks
 	glfwSetJoystickCallback(GLFWJoystickCallback);
@@ -168,7 +178,17 @@ void Window::SetTitle(const char* title) { SetTitle(string(title)); }
 
 string Window::GetTitle() { return s_Instance ? s_Instance->m_Title : ""; }
 
-glm::ivec2 Window::GetResolution() { return s_Instance ? s_Instance->m_Resolution : glm::ivec2(0, 0); }
+ivec2 Window::GetResolution() { return s_Instance ? s_Instance->m_Resolution : glm::ivec2(0, 0); }
+
+ivec2 Window::GetFramebufferResolution()
+{
+	ivec2 resolution(0, 0);
+	if(!s_Instance)
+		return resolution;
+	
+	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
+	return resolution;
+}
 
 void Window::SetResolution(glm::ivec2 resolution)
 {
@@ -310,6 +330,11 @@ void Window::GLFWJoystickCallback(int jid, int event)
 	}
 	else
 		spdlog::debug("Gamepad #{} was disconnected", jid);
+}
+
+void GLFWErrorCallback(int error, const char* message)
+{
+	spdlog::error("[GLFW] {} [{}]", message, error);
 }
 
 void GLFWDebugOutput(
