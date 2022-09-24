@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include <AquaEngine/API.hpp>
 
 namespace AquaEngine
@@ -9,6 +10,7 @@ namespace AquaEngine
 	class Application
 	{
 		bool m_Running = true;
+		std::unordered_map<std::string, std::string> m_Args;
 
 		void InitVFS();
 		void InitLogger();
@@ -44,6 +46,13 @@ namespace AquaEngine
 		/// Stops the engine loop and releases resources
 		/// </summary>
 		AquaAPI void Exit();
+
+		#pragma region Arguments
+		AquaAPI void ProcessArgs(int argc, char** argv);
+
+		AquaAPI bool HasArg(std::string name);
+		AquaAPI std::string& GetArg(std::string name);
+		#pragma endregion
 	};
 
 	/// <summary>

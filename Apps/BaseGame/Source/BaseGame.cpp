@@ -25,8 +25,6 @@ Camera* camera;
 Transform* cameraTransform;
 World* Scene;
 
-BaseGame::BaseGame(int argc, char** argv) : WindowedApplication() {}
-
 void BaseGame::Setup()
 {
 	WindowedApplication::Setup();
@@ -103,7 +101,7 @@ void BaseGame::Setup()
 	SystemManager::Get<SceneSystem>()->AddScene(Scene);
 }
 
-BaseGame::~BaseGame()
+void BaseGame::Cleanup()
 {
 	delete Scene;
 }

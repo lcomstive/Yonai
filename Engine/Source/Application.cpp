@@ -58,16 +58,14 @@ void Application::InitVFS()
 #endif
 	);
 
-#if !defined(NDEBUG) // Debug mode
+#if !defined(NDEBUG)
+	// Debug mode, mount 'Apps/Assets/' to 
 	#if defined(AQUA_PLATFORM_WINDOWS) 
 		AquaEngine::IO::VFS::Mount("/Assets", "../../../Apps/Assets");
 	#else
 		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
 	#endif
 #endif
-
-	// TODO: Map '/' to project root
-	VFS::Mount("/Assets", "Assets");
 
 	VFS::Mount("/Cache", ".aqua");
 }
@@ -154,6 +152,61 @@ void Application::Run()
 }
 
 void Application::Exit() { m_Running = false; }
+
+void ToLower(std::string& input) { transform(input.begin(), input.end(), input.begin(), ::tolower); }
+
+void Application::ProcessArgs(int argc, char** argv)
+{
+	size_t previousArgCount = m_Args.size();
+	for(int i = 0; i < argc; i++)
+	{
+		string name(argv[i]);
+
+		// Accept parameters starting with '-' && '--'
+		if(name[0] != '-')
+			continue;
+
+		for(int i = 0; i < 2; i++)
+			if(name[0] == '-')
+				name.erase(0, 1);
+
+		auto splitPos = name.find('=');
+		if(splitPos == string::npos)
+		{
+			ToLower(name);
+			m_Args.emplace(name, "");
+		}
+		else
+		{
+			string key = name.substr(0, splitPos);
+			ToLower(key);
+			m_Args.emplace(key, name.substr(splitPos + 1));
+		}
+	}
+
+	if(m_Args.size() == previousArgCount)
+		return; // Nothing new added
+
+	spdlog::debug("Added {} argument(s)", m_Args.size());
+	for(auto& pair : m_Args)
+	{
+		if(pair.second.empty())
+			spdlog::debug("  '{}'", pair.first);
+		else
+			spdlog::debug("  '{}' = '{}'", pair.first, pair.second);
+	}
+}
+
+bool Application::HasArg(std::string name)
+{
+	ToLower(name);
+	return m_Args.find(name) != m_Args.end();
+}
+std::string& Application::GetArg(std::string name)
+{
+	ToLower(name);
+	return m_Args[name];
+}
 
 #pragma region Windowed Application
 void WindowedApplication::Setup()

@@ -1,11 +1,11 @@
-#include <BaseGame.hpp>
+#include <EditorApp.hpp>
 
 int main(int argc, char** argv)
 {
-	BaseGame baseGame;
-	baseGame.ProcessArgs(argc, argv);
+	AquaEditor::EditorApp app;
+	app.ProcessArgs(argc, argv);
 	
-	baseGame.Run(); // Game loop
+	app.Run(); // Game loop
 
 	return 0;
 }
