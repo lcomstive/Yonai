@@ -13,20 +13,17 @@ jobs:
         - {
             name: "Windows",
             os: windows-latest,
-            triplet: 'x64-windows-static',
-            artifact: "AquaEngine_Windows.zip"
+            triplet: 'x64-windows-static'
           }
         - {
             name: "Linux",
             os: ubuntu-latest,
-            triplet: 'x64-linux',
-            artifact: "AquaEngine_Linux.txz"
+            triplet: 'x64-linux'
           }
         - {
             name: "MacOS",
             os: macos-latest,
-            triplet: 'arm64-osx',
-            artifact: "AquaEngine_MacOS.txz"
+            triplet: 'arm64-osx'
           }
 
     # Get source
@@ -91,13 +88,12 @@ jobs:
     - name: Gather artifacts
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
-        cp ${{ env.BINARY_DIR }}/BaseGame* ${{ github.workspace }}/build/artifact/
-        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
+        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
       with:
         if-no-files-found: error
-        name: ${{ matrix.config.artifact }}-${{ steps.readFile.outputs.content }}
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
         path: ${{ github.workspace }}/build/artifact/

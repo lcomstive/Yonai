@@ -118,6 +118,16 @@ namespace AquaEngine::IO
 		/// </summary>
 		AquaAPI virtual void Copy(std::string originalPath, std::string newPath) { }
 
+		/// <summary>
+		/// Moves file at path to a new path 
+		/// </summary>
+		AquaAPI virtual void Move(std::string originalPath, std::string newPath) { }
+
+		/// <summary>
+		/// Permanently deletes a file from system
+		/// </summary>
+		AquaAPI virtual void Remove(std::string path) { }
+
 		AquaAPI virtual bool CanWrite();
 		AquaAPI virtual bool CanWatch();
 		AquaAPI virtual FilePermissions GetPermissions();

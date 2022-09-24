@@ -17,6 +17,7 @@ namespace AquaEngine::IO
 	public:
 		static std::filesystem::path GetCurrentDirectory();
 
+		/// <returns>True if mountPoint exists</returns>
 		static bool HasMount(std::string mountPoint);
 
 		/// <summary>
@@ -104,6 +105,8 @@ namespace AquaEngine::IO
 		static void WriteText(std::string path, std::string contents);
 		static void Write(std::string path, std::vector<unsigned char> contents);
 
+		static void Remove(std::string path);
+		static void Move(std::string originalPath, std::string newPath);
 		static void Copy(std::string originalPath, std::string copyPath);
 
 		/// <summary>

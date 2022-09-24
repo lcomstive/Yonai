@@ -17,13 +17,14 @@
 using namespace std;
 using namespace glm;
 using namespace AquaEngine;
+using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
+World* Scene;
 Camera* camera;
 Transform* cameraTransform;
-World* Scene;
 
 void BaseGame::Setup()
 {
@@ -31,6 +32,8 @@ void BaseGame::Setup()
 
 	Window::SetTitle("Base Game");
 	Window::SetVSync(true);
+
+	VFS::Mount("/Assets", "./Assets");
 
 	Scene = new World();
 

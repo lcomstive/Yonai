@@ -131,16 +131,52 @@ void VFS::Write(string path, vector<unsigned char> contents)
 	mapping->Write(mapping->GetMountedPath(path), contents);
 }
 
-void VFS::Copy(string originalPath, string copyPath)
+void VFS::Remove(string path)
 {
-	VFSMapping* mapping = GetMapping(originalPath, false, FilePermissions::Write);
+	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
 	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+		return;
+	}
+
+	mapping->Remove(mapping->GetMountedPath(path));
+}
+
+void VFS::Move(string originalPath, string newPath)
+{
+	VFSMapping* originalMapping = GetMapping(originalPath, false, FilePermissions::Read);
+	VFSMapping* newMapping = GetMapping(newPath, false, FilePermissions::Write);
+	if (!originalMapping)
 	{
 		spdlog::warn("Could not find virtual mapping to suit '{}'", originalPath);
 		return;
 	}
+	if (!newMapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", newPath);
+		return;
+	}
 
-	mapping->Copy(mapping->GetMountedPath(originalPath), mapping->GetMountedPath(copyPath));
+	originalMapping->Move(originalMapping->GetMountedPath(originalPath), newMapping->GetMountedPath(newPath));
+}
+
+void VFS::Copy(string originalPath, string copyPath)
+{
+	VFSMapping* originalMapping = GetMapping(originalPath, false, FilePermissions::Read);
+	VFSMapping* newMapping = GetMapping(copyPath, false, FilePermissions::Write);
+	if (!originalMapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", originalPath);
+		return;
+	}
+	if (!newMapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", copyPath);
+		return;
+	}
+
+	originalMapping->Copy(originalMapping->GetMountedPath(originalPath), newMapping->GetMountedPath(copyPath));
 }
 
 vector<VFSFile> VFS::GetFiles(string directory, bool recursive)

@@ -25,6 +25,8 @@ namespace AquaEngine::IO
 		AquaAPI virtual bool CreateDirectory(std::string path) override;
 		AquaAPI virtual bool DeleteDirectory(std::string path) override;
 
+		AquaAPI virtual void Remove(std::string path) override;
+		AquaAPI virtual void Move(std::string originalPath, std::string newPath) override;
 		AquaAPI virtual void Copy(std::string originalPath, std::string newPath) override;
 
 		AquaAPI virtual void Watch(std::string path, VFSMappingCallback callback) override;
