@@ -35,6 +35,21 @@ void CameraControlSystem::Update()
 	}
 }
 
+void CameraControlSystem::Update(Components::FPSCamera* fpsCamera)
+{
+	float deltaTime = (float)Time::DeltaTime();
+	vec3 movement = GetPlayerMovement() * deltaTime;
+	quat rotation = GetCameraRotation(deltaTime);
+
+	Transform* transform = fpsCamera->Entity.GetComponent<Transform>();
+
+	vec3 totalMovement = movement * fpsCamera->Speed;
+	if(Input::IsKeyDown(Key::LeftShift))
+		totalMovement *= fpsCamera->SprintMultiplier;
+	transform->Position += inverse(transform->Rotation) * totalMovement;
+	transform->Rotation = rotation;
+}
+
 vec3 GetPlayerMovement()
 {
 	vec3 movement = { 0, 0, 0 };

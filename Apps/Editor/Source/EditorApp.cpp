@@ -10,6 +10,9 @@
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
+// Views //
+#include <Views/Viewport.hpp>
+
 using namespace glm;
 using namespace AquaEditor;
 using namespace AquaEngine;
@@ -42,6 +45,8 @@ void EditorApp::Setup()
 	m_RenderSystem->Enable(false);
 
 	LoadScene();
+
+	Add<ViewportView>();
 }
 
 void EditorApp::OnDraw()
@@ -49,17 +54,26 @@ void EditorApp::OnDraw()
 	DrawUI();
 }
 
+void EditorApp::OnUpdate()
+{
+	// Iterate over & update views
+	for(auto& viewPair : m_Views)
+		viewPair.second->Update();
+}
+
 void EditorApp::LoadScene()
 {
-	m_CurrentScene = new World();
+	m_CurrentScene = new World("Test World");
 
 	// Add a camera
+	/*
 	Entity cameraEntity = m_CurrentScene->CreateEntity();
 	Transform* cameraTransform = cameraEntity.AddComponent<Transform>();
 	cameraTransform->Position = { 0, 0, -10 };
 	m_EditorCamera = cameraEntity.AddComponent<Camera>();
 	m_EditorCamera->Orthographic = false;
 	cameraEntity.AddComponent<FPSCamera>();
+	*/
 
 	// 2D Sprite Test
 	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "/Assets/Textures/Test.png");
@@ -85,8 +99,6 @@ void EditorApp::LoadScene()
 			sprite->Shader = spriteShader;
 		}
 	}
-
-	m_CurrentScene->GetSystemManager()->Add<CameraControlSystem>();
 
 	// Add scene to active scenes
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
@@ -156,38 +168,20 @@ void EditorApp::DrawUI()
 			ImGui::EndMenu();
 		}
 
+		if(ImGui::BeginMenu("View"))
+		{
+			if(ImGui::MenuItem("Viewport"))
+				Add<ViewportView>();
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-	ImGui::Begin("Viewport");
-	auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-	auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-	auto viewportOffset = ImGui::GetWindowPos();
+	// Iterate over & draw views
+	for(auto& viewPair : m_Views)
+		viewPair.second->Draw();
 
-	static vec2 m_ViewportBounds[2] = { { 0, 0 }, { 0, 0 } };
-	m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-	m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-	static bool m_ViewportFocused = ImGui::IsWindowFocused();
-	static bool m_ViewportHovered = ImGui::IsWindowHovered();
-
-	ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-	vec2 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
-	if(m_EditorCamera)
-	{
-		m_RenderSystem->GetPipeline()->SetResolution(m_ViewportSize);
-		m_RenderSystem->Draw(m_EditorCamera);
-
-		ImGui::Image(reinterpret_cast<void*>(m_RenderSystem->GetPipeline()->GetOutput()->GetColourAttachment()->GetID()),
-					ImVec2{ m_ViewportSize.x, m_ViewportSize.y },
-					ImVec2{ 0, 1 },
-					ImVec2{ 1, 0 }
-					);
-	}
-
-	ImGui::End();
-	ImGui::PopStyleVar();
 	ImGui::End();
 }
