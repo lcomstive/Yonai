@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <AquaEngine/Graphics/Mesh.hpp>
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Graphics/Framebuffer.hpp>
 #include <AquaEngine/Graphics/RenderPipeline.hpp>
@@ -17,10 +18,14 @@ namespace AquaEngine::Graphics::Pipelines
 		/// </summary>
 		void ForwardPass(Components::Camera* camera);
 
-	public:
-		ForwardRenderPipeline();
-		~ForwardRenderPipeline();
+		virtual void OnResized(glm::ivec2 resolution) override;
 
-		void Draw(Components::Camera* camera) override;
+	public:
+		AquaAPI ForwardRenderPipeline();
+		AquaAPI ~ForwardRenderPipeline();
+
+		AquaAPI void Draw(Components::Camera* camera) override;
+
+		AquaAPI Framebuffer* GetOutput() override;
 	};
 }

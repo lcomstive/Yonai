@@ -1,4 +1,5 @@
 #include <AquaEngine/World.hpp>
+#include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Systems/System.hpp>
 
 using namespace AquaEngine;
@@ -18,3 +19,6 @@ void System::Enable(bool enable)
 		OnDisabled();
 	m_Enabled = enable;
 }
+
+World* System::GetWorld() { return m_Owner ? m_Owner->GetWorld() : nullptr; }
+SystemManager* System::GetManager() { return m_Owner; }

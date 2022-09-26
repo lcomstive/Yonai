@@ -67,6 +67,8 @@ DeferredRenderPipeline::~DeferredRenderPipeline()
 	glDisable(GL_CULL_FACE);
 }
 
+Framebuffer* DeferredRenderPipeline::GetOutput() { return m_ForwardFB; }
+
 void DeferredRenderPipeline::Draw(Camera* camera)
 {
 	m_CurrentCamera = camera;

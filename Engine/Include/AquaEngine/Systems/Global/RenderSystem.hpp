@@ -3,10 +3,10 @@
 #include <AquaEngine/Systems/System.hpp>
 #include <AquaEngine/Graphics/Shader.hpp>
 #include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Systems/SceneSystem.hpp>
 #include <AquaEngine/Components/MeshRenderer.hpp>
 #include <AquaEngine/Graphics/RenderPipeline.hpp>
 #include <AquaEngine/Components/SpriteRenderer.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
 namespace AquaEngine::Systems
 {
@@ -17,6 +17,8 @@ namespace AquaEngine::Systems
 		Graphics::RenderPipeline* m_Pipeline;
 
 	public:
+		AquaAPI void Draw(Components::Camera* camera);
+
 		AquaAPI void Draw() override;
 		AquaAPI void OnEnabled() override;
 

@@ -9,9 +9,9 @@
 
 // Systems //
 #include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Systems/SceneSystem.hpp>
-#include <AquaEngine/Systems/RenderSystem.hpp>
-#include <AquaEngine/Systems/ImGUISystem.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
 
 // Virtual File System //
 #include <AquaEngine/IO/VFS.hpp>
@@ -23,7 +23,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
-string LogFile = ".aqua/Logs/Engine.txt";
+string LogFile = "/PersistentData/Logs/Engine.txt";
 void Application::InitLogger()
 {
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -35,7 +35,7 @@ void Application::InitLogger()
 	consoleSink->set_level(spdlog::level::info);
 #endif
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(VFS::GetAbsolutePath(LogFile), 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -59,21 +59,19 @@ void Application::InitVFS()
 	);
 
 #if !defined(NDEBUG)
-	// Debug mode, mount 'Apps/Assets/' to 
+	// Debug mode, mount 'Apps/Assets/' to '/Assets/'
 	#if defined(AQUA_PLATFORM_WINDOWS) 
 		AquaEngine::IO::VFS::Mount("/Assets", "../../../Apps/Assets");
 	#else
 		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
 	#endif
 #endif
-
-	VFS::Mount("/Cache", ".aqua");
 }
 
 Application::Application()
 {
-	InitLogger();
 	InitVFS();
+	InitLogger();
 
 #pragma region Log engine information
 	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
@@ -86,33 +84,35 @@ Application::Application()
 	);
 	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
 	spdlog::info("");
-	spdlog::info("{:>12}: {}", "Log File", LogFile);
+	spdlog::debug("{:>12}: {}", "Log File", VFS::GetAbsolutePath(LogFile));
+	spdlog::debug("{:>12}: {}", "Persistent", VFS::GetMapping("/PersistentData/")->GetMountPath());
 #ifdef AQUA_PLATFORM_DESKTOP
-	spdlog::info("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
+	spdlog::debug("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
 #endif
 
 #if !defined(NDEBUG)
-	spdlog::info("{:>12}: {}", "Configuration", "Debug");
+	spdlog::debug("{:>12}: {}", "Configuration", "Debug");
 #endif
 
 #if defined(AQUA_ENGINE_PLATFORM_MAC) || defined(AQUA_ENGINE_PLATFORM_LINUX)
-	spdlog::info("DYLD_LIBRARY_PATH = {}", getenv("DYLD_LIBRARY_PATH"));
+	spdlog::debug("DYLD_LIBRARY_PATH = {}", getenv("DYLD_LIBRARY_PATH"));
 #endif
 #pragma endregion
 }
 
 void Application::Setup()
 {
-	SystemManager::Add<SceneSystem>();
+	SystemManager::Global()->Add<SceneSystem>();
 }
 
 void Application::Cleanup()
 {
-	SystemManager::Remove<SceneSystem>();
+	SystemManager::Global()->Remove<SceneSystem>();
 }
 
 Application::~Application()
 {
+	SystemManager::Global()->Destroy();
 	spdlog::shutdown();
 }
 
@@ -125,7 +125,7 @@ void Application::Run()
 #endif
 
 	Setup();
-	SystemManager::Initialize();
+	SystemManager::Global()->Init();
 
 #ifndef NDEBUG
 	InlineProfiler::End();
@@ -134,7 +134,8 @@ void Application::Run()
 	while (IsRunning())
 	{
 		OnUpdate();
-		SystemManager::Update();
+
+		SystemManager::Global()->Update();
 
 		Time::OnFrameEnd();
 	}
@@ -144,7 +145,7 @@ void Application::Run()
 #endif
 
 	Cleanup();
-	SystemManager::Destroy();
+	SystemManager::Global()->Destroy();
 
 #ifndef NDEBUG
 	InlineProfiler::End();
@@ -212,15 +213,15 @@ std::string& Application::GetArg(std::string name)
 void WindowedApplication::Setup()
 {
 	Application::Setup();
-	SystemManager::Add<ImGUISystem>();
-	SystemManager::Add<RenderSystem>();
+	SystemManager::Global()->Add<ImGUISystem>();
+	SystemManager::Global()->Add<RenderSystem>();
 }
 
 void WindowedApplication::Cleanup()
 {
 	Application::Cleanup();
-	SystemManager::Remove<RenderSystem>();
-	SystemManager::Remove<ImGUISystem>();
+	SystemManager::Global()->Remove<RenderSystem>();
+	SystemManager::Global()->Remove<ImGUISystem>();
 }
 
 void WindowedApplication::Run()
@@ -236,7 +237,7 @@ void WindowedApplication::Run()
 		return;
 
 	Setup();
-	SystemManager::Initialize();
+	SystemManager::Global()->Init();
 
 #ifndef NDEBUG
 	InlineProfiler::End();
@@ -247,17 +248,10 @@ void WindowedApplication::Run()
 		// if OpenGL
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#if defined(AQUA_PLATFORM_DESKTOP)
-		glm::ivec2 resolution;
-		glfwGetFramebufferSize(Window::GetNativeHandle(), &resolution.x, &resolution.y);
-#else
-		ivec2 resolution = Window::GetResolution();
-#endif
-		// glViewport(0, 0, resolution.x, resolution.y);
-
 		OnUpdate();
-		SystemManager::Update();
-		SystemManager::Draw();
+		SystemManager::Global()->Update();
+			
+		SystemManager::Global()->Draw();
 		OnDraw();
 
 		Window::SwapBuffers();
@@ -272,7 +266,7 @@ void WindowedApplication::Run()
 
 	Window::Close();
 	Cleanup();
-	SystemManager::Destroy();
+	SystemManager::Global()->Destroy();
 
 #ifndef NDEBUG
 	InlineProfiler::End();

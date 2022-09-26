@@ -1,7 +1,7 @@
 #pragma once
 #include <AquaEngine/API.hpp>
 	
-namespace AquaEngine { class World; }
+namespace AquaEngine { class World; class SystemManager; }
 
 namespace AquaEngine::Systems
 {
@@ -9,6 +9,9 @@ namespace AquaEngine::Systems
 	{
 	private:
 		bool m_Enabled = true;
+		SystemManager* m_Owner = nullptr;
+
+		friend class AquaEngine::SystemManager;
 
 	public:
 #pragma region Virtual Functions
@@ -26,5 +29,8 @@ namespace AquaEngine::Systems
 		AquaAPI void ToggleEnabled();
 
 		AquaAPI void Enable(bool enable = true);
+
+		AquaAPI World* GetWorld();
+		AquaAPI SystemManager* GetManager();
 	};
 }

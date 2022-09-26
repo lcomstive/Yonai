@@ -17,6 +17,7 @@ namespace AquaEngine
 		unsigned int m_ID;
 		std::string m_Name;
 		std::unique_ptr<EntityManager> m_EntityManager;
+		std::unique_ptr<SystemManager> m_SystemManager;
 		std::unique_ptr<ComponentManager> m_ComponentManager;
 
 		static std::unordered_map<unsigned int, World*> s_Worlds;
@@ -239,6 +240,7 @@ namespace AquaEngine
 		AquaAPI void ClearComponents(EntityID entity);
 
 		/// Getters ///
+		AquaAPI AquaEngine::SystemManager* GetSystemManager();
 		AquaAPI AquaEngine::EntityManager* GetEntityManager();
 		AquaAPI AquaEngine::ComponentManager* GetComponentManager();
 

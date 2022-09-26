@@ -1,13 +1,16 @@
 #include <iostream>
+#include <AquaEngine/World.hpp>
 #include <AquaEngine/SystemManager.hpp>
 
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Systems;
 
-unordered_map<type_index, System*> SystemManager::m_Systems = {};
+SystemManager* SystemManager::s_Global = nullptr;
 
-void SystemManager::Initialize()
+SystemManager::SystemManager(World* owner) : m_Owner(owner) { }
+
+void SystemManager::Init()
 {
 	for (auto& iterator : m_Systems)
 		iterator.second->Init();
@@ -30,6 +33,21 @@ void SystemManager::Destroy()
 		delete iterator.second;
 	}
 	m_Systems.clear();
+
+	if(this == s_Global)
+	{
+		delete this;
+		s_Global = nullptr;
+	}
+}
+
+World* SystemManager::GetWorld() { return m_Owner; }
+
+SystemManager* SystemManager::Global()
+{
+	if(!s_Global)
+		s_Global = new SystemManager(nullptr);
+	return s_Global;
 }
 
 void SystemManager::Update()

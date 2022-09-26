@@ -1,9 +1,10 @@
-#include <AquaEngine/Systems/ImGUISystem.hpp>
 #include <imgui.h>
-#include <AquaEngine/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
-#include <AquaEngine/Systems/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
-#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 #include <AquaEngine/Window.hpp>
+#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
+#include <AquaEngine/Systems/Global/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
+#include <AquaEngine/Systems/Global/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
+#include <GLFW/glfw3.h>
 
 using namespace glm;
 using namespace AquaEngine;
@@ -15,7 +16,7 @@ void ImGUISystem::OnEnabled()
 	ImGui::CreateContext();
 
 	m_IO = &ImGui::GetIO();
-	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
@@ -38,6 +39,8 @@ void ImGUISystem::Draw()
 {
 	EndFrame();
 	StartFrame();
+
+	// ImGui::DockSpace();
 }
 
 void ImGUISystem::StartFrame()

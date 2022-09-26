@@ -8,25 +8,37 @@
 
 namespace AquaEngine
 {
+	class World;
+
 	class SystemManager
 	{
+		World* m_Owner;
+
+		static SystemManager* s_Global;
+
 	public:
-		AquaAPI static void Initialize();
-		AquaAPI static void Destroy();
+		AquaAPI SystemManager(World* owner);
+
+		AquaAPI void Init();
+		AquaAPI void Destroy();
+		
+		AquaAPI World* GetWorld();
+		AquaAPI static SystemManager* Global();
 
 		template<typename T>
-		static T* Add()
+		T* Add()
 		{
 			if (!std::is_base_of<Systems::System, T>())
 				return nullptr;
 
 			T* system = new T();
+			system->m_Owner = this;
 			m_Systems.emplace(typeid(T), system);
 			return system;
 		}
 
 		template<typename T>
-		static void Remove()
+		void Remove()
 		{
 			if (!Has<T>())
 				return;
@@ -36,23 +48,23 @@ namespace AquaEngine
 		}
 
 		template<typename T>
-		static bool Has() { return m_Systems.find(typeid(T)) != m_Systems.end(); }
+		bool Has() { return m_Systems.find(typeid(T)) != m_Systems.end(); }
 
 		template<typename T>
 		/// <returns>Pointer to system, or nullptr if not available</returns>
-		static T* Get()
+		T* Get()
 		{
 			if (!Has<T>())
 				return nullptr;
 			return (T*)m_Systems[typeid(T)];
 		}
 
-		AquaAPI static void Draw();
-		AquaAPI static void Update();
+		AquaAPI void Draw();
+		AquaAPI void Update();
 
-		AquaAPI static std::vector<Systems::System*> All();
+		AquaAPI std::vector<Systems::System*> All();
 
 	private:
-		AquaAPI static std::unordered_map<std::type_index, Systems::System*> m_Systems;
+		AquaAPI std::unordered_map<std::type_index, Systems::System*> m_Systems = {};
 	};
 }

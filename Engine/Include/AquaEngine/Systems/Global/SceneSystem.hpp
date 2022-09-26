@@ -20,6 +20,7 @@ namespace AquaEngine::Systems
 		std::vector<SceneCallback> m_SceneCallbacks;
 
 	public:
+		AquaAPI void Draw() override;
 		AquaAPI void Update() override;
 
 		/// <summary>

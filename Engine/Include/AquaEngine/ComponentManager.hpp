@@ -8,6 +8,8 @@
 
 namespace AquaEngine
 {
+	namespace Components { struct Component; }
+	
 	/// <summary>
 	/// Handles many entities & their related component instances
 	/// </summary>
@@ -19,26 +21,16 @@ namespace AquaEngine
 		/// </summary>
 		struct ComponentData
 		{
-			std::vector<void*> Instances;
+			std::vector<Components::Component*> Instances;
 			std::unordered_map<EntityID, unsigned int> EntityIndex;
 
-			ComponentData() { }
+			void Destroy();
 
-			void Destroy()
-			{
-				for (size_t i = 0; i < Instances.size(); i++)
-					delete Instances[i];
-				Instances.clear();
-				EntityIndex.clear();
-			}
-
-			void Add(void* component, EntityID entity)
-			{
-				Instances.emplace_back(component);
-				EntityIndex.emplace(entity, (unsigned int)Instances.size() - 1);
-			}
-
-			void* Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
+			bool Has(EntityID entity);
+			void Remove(EntityID entity);
+			std::vector<EntityID> GetEntities();
+			Components::Component* Get(EntityID entity);
+			void Add(Components::Component* component, EntityID entity);
 
 			template<typename T>
 			T* Get(EntityID entity) { return (T*)(Has(entity) ? Instances[EntityIndex[entity]] : nullptr); }
@@ -51,34 +43,6 @@ namespace AquaEngine
 				for (const auto& pair : EntityIndex)
 					components.push_back((T*)Instances[pair.second]);
 				return components;
-			}
-
-			bool Has(EntityID entity) { return EntityIndex.find(entity) != EntityIndex.end(); }
-
-			void Remove(EntityID entity)
-			{
-				unsigned int instanceIndex = EntityIndex[entity];
-				delete Instances[instanceIndex];
-				Instances.erase(Instances.begin() + instanceIndex);
-
-				EntityIndex.erase(entity);
-
-				// Shift all indexes down
-				for (const auto& pair : EntityIndex)
-				{
-					if (pair.second >= instanceIndex)
-						EntityIndex[pair.first]--;
-				}
-			}
-
-			std::vector<EntityID> GetEntities()
-			{
-				std::vector<EntityID> entities;
-				entities.resize(EntityIndex.size());
-				unsigned int i = 0;
-				for (const auto& pair : EntityIndex)
-					entities[i++] = pair.first;
-				return entities;
 			}
 		};
 

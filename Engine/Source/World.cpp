@@ -16,6 +16,7 @@ World::World(string name) : m_Name(name)
 		m_ID++;
 	s_Worlds.emplace(m_ID, this);
 
+	m_SystemManager = make_unique<AquaEngine::SystemManager>(this);
 	m_ComponentManager = make_unique<AquaEngine::ComponentManager>(m_ID);
 	m_EntityManager = make_unique<AquaEngine::EntityManager>(m_ComponentManager.get(), m_ID);
 
@@ -73,8 +74,10 @@ void World::DestroyEntity(EntityID entity)
 bool World::HasComponents(EntityID entity) { return !m_ComponentManager->IsEmpty(entity); }
 void World::SetupEntityComponent(EntityID id, Component* component) { component->Entity = GetEntity(id); }
 
+SystemManager* World::GetSystemManager() { return m_SystemManager.get(); }
 EntityManager* World::GetEntityManager() { return m_EntityManager.get(); }
 ComponentManager* World::GetComponentManager() { return m_ComponentManager.get(); }
+
 void World::ClearComponents(EntityID entity) { m_ComponentManager->Clear(entity); }
 
 #pragma region World::Entity

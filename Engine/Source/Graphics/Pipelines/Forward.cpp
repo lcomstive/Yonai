@@ -44,6 +44,8 @@ void ForwardRenderPipeline::Draw(Camera* camera)
 	ForwardPass(camera);
 }
 
+Framebuffer* ForwardRenderPipeline::GetOutput() { return m_Framebuffer; }
+
 void DrawMesh(Mesh* mesh, Shader* shader, Transform* transform, Camera* camera, ivec2 resolution)
 {
 	// Fill shader
@@ -60,6 +62,11 @@ void DrawMesh(Mesh* mesh, Shader* shader, Transform* transform, Camera* camera, 
 	shader->Unbind();
 }
 
+void ForwardRenderPipeline::OnResized(glm::ivec2 resolution)
+{
+	m_Framebuffer->SetResolution(resolution);
+}
+
 void ForwardRenderPipeline::ForwardPass(Camera* camera)
 {
 	m_Framebuffer->Bind();
@@ -70,9 +77,8 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 
 	vector<MeshRenderer*> meshes = camera->Entity.GetWorld()->GetComponents<MeshRenderer>();
 
-	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : Window::GetFramebufferResolution();
+	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : GetResolution();
 	glViewport(0, 0, currentResolution.x, currentResolution.y);
-	m_Framebuffer->SetResolution(currentResolution);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -129,7 +135,9 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	if (camera->RenderTarget)
 		// Copy to camera's render target
 		m_Framebuffer->CopyAttachmentTo(camera->RenderTarget);
+	/*
 	else
 		// Blit to default framebuffer (screen)
 		m_Framebuffer->BlitTo(nullptr);
+	*/
 }

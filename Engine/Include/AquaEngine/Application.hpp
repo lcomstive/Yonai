@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <AquaEngine/API.hpp>
+#include <AquaEngine/SystemManager.hpp>
 
 namespace AquaEngine
 {
@@ -10,7 +11,7 @@ namespace AquaEngine
 	class Application
 	{
 		bool m_Running = true;
-		std::unordered_map<std::string, std::string> m_Args;
+		std::unordered_map<std::string, std::string> m_Args = {};
 
 		void InitVFS();
 		void InitLogger();

@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <AquaEngine/Time.hpp>
 #include <AquaEngine/World.hpp>
-#include <AquaEngine/Systems/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -9,7 +9,16 @@ using namespace AquaEngine::Systems;
 
 void SceneSystem::Update()
 {
-	
+	auto scenes = GetActiveScenes();
+	for(auto& scene : scenes)
+		scene->GetSystemManager()->Update();
+}
+
+void SceneSystem::Draw()
+{
+	auto scenes = GetActiveScenes();
+	for(auto& scene : scenes)
+		scene->GetSystemManager()->Draw();
 }
 
 void SceneSystem::LoadScene(World* scene)

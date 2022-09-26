@@ -10,7 +10,9 @@
 #include <AquaEngine/IO/Files.hpp>
 
 #if defined(AQUA_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
+#include <imgui.h>
 #include <spdlog/spdlog.h>
+#include <imgui_internal.h>
 #include <AquaEngine/Window.hpp>
 
 using namespace std;
@@ -185,6 +187,13 @@ ivec2 Window::GetFramebufferResolution()
 	ivec2 resolution(0, 0);
 	if(!s_Instance)
 		return resolution;
+
+	if(GImGui->CurrentWindow)
+	{
+		// If inside ImGui window, get window size
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		return { viewportPanelSize.x, viewportPanelSize.y };
+	}
 	
 	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
 	return resolution;
@@ -194,7 +203,6 @@ void Window::SetResolution(glm::ivec2 resolution)
 {
 	if (!s_Instance)
 		return;
-
 
 	s_Instance->m_Resolution = resolution;
 	if (s_Instance->m_FullscreenMode == FullscreenMode::None)

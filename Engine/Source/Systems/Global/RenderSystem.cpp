@@ -6,9 +6,9 @@
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Graphics/Material.hpp>
-#include <AquaEngine/Systems/SceneSystem.hpp>
-#include <AquaEngine/Systems/RenderSystem.hpp>
 #include <AquaEngine/Graphics/Pipelines/Forward.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/RenderSystem.hpp>
 #include <AquaEngine/Window.hpp>
 
 // Components //
@@ -27,30 +27,31 @@ using namespace AquaEngine::Graphics::Pipelines;
 
 void RenderSystem::OnEnabled()
 {
-	m_SceneSystem = SystemManager::Get<SceneSystem>();
-	if (!m_SceneSystem)
-	{
-		// No scene system, disable this system
-		Enable(false);
-		return;
-	}
+	m_SceneSystem = SystemManager::Global()->Get<SceneSystem>();
 }
 
-RenderPipeline* RenderSystem::GetPipeline() { return m_Pipeline; }
+RenderPipeline* RenderSystem::GetPipeline()
+{
+	if (!m_Pipeline)
+		SetPipeline<ForwardRenderPipeline>();
+	return m_Pipeline;
+}
 
 void RenderSystem::Draw()
 {
 	if (!m_SceneSystem || !m_SceneSystem->IsEnabled())
 		return;
 
-	if (!m_Pipeline)
-		SetPipeline<ForwardRenderPipeline>();
-
 	auto scenes = m_SceneSystem->GetActiveScenes();
 	for (auto& scene : scenes)
 	{
 		auto cameras = scene->GetComponents<Camera>();
-		for (auto& camera : cameras)
-			m_Pipeline->Draw(camera);
+		for (auto camera : cameras)
+			Draw(camera);
 	}
+}
+
+void RenderSystem::Draw(Camera* camera)
+{
+	GetPipeline()->Draw(camera);
 }

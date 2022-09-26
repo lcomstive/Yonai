@@ -1,7 +1,9 @@
 #include <AquaEngine/ComponentManager.hpp>
+#include <AquaEngine/Components/Component.hpp>
 
 using namespace std;
 using namespace AquaEngine;
+using namespace AquaEngine::Components;
 
 void ComponentManager::Destroy()
 {
@@ -40,3 +42,49 @@ void ComponentManager::Clear(EntityID id)
 	}
 	m_EntityComponents[id].clear();
 }
+
+#pragma region ComponentData
+void ComponentManager::ComponentData::Destroy()
+{
+	for (size_t i = 0; i < Instances.size(); i++)
+		delete Instances[i];
+	Instances.clear();
+	EntityIndex.clear();
+}
+
+void ComponentManager::ComponentData::Add(Component* component, EntityID entity)
+{
+	Instances.emplace_back(component);
+	EntityIndex.emplace(entity, (unsigned int)Instances.size() - 1);
+}
+
+Component* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
+
+bool ComponentManager::ComponentData::Has(EntityID entity) { return EntityIndex.find(entity) != EntityIndex.end(); }
+
+void ComponentManager::ComponentData::Remove(EntityID entity)
+{
+	unsigned int instanceIndex = EntityIndex[entity];
+	delete Instances[instanceIndex];
+	Instances.erase(Instances.begin() + instanceIndex);
+
+	EntityIndex.erase(entity);
+
+	// Shift all indexes down
+	for (const auto& pair : EntityIndex)
+	{
+		if (pair.second >= instanceIndex)
+			EntityIndex[pair.first]--;
+	}
+}
+
+std::vector<EntityID> ComponentManager::ComponentData::GetEntities()
+{
+	std::vector<EntityID> entities;
+	entities.resize(EntityIndex.size());
+	unsigned int i = 0;
+	for (const auto& pair : EntityIndex)
+		entities[i++] = pair.first;
+	return entities;
+}
+#pragma endregion
