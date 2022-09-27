@@ -14,7 +14,7 @@ namespace AquaEngine
 		std::thread m_Thread;
 		TimerCallback m_Callback;
 		std::chrono::milliseconds m_Interval;
-		std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTime, m_StopTime;
+		std::chrono::high_resolution_clock::time_point m_StartTime, m_StopTime;
 
 	public:
 		static const std::chrono::milliseconds DefaultInterval;

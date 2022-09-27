@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <Views/Viewport.hpp>
+#include <AquaEngine/Input.hpp>
 #include <AquaEngine/SystemManager.hpp>
 
 using namespace glm;
@@ -36,18 +37,20 @@ void ViewportView::Update()
 void ViewportView::Draw()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-	ImGui::Begin("Viewport");
+	ImGui::Begin("Viewport", nullptr);
 		
 	auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 	auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 	auto viewportOffset = ImGui::GetWindowPos();
 
-	static vec2 m_ViewportBounds[2] = { { 0, 0 }, { 0, 0 } };
+	vec2 m_ViewportBounds[2] = { { 0, 0 }, { 0, 0 } };
 	m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
 	m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 
-	static bool m_ViewportFocused = ImGui::IsWindowFocused();
-	static bool m_ViewportHovered = ImGui::IsWindowHovered();
+	bool m_ViewportFocused = ImGui::IsWindowFocused();
+	bool m_ViewportHovered = ImGui::IsWindowHovered();
+
+	Input::Enable(m_ViewportFocused);
 
 	ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 	vec2 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -58,10 +61,10 @@ void ViewportView::Draw()
 		m_RenderSystem->Draw(m_EditorCamera);
 
 		ImGui::Image(reinterpret_cast<void*>(m_RenderSystem->GetPipeline()->GetOutput()->GetColourAttachment()->GetID()),
-					ImVec2{ m_ViewportSize.x, m_ViewportSize.y },
-					ImVec2{ 0, 1 },
-					ImVec2{ 1, 0 }
-					);
+			ImVec2{ m_ViewportSize.x, m_ViewportSize.y },
+			ImVec2{ 0, 1 },
+			ImVec2{ 1, 0 }
+		);
 	}
 
 	ImGui::End();

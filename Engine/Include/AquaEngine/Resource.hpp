@@ -52,8 +52,9 @@ namespace AquaEngine
 		{
 			replace(path.begin(), path.end(), '\\', '/');
 
-			// Check if instance already exists
 			std::type_index loadType = typeid(T);
+
+			// Check if instance already exists
 			auto cacheIt = s_InstancePaths.find(path);
 			if (cacheIt != s_InstancePaths.end())
 			{
@@ -68,7 +69,6 @@ namespace AquaEngine
 
 			// Create new resource
 			s_Instances.emplace_back(ResourceInstance(new T(constructorArgs...), loadType));
-
 			ResourceID id = AllocateID((unsigned int)s_Instances.size() - 1);
 			s_InstancePaths.emplace(path, id);
 
@@ -132,6 +132,8 @@ namespace AquaEngine
 		template<typename T>
 		static void PrintResourceTypes()
 		{
+			PROFILE_FN();
+
 			const std::type_info& typeInfo = typeid(T);
 			spdlog::trace("Printing resources [{}]", typeInfo.name());
 			for (auto& pair : s_InstancePaths)

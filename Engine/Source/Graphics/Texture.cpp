@@ -37,8 +37,7 @@ void Texture::GenerateImage(bool hdr)
 	}
 
 #ifndef NDEBUG
-	Timer timer(50);
-	timer.Start();
+	Timer profileTimer;
 #endif
 
 	// Read image data
@@ -114,8 +113,8 @@ void Texture::GenerateImage(bool hdr)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 #ifndef NDEBUG
-	timer.Stop();
-	spdlog::debug("Loaded texture '{}' in {}ms", m_Path, timer.ElapsedTime().count());
+	profileTimer.Stop();
+	spdlog::debug("Loaded texture '{}' in {}ms", m_Path, profileTimer.ElapsedTime().count());
 #endif
 }
 

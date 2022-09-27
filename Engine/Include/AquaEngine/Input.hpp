@@ -38,6 +38,7 @@ namespace AquaEngine
 			Gamepad
 		};
 
+		static bool s_Enabled;
 		static float s_ScrollDelta;
 		static glm::vec2 s_MousePosition;
 		static glm::vec2 s_LastMousePosition;
@@ -54,6 +55,9 @@ namespace AquaEngine
 		friend class Window;
 
 	public:
+		AquaAPI static void Enable(bool enable);
+		AquaAPI static bool IsEnabled();
+
 #pragma region Keys
 		/// <returns>True if the key is not pressed down</returns>
 		AquaAPI static bool IsKeyUp(Key key);

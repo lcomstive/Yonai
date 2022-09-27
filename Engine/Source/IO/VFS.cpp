@@ -61,7 +61,7 @@ VFSMapping* VFS::GetMapping(string path, bool needExistingFile, FilePermissions 
 }
 
 vector<VFSMapping*> VFS::GetMappings(string path, bool needExistingFile, FilePermissions requiredPerms)
-{
+{	
 	vector<VFSMapping*> mappings;
 
 	for (auto& mounts : m_Mappings)

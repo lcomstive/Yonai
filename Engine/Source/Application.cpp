@@ -1,6 +1,5 @@
 #include <filesystem>
 #include <AquaEngine/Time.hpp>
-#include <AquaEngine/Profiler.hpp>
 #include <AquaEngine/Application.hpp>
 
 // spdlog //
@@ -120,17 +119,9 @@ bool Application::IsRunning() { return m_Running; }
 
 void Application::Run()
 {
-#ifndef NDEBUG
-	InlineProfiler::Start("/PersistentData/engine_startup.json");
-#endif
-
 	Setup();
 	SystemManager::Global()->Init();
 
-#ifndef NDEBUG
-	InlineProfiler::End();
-	InlineProfiler::Start("/PersistentData/engine_profile.json");
-#endif
 	while (IsRunning())
 	{
 		OnUpdate();
@@ -139,17 +130,9 @@ void Application::Run()
 
 		Time::OnFrameEnd();
 	}
-#ifndef NDEBUG
-	InlineProfiler::End();
-	InlineProfiler::Start("/PersistentData/engine_shutdown.json");
-#endif
 
 	Cleanup();
 	SystemManager::Global()->Destroy();
-
-#ifndef NDEBUG
-	InlineProfiler::End();
-#endif
 }
 
 void Application::Exit() { m_Running = false; }
@@ -235,10 +218,6 @@ AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
 
 void WindowedApplication::Run()
 {
-#ifndef NDEBUG
-	InlineProfiler::Start("/PersistentData/engine_startup.json");
-#endif
-
 	Window::Create();
 
 	// Check if window was created successfully
@@ -248,10 +227,6 @@ void WindowedApplication::Run()
 	Setup();
 	SystemManager::Global()->Init();
 
-#ifndef NDEBUG
-	InlineProfiler::End();
-	InlineProfiler::Start("/PersistentData/engine_profile.json");
-#endif
 	while (IsRunning() && !Window::RequestedToClose())
 	{
 		// if OpenGL
@@ -268,17 +243,9 @@ void WindowedApplication::Run()
 
 		Time::OnFrameEnd();
 	}
-#ifndef NDEBUG
-	InlineProfiler::End();
-	InlineProfiler::Start("/PersistentData/engine_shutdown.json");
-#endif
 
 	Window::Close();
 	Cleanup();
 	SystemManager::Global()->Destroy();
-
-#ifndef NDEBUG
-	InlineProfiler::End();
-#endif
 }
 #pragma endregion

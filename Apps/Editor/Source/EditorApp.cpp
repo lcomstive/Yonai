@@ -11,6 +11,7 @@
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
 // Views //
+#include <Views/Stats.hpp>
 #include <Views/Viewport.hpp>
 
 using namespace glm;
@@ -27,11 +28,11 @@ void EditorApp::Setup()
 
 	Window::SetTitle("Aqua Editor");
 
-	if(HasArg("ProjectPath"))
+	if (HasArg("ProjectPath"))
 		m_ProjectPath = GetArg("ProjectPath");
 	else
 		m_ProjectPath = "./";
-	if(m_ProjectPath[m_ProjectPath.size() - 1] != '/')
+	if (m_ProjectPath[m_ProjectPath.size() - 1] != '/')
 		m_ProjectPath += '/';
 	spdlog::info("Project path: {}", m_ProjectPath);
 
@@ -57,7 +58,7 @@ void EditorApp::OnDraw()
 void EditorApp::OnUpdate()
 {
 	// Iterate over & update views
-	for(auto& viewPair : m_Views)
+	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
 }
 
@@ -82,6 +83,7 @@ void EditorApp::LoadScene()
 			"/Assets/Shaders/Sprite.vert",
 			"/Assets/Shaders/Sprite.frag"
 		});
+
 	const unsigned int spriteRows = 10;
 	const unsigned int spriteColumns = 10;
 	for (unsigned int x = 0; x < spriteRows; x++)
@@ -168,10 +170,13 @@ void EditorApp::DrawUI()
 			ImGui::EndMenu();
 		}
 
-		if(ImGui::BeginMenu("View"))
+		if (ImGui::BeginMenu("View"))
 		{
-			if(ImGui::MenuItem("Viewport"))
+			if (ImGui::MenuItem("Viewport"))
 				Add<ViewportView>();
+
+			if (ImGui::MenuItem("Stats"))
+				Add<StatsView>();
 
 			ImGui::EndMenu();
 		}
@@ -180,7 +185,7 @@ void EditorApp::DrawUI()
 	}
 
 	// Iterate over & draw views
-	for(auto& viewPair : m_Views)
+	for (auto& viewPair : m_Views)
 		viewPair.second->Draw();
 
 	ImGui::End();

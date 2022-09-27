@@ -7,8 +7,8 @@
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Application.hpp>
 #include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
 #include <AquaEngine/Graphics/RenderTexture.hpp>
+#include <AquaEngine/Systems/Global/RenderSystem.hpp>
 
 namespace AquaEditor
 {
