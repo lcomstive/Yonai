@@ -214,7 +214,9 @@ void WindowedApplication::Setup()
 {
 	Application::Setup();
 	SystemManager::Global()->Add<ImGUISystem>();
-	SystemManager::Global()->Add<RenderSystem>();
+
+	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+	m_RenderSystem->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
 }
 
 void WindowedApplication::Cleanup()
@@ -222,6 +224,13 @@ void WindowedApplication::Cleanup()
 	Application::Cleanup();
 	SystemManager::Global()->Remove<RenderSystem>();
 	SystemManager::Global()->Remove<ImGUISystem>();
+}
+
+AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
+{
+	if (!m_RenderSystem)
+		m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+	return m_RenderSystem;
 }
 
 void WindowedApplication::Run()

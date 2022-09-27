@@ -22,6 +22,8 @@ AUTOLINK_SUPPORT		= YES
 SHOW_USED_FILES			= NO
 LAYOUT_FILE				= DoxygenLayout.xml
 
+EXCLUDE_SYMBOLS			= ImGui_ImplGlfw_Data ImGui_ImplOpenGL3_Data
+
 # Theming
 GENERATE_TREEVIEW		= YES
 HTML_HEADER				= header.html

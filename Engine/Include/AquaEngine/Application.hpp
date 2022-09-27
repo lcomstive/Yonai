@@ -5,6 +5,9 @@
 
 namespace AquaEngine
 {
+	// Forward declaration
+	namespace Systems { struct RenderSystem; }
+
 	/// <summary>
 	/// Base application class
 	/// </summary>
@@ -61,8 +64,11 @@ namespace AquaEngine
 	/// </summary>
 	class WindowedApplication : public Application
 	{
+		Systems::RenderSystem* m_RenderSystem = nullptr;
+
 	protected:
 		AquaAPI virtual void OnDraw() { }
+		AquaAPI Systems::RenderSystem* GetRenderSystem();
 
 	public:
 		AquaAPI virtual void Setup() override;

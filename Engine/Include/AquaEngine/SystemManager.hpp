@@ -31,7 +31,10 @@ namespace AquaEngine
 			if (!std::is_base_of<Systems::System, T>())
 				return nullptr;
 
-			T* system = new T();
+			T* system = Get<T>();
+			if (system) // Check if system already added
+				return system;
+			system = new T();
 			system->m_Owner = this;
 			m_Systems.emplace(typeid(T), system);
 			return system;

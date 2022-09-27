@@ -84,7 +84,7 @@ namespace AquaEngine
 
 		AquaAPI void Destroy();
 
-		/// ENTITY ///
+#pragma region Entity
 		AquaAPI void DestroyEntity(EntityID entity);
 		AquaAPI void PrepareEntities(unsigned int count);
 		AquaAPI Entity CreateEntity();
@@ -169,8 +169,9 @@ namespace AquaEngine
 				entities[i] = GetEntity(IDs[i]);
 			return entities;
 		}
+#pragma endregion
 
-		/// COMPONENT ///
+#pragma region Components
 		template<typename T>
 		T* GetComponent(EntityID entity) { return m_ComponentManager->Get<T>(entity); }
 
@@ -238,13 +239,15 @@ namespace AquaEngine
 		bool HasComponents(EntityID entity) { return m_ComponentManager->Has<T1, T2, T3, T4>(entity); }
 
 		AquaAPI void ClearComponents(EntityID entity);
+#pragma endregion
 
-		/// Getters ///
+#pragma region Getters
 		AquaAPI AquaEngine::SystemManager* GetSystemManager();
 		AquaAPI AquaEngine::EntityManager* GetEntityManager();
 		AquaAPI AquaEngine::ComponentManager* GetComponentManager();
 
 		static World* GetWorld(unsigned int id) { return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
+#pragma endregion
 
 	private:
 		std::unordered_map<EntityID, Entity> m_Entities;

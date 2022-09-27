@@ -82,6 +82,10 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	vector<World*>& scenes = m_SceneSystem->GetActiveScenes();
 
 	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : GetResolution();
+
+	if (currentResolution.x <= 0 || currentResolution.y <= 0)
+		return; // Nothing to draw
+
 	glViewport(0, 0, currentResolution.x, currentResolution.y);
 
 	glEnable(GL_CULL_FACE);
@@ -144,9 +148,4 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	if (camera->RenderTarget)
 		// Copy to camera's render target
 		m_Framebuffer->CopyAttachmentTo(camera->RenderTarget);
-	/*
-	else
-		// Blit to default framebuffer (screen)
-		m_Framebuffer->BlitTo(nullptr);
-	*/
 }

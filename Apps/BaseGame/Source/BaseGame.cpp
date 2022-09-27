@@ -150,6 +150,8 @@ void BaseGame::OnUpdate()
 
 	if (camera->Orthographic)
 		camera->OrthographicSize -= ScrollSpeed * Input::GetScrollDelta() * deltaTime;
+
+	GetRenderSystem()->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
 }
 
 #include <imgui.h>
@@ -158,4 +160,7 @@ void BaseGame::OnDraw()
 	ImGui::Begin("FPS");
 	ImGui::Text("FPS: %.2f", Time::FPS());
 	ImGui::End();
+
+	// Blit output to default framebuffer (screen)
+	GetRenderSystem()->GetPipeline()->GetOutput()->BlitTo(nullptr);
 }

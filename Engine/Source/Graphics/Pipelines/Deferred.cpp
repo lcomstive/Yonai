@@ -235,9 +235,6 @@ void DeferredRenderPipeline::ForwardPass()
 	if (m_CurrentCamera->RenderTarget)
 		// Copy to camera's render target
 		m_ForwardFB->CopyAttachmentTo(m_CurrentCamera->RenderTarget);
-	else
-		// Blit to default framebuffer (screen)
-		m_ForwardFB->BlitTo(nullptr);
 }
 
 const unsigned int MaxLights = 4;

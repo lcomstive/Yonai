@@ -46,6 +46,7 @@ void RenderPipeline::SetResolution(ivec2 resolution)
 	if(m_Resolution == resolution)
 		return; // Same, ignore
 		
+	spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
 	m_Resolution = resolution;
 	OnResized(resolution);
 }

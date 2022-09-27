@@ -182,13 +182,13 @@ string Window::GetTitle() { return s_Instance ? s_Instance->m_Title : ""; }
 
 ivec2 Window::GetResolution() { return s_Instance ? s_Instance->m_Resolution : glm::ivec2(0, 0); }
 
-ivec2 Window::GetFramebufferResolution()
+ivec2 Window::GetFramebufferResolution(bool useImGui)
 {
 	ivec2 resolution(0, 0);
 	if(!s_Instance)
 		return resolution;
 
-	if(GImGui->CurrentWindow)
+	if(useImGui && GImGui && GImGui->CurrentWindow)
 	{
 		// If inside ImGui window, get window size
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
