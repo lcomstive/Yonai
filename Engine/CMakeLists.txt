@@ -49,3 +49,31 @@ endif()
 if(AQUA_ENGINE_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
+
+if(WIN32)
+	set(SGEN_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/")
+else()
+	set(SGEN_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/")
+endif()
+
+# Copy mono .dll to output directory
+if(WIN32)
+	add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+				"${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/bin/Windows/mono-2.0-sgen.dll"
+                "${SGEN_OUTPUT_DIR}/mono-2.0-sgen.dll")
+elseif(UNIX)
+	add_custom_command(
+		TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+				"${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/Linux/libmonosgen-2.0.so.1"
+				"${SGEN_OUTPUT_DIR}/libmonosgen-2.0.so.1")
+endif()
+
+add_custom_command(
+	TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/lib
+			${SGEN_OUTPUT_DIR}/mono/lib
+)

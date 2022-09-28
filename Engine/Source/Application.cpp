@@ -22,7 +22,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
-string LogFile = "/PersistentData/Logs/Engine.txt";
+string LogFile = "./Engine-Log.txt";
 void Application::InitLogger()
 {
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -34,7 +34,7 @@ void Application::InitLogger()
 	consoleSink->set_level(spdlog::level::info);
 #endif
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(VFS::GetAbsolutePath(LogFile), 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -65,12 +65,16 @@ void Application::InitVFS()
 		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
 	#endif
 #endif
+
+	// Default mapping for local filesystem.
+	// Useful for absolute paths
+	VFS::Mount(string());
 }
 
 Application::Application()
 {
-	InitVFS();
 	InitLogger();
+	InitVFS();
 
 #pragma region Log engine information
 	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
@@ -186,10 +190,11 @@ bool Application::HasArg(std::string name)
 	ToLower(name);
 	return m_Args.find(name) != m_Args.end();
 }
-std::string& Application::GetArg(std::string name)
+
+std::string Application::GetArg(string name, string defaultValue)
 {
 	ToLower(name);
-	return m_Args[name];
+	return HasArg(name) ? m_Args[name] : defaultValue;
 }
 
 #pragma region Windowed Application

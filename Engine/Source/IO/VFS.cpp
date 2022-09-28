@@ -4,21 +4,21 @@
 using namespace std;
 using namespace AquaEngine::IO;
 
-unordered_map<string, list<VFSMapping*>> VFS::m_Mappings;
+unordered_map<string, list<VFSMapping*>> VFS::s_Mappings;
 
 VFSMapping* VFS::Mount(string mountPoint) { return Mount<VFSPhysicalFileMapping>(mountPoint); }
 VFSMapping* VFS::Mount(string mountPoint, string mountPath) { return Mount<VFSPhysicalFileMapping>(mountPoint, mountPath); }
 
 void VFS::Unmount(string mountPoint, string mountPath)
 {
-	if (m_Mappings.find(mountPoint) == m_Mappings.end())
+	if (s_Mappings.find(mountPoint) == s_Mappings.end())
 		return; // Mount point isn't mapped
 
-	for (auto it : m_Mappings[mountPoint])
+	for (auto it : s_Mappings[mountPoint])
 	{
 		if (it->GetMountPath().compare(mountPath) == 0)
 		{
-			m_Mappings[mountPoint].remove(it);
+			s_Mappings[mountPoint].remove(it);
 			delete it;
 			break;
 		}
@@ -26,11 +26,11 @@ void VFS::Unmount(string mountPoint, string mountPath)
 }
 
 filesystem::path VFS::GetCurrentDirectory() { return filesystem::current_path(); }
-bool VFS::HasMount(string mountPath) { return m_Mappings.find(mountPath) != m_Mappings.end(); }
+bool VFS::HasMount(string mountPath) { return s_Mappings.find(mountPath) != s_Mappings.end(); }
 
 bool VFS::Exists(string path)
 {
-	for (auto& mounts : m_Mappings)
+	for (auto& mounts : s_Mappings)
 	{
 		// Check if path starts with mount
 		if (path.rfind(mounts.first, 0) != 0)
@@ -44,7 +44,7 @@ bool VFS::Exists(string path)
 
 VFSMapping* VFS::GetMapping(string path, bool needExistingFile, FilePermissions requiredPerms)
 {
-	for (auto& mounts : m_Mappings)
+	for (auto& mounts : s_Mappings)
 	{
 		// Check if path starts with mount
 		if (path.rfind(mounts.first, 0) != 0)
@@ -64,7 +64,7 @@ vector<VFSMapping*> VFS::GetMappings(string path, bool needExistingFile, FilePer
 {	
 	vector<VFSMapping*> mappings;
 
-	for (auto& mounts : m_Mappings)
+	for (auto& mounts : s_Mappings)
 	{
 		// Check if path starts with mount
 		if (path.rfind(mounts.first, 0) != 0)
@@ -82,15 +82,15 @@ vector<VFSMapping*> VFS::GetMappings(string path, bool needExistingFile, FilePer
 
 void VFS::Unmount(string mountPoint)
 {
-	if (m_Mappings.find(mountPoint) == m_Mappings.end())
+	if (s_Mappings.find(mountPoint) == s_Mappings.end())
 		return;
 
-	for (auto it : m_Mappings[mountPoint])
+	for (auto it : s_Mappings[mountPoint])
 		delete it;
-	m_Mappings[mountPoint].clear();
+	s_Mappings[mountPoint].clear();
 }
 
-string VFS::ReadText(string path)
+string VFS::ReadText(const string& path)
 {
 	VFSMapping* mapping = GetMapping(path);
 	if (!mapping)
@@ -98,7 +98,7 @@ string VFS::ReadText(string path)
 	return mapping ? mapping->ReadText(mapping->GetMountedPath(path)) : "";
 }
 
-vector<unsigned char> VFS::Read(string path)
+vector<unsigned char> VFS::Read(const string& path)
 {
 	VFSMapping* mapping = GetMapping(path);
 	if (!mapping)
@@ -106,7 +106,7 @@ vector<unsigned char> VFS::Read(string path)
 	return mapping ? mapping->Read(mapping->GetMountedPath(path)) : vector<unsigned char>();
 }
 
-void VFS::WriteText(string path, string contents)
+void VFS::WriteText(const string& path, string contents)
 {
 	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
 
@@ -119,7 +119,7 @@ void VFS::WriteText(string path, string contents)
 	mapping->WriteText(mapping->GetMountedPath(path), contents);
 }
 
-void VFS::Write(string path, vector<unsigned char> contents)
+void VFS::Write(const string& path, vector<unsigned char> contents)
 {
 	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
 	if (!mapping)
@@ -131,7 +131,7 @@ void VFS::Write(string path, vector<unsigned char> contents)
 	mapping->Write(mapping->GetMountedPath(path), contents);
 }
 
-void VFS::Remove(string path)
+void VFS::Remove(const string& path)
 {
 	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
 	if (!mapping)
@@ -143,7 +143,7 @@ void VFS::Remove(string path)
 	mapping->Remove(mapping->GetMountedPath(path));
 }
 
-void VFS::Move(string originalPath, string newPath)
+void VFS::Move(const string& originalPath, const string& newPath)
 {
 	VFSMapping* originalMapping = GetMapping(originalPath, false, FilePermissions::Read);
 	VFSMapping* newMapping = GetMapping(newPath, false, FilePermissions::Write);
@@ -161,7 +161,7 @@ void VFS::Move(string originalPath, string newPath)
 	originalMapping->Move(originalMapping->GetMountedPath(originalPath), newMapping->GetMountedPath(newPath));
 }
 
-void VFS::Copy(string originalPath, string copyPath)
+void VFS::Copy(const string& originalPath, const string& copyPath)
 {
 	VFSMapping* originalMapping = GetMapping(originalPath, false, FilePermissions::Read);
 	VFSMapping* newMapping = GetMapping(copyPath, false, FilePermissions::Write);

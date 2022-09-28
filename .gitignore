@@ -1,5 +1,6 @@
 # Mac OS Meta
 .DS_Store
+*.DS_Store
 
 # Visual Studio & VS Code
 .vs/

@@ -14,6 +14,10 @@
 #include <Views/Stats.hpp>
 #include <Views/Viewport.hpp>
 
+// Scripting //
+#include <Scripting.hpp>
+
+using namespace std;
 using namespace glm;
 using namespace AquaEditor;
 using namespace AquaEngine;
@@ -22,16 +26,18 @@ using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Components;
 
+string ProjectPathArg = "ProjectPath";
+string CSharpDLLPath = "dll-path";
+
 void EditorApp::Setup()
 {
 	WindowedApplication::Setup();
 
 	Window::SetTitle("Aqua Editor");
 
-	if (HasArg("ProjectPath"))
-		m_ProjectPath = GetArg("ProjectPath");
-	else
-		m_ProjectPath = "./";
+	m_ProjectPath = GetArg(ProjectPathArg, "./");
+	if (m_ProjectPath.empty())
+		spdlog::warn("Empty project path!");
 	if (m_ProjectPath[m_ProjectPath.size() - 1] != '/')
 		m_ProjectPath += '/';
 	spdlog::info("Project path: {}", m_ProjectPath);
@@ -48,6 +54,40 @@ void EditorApp::Setup()
 	LoadScene();
 
 	Add<ViewportView>();
+
+	// Scripting
+	ScriptEngine::InitMono();
+	
+	string dllPath = GetArg(CSharpDLLPath);
+	if (dllPath.empty() || !VFS::Exists(dllPath))
+		spdlog::warn("Please provide the 'dll-path' parameter to a valid C# .dll file");
+	else
+	{
+		unique_ptr<Assembly> assembly = ScriptEngine::LoadAssembly(dllPath);
+		unique_ptr<Class> testClass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
+
+		// Call ScriptingTest.HelloWorld.PrintFloatVar()
+		MonoMethod* printMethod = testClass->GetMethod("PrintFloatVar");
+		MonoMethod* incMethod = testClass->GetMethod("IncrementFloatVar", 1);
+		if (printMethod && incMethod)
+		{
+			MonoObject* exception = nullptr;
+			
+			// PrintFloatVar()
+			mono_runtime_invoke(printMethod, testClass->Instance, nullptr, &exception);
+
+			// IncrementFloatVar(2.0f)
+			float value = 2.0f;
+			void* param = &value;
+			mono_runtime_invoke(incMethod, testClass->Instance, &param, &exception);
+
+			MonoClassField* floatField = testClass->GetField("MyPublicFloatVar");
+			mono_field_set_value(testClass->Instance, floatField, param);
+
+			// PrintFloatVar()
+			mono_runtime_invoke(printMethod, testClass->Instance, nullptr, &exception);
+		}
+	}
 }
 
 void EditorApp::OnDraw()

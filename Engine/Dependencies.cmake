@@ -48,3 +48,14 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui::imgui)
 if(LINUX)
     list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS X11)
 endif()
+
+# Mono
+if(WIN32)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/Windows/mono-2.0-sgen.lib)
+elseif(APPLE)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/MacOS/libmonosgen-2.0.1.dylib)
+elseif(UNIX)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/Linux/libmonosgen-2.0.so.1.0.0)
+endif()
+
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")

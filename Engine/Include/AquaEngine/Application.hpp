@@ -55,7 +55,10 @@ namespace AquaEngine
 		AquaAPI void ProcessArgs(int argc, char** argv);
 
 		AquaAPI bool HasArg(std::string name);
-		AquaAPI std::string& GetArg(std::string name);
+
+		/// <param name="name">Name of argument to search for, case-insensitive</param>
+		/// <param name="default">Default value to return if argument is not found</param>
+		AquaAPI std::string GetArg(std::string name, std::string defaultValue = "");
 		#pragma endregion
 	};
 
