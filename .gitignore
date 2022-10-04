@@ -10,6 +10,8 @@
 Docs/html/
 
 # Generated files & artifacts
+[Bb]in/
+[Oo]bj/
 [Bb]uild/
 AquaEngine*.zip
 

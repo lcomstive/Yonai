@@ -15,7 +15,10 @@
 #include <Views/Viewport.hpp>
 
 // Scripting //
-#include <Scripting.hpp>
+#include <AquaEngine/Scripting/Method.hpp>
+#include <AquaEngine/Scripting/Class.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/ScriptSystem.hpp>
 
 using namespace std;
 using namespace glm;
@@ -24,6 +27,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Systems;
+using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
 string ProjectPathArg = "ProjectPath";
@@ -56,6 +60,13 @@ void EditorApp::Setup()
 	Add<ViewportView>();
 
 	// Scripting
+	ScriptSystem* scriptSystem = m_CurrentScene->GetSystemManager()->Add<ScriptSystem>();
+	auto assembly = scriptSystem->LoadAssembly(GetArg(CSharpDLLPath, "/Users/lcomstive/Projects/AquaEngine/Apps/AquaScriptCore/bin/Debug/net6.0/AquaScriptCore.dll"));
+	auto klass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
+	auto method = klass->GetMethod("PrintFloatVar");
+
+	/*
+	
 	ScriptEngine::InitMono();
 	
 	string dllPath = GetArg(CSharpDLLPath);
@@ -88,6 +99,7 @@ void EditorApp::Setup()
 			mono_runtime_invoke(printMethod, testClass->Instance, nullptr, &exception);
 		}
 	}
+	*/
 }
 
 void EditorApp::OnDraw()
