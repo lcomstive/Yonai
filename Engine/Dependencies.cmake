@@ -3,6 +3,14 @@ cmake_policy(SET CMP0072 NEW) # Prefer newer OpenGL libraries over legacy ones
 set(AQUA_ENGINE_DEPENDENCY_LIBS)
 set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "")
 
+# Unix requires pthread library
+if(UNIX)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+	find_package(Threads REQUIRED)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS Threads::Threads);
+endif()
+
+
 # OpenGL
 find_package(OpenGL REQUIRED)
 

@@ -22,7 +22,7 @@ jobs:
           }
         - {
             name: "MacOS",
-            os: macos-latest,
+            os: [ macos, arm64, self-hosted ],
             triplet: 'arm64-osx'
           }
 

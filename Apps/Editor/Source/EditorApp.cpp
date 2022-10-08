@@ -61,45 +61,16 @@ void EditorApp::Setup()
 
 	// Scripting
 	ScriptSystem* scriptSystem = m_CurrentScene->GetSystemManager()->Add<ScriptSystem>();
-	auto assembly = scriptSystem->LoadAssembly(GetArg(CSharpDLLPath, "/Users/lcomstive/Projects/AquaEngine/Apps/AquaScriptCore/bin/Debug/net6.0/AquaScriptCore.dll"));
+	auto assembly = scriptSystem->LoadAssembly(GetArg(CSharpDLLPath));
 	auto klass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
-	auto method = klass->GetMethod("PrintFloatVar");
 
-	/*
-	
-	ScriptEngine::InitMono();
-	
-	string dllPath = GetArg(CSharpDLLPath);
-	if (dllPath.empty() || !VFS::Exists(dllPath))
-		spdlog::warn("Please provide the 'dll-path' parameter to a valid C# .dll file");
-	else
-	{
-		unique_ptr<Assembly> assembly = ScriptEngine::LoadAssembly(dllPath);
-		unique_ptr<Class> testClass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
+	auto method = klass->GetMethod("PrintTestFloat");
+	if (method && method->IsValid())
+		method->Invoke();
 
-		// Call ScriptingTest.HelloWorld.PrintFloatVar()
-		MonoMethod* printMethod = testClass->GetMethod("PrintFloatVar");
-		MonoMethod* incMethod = testClass->GetMethod("IncrementFloatVar", 1);
-		if (printMethod && incMethod)
-		{
-			MonoObject* exception = nullptr;
-			
-			// PrintFloatVar()
-			mono_runtime_invoke(printMethod, testClass->Instance, nullptr, &exception);
-
-			// IncrementFloatVar(2.0f)
-			float value = 2.0f;
-			void* param = &value;
-			mono_runtime_invoke(incMethod, testClass->Instance, &param, &exception);
-
-			MonoClassField* floatField = testClass->GetField("MyPublicFloatVar");
-			mono_field_set_value(testClass->Instance, floatField, param);
-
-			// PrintFloatVar()
-			mono_runtime_invoke(printMethod, testClass->Instance, nullptr, &exception);
-		}
-	}
-	*/
+	method = klass->GetMethod("PrintTestMsg");
+	if (method && method->IsValid())
+		method->Invoke();
 }
 
 void EditorApp::OnDraw()

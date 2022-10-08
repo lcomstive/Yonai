@@ -6,16 +6,12 @@ namespace AquaEngine::Scripting
 {
 	struct Method
 	{
-		MonoClass* Instance;
 		MonoMethod* Handle;
+		MonoObject* ClassInstance;
 
-		AquaAPI Method(MonoClass* instance, MonoMethod* handle) : Instance(instance), Handle(handle) { }
+		AquaAPI Method(MonoObject* classInstance, MonoMethod* handle) : ClassInstance(classInstance), Handle(handle) { }
 
-		AquaAPI void Invoke(void** params = nullptr)
-		{
-			MonoObject* exception = nullptr;
-			mono_runtime_invoke(Handle, Instance, nullptr, &exception);
-		}
+		AquaAPI void Invoke(void** params = nullptr);
 
 		template<typename T>
 		void Invoke(T* param) { Invoke(&param); }
@@ -26,5 +22,7 @@ namespace AquaEngine::Scripting
 			T* ptr = &param;
 			Invoke<T>(ptr);
 		}
+
+		AquaAPI bool IsValid();
 	};
 }
