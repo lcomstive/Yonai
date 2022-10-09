@@ -91,5 +91,5 @@ MonoString* GetMessage() { return mono_string_new(mono_domain_get(), "Hello from
 
 void ScriptSystem::AddInternalCalls()
 {
-	mono_add_internal_call("Sample::GetMessage", GetMessage);
+	mono_add_internal_call("Sample::GetMessage", (const void*)GetMessage);
 }
