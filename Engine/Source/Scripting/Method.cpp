@@ -12,6 +12,9 @@ void Method::Invoke(void** params)
 	}
 	MonoObject* exception = nullptr;
 	mono_runtime_invoke(Handle, ClassInstance, nullptr, &exception);
+
+	if(exception)
+		mono_print_unhandled_exception(exception);
 }
 
 bool Method::IsValid() { return Handle != nullptr; }

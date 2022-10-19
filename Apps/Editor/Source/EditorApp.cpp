@@ -33,6 +33,8 @@ using namespace AquaEngine::Components;
 string ProjectPathArg = "ProjectPath";
 string CSharpDLLPath = "dll-path";
 
+unique_ptr<Method> updateMethod;
+
 void EditorApp::Setup()
 {
 	WindowedApplication::Setup();
@@ -71,6 +73,10 @@ void EditorApp::Setup()
 	method = klass->GetMethod("PrintTestMsg");
 	if (method && method->IsValid())
 		method->Invoke();
+
+	updateMethod = klass->GetMethod("Update");
+	if (!updateMethod)
+		spdlog::warn("ScriptingTest.HelloWorld::Update() not found");
 }
 
 void EditorApp::OnDraw()
@@ -83,6 +89,9 @@ void EditorApp::OnUpdate()
 	// Iterate over & update views
 	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
+
+	if (updateMethod)
+		updateMethod->Invoke();
 }
 
 void EditorApp::LoadScene()
