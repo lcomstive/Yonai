@@ -4,8 +4,6 @@ namespace AquaEngine
 {
 	public class Transform : Component
 	{
-		public Transform Parent = null;
-
 		public Vector3 Position
 		{
 			get
@@ -35,8 +33,6 @@ namespace AquaEngine
 			}
 			set => _aqua_internal_Transform_SetScale(World.ID, Entity.ID, ref value);
 		}
-
-		internal Transform(Entity entity) : base(entity) { }
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_SetPosition(uint worldID, uint entityID, ref Vector3 position);

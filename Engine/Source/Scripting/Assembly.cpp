@@ -6,7 +6,10 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 
-Assembly::Assembly(ScriptSystem* owner, MonoAssembly* handle) : Owner(owner), Handle(handle) { }
+Assembly::Assembly(ScriptSystem* owner, MonoAssembly* handle) : Owner(owner), Handle(handle), Image(mono_assembly_get_image(handle))
+{
+	AddInternalCalls();
+}
 
 unique_ptr<Class> Assembly::InstantiateClass(const char* namespaceName, const char* className)
 {
@@ -31,4 +34,22 @@ unique_ptr<Class> Assembly::InstantiateClass(const char* namespaceName, const ch
 	mono_runtime_object_init(instance);
 
 	return make_unique<Class>(klass, instance);
+}
+
+namespace InternalCalls
+{
+	extern void AddLogInternalCalls();
+	extern void AddTimeInternalCalls();
+	extern void AddVectorInternalCalls();
+	extern void AddTransformInternalCalls();
+	extern void AddWorldInternalCalls();
+}
+
+void Assembly::AddInternalCalls()
+{
+	InternalCalls::AddLogInternalCalls();
+	InternalCalls::AddTimeInternalCalls();
+	InternalCalls::AddWorldInternalCalls();
+	InternalCalls::AddVectorInternalCalls();
+	InternalCalls::AddTransformInternalCalls();
 }

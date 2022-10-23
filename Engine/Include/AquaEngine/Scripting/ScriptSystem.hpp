@@ -14,11 +14,9 @@ namespace AquaEngine::Scripting
 		MonoDomain* m_AppDomain = nullptr;
 		MonoDomain* m_RootDomain = nullptr;
 
-		void AddInternalCalls();
-
 	public:
-		AquaAPI ScriptSystem();
-		AquaAPI ~ScriptSystem();
+		AquaAPI virtual void Init() override;
+		AquaAPI virtual void Destroy() override;
 
 		AquaAPI std::unique_ptr<Assembly> LoadAssembly(const std::string& path);
 

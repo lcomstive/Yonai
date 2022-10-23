@@ -7,7 +7,7 @@ set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "")
 if(UNIX)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 	find_package(Threads REQUIRED)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS Threads::Threads)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS Threads::Threads pthread)
 endif()
 
 
@@ -59,11 +59,20 @@ endif()
 
 # Mono
 if(WIN32)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/Windows/mono-2.0-sgen.lib)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS
+		ws2_32.lib
+		version.lib
+		Bcrypt.lib
+		winmm.lib
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmono-static-sgen.lib
+	)
 elseif(APPLE)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/MacOS/libmonosgen-2.0.1.dylib)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.1.dylib)
 elseif(UNIX)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/lib/Linux/libmonosgen-2.0.so.1.0.0)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS
+		libz.so
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.a
+	)
 endif()
 
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")

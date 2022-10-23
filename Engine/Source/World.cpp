@@ -54,14 +54,14 @@ vector<Entity> World::Entities()
 	return entities;
 }
 
+bool World::HasEntity(EntityID entity)
+{
+	return m_Entities.find(entity) != m_Entities.end();
+}
+
 Entity World::GetEntity(EntityID entity)
 {
-	if (m_Entities.find(entity) == m_Entities.end())
-	{
-		if (m_EntityManager->Entities()[entity])
-			m_Entities.emplace(entity, Entity(entity, this));
-	}
-	return m_Entities.at(entity);
+	return m_Entities.find(entity) != m_Entities.end() ? m_Entities.at(entity) : Entity();
 }
 
 void World::DestroyEntity(EntityID entity)
@@ -69,6 +69,11 @@ void World::DestroyEntity(EntityID entity)
 	m_EntityManager->Destroy(entity);
 	if(m_Entities.find(entity) != m_Entities.end())
 		m_Entities.erase(entity);
+}
+
+void* World::GetComponent(EntityID entity, size_t type)
+{
+	return m_ComponentManager->Get(entity, type);
 }
 
 bool World::HasComponents(EntityID entity) { return !m_ComponentManager->IsEmpty(entity); }

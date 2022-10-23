@@ -1,0 +1,7 @@
+{
+	"name": "TestGame",
+	"assetsDir": "Assets",
+	"assemblies": [
+		"Scripting/bin/Debug/TestGame.dll"
+	]
+}

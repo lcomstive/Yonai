@@ -1,21 +1,31 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/assembly.h>
+#include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
+using namespace AquaEngine::IO;
 using namespace AquaEngine::Scripting;
 
+const char* AssembliesPath = "/Assets/Scripts/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
-ScriptSystem::ScriptSystem()
+void ScriptSystem::Init()
 {
-	mono_set_assemblies_path("mono/lib/4.5");
+	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
+	if (!VFS::Exists(assembliesPath))
+	{
+		spdlog::error("Mono assemblies path is invalid, disabling scripting");
+		GetManager()->Remove<ScriptSystem>();
+		return;
+	}
+	mono_set_assemblies_path(assembliesPath.c_str());
 
 	m_RootDomain = mono_jit_init("AquaEngineRuntime");
-	if(!m_RootDomain)
+	if (!m_RootDomain)
 	{
 		spdlog::critical("Failed to create mono domain");
 		return;
@@ -23,11 +33,9 @@ ScriptSystem::ScriptSystem()
 
 	m_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
 	mono_domain_set(m_AppDomain, true);
-
-	AddInternalCalls();
 }
 
-ScriptSystem::~ScriptSystem()
+void ScriptSystem::Destroy()
 {
 	mono_jit_cleanup(m_RootDomain);
 }
@@ -86,45 +94,3 @@ unique_ptr<Assembly> ScriptSystem::LoadAssembly(const string& path)
 }
 
 MonoDomain* ScriptSystem::GetAppDomain() { return m_AppDomain; }
-
-MonoString* GetMessage() { return mono_string_new(mono_domain_get(), "Hello from C++"); }
-
-/// <summary>
-/// Levels:
-/// default   - debug
-///			1 - info
-///			2 - warning
-///			3 - error
-///			4 - critical
-/// </summary>
-/// <param name="msg"></param>
-/// <param name="level"></param>
-void NativeLog(MonoString* rawMsg, int level)
-{
-	char* msg = mono_string_to_utf8(rawMsg);
-	switch (level)
-	{
-	default: spdlog::debug(msg);	break;
-	case 1: spdlog::info(msg);		break;
-	case 2: spdlog::warn(msg);		break;
-	case 3: spdlog::error(msg);		break;
-	case 4: spdlog::critical(msg);	break;
-	}
-	mono_free(msg);
-}
-
-namespace InternalCalls
-{
-	extern void AddTimeInternalCalls();
-	extern void AddVectorInternalCalls();
-	extern void AddTransformInternalCalls();
-}
-
-void ScriptSystem::AddInternalCalls()
-{
-	mono_add_internal_call("AquaEngine.Log::_aqua_internal_NativeLog", (const void*)NativeLog);
-
-	InternalCalls::AddTimeInternalCalls();
-	InternalCalls::AddVectorInternalCalls();
-	InternalCalls::AddTransformInternalCalls();
-}

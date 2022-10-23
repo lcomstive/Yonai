@@ -85,9 +85,14 @@ namespace AquaEngine
 		AquaAPI void Destroy();
 
 #pragma region Entity
+		AquaAPI Entity CreateEntity();
+		AquaAPI bool HasEntity(EntityID entity);
 		AquaAPI void DestroyEntity(EntityID entity);
 		AquaAPI void PrepareEntities(unsigned int count);
-		AquaAPI Entity CreateEntity();
+
+		/// <summary>
+		/// Gets an entity with matching ID, or creates entity if it does not exist
+		/// </summary>
 		AquaAPI Entity GetEntity(EntityID entity);
 
 		template<typename T>
@@ -172,6 +177,14 @@ namespace AquaEngine
 #pragma endregion
 
 #pragma region Components
+		/// <summary>
+		/// Gets an instance of a component
+		/// </summary>
+		void* GetComponent(EntityID entity, size_t type);
+
+		/// <summary>
+		/// Gets an instance of a component
+		/// </summary>
 		template<typename T>
 		T* GetComponent(EntityID entity) { return m_ComponentManager->Get<T>(entity); }
 

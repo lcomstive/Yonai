@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.3.32901.215
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaScriptCore", "AquaScriptCore.csproj", "{7CACFA83-444B-4820-8781-C80223BAF445}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaScriptCore", "AquaScriptCore.csproj", "{C7377826-DB72-4B51-9874-4008111ED1E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7CACFA83-444B-4820-8781-C80223BAF445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7CACFA83-444B-4820-8781-C80223BAF445}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7CACFA83-444B-4820-8781-C80223BAF445}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7CACFA83-444B-4820-8781-C80223BAF445}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7377826-DB72-4B51-9874-4008111ED1E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7377826-DB72-4B51-9874-4008111ED1E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7377826-DB72-4B51-9874-4008111ED1E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7377826-DB72-4B51-9874-4008111ED1E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0F7CDB94-3906-4710-B5E0-CF56D244D22C}
+		SolutionGuid = {B243348D-407E-48F8-ADFF-6737E2E96DA0}
 	EndGlobalSection
 EndGlobal

@@ -3,8 +3,14 @@
 	public abstract class Component
 	{
 		public World World => Entity.World;
-		public Entity Entity { get; internal set; }
+		public Entity Entity { get; private set; }
 
-		public Component(Entity entity) => Entity = entity;
+		public Component() => Log.Debug("Component constructor");
+
+		public void Initialise(uint worldID, uint entityID)
+		{
+			Log.Debug($"Initialised component [{worldID}.{entityID}]");
+			Entity = new Entity(World.Get(worldID), entityID);
+		}
 	}
 }

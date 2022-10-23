@@ -11,9 +11,9 @@ void ComponentManager::Destroy()
 		iterator.second.Destroy();
 }
 
-vector<pair<type_index, void*>> ComponentManager::Get(EntityID id)
+vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 {
-	std::vector<std::pair<std::type_index, void*>> components;
+	std::vector<std::pair<size_t, void*>> components;
 
 	if (m_EntityComponents.find(id) == m_EntityComponents.end())
 		return components;
@@ -29,6 +29,14 @@ bool ComponentManager::IsEmpty(EntityID id)
 	return m_EntityComponents.find(id) == m_EntityComponents.end() ||
 			m_EntityComponents[id].size() == 0;
 }
+
+bool ComponentManager::Has(EntityID& id, size_t type)
+{
+	return m_ComponentArrays.find(type) != m_ComponentArrays.end() && m_ComponentArrays[type].Has(id);
+}
+
+bool ComponentManager::Has(EntityID& id, type_info& type)
+{ return Has(id, type.hash_code()); }
 
 void ComponentManager::Clear(EntityID id)
 {
@@ -52,13 +60,13 @@ void ComponentManager::ComponentData::Destroy()
 	EntityIndex.clear();
 }
 
-void ComponentManager::ComponentData::Add(Component* component, EntityID entity)
+void ComponentManager::ComponentData::Add(void* instance, EntityID entity)
 {
-	Instances.emplace_back(component);
+	Instances.emplace_back(instance);
 	EntityIndex.emplace(entity, (unsigned int)Instances.size() - 1);
 }
 
-Component* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
+void* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
 
 bool ComponentManager::ComponentData::Has(EntityID entity) { return EntityIndex.find(entity) != EntityIndex.end(); }
 

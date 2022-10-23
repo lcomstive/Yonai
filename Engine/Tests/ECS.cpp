@@ -121,3 +121,37 @@ TEST(ECS, TransformComponentChild)
 	// Set transform2 as child of transform1
 	// TODO: Hierarchy functions
 }
+
+TEST(ECS, WorldHasEntity)
+{
+	AquaEngine::World world;
+
+	EXPECT_FALSE(world.HasEntity(123));
+
+	AquaEngine::Entity entity = world.CreateEntity();
+	unsigned int entityID = entity.ID();
+	EXPECT_TRUE(entity.IsValid());
+	EXPECT_TRUE(world.HasEntity(entityID));
+
+	world.DestroyEntity(entityID);
+	EXPECT_FALSE(world.HasEntity(entityID));
+
+	entity = world.CreateEntity();
+	entityID = entity.ID();
+	EXPECT_TRUE(world.HasEntity(entityID));
+	
+	entity.Destroy();
+	EXPECT_FALSE(world.HasEntity(entityID));
+}
+
+TEST(ECS, WorldGetEntity)
+{
+	const unsigned int entityID = 123;
+	AquaEngine::World world;
+
+	EXPECT_FALSE(world.HasEntity(entityID));
+
+	AquaEngine::Entity e = world.GetEntity(entityID);
+	EXPECT_FALSE(e.IsValid());
+	EXPECT_FALSE(world.HasEntity(entityID));
+}

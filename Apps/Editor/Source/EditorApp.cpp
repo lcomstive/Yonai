@@ -15,7 +15,6 @@
 #include <Views/Viewport.hpp>
 
 // Scripting //
-#include <AquaEngine/Scripting/Method.hpp>
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptSystem.hpp>
@@ -32,8 +31,13 @@ using namespace AquaEngine::Components;
 
 string ProjectPathArg = "ProjectPath";
 string CSharpDLLPath = "dll-path";
+string CSharpCoreDLLPath = "core-dll-path";
 
-unique_ptr<Method> updateMethod;
+unique_ptr<Scripting::Class> ScriptClass;
+MonoMethod* UpdateMethod = nullptr;
+
+// Maps unmanaged component definitions to managed components
+namespace InternalCalls { extern void PostCoreAssemblyLoaded(unique_ptr<Scripting::Assembly>& assembly); }
 
 void EditorApp::Setup()
 {
@@ -50,7 +54,7 @@ void EditorApp::Setup()
 
 	VFS::Mount("/Project", m_ProjectPath);
 	VFS::Mount("/Assets", m_ProjectPath + "Assets");
-	VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
+	// VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
 
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
@@ -63,20 +67,34 @@ void EditorApp::Setup()
 
 	// Scripting
 	ScriptSystem* scriptSystem = m_CurrentScene->GetSystemManager()->Add<ScriptSystem>();
-	auto assembly = scriptSystem->LoadAssembly(GetArg(CSharpDLLPath));
-	auto klass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
+	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
+	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
+	{
+		spdlog::critical("Core DLL path not specified or invalid. Set the '-core-dll-path' flag to 'AquaScriptCore.dll'");
+		Exit();
+		return;
+	}
+	unique_ptr<Assembly> coreAssembly = scriptSystem->LoadAssembly(VFS::GetAbsolutePath(coreDllPath));
+	InternalCalls::PostCoreAssemblyLoaded(coreAssembly);
 
-	auto method = klass->GetMethod("PrintTestFloat");
-	if (method && method->IsValid())
-		method->Invoke();
+	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
+	if (!assemblyPath.empty() || !VFS::Exists(assemblyPath))
+	{
+		unique_ptr<Assembly> assembly = scriptSystem->LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
 
-	method = klass->GetMethod("PrintTestMsg");
-	if (method && method->IsValid())
-		method->Invoke();
+		ScriptClass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
+		ScriptClass->Invoke("Start");
 
-	updateMethod = klass->GetMethod("Update");
-	if (!updateMethod)
-		spdlog::warn("ScriptingTest.HelloWorld::Update() not found");
+		UpdateMethod = ScriptClass->GetMethod("Update");
+		if (!UpdateMethod)
+			spdlog::warn("ScriptingTest.HelloWorld::Update() not found");
+	}
+	else
+	{
+		m_CurrentScene->GetSystemManager()->Remove<ScriptSystem>();
+		spdlog::warn("No C# DLL path found, scripting engine disabled");
+		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
+	}
 }
 
 void EditorApp::OnDraw()
@@ -90,8 +108,8 @@ void EditorApp::OnUpdate()
 	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
 
-	if (updateMethod)
-		updateMethod->Invoke();
+	if (UpdateMethod)
+		ScriptClass->Invoke(UpdateMethod);
 }
 
 void EditorApp::LoadScene()

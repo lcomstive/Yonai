@@ -7,9 +7,7 @@
 #include <AquaEngine/Entity.hpp>
 
 namespace AquaEngine
-{
-	namespace Components { struct Component; }
-	
+{	
 	/// <summary>
 	/// Handles many entities & their related component instances
 	/// </summary>
@@ -21,16 +19,28 @@ namespace AquaEngine
 		/// </summary>
 		struct ComponentData
 		{
-			std::vector<Components::Component*> Instances;
+			/// <summary>
+			/// Array of all created instances
+			/// </summary>
+			std::vector<void*> Instances;
+
+			/// <summary>
+			/// Maps EntityID to index inside Instances
+			/// </summary>
 			std::unordered_map<EntityID, unsigned int> EntityIndex;
 
+			/// <summary>
+			/// Release all instances
+			/// </summary>
 			void Destroy();
 
+			/// <returns>True if entity has an instance</returns>
 			bool Has(EntityID entity);
+
 			void Remove(EntityID entity);
 			std::vector<EntityID> GetEntities();
-			Components::Component* Get(EntityID entity);
-			void Add(Components::Component* component, EntityID entity);
+			void* Get(EntityID entity);
+			void Add(void* instance, EntityID entity);
 
 			template<typename T>
 			T* Get(EntityID entity) { return (T*)(Has(entity) ? Instances[EntityIndex[entity]] : nullptr); }
@@ -48,8 +58,8 @@ namespace AquaEngine
 
 		unsigned int m_WorldID;
 
-		std::unordered_map<std::type_index, ComponentData> m_ComponentArrays;
-		std::unordered_map<EntityID, std::vector<std::type_index>> m_EntityComponents;
+		std::unordered_map<size_t, ComponentData> m_ComponentArrays;
+		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
 
 	public:
 		AquaAPI ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
@@ -66,14 +76,15 @@ namespace AquaEngine
 		template<typename T>
 		T* Add(EntityID id)
 		{
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
+			T* component = new T();
+
 			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
 				m_ComponentArrays.emplace(type, ComponentData());
-			T* component = new T();
 			m_ComponentArrays[type].Add(component, id);
 
 			if (m_EntityComponents.find(id) == m_EntityComponents.end())
-				m_EntityComponents.emplace(id, std::vector<std::type_index>());
+				m_EntityComponents.emplace(id, std::vector<size_t>());
 			m_EntityComponents[id].push_back(type);
 			
 			return component;
@@ -112,6 +123,11 @@ namespace AquaEngine
 			Add<T4>(id);
 		}
 
+		void* Get(EntityID id, size_t type)
+		{
+			return IsEmpty(id) ? nullptr : m_ComponentArrays[type].Get(id);
+		}
+
 		/// <summary>
 		/// Gets component from entity
 		/// </summary>
@@ -121,7 +137,7 @@ namespace AquaEngine
 		{
 			if (IsEmpty(id))
 				return nullptr;
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
 			return m_ComponentArrays[type].Get<T>(id);
 		}
 
@@ -129,7 +145,7 @@ namespace AquaEngine
 		/// Gets all components from entity
 		/// </summary>
 		/// <returns>All components, tuple of type and their data</returns>
-		AquaAPI std::vector<std::pair<std::type_index, void*>> Get(EntityID id);
+		AquaAPI std::vector<std::pair<size_t, void*>> Get(EntityID id);
 
 		/// <summary>
 		/// Gets all entities with component
@@ -138,7 +154,7 @@ namespace AquaEngine
 		template<typename T>
 		std::vector<T*> Get()
 		{
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
 			return m_ComponentArrays.find(type) == m_ComponentArrays.end() ?
 				std::vector<T*>() : m_ComponentArrays[type].Get<T>();
 		}
@@ -150,7 +166,7 @@ namespace AquaEngine
 		template<typename T>
 		std::vector<T*> Get(EntityID entities[], unsigned int entityCount)
 		{
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
 			std::vector<T*> components;
 			for (unsigned int i = 0; i < entityCount; i++)
 			{
@@ -197,7 +213,7 @@ namespace AquaEngine
 		template<typename T>
 		std::vector<EntityID> Entities()
 		{
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
 			return m_ComponentArrays.find(type) == m_ComponentArrays.end() ?
 				std::vector<EntityID>() : m_ComponentArrays[type].GetEntities();
 		}
@@ -205,11 +221,10 @@ namespace AquaEngine
 		AquaAPI bool IsEmpty(EntityID id);
 
 		template<typename T>
-		bool Has(EntityID id)
-		{
-			std::type_index type = typeid(T);
-			return m_ComponentArrays.find(type) != m_ComponentArrays.end() && m_ComponentArrays[type].Has(id);
-		}
+		bool Has(EntityID id) { return Has(id, typeid(T).hash_code()); }
+
+		bool Has(EntityID& id, size_t type);
+		bool Has(EntityID& id, std::type_info& type);
 
 		template<typename T1, typename T2>
 		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id); }
@@ -225,7 +240,7 @@ namespace AquaEngine
 		{
 			if (!Has<T>(id))
 				return;
-			std::type_index type = typeid(T);
+			size_t type = typeid(T).hash_code();
 			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
 				return;
 			
