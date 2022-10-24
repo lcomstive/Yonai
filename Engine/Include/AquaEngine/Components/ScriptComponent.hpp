@@ -8,6 +8,5 @@ namespace AquaEngine::Components
 	struct ScriptComponent : public Component
 	{
 		MonoType* Type = nullptr;
-		MonoObject* Instance = nullptr;
 	};
 }

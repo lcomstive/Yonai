@@ -24,7 +24,7 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 	return components;
 }
 
-bool ComponentManager::IsEmpty(EntityID id)
+bool ComponentManager::IsEmpty(EntityID& id)
 {
 	return m_EntityComponents.find(id) == m_EntityComponents.end() ||
 			m_EntityComponents[id].size() == 0;
@@ -49,6 +49,24 @@ void ComponentManager::Clear(EntityID id)
 		m_ComponentArrays[type].Remove(id);
 	}
 	m_EntityComponents[id].clear();
+}
+
+bool ComponentManager::Remove(EntityID& id, size_t type)
+{
+	if (!Has(id, type) || m_ComponentArrays.find(type) == m_ComponentArrays.end())
+		return false;
+
+	for (size_t i = 0; i < m_EntityComponents[id].size(); i++)
+	{
+		if (m_EntityComponents[id][i] == type)
+		{
+			m_EntityComponents[id].erase(m_EntityComponents[id].begin() + i);
+			break;
+		}
+	}
+
+	m_ComponentArrays[type].Remove(id);
+	return true;
 }
 
 #pragma region ComponentData

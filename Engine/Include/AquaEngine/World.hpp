@@ -199,16 +199,20 @@ namespace AquaEngine
 		std::vector<std::pair<T1*, T2*>> GetComponents() { return m_ComponentManager->Get<T1, T2>(); }
 
 		template<typename T>
-		T* AddComponent(EntityID entity)
+		T* AddComponent(EntityID id, size_t type)
 		{
-			if (HasComponent<T>(entity))
-				return GetComponent<T>(entity);
+			if (HasComponent<T>(id))
+				return GetComponent<T>(id);
 
-			T* component = m_ComponentManager->Add<T>(entity);
+			T* component = m_ComponentManager->Add<T>(id, type);
 			if (std::is_base_of<Components::Component, T>())
-				SetupEntityComponent(entity, (Components::Component*)component);
+				SetupEntityComponent(id, (Components::Component*)component);
 			return component;
 		}
+
+		template<typename T>
+		T* AddComponent(EntityID entity)
+		{ return AddComponent<T>(entity, typeid(T).hash_code()); }
 
 		template<typename T1, typename T2>
 		void AddComponent(EntityID entity)

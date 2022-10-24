@@ -74,11 +74,9 @@ namespace AquaEngine
 		/// </summary>
 		/// <returns>Created component</returns>
 		template<typename T>
-		T* Add(EntityID id)
+		T* Add(EntityID id, size_t type)
 		{
-			size_t type = typeid(T).hash_code();
 			T* component = new T();
-
 			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
 				m_ComponentArrays.emplace(type, ComponentData());
 			m_ComponentArrays[type].Add(component, id);
@@ -86,9 +84,16 @@ namespace AquaEngine
 			if (m_EntityComponents.find(id) == m_EntityComponents.end())
 				m_EntityComponents.emplace(id, std::vector<size_t>());
 			m_EntityComponents[id].push_back(type);
-			
+
 			return component;
 		}
+
+		/// <summary>
+		/// Create a component and add it to an entity
+		/// </summary>
+		/// <returns>Created component</returns>
+		template<typename T>
+		T* Add(EntityID id) { return Add<T>(id, typeid(T).hash_code()); }
 
 		/// <summary>
 		/// Creates components and adds them to an entity
@@ -218,43 +223,27 @@ namespace AquaEngine
 				std::vector<EntityID>() : m_ComponentArrays[type].GetEntities();
 		}
 
-		AquaAPI bool IsEmpty(EntityID id);
-
-		template<typename T>
-		bool Has(EntityID id) { return Has(id, typeid(T).hash_code()); }
+		AquaAPI bool IsEmpty(EntityID& id);
 
 		bool Has(EntityID& id, size_t type);
 		bool Has(EntityID& id, std::type_info& type);
 
+		template<typename T>
+		bool Has(EntityID& id) { return Has(id, typeid(T).hash_code()); }
+
 		template<typename T1, typename T2>
-		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id); }
+		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id); }
 
 		template<typename T1, typename T2, typename T3>
-		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id); }
+		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id); }
 
 		template<typename T1, typename T2, typename T3, typename T4>
-		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id) && Has<T4>(id); }
+		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id) && Has<T4>(id); }
+
+		bool Remove(EntityID& id, size_t type);
 
 		template<typename T>
-		void Remove(EntityID id)
-		{
-			if (!Has<T>(id))
-				return;
-			size_t type = typeid(T).hash_code();
-			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
-				return;
-			
-			for(unsigned int i = 0; i < (unsigned int)m_EntityComponents[id].size(); i++)
-			{
-				if(m_EntityComponents[id][i] == type)
-				{
-					m_EntityComponents[id].erase(m_EntityComponents[id].begin() + i);
-					break;
-				}
-			}
-			
-			m_ComponentArrays[type].Remove(id);
-		}
+		bool Remove(EntityID& id) { return Remove(id, typeid(T).hash_code()); }
 
 		AquaAPI void Clear(EntityID id);
 	};

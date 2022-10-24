@@ -1,11 +1,37 @@
 ﻿using System;
+using System.Diagnostics;
 using AquaEngine;
 
 namespace ScriptingTest
 {
+	public class TestComponent : Component
+	{
+		public Transform Target = null;
+		public float Speed = 1.0f;
+		public float Length = 0.5f;
+
+		public void Start()
+		{
+			Target = Entity.GetComponent<Transform>();
+			Log.Debug("Target found? " + (Target != null ? "Yes" : "No"));
+
+			Log.Debug($"Speed: {Speed}");
+			Log.Debug($"Length: {Length}");
+		}
+
+		public void Update()
+		{
+			if (Target == null)
+				return;
+
+			Target.Position = Vector3.Right * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
+			Target.Position -= Vector3.Forward;
+		}
+	}
+
 	public class HelloWorld
 	{
-		private Transform transform = null;
+		private TestComponent m_TestComponent;
 
 		public void Start()
 		{
@@ -41,16 +67,16 @@ namespace ScriptingTest
 			Log.Debug($"World loaded: '{world.Name}'");
 
 			Entity entity = world.GetEntity(0);
-			transform = entity.GetComponent<Transform>();
+			m_TestComponent = entity.AddComponent<TestComponent>();
+			if (m_TestComponent != null)
+			{
+				Log.Debug("Added test component");
+				m_TestComponent.Start();
+			}
+			else
+				Log.Error("TestComponent not created?");
 		}
 
-		public void Update()
-		{
-			if (transform == null)
-				return;
-
-			transform.Position = Vector3.Right * (float)Math.Sin(Time.TimeSinceLaunch);
-			transform.Position -= Vector3.Forward;
-		}
+		public void Update() => m_TestComponent?.Update();
 	}
 }

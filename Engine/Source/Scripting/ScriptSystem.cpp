@@ -13,8 +13,11 @@ using namespace AquaEngine::Scripting;
 const char* AssembliesPath = "/Assets/Scripts/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
-void ScriptSystem::Init()
+ScriptSystem::ScriptSystem()
 {
+	if (m_RootDomain)
+		return; // Already initialised
+
 	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
 	if (!VFS::Exists(assembliesPath))
 	{
@@ -35,31 +38,18 @@ void ScriptSystem::Init()
 	mono_domain_set(m_AppDomain, true);
 }
 
-void ScriptSystem::Destroy()
+ScriptSystem::~ScriptSystem()
 {
+	if (!m_RootDomain)
+		return; // Already destroyed
+
 	mono_jit_cleanup(m_RootDomain);
+
+	m_RootDomain = nullptr;
+	m_AppDomain = nullptr;
 }
 
-void PrintAssemblyTypes(MonoAssembly* assembly)
-{
-	MonoImage* image = mono_assembly_get_image(assembly);
-	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
-	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
-
-	spdlog::debug("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(assembly)));
-	for (int i = 0; i < typeCount; i++)
-	{
-		uint32_t columns[MONO_TYPEDEF_SIZE];
-		mono_metadata_decode_row(typeDefinitionsTable, i, columns, MONO_TYPEDEF_SIZE);
-
-		spdlog::debug("  {}.{}",
-			mono_metadata_string_heap(image, columns[MONO_TYPEDEF_NAMESPACE]),
-			mono_metadata_string_heap(image, columns[MONO_TYPEDEF_NAME])
-		);
-	}
-}
-
-unique_ptr<Assembly> ScriptSystem::LoadAssembly(const string& path)
+unique_ptr<Assembly> ScriptSystem::LoadAssembly(string& path)
 {
 	spdlog::debug("Loading C# script from '{}'", path);
 	auto data = IO::VFS::Read(path);
@@ -86,9 +76,6 @@ unique_ptr<Assembly> ScriptSystem::LoadAssembly(const string& path)
 		0	// Bool. Load in reflection mode
 	);
 	mono_image_close(image);
-
-	if(assembly)
-		PrintAssemblyTypes(assembly);
 
 	return make_unique<Assembly>(this, assembly);
 }

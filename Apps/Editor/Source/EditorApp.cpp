@@ -36,9 +36,6 @@ string CSharpCoreDLLPath = "core-dll-path";
 unique_ptr<Scripting::Class> ScriptClass;
 MonoMethod* UpdateMethod = nullptr;
 
-// Maps unmanaged component definitions to managed components
-namespace InternalCalls { extern void PostCoreAssemblyLoaded(unique_ptr<Scripting::Assembly>& assembly); }
-
 void EditorApp::Setup()
 {
 	WindowedApplication::Setup();
@@ -75,7 +72,7 @@ void EditorApp::Setup()
 		return;
 	}
 	unique_ptr<Assembly> coreAssembly = scriptSystem->LoadAssembly(VFS::GetAbsolutePath(coreDllPath));
-	InternalCalls::PostCoreAssemblyLoaded(coreAssembly);
+	coreAssembly->LoadScriptCoreTypes();
 
 	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
 	if (!assemblyPath.empty() || !VFS::Exists(assemblyPath))

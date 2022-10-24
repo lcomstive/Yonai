@@ -49,6 +49,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /s $(TargetDir)\*.dll $(SolutionDir)..\..\Assets\Scripts\</PostBuildEvent>
+    <PostBuildEvent>xcopy /s /y $(TargetDir)\*.dll $(SolutionDir)..\..\Assets\Scripts\</PostBuildEvent>
   </PropertyGroup>
 </Project>

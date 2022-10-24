@@ -7,10 +7,10 @@
 
 		public Component() => Log.Debug("Component constructor");
 
-		public void Initialise(uint worldID, uint entityID)
-		{
-			Log.Debug($"Initialised component [{worldID}.{entityID}]");
-			Entity = new Entity(World.Get(worldID), entityID);
-		}
+		private void Initialise(uint worldID, uint entityID) => Entity = new Entity(World.Get(worldID), entityID);
+
+		protected virtual void Start() { }
+		protected virtual void Update() { }
+		protected virtual void OnDestroy() { }
 	}
 }
