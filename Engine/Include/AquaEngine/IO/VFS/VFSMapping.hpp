@@ -13,7 +13,7 @@
 
 namespace AquaEngine::IO
 {
-	typedef std::function<void(std::string, FileWatchStatus)> VFSMappingCallback;
+	typedef std::function<void(const std::string&, FileWatchStatus)> VFSMappingCallback;
 
 	enum class FilePermissions : unsigned int
 	{

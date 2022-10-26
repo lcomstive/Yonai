@@ -7,11 +7,15 @@ namespace ScriptingTest
 	public class TestComponent : Component
 	{
 		public Transform Target = null;
-		public float Speed = 1.0f;
+		public float Speed = 2.0f;
 		public float Length = 0.5f;
 
-		public void Start()
+		TestComponent() => Log.Debug("TestComponent.Constructor");
+
+		protected override void Start()
 		{
+			Log.Debug("TestComponent.Start");
+
 			Target = Entity.GetComponent<Transform>();
 			Log.Debug("Target found? " + (Target != null ? "Yes" : "No"));
 
@@ -19,14 +23,18 @@ namespace ScriptingTest
 			Log.Debug($"Length: {Length}");
 		}
 
-		public void Update()
+		protected override void Update()
 		{
 			if (Target == null)
 				return;
 
-			Target.Position = Vector3.Right * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
+			Target.Position = Vector3.Up * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
 			Target.Position -= Vector3.Forward;
 		}
+
+		protected override void OnEnabled() => Log.Debug("TestComponent.OnEnabled");
+		protected override void OnDisabled() => Log.Debug("TestComponent.OnDisabled");
+		protected override void OnDestroyed() => Log.Debug("TestComponent.OnDestroyed");
 	}
 
 	public class HelloWorld
@@ -69,14 +77,9 @@ namespace ScriptingTest
 			Entity entity = world.GetEntity(0);
 			m_TestComponent = entity.AddComponent<TestComponent>();
 			if (m_TestComponent != null)
-			{
 				Log.Debug("Added test component");
-				m_TestComponent.Start();
-			}
 			else
 				Log.Error("TestComponent not created?");
 		}
-
-		public void Update() => m_TestComponent?.Update();
 	}
 }

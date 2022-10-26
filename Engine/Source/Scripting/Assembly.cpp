@@ -1,6 +1,6 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptSystem.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
@@ -13,7 +13,7 @@ using namespace AquaEngine::Scripting;
 unordered_map<MonoType*, size_t> Assembly::s_TypeHashes;
 unordered_map<size_t, Assembly::ManagedComponentData> Assembly::s_InternalManagedComponentTypes = {};
 
-Assembly::Assembly(ScriptSystem* owner, MonoAssembly* handle) : Owner(owner), Handle(handle), Image(mono_assembly_get_image(handle))
+Assembly::Assembly(ScriptEngine* owner, MonoAssembly* handle) : Owner(owner), Handle(handle), Image(mono_assembly_get_image(handle))
 {
 	HashTypes();
 	AddInternalCalls();
@@ -98,11 +98,12 @@ void Assembly::AddInternalCalls()
 
 void (*ComponentMethodStart)(MonoObject*, MonoException**) = nullptr;
 void (*ComponentMethodUpdate)(MonoObject*, MonoException**) = nullptr;
-void (*ComponentMethodOnDestroy)(MonoObject*, MonoException**) = nullptr;
+void (*ComponentMethodDestroy)(MonoObject*, MonoException**) = nullptr;
+void (*ComponentMethodEnable)(MonoObject*, bool, MonoException**) = nullptr;
 void (*ComponentMethodInitialise)(MonoObject*, unsigned int, unsigned int, MonoException**) = nullptr;
 
 #define AddComponentMethod(name) \
-	method = mono_class_get_method_from_name(component, #name, 0); \
+	method = mono_class_get_method_from_name(component, "_"#name, 0); \
 	if(ComponentMethod##name == nullptr && method) \
 		ComponentMethod##name = (void(*)(MonoObject*, MonoException**))mono_method_get_unmanaged_thunk(method);
 
@@ -117,7 +118,11 @@ void Assembly::LoadScriptCoreTypes()
 	if (ComponentMethodInitialise == nullptr && method)
 		ComponentMethodInitialise = (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method);
 
+	method = mono_class_get_method_from_name(component, "_Enable", 1);
+	if (ComponentMethodEnable == nullptr && method)
+		ComponentMethodEnable = (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method);
+
 	AddComponentMethod(Start)
 	AddComponentMethod(Update)
-	AddComponentMethod(OnDestroy)
+	AddComponentMethod(Destroy)
 }

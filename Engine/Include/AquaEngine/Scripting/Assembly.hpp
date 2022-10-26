@@ -2,13 +2,14 @@
 #include <memory>
 #include <functional>
 #include <unordered_map>
+#include <spdlog/spdlog.h>
 #include <mono/metadata/assembly.h>
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Components/Component.hpp>
 
 namespace AquaEngine::Scripting
 {
-	class ScriptSystem;
+	class ScriptEngine;
 
 	struct Assembly
 	{
@@ -25,15 +26,17 @@ namespace AquaEngine::Scripting
 		/// </summary>
 		static std::unordered_map<size_t, ManagedComponentData> s_InternalManagedComponentTypes;
 
-	public:
-		MonoImage* Image;
-		ScriptSystem* Owner;
-		MonoAssembly* Handle;
-
-		Assembly(ScriptSystem* owner, MonoAssembly* handle);
+		friend class AquaEngine::Scripting::ScriptEngine;
 
 		/// Maps AquaScriptCore managed to unmanaged components (e.g. Transform)
 		void LoadScriptCoreTypes();
+
+	public:
+		MonoImage* Image;
+		ScriptEngine* Owner;
+		MonoAssembly* Handle;
+
+		Assembly(ScriptEngine* owner, MonoAssembly* handle);
 
 		std::unique_ptr<Class> InstantiateClass(const char* namespaceName, const char* className);
 

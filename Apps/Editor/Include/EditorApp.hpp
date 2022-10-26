@@ -8,6 +8,7 @@
 #include <AquaEngine/Application.hpp>
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Graphics/RenderTexture.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
 
 namespace AquaEditor
@@ -16,6 +17,7 @@ namespace AquaEditor
 	{
 		std::string m_ProjectPath = "";
 		AquaEngine::Systems::RenderSystem* m_RenderSystem = nullptr;
+		AquaEngine::Scripting::ScriptEngine* m_ScriptEngine = nullptr;
 
 		AquaEngine::World* m_CurrentScene = nullptr;
 

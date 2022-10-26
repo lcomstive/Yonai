@@ -17,7 +17,6 @@
 // Scripting //
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptSystem.hpp>
 
 using namespace std;
 using namespace glm;
@@ -32,9 +31,6 @@ using namespace AquaEngine::Components;
 string ProjectPathArg = "ProjectPath";
 string CSharpDLLPath = "dll-path";
 string CSharpCoreDLLPath = "core-dll-path";
-
-unique_ptr<Scripting::Class> ScriptClass;
-MonoMethod* UpdateMethod = nullptr;
 
 void EditorApp::Setup()
 {
@@ -63,7 +59,6 @@ void EditorApp::Setup()
 	Add<ViewportView>();
 
 	// Scripting
-	ScriptSystem* scriptSystem = m_CurrentScene->GetSystemManager()->Add<ScriptSystem>();
 	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
 	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
 	{
@@ -71,24 +66,18 @@ void EditorApp::Setup()
 		Exit();
 		return;
 	}
-	unique_ptr<Assembly> coreAssembly = scriptSystem->LoadAssembly(VFS::GetAbsolutePath(coreDllPath));
-	coreAssembly->LoadScriptCoreTypes();
+	m_ScriptEngine = new ScriptEngine(coreDllPath);
 
 	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
 	if (!assemblyPath.empty() || !VFS::Exists(assemblyPath))
 	{
-		unique_ptr<Assembly> assembly = scriptSystem->LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
-
-		ScriptClass = assembly->InstantiateClass("ScriptingTest", "HelloWorld");
-		ScriptClass->Invoke("Start");
-
-		UpdateMethod = ScriptClass->GetMethod("Update");
-		if (!UpdateMethod)
-			spdlog::warn("ScriptingTest.HelloWorld::Update() not found");
+		m_ScriptEngine->LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
 	}
 	else
 	{
-		m_CurrentScene->GetSystemManager()->Remove<ScriptSystem>();
+		delete m_ScriptEngine;
+		m_ScriptEngine = nullptr;
+		
 		spdlog::warn("No C# DLL path found, scripting engine disabled");
 		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
 	}
@@ -105,12 +94,13 @@ void EditorApp::OnUpdate()
 	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
 
-	if (UpdateMethod)
-		ScriptClass->Invoke(UpdateMethod);
+	if(m_ScriptEngine->AwaitingReload())
+		m_ScriptEngine->Reload();
 }
 
 void EditorApp::LoadScene()
 {
+	
 	m_CurrentScene = new World("Test World");
 
 	// Add a camera
@@ -212,6 +202,9 @@ void EditorApp::DrawUI()
 			// Disabling fullscreen would allow the window to be moved to the front of other windows, 
 			// which we can't undo at the moment without finer window depth/z control.
 			//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
+
+			if(ImGui::MenuItem("Reload Scripts"))
+				m_ScriptEngine->Reload(true);
 
 			if (ImGui::MenuItem("Exit")) Exit();
 			ImGui::EndMenu();

@@ -13,7 +13,8 @@ using namespace AquaEngine::Scripting;
 extern void (*ComponentMethodInitialise)(MonoObject*, unsigned int, unsigned int, MonoException**);
 extern void (*ComponentMethodStart)(MonoObject*, MonoException**);
 extern void (*ComponentMethodUpdate)(MonoObject*, MonoException**);
-extern void (*ComponentMethodOnDestroy)(MonoObject*, MonoException**);
+extern void (*ComponentMethodDestroy)(MonoObject*, MonoException**);
+extern void (*ComponentMethodEnable)(MonoObject*, bool, MonoException**);
 
 #pragma region World
 bool WorldGet(unsigned int worldID, MonoString** outName)
@@ -128,6 +129,10 @@ MonoObject* EntityAddComponent(unsigned int worldID, unsigned int entityID, Mono
 	// Call constructor
 	mono_runtime_object_init(unmanagedInstance->ManagedInstance);
 
+	// Call OnEnabled() and then Start()
+	ComponentMethodEnable(unmanagedInstance->ManagedInstance, true, &exception);
+	ComponentMethodStart(unmanagedInstance->ManagedInstance, &exception);
+
 	return unmanagedInstance->ManagedInstance;
 }
 
@@ -141,8 +146,10 @@ bool EntityRemoveComponent(unsigned int worldID, unsigned int entityID, MonoRefl
 	Components::Component* component = (Components::Component*)world->GetComponentManager()->Get(entityID, type);
 	if (component && component->ManagedInstance)
 	{
+		// Call OnDisabled() and then OnDestroyed()
 		MonoException* exception = nullptr;
-		ComponentMethodOnDestroy(component->ManagedInstance, &exception);
+		ComponentMethodEnable(component->ManagedInstance, false, &exception);
+		ComponentMethodDestroy(component->ManagedInstance, &exception);
 	}
 
 	return world->GetComponentManager()->Remove(entityID, type);
@@ -174,28 +181,6 @@ MonoObject* EntityGetComponent(unsigned int worldID, unsigned int entityID, Mono
 	return instance->ManagedInstance;
 }
 #pragma endregion
-/// <summary>
-/// Maps an unmanaged (C++) component type to a managed (C#) component
-/// </summary>
-template<typename T>
-void AddInternalManagedComponent(char* managedNamespace, char* managedName, MonoImage* image)
-{
-	MonoClass* klass = mono_class_from_name(image, managedNamespace, managedName);
-	if (!klass)
-	{
-		spdlog::warn("Failed to add internal managed component definition for '{}' - not found in assembly '{}'", managedName, mono_image_get_name(image));
-		return;
-	}
-
-	s_InternalManagedComponentTypes.emplace(
-		Assembly::GetTypeHash(mono_class_get_type(klass)),
-		ManagedComponentData
-		{
-			typeid(T).hash_code(),
-			[](World* world, EntityID entityID) -> Components::Component* { return world->AddComponent<T>(entityID); }
-		}
-	);
-}
 
 void AquaEngine::Scripting::Assembly::AddWorldInternalCalls()
 {
