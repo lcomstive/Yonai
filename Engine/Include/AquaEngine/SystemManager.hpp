@@ -68,6 +68,6 @@ namespace AquaEngine
 		AquaAPI std::vector<Systems::System*> All();
 
 	private:
-		AquaAPI std::unordered_map<std::type_index, Systems::System*> m_Systems = {};
+		std::unordered_map<std::type_index, Systems::System*> m_Systems = {};
 	};
 }

@@ -48,7 +48,14 @@
     <Compile Include="Class1.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>cp $(TargetDir)\*.dll $(SolutionDir)..\..\Assets\Scripts\</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="CopyFiles" AfterTargets="Build">
+	<ItemGroup>
+		<CopySourceFiles Include="$(TargetDir)\*.dll" />
+	</ItemGroup>
+	<Copy
+		SourceFiles="@(CopySourceFiles)"
+		DestinationFolder="$(SolutionDir)..\..\Assets\Scripts\"
+	/>
+	<Message Text="Copied build output to shared Assets/Scripts directory" Importance="High" />
+  </Target>
 </Project>

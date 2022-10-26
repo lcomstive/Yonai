@@ -114,13 +114,13 @@ void Assembly::LoadScriptCoreTypes()
 
 	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");
 
+	// Component.Initialise
 	MonoMethod* method = mono_class_get_method_from_name(component, "Initialise", 2);
-	if (ComponentMethodInitialise == nullptr && method)
-		ComponentMethodInitialise = (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method);
+	ComponentMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+
 
 	method = mono_class_get_method_from_name(component, "_Enable", 1);
-	if (ComponentMethodEnable == nullptr && method)
-		ComponentMethodEnable = (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method);
+	ComponentMethodEnable = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddComponentMethod(Start)
 	AddComponentMethod(Update)

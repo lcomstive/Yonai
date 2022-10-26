@@ -162,5 +162,5 @@ void ScriptEngine::Reload(bool force)
 	}
 
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
-}
 #endif
+}

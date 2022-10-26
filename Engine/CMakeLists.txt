@@ -49,17 +49,3 @@ endif()
 if(AQUA_ENGINE_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
-
-if(WIN32)
-	set(SGEN_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/")
-else()
-	set(SGEN_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/")
-endif()
-
-# Copy mono runtime libraries to binary output folder
-# add_custom_command(
-# 	TARGET ${PROJECT_NAME} POST_BUILD
-# 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-# 			${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/lib/4.5
-# 			${SGEN_OUTPUT_DIR}/mono
-# )

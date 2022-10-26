@@ -13,7 +13,7 @@ namespace AquaEngine::Systems
 
 		friend class AquaEngine::SystemManager;
 
-	public:
+	protected:
 #pragma region Virtual Functions
 		AquaAPI virtual void Init() { }
 		AquaAPI virtual void Update() { }
@@ -24,6 +24,7 @@ namespace AquaEngine::Systems
 		AquaAPI virtual void OnDisabled() { }
 #pragma endregion
 
+	public:
 		AquaAPI bool IsEnabled();
 
 		AquaAPI void ToggleEnabled();

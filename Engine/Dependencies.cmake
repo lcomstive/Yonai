@@ -10,7 +10,6 @@ if(UNIX)
 	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS Threads::Threads pthread)
 endif()
 
-
 # OpenGL
 find_package(OpenGL REQUIRED)
 

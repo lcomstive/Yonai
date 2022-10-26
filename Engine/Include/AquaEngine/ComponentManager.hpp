@@ -32,15 +32,15 @@ namespace AquaEngine
 			/// <summary>
 			/// Release all instances
 			/// </summary>
-			void Destroy();
+			AquaAPI void Destroy();
 
 			/// <returns>True if entity has an instance</returns>
-			bool Has(EntityID entity);
+			AquaAPI bool Has(EntityID entity);
 
-			void Remove(EntityID entity);
-			std::vector<EntityID> GetEntities();
-			void* Get(EntityID entity);
-			void Add(void* instance, EntityID entity);
+			AquaAPI void* Get(EntityID entity);
+			AquaAPI void Remove(EntityID entity);
+			AquaAPI std::vector<EntityID> GetEntities();
+			AquaAPI void Add(void* instance, EntityID entity);
 
 			template<typename T>
 			T* Get(EntityID entity) { return (T*)(Has(entity) ? Instances[EntityIndex[entity]] : nullptr); }
@@ -225,8 +225,8 @@ namespace AquaEngine
 
 		AquaAPI bool IsEmpty(EntityID& id);
 
-		bool Has(EntityID& id, size_t type);
-		bool Has(EntityID& id, std::type_info& type);
+		AquaAPI bool Has(EntityID& id, size_t type);
+		AquaAPI bool Has(EntityID& id, std::type_info& type);
 
 		template<typename T>
 		bool Has(EntityID& id) { return Has(id, typeid(T).hash_code()); }
@@ -240,7 +240,7 @@ namespace AquaEngine
 		template<typename T1, typename T2, typename T3, typename T4>
 		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id) && Has<T4>(id); }
 
-		bool Remove(EntityID& id, size_t type);
+		AquaAPI bool Remove(EntityID& id, size_t type);
 
 		template<typename T>
 		bool Remove(EntityID& id) { return Remove(id, typeid(T).hash_code()); }
