@@ -30,8 +30,15 @@ void World::Name(string& name) { m_Name = name; }
 void World::Destroy()
 {
 	m_ComponentManager->Destroy();
+	m_ComponentManager = nullptr;
 
 	s_Worlds.erase(m_ID);
+}
+
+void World::Update()
+{
+	m_SystemManager->Update();
+	m_ComponentManager->CallUpdateFn();
 }
 
 void World::PrepareEntities(unsigned int count) { m_EntityManager->Prepare(count); }
@@ -74,6 +81,12 @@ void World::DestroyEntity(EntityID entity)
 void* World::GetComponent(EntityID entity, size_t type)
 {
 	return m_ComponentManager->Get(entity, type);
+}
+
+void World::OnActiveStateChanged(bool isActive)
+{
+	spdlog::debug("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
+	m_ComponentManager->OnWorldActiveStateChanged(isActive);
 }
 
 ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType) { return m_ComponentManager->Add(entity, managedType); }

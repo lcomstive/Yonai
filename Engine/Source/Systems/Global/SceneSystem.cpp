@@ -22,8 +22,8 @@ void SceneSystem::Destroy()
 void SceneSystem::Update()
 {
 	auto scenes = GetActiveScenes();
-	for(auto& scene : scenes)
-		scene->GetSystemManager()->Update();
+	for (auto& scene : scenes)
+		scene->Update();
 }
 
 void SceneSystem::Draw()
@@ -42,6 +42,7 @@ void SceneSystem::LoadScene(World* scene)
 void SceneSystem::AddScene(World* scene)
 {
 	m_ActiveScenes.emplace_back(scene);
+	scene->OnActiveStateChanged(true);
 	for (auto& callback : m_SceneCallbacks)
 		callback(scene, true);
 }
@@ -70,6 +71,8 @@ void SceneSystem::UnloadScene(int index)
 		return;
 
 	index = clamp(index, 0, (int)m_ActiveScenes.size());
+
+	m_ActiveScenes[index]->OnActiveStateChanged(false);
 
 	for (auto& callback : m_SceneCallbacks)
 		callback(m_ActiveScenes[index], false);

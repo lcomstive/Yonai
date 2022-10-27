@@ -1,5 +1,6 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Timer.hpp>
+#include <AquaEngine/World.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/assembly.h>
 #include <AquaEngine/SystemManager.hpp>
@@ -155,6 +156,9 @@ void ScriptEngine::Reload(bool force)
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	vector<World*> worlds = sceneSystem->GetActiveScenes();
+	sceneSystem->UnloadAllScenes();
+	for (World* world : worlds)
+		world->GetComponentManager()->InvalidateAllManagedInstances();
 
 	// Release resources
 	mono_domain_set(mono_get_root_domain(), false);
@@ -163,6 +167,7 @@ void ScriptEngine::Reload(bool force)
 	for(Assembly* instance : s_Assemblies)
 		delete instance;
 	s_Assemblies.clear();
+	Assembly::ClearCachedTypes();
 
 	// Restart mono
 	s_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
@@ -181,6 +186,9 @@ void ScriptEngine::Reload(bool force)
 		VFS::GetMapping(assemblyPath)->Unwatch(assemblyPath);
 		LoadAssembly(assemblyPath);
 	}
+
+	for(World* world : worlds)
+		sceneSystem->LoadScene(world);
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());

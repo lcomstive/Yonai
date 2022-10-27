@@ -45,17 +45,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="TestComponent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="CopyFiles" AfterTargets="Build">
-	<ItemGroup>
-		<CopySourceFiles Include="$(TargetDir)\*.dll" />
-	</ItemGroup>
-	<Copy
-		SourceFiles="@(CopySourceFiles)"
-		DestinationFolder="$(SolutionDir)..\..\Assets\Scripts\"
-	/>
-	<Message Text="Copied build output to shared Assets/Scripts directory" Importance="High" />
+    <ItemGroup>
+      <CopySourceFiles Include="$(TargetDir)\*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CopySourceFiles)" DestinationFolder="$(SolutionDir)..\..\Assets\Scripts\" />
+    <Message Text="Copied build output to shared Assets/Scripts directory" Importance="High" />
   </Target>
 </Project>

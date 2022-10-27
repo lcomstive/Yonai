@@ -17,17 +17,17 @@ unordered_map<size_t, MonoType*> Assembly::s_ReverseTypeHashes = {};
 unordered_map<size_t, Assembly::ManagedComponentData> Assembly::s_InternalManagedComponentTypes = {};
 
 // Unmanaged thunks definition
-ComponentMethodStartFn ComponentMethodStart = nullptr;
-ComponentMethodUpdateFn ComponentMethodUpdate = nullptr;
+EmptyMethodFn ComponentMethodStart = nullptr;
+EmptyMethodFn ComponentMethodUpdate = nullptr;
+EmptyMethodFn ComponentMethodDestroyed = nullptr;
 ComponentMethodEnabledFn ComponentMethodEnabled = nullptr;
-ComponentMethodDestroyedFn ComponentMethodDestroyed = nullptr;
 ComponentMethodInitialiseFn ComponentMethodInitialise = nullptr;
 
-SystemMethodDrawFn SystemMethodDraw = nullptr;
-SystemMethodStartFn SystemMethodStart = nullptr;
-SystemMethodUpdateFn SystemMethodUpdate = nullptr;
+EmptyMethodFn SystemMethodDraw = nullptr;
+EmptyMethodFn SystemMethodStart = nullptr;
+EmptyMethodFn SystemMethodUpdate = nullptr;
+EmptyMethodFn SystemMethodDestroyed = nullptr;
 SystemMethodEnabledFn SystemMethodEnabled = nullptr;
-SystemMethodDestroyedFn SystemMethodDestroyed = nullptr;
 SystemMethodInitialiseFn SystemMethodInitialise = nullptr;
 
 Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), Image(mono_assembly_get_image(handle))
@@ -94,6 +94,12 @@ Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanage
 	return it == s_InternalManagedComponentTypes.end() ? Assembly::ManagedComponentData{ unmanagedType } : it->second;
 }
 
+void Assembly::ClearCachedTypes()
+{
+	s_TypeHashes.clear();
+	s_ReverseTypeHashes.clear();
+}
+
 void Assembly::CacheTypes(bool isCore)
 {
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
@@ -151,13 +157,11 @@ void Assembly::AddInternalCalls()
 
 #define AddComponentMethod(name) \
 	method = mono_class_get_method_from_name(component, #name, 0); \
-	if(ComponentMethod##name == nullptr && method) \
-		ComponentMethod##name = (void(*)(MonoObject*, MonoException**))mono_method_get_unmanaged_thunk(method);
+	ComponentMethod##name = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 #define AddSystemMethod(name) \
 	method = mono_class_get_method_from_name(system, #name, 0); \
-	if(SystemMethod##name == nullptr && method) \
-		SystemMethod##name = (void(*)(MonoObject*, MonoException**))mono_method_get_unmanaged_thunk(method);
+	SystemMethod##name = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 void Assembly::LoadScriptCoreTypes()
 {
@@ -169,12 +173,11 @@ void Assembly::LoadScriptCoreTypes()
 
 	// Component.Initialise
 	MonoMethod* method = mono_class_get_method_from_name(component, "aqua_Initialise", 2);
-	void* thunk = mono_method_get_unmanaged_thunk(method);
 	ComponentMethodInitialise = (ComponentMethodInitialiseFn)mono_method_get_unmanaged_thunk(method);
 
 	// Component._Enable
 	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
-	ComponentMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	ComponentMethodEnabled = method ? (ComponentMethodEnabledFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddComponentMethod(Start)
 	AddComponentMethod(Update)

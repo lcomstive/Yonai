@@ -6,8 +6,8 @@ namespace ScriptingTest
 	public class TestComponent : Component
 	{
 		public Transform Target = null;
-		public float Speed = 2.0f;
-		public float Length = 0.5f;
+		public float Speed = 1.0f;
+		public float Length = 0.25f;
 
 		TestComponent() => Log.Debug("TestComponent.Constructor");
 
@@ -27,7 +27,7 @@ namespace ScriptingTest
 			if (Target == null)
 				return;
 
-			Target.Position = Vector3.Up * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
+			Target.Position = Vector3.Right * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
 			Target.Position -= Vector3.Forward;
 		}
 

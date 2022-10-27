@@ -11,10 +11,10 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 
-extern ComponentMethodStartFn ComponentMethodStart;
-extern ComponentMethodUpdateFn ComponentMethodUpdate;
+extern EmptyMethodFn ComponentMethodStart;
+extern EmptyMethodFn ComponentMethodUpdate;
+extern EmptyMethodFn ComponentMethodDestroyed;
 extern ComponentMethodEnabledFn ComponentMethodEnabled;
-extern ComponentMethodDestroyedFn ComponentMethodDestroyed;
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
 #pragma region World

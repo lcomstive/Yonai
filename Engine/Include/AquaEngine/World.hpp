@@ -9,6 +9,8 @@
 
 namespace AquaEngine
 {
+	// Forward declarations
+	namespace Systems { class SceneSystem;  }
 	namespace Components { struct Component; struct ScriptComponent; }
 
 	class World
@@ -23,6 +25,14 @@ namespace AquaEngine
 		static std::unordered_map<unsigned int, World*> s_Worlds;
 
 		AquaAPI void SetupEntityComponent(EntityID id, Components::Component* component);
+
+		// When this world is added or removed from active scenes
+		void OnActiveStateChanged(bool isActive);
+
+		// Called once per frame
+		void Update();
+
+		friend class Systems::SceneSystem;
 
 	public:
 		struct Entity

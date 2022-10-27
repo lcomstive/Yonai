@@ -79,6 +79,10 @@ namespace AquaEngine::Scripting
 		void CacheTypes(bool isCore);
 		void AddInternalCalls();
 
+		// Clears s_TypeHashes & s_ReverseTypeHashes.
+		// Intended to be used when reloading assemblies
+		static void ClearCachedTypes();
+
 #pragma region Internal Calls
 		void AddLogInternalCalls();
 		void AddTimeInternalCalls();

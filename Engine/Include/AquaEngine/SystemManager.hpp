@@ -21,7 +21,10 @@ namespace AquaEngine
 
 		AquaAPI void Init();
 		AquaAPI void Destroy();
-		
+
+		AquaAPI void Draw();
+		AquaAPI void Update();
+
 		AquaAPI World* GetWorld();
 		AquaAPI static SystemManager* Global();
 
@@ -61,9 +64,6 @@ namespace AquaEngine
 				return nullptr;
 			return (T*)m_Systems[typeid(T)];
 		}
-
-		AquaAPI void Draw();
-		AquaAPI void Update();
 
 		AquaAPI std::vector<Systems::System*> All();
 

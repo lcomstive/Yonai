@@ -126,9 +126,8 @@ void EditorApp::LoadScene()
 		spdlog::error("Could not find type matching 'ScriptingTest.TestComponent'");
 
 	// Add scene to active scenes
-	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
-	sceneSystem->UnloadAllScenes();
-	sceneSystem->AddScene(m_CurrentScene);
+	SceneSystem::UnloadAllScenes();
+	SceneSystem::AddScene(m_CurrentScene);
 }
 
 void EditorApp::InitialiseScripting()

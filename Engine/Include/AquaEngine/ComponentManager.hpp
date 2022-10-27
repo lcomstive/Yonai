@@ -12,6 +12,8 @@
 namespace AquaEngine
 {	
 	// Forward declaration
+	class World;
+	namespace Scripting { class ScriptEngine; }
 	namespace Components { struct Component; struct ScriptComponent; }
 
 	/// <summary>
@@ -25,10 +27,7 @@ namespace AquaEngine
 		/// </summary>
 		struct ComponentData
 		{
-			/// <summary>
-			/// ID of the world that components are added inside
-			/// </summary>
-			unsigned int WorldID = InvalidEntityID;
+			ComponentManager* Owner = nullptr;
 
 			/// <summary>
 			/// Hash of type that all instances share
@@ -88,8 +87,23 @@ namespace AquaEngine
 
 		AquaAPI unsigned int m_WorldID;
 
+		bool m_WorldIsActive = false;
 		std::unordered_map<size_t, ComponentData> m_ComponentArrays;
 		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
+		
+		void OnWorldActiveStateChanged(bool isActive);
+		MonoObject* CreateManagedInstance(size_t typeHash, unsigned int entityID);
+
+		/// <summary>
+		/// Releases all 'Component::ManagedInstance's,
+		/// so the next time they are accessed they are regenerated
+		/// </summary>
+		void InvalidateAllManagedInstances();
+
+		void CallUpdateFn();
+
+		friend class World;
+		friend class Scripting::ScriptEngine;
 
 	public:
 		AquaAPI ComponentManager(unsigned int worldID);
@@ -115,7 +129,7 @@ namespace AquaEngine
 
 			T* component = new T();
 			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
-				m_ComponentArrays.emplace(type, ComponentData { m_WorldID, type });
+				m_ComponentArrays.emplace(type, ComponentData { this, type });
 			m_ComponentArrays[type].Add((Components::Component*)component, id);
 
 			if (m_EntityComponents.find(id) == m_EntityComponents.end())

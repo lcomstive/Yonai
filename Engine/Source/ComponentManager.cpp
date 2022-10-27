@@ -11,10 +11,10 @@ using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
-extern ComponentMethodStartFn ComponentMethodStart;
-extern ComponentMethodUpdateFn ComponentMethodUpdate;
+extern EmptyMethodFn ComponentMethodStart;
+extern EmptyMethodFn ComponentMethodUpdate;
+extern EmptyMethodFn ComponentMethodDestroyed;
 extern ComponentMethodEnabledFn ComponentMethodEnabled;
-extern ComponentMethodDestroyedFn ComponentMethodDestroyed;
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
 ComponentManager::ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
@@ -36,6 +36,24 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 		components.emplace_back(type, m_ComponentArrays[type].Get(id));
 
 	return components;
+}
+
+ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
+{
+	ScriptComponent* component = new ScriptComponent();
+	size_t typeHash = Scripting::Assembly::GetTypeHash(managedType);
+	if (m_ComponentArrays.find(typeHash) == m_ComponentArrays.end())
+		m_ComponentArrays.emplace(typeHash, ComponentData{ this, typeHash });
+	m_ComponentArrays[typeHash].Add(component, id);
+
+	if (m_EntityComponents.find(id) == m_EntityComponents.end())
+		m_EntityComponents.emplace(id, std::vector<size_t>());
+	m_EntityComponents[id].push_back(typeHash);
+
+	// Set managed type in component
+	component->Type = managedType;
+
+	return component;
 }
 
 bool ComponentManager::IsEmpty(EntityID& id)
@@ -85,6 +103,72 @@ bool ComponentManager::Remove(EntityID& id, size_t type)
 	return true;
 }
 
+void ComponentManager::OnWorldActiveStateChanged(bool isActive)
+{
+	m_WorldIsActive = isActive;
+
+	MonoException* exception = nullptr;
+	// Call all components' Enabled/Disabled and Start functions
+	for (auto componentPair : m_ComponentArrays)
+	{
+		for (Component* instance : componentPair.second.Instances)
+		{
+			if (!instance->ManagedInstance)
+				instance->ManagedInstance = CreateManagedInstance(componentPair.first, instance->Entity.ID());
+			if (!instance->ManagedInstance)
+				continue;
+
+			ComponentMethodEnabled(instance->ManagedInstance, m_WorldIsActive, &exception);
+			if (m_WorldIsActive)
+				ComponentMethodStart(instance->ManagedInstance, &exception);
+			else
+				ComponentMethodDestroyed(instance->ManagedInstance, &exception);
+		}
+	}
+}
+
+void ComponentManager::InvalidateAllManagedInstances()
+{
+	for (auto componentPair : m_ComponentArrays)
+	{
+		for (Component* instance : componentPair.second.Instances)
+		{
+			// mono_free(instance->ManagedInstance); // <-- Causes exception. TODO: Find way to delete or force GC on managed instances
+			instance->ManagedInstance = nullptr;
+		}
+	}
+}
+
+MonoObject* ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
+{
+	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
+	if (!managedType)
+		return nullptr;
+
+	// Create managed (C#) instance
+	MonoObject* instance = mono_object_new(mono_domain_get(), mono_class_from_mono_type(managedType));
+
+	// Initialise component
+	MonoException* exception = nullptr;
+	unsigned int params[2] = { m_WorldID, entityID };
+	ComponentMethodInitialise(instance, m_WorldID, entityID, &exception);
+
+	// Call constructor
+	mono_runtime_object_init(instance);
+
+	return instance;
+}
+
+void ComponentManager::CallUpdateFn()
+{
+	MonoException* exception = nullptr;
+	// Call all components' Update function
+	for (auto componentPair : m_ComponentArrays)
+		for (Component* instance : componentPair.second.Instances)
+			if(instance->ManagedInstance)
+				ComponentMethodUpdate(instance->ManagedInstance, &exception);
+}
+
 #pragma region ComponentData
 void ComponentManager::ComponentData::Destroy()
 {
@@ -103,42 +187,18 @@ void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 	if (!ScriptEngine::IsLoaded())
 		return;
 
-	MonoType* managedType = ScriptEngine::GetTypeFromHash(TypeHash);
-	if (managedType)
+	// Create managed (C#) instance
+	instance->ManagedInstance = Owner->CreateManagedInstance(TypeHash, entity);
+	if (!instance->ManagedInstance)
+		return;
+
+	// If world is active, call Enabled and then Start
+	MonoException* exception = nullptr;
+	if (Owner->m_WorldIsActive)
 	{
-		// Create managed (C#) instance
-		instance->ManagedInstance = mono_object_new(mono_domain_get(), mono_class_from_mono_type(managedType));
-
-		// Call initialise method, setting entity & world IDs in the component
-		MonoException* exception = nullptr;
-		unsigned int params[2] = { WorldID, entity };
-		ComponentMethodInitialise(instance->ManagedInstance, WorldID, entity, &exception);
-
-		// Call constructor
-		mono_runtime_object_init(instance->ManagedInstance);
-
-		// Call OnEnabled() and then Start()
 		ComponentMethodEnabled(instance->ManagedInstance, true, &exception);
 		ComponentMethodStart(instance->ManagedInstance, &exception);
 	}
-}
-
-ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
-{
-	ScriptComponent* component = new ScriptComponent();
-	size_t typeHash = Scripting::Assembly::GetTypeHash(managedType);
-	if (m_ComponentArrays.find(typeHash) == m_ComponentArrays.end())
-		m_ComponentArrays.emplace(typeHash, ComponentData{ m_WorldID, typeHash });
-	m_ComponentArrays[typeHash].Add(component, id);
-
-	if (m_EntityComponents.find(id) == m_EntityComponents.end())
-		m_EntityComponents.emplace(id, std::vector<size_t>());
-	m_EntityComponents[id].push_back(typeHash);
-
-	// Set managed type in component
-	component->Type = managedType;
-
-	return component;
 }
 
 Component* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }

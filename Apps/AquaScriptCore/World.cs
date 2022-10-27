@@ -28,8 +28,6 @@ namespace AquaEngine
 				s_Instances.Add(ID, this);
 		}
 
-		~World() => Destroy();
-
 		/// <summary>
 		/// Removes this world and releases all associated resources
 		/// </summary>
