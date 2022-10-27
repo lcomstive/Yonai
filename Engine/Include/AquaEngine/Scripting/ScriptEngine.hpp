@@ -17,8 +17,14 @@ namespace AquaEngine::Scripting
 		static Assembly* s_CoreAssembly;
 		static std::vector<Assembly*> s_Assemblies;
 
+		struct AssemblyPath
+		{
+			std::string Path;
+			bool WatchForChanges;
+		};
+
 		// Paths to all loaded assemblies
-		static std::vector<std::string> s_AssemblyPaths;
+		static std::vector<AssemblyPath> s_AssemblyPaths;
 
 		// Callback 
 		static void OnAssemblyFileChanged(const std::string& path, IO::FileWatchStatus status);
@@ -30,7 +36,7 @@ namespace AquaEngine::Scripting
 		/// Loads an assembly from disk
 		/// </summary>
 		/// <returns>Assembly from disk, located at <paramref name="path"/></returns>
-		static Assembly* LoadAssembly(std::string& path, bool watch);
+		static Assembly* LoadAssembly(std::string& path, bool isCoreAssembly, bool shouldWatch);
 
 	public:
 		/// <summary>
@@ -52,7 +58,15 @@ namespace AquaEngine::Scripting
 		/// Loads an assembly from disk
 		/// </summary>
 		/// <returns>Assembly from disk, located at <paramref name="path"/></returns>
-		AquaAPI static Assembly* LoadAssembly(std::string path);
+		AquaAPI static Assembly* LoadAssembly(std::string path, bool shouldWatch =
+#ifndef NDEBUG
+			// Debug mode, watch files by default
+			true
+#else
+			// Release mode, don't watch files by default
+			false
+#endif
+		);
 
 		/// <returns>All assemblies currently loaded</summary>
 		AquaAPI static std::vector<Assembly*>& GetAssemblies();

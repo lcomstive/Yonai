@@ -1,4 +1,6 @@
-﻿namespace AquaEngine
+﻿using System;
+
+namespace AquaEngine
 {
 	public abstract class Component
 	{

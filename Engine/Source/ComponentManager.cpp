@@ -111,10 +111,12 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 	// Call all components' Enabled/Disabled and Start functions
 	for (auto componentPair : m_ComponentArrays)
 	{
-		for (Component* instance : componentPair.second.Instances)
+		auto entities = componentPair.second.GetEntities();
+		for (auto entityPair : componentPair.second.EntityIndex)
 		{
+			Component* instance = componentPair.second.Instances[entityPair.second];
 			if (!instance->ManagedInstance)
-				instance->ManagedInstance = CreateManagedInstance(componentPair.first, instance->Entity.ID());
+				instance->ManagedInstance = CreateManagedInstance(componentPair.first, entityPair.first);
 			if (!instance->ManagedInstance)
 				continue;
 

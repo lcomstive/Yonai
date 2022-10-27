@@ -6,8 +6,8 @@ namespace ScriptingTest
 	public class TestComponent : Component
 	{
 		public Transform Target = null;
-		public float Speed = 1.0f;
-		public float Length = 0.25f;
+		public float Speed = 2.5f;
+		public float Length = 0.5f;
 
 		TestComponent() => Log.Debug("TestComponent.Constructor");
 
@@ -16,7 +16,6 @@ namespace ScriptingTest
 			Log.Debug("TestComponent.Start");
 
 			Target = Entity.GetComponent<Transform>();
-			Log.Debug("Target found? " + (Target != null ? "Yes" : "No"));
 
 			Log.Debug($"Speed: {Speed}");
 			Log.Debug($"Length: {Length}");
@@ -27,8 +26,10 @@ namespace ScriptingTest
 			if (Target == null)
 				return;
 
-			Target.Position = Vector3.Right * (float)Math.Sin(Time.TimeSinceLaunch * Speed) * Length;
-			Target.Position -= Vector3.Forward;
+			float scale = (float)Math.Cos(Time.TimeSinceLaunch * Speed + Target.Position.x + Target.Position.y);
+			scale = (scale / 2.0f) + 0.5f;
+			scale *= Length;
+			Target.Scale = new Vector3(scale);
 		}
 
 		protected override void Enabled() => Log.Debug("TestComponent.OnEnabled");

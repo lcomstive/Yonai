@@ -24,9 +24,7 @@ Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
 vector<Assembly*> ScriptEngine::s_Assemblies = {};
 
-#ifndef NDEBUG
-vector<string> ScriptEngine::s_AssemblyPaths = {};
-#endif
+vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
 void ScriptEngine::Init(std::string& coreDllPath)
 {
@@ -68,9 +66,9 @@ void ScriptEngine::Destroy()
 
 Assembly* ScriptEngine::GetCoreAssembly() { return s_CoreAssembly; }
 vector<Assembly*>& ScriptEngine::GetAssemblies() { return s_Assemblies; }
-Assembly* ScriptEngine::LoadAssembly(string path) { return LoadAssembly(path, false); }
+Assembly* ScriptEngine::LoadAssembly(string path, bool shouldWatch) { return LoadAssembly(path, false, shouldWatch); }
 
-Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly)
+Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool shouldWatch)
 {
 	if(path.empty())
 		return nullptr;
@@ -88,15 +86,14 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly)
 		return nullptr;
 	}
 
-	#ifndef NDEBUG
-	if(!isCoreAssembly)
+	if(!isCoreAssembly && shouldWatch)
 	{
-		// Debug mode, watch files and reload if any changes occur
-		s_AssemblyPaths.push_back(path);
+		s_AssemblyPaths.push_back({ path, shouldWatch });
 
-		IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
+		// Watch files and reload if any changes occur
+		if(shouldWatch)
+			IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
 	}
-	#endif
 
 	MonoImageOpenStatus status;
 	MonoImage* image = mono_image_open_from_data_full(
@@ -128,7 +125,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly)
 
 void ScriptEngine::LoadCoreAssembly()
 {
-	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true);
+	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true, false);
 	if(s_CoreAssembly)
 		s_CoreAssembly->LoadScriptCoreTypes();
 }
@@ -173,18 +170,19 @@ void ScriptEngine::Reload(bool force)
 	s_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
 	mono_domain_set(s_AppDomain, true);
 
-	std::vector<string> assemblyPaths = s_AssemblyPaths;
+	std::vector<AssemblyPath> assemblyPaths = s_AssemblyPaths;
 	s_AssemblyPaths.clear();
 
 	// Load AquaScriptCore assembly
 	LoadCoreAssembly();
 
 	// Load all previously loaded assemblies, in same order
-	for(string& assemblyPath : assemblyPaths)
+	for(AssemblyPath& assemblyPath : assemblyPaths)
 	{
-		spdlog::debug("Reloading assembly {}", assemblyPath);
-		VFS::GetMapping(assemblyPath)->Unwatch(assemblyPath);
-		LoadAssembly(assemblyPath);
+		spdlog::debug("Reloading assembly {} {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
+		if(assemblyPath.WatchForChanges)
+			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
+		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
 	}
 
 	for(World* world : worlds)

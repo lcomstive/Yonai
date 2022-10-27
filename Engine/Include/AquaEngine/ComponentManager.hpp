@@ -7,7 +7,6 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Entity.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
 
 namespace AquaEngine
 {	

@@ -7,9 +7,15 @@
 using namespace AquaEngine;
 using namespace AquaEditor;
 
+void StatsView::Open() { m_IsOpen = true; }
+void StatsView::Close() { m_IsOpen = false; }
+
 void StatsView::Draw()
 {
-	ImGui::Begin("Stats");
+	if (!m_IsOpen)
+		return;
+
+	ImGui::Begin("Stats", &m_IsOpen);
 	ImGui::Text("FPS: %.1f", Time::FPS());
 	ImGui::Text("Delta Time: %.2f ms", Time::DeltaTime() * 1000.0f);
 
@@ -17,5 +23,5 @@ void StatsView::Draw()
 	ImGui::Checkbox("VSync", &vsync);
 	Window::SetVSync(vsync);
 
-	ImGui::End();
+	ImGui::End();		
 }

@@ -36,7 +36,7 @@ namespace AquaEditor
 		T* Get()
 		{
 			auto it = m_Views.find(typeid(T));
-			return it == m_Views.end() ? (T*)nullptr : (T*)*it;
+			return it == m_Views.end() ? (T*)nullptr : (T*)it->second;
 		}
 
 		template<typename T>
@@ -44,6 +44,8 @@ namespace AquaEditor
 		{
 			if(!std::is_base_of<View, T>())
 				return nullptr;
+			if (Has<T>())
+				return Get<T>();
 			
 			T* view = new T();
 			m_Views.emplace(typeid(T), view);

@@ -1,6 +1,7 @@
 #include <memory>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/ComponentManager.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/Component.hpp>
 
 using namespace std;

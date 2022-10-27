@@ -99,8 +99,8 @@ void EditorApp::LoadScene()
 			"/Assets/Shaders/Sprite.frag"
 		});
 
-	const unsigned int spriteRows = 10;
-	const unsigned int spriteColumns = 10;
+	const unsigned int spriteRows = 20;
+	const unsigned int spriteColumns = 20;
 	for (unsigned int x = 0; x < spriteRows; x++)
 	{
 		for (unsigned int y = 0; y < spriteColumns; y++)
@@ -120,10 +120,13 @@ void EditorApp::LoadScene()
 	// Add managed component to first entity
 	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
 	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
-	if (monoType)
-		m_CurrentScene->GetEntity(0).AddComponent(monoType);
-	else
-		spdlog::error("Could not find type matching 'ScriptingTest.TestComponent'");
+	for (int i = 0; i < spriteRows * spriteColumns; i++)
+	{
+		if (monoType)
+			m_CurrentScene->GetEntity(i).AddComponent(monoType);
+		else
+			spdlog::error("Could not find type matching 'ScriptingTest.TestComponent'");
+	}
 
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();
@@ -148,7 +151,7 @@ void EditorApp::InitialiseScripting()
 		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
 	}
 	else
-		Assembly* assembly = ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
+		Assembly* assembly = ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assemblyPath), true);
 }
 
 void EditorApp::DrawUI()
@@ -219,10 +222,10 @@ void EditorApp::DrawUI()
 		if (ImGui::BeginMenu("View"))
 		{
 			if (ImGui::MenuItem("Viewport"))
-				Add<ViewportView>();
+				Add<ViewportView>()->Open();
 
 			if (ImGui::MenuItem("Stats"))
-				Add<StatsView>();
+				Add<StatsView>()->Open();
 
 			ImGui::EndMenu();
 		}

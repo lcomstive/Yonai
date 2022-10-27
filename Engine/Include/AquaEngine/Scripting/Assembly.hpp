@@ -3,12 +3,12 @@
 #include <functional>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
+#include <AquaEngine/World.hpp>
 #include <mono/metadata/assembly.h>
 #include <AquaEngine/Scripting/Class.hpp>
 
 namespace AquaEngine
 {
-	class World;
 	namespace Components { struct Component; }
 }
 
