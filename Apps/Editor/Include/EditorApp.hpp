@@ -17,7 +17,6 @@ namespace AquaEditor
 	{
 		std::string m_ProjectPath = "";
 		AquaEngine::Systems::RenderSystem* m_RenderSystem = nullptr;
-		AquaEngine::Scripting::ScriptEngine* m_ScriptEngine = nullptr;
 
 		AquaEngine::World* m_CurrentScene = nullptr;
 
@@ -25,6 +24,7 @@ namespace AquaEditor
 
 		void DrawUI();
 		void LoadScene();
+		void InitialiseScripting();
 
 	protected:
 		void Setup() override;

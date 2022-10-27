@@ -7,6 +7,18 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Systems;
 
+SceneSystem* SceneSystem::s_Instance = nullptr;
+vector<World*> SceneSystem::m_ActiveScenes = {};
+vector<SceneCallback> SceneSystem::m_SceneCallbacks = {};
+
+void SceneSystem::Init() { s_Instance = this; }
+
+void SceneSystem::Destroy()
+{
+	if(this == s_Instance)
+		s_Instance = nullptr;
+}
+
 void SceneSystem::Update()
 {
 	auto scenes = GetActiveScenes();

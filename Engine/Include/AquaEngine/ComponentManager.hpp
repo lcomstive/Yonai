@@ -4,10 +4,16 @@
 #include <typeinfo>
 #include <typeindex>
 #include <unordered_map>
+#include <mono/jit/jit.h>
+#include <spdlog/spdlog.h>
 #include <AquaEngine/Entity.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
 
 namespace AquaEngine
 {	
+	// Forward declaration
+	namespace Components { struct Component; struct ScriptComponent; }
+
 	/// <summary>
 	/// Handles many entities & their related component instances
 	/// </summary>
@@ -20,9 +26,19 @@ namespace AquaEngine
 		struct ComponentData
 		{
 			/// <summary>
+			/// ID of the world that components are added inside
+			/// </summary>
+			unsigned int WorldID = InvalidEntityID;
+
+			/// <summary>
+			/// Hash of type that all instances share
+			/// </summary>
+			size_t TypeHash = 0;
+
+			/// <summary>
 			/// Array of all created instances
 			/// </summary>
-			std::vector<void*> Instances;
+			std::vector<Components::Component*> Instances;
 
 			/// <summary>
 			/// Maps EntityID to index inside Instances
@@ -37,12 +53,26 @@ namespace AquaEngine
 			/// <returns>True if entity has an instance</returns>
 			AquaAPI bool Has(EntityID entity);
 
-			AquaAPI void* Get(EntityID entity);
+			/// <returns>Instance of component attached to entity matching ID, or nullptr if not found</returns>
+			AquaAPI Components::Component* Get(EntityID entity);
+
+			/// <summary>
+			/// Removes any found instance of component on entity
+			/// </summary>
 			AquaAPI void Remove(EntityID entity);
+
+			/// <summary>
+			/// Gets all entities with this component type
+			/// </summary>
 			AquaAPI std::vector<EntityID> GetEntities();
-			AquaAPI void Add(void* instance, EntityID entity);
+
+			/// <summary>
+			/// Adds a new instance, attaching to entity
+			/// </summary>
+			AquaAPI void Add(Components::Component* instance, EntityID entity);
 
 			template<typename T>
+			/// <returns>Instance of component attached to entity matching ID, or nullptr if not found</returns>
 			T* Get(EntityID entity) { return (T*)(Has(entity) ? Instances[EntityIndex[entity]] : nullptr); }
 
 			template<typename T>
@@ -56,13 +86,13 @@ namespace AquaEngine
 			}
 		};
 
-		unsigned int m_WorldID;
+		AquaAPI unsigned int m_WorldID;
 
 		std::unordered_map<size_t, ComponentData> m_ComponentArrays;
 		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
 
 	public:
-		AquaAPI ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
+		AquaAPI ComponentManager(unsigned int worldID);
 
 		/// <summary>
 		/// Release all resources
@@ -76,10 +106,17 @@ namespace AquaEngine
 		template<typename T>
 		T* Add(EntityID id, size_t type)
 		{
+			if (!std::is_base_of<Components::Component, T>())
+			{
+				spdlog::warn("Cannot add component of type '{}' because it does not derive from AquaEngine::Components::Component",
+					typeid(T).name());
+				return nullptr;
+			}
+
 			T* component = new T();
 			if (m_ComponentArrays.find(type) == m_ComponentArrays.end())
-				m_ComponentArrays.emplace(type, ComponentData());
-			m_ComponentArrays[type].Add(component, id);
+				m_ComponentArrays.emplace(type, ComponentData { m_WorldID, type });
+			m_ComponentArrays[type].Add((Components::Component*)component, id);
 
 			if (m_EntityComponents.find(id) == m_EntityComponents.end())
 				m_EntityComponents.emplace(id, std::vector<size_t>());
@@ -87,6 +124,8 @@ namespace AquaEngine
 
 			return component;
 		}
+
+		Components::ScriptComponent* Add(EntityID id, MonoType* managedType);
 
 		/// <summary>
 		/// Create a component and add it to an entity
@@ -128,7 +167,7 @@ namespace AquaEngine
 			Add<T4>(id);
 		}
 
-		void* Get(EntityID id, size_t type)
+		Components::Component* Get(EntityID id, size_t type)
 		{
 			return IsEmpty(id) ? nullptr : m_ComponentArrays[type].Get(id);
 		}

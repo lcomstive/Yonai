@@ -1,9 +1,23 @@
 #include <AquaEngine/ComponentManager.hpp>
 #include <AquaEngine/Components/Component.hpp>
+#include <AquaEngine/Components/ScriptComponent.hpp>
+
+#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 
 using namespace std;
 using namespace AquaEngine;
+using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
+
+extern ComponentMethodStartFn ComponentMethodStart;
+extern ComponentMethodUpdateFn ComponentMethodUpdate;
+extern ComponentMethodEnabledFn ComponentMethodEnabled;
+extern ComponentMethodDestroyedFn ComponentMethodDestroyed;
+extern ComponentMethodInitialiseFn ComponentMethodInitialise;
+
+ComponentManager::ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
 
 void ComponentManager::Destroy()
 {
@@ -27,7 +41,7 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 bool ComponentManager::IsEmpty(EntityID& id)
 {
 	return m_EntityComponents.find(id) == m_EntityComponents.end() ||
-			m_EntityComponents[id].size() == 0;
+		m_EntityComponents[id].size() == 0;
 }
 
 bool ComponentManager::Has(EntityID& id, size_t type)
@@ -36,7 +50,9 @@ bool ComponentManager::Has(EntityID& id, size_t type)
 }
 
 bool ComponentManager::Has(EntityID& id, type_info& type)
-{ return Has(id, type.hash_code()); }
+{
+	return Has(id, type.hash_code());
+}
 
 void ComponentManager::Clear(EntityID id)
 {
@@ -78,13 +94,54 @@ void ComponentManager::ComponentData::Destroy()
 	EntityIndex.clear();
 }
 
-void ComponentManager::ComponentData::Add(void* instance, EntityID entity)
+void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 {
 	Instances.emplace_back(instance);
 	EntityIndex.emplace(entity, (unsigned int)Instances.size() - 1);
+
+	// Scripting
+	if (!ScriptEngine::IsLoaded())
+		return;
+
+	MonoType* managedType = ScriptEngine::GetTypeFromHash(TypeHash);
+	if (managedType)
+	{
+		// Create managed (C#) instance
+		instance->ManagedInstance = mono_object_new(mono_domain_get(), mono_class_from_mono_type(managedType));
+
+		// Call initialise method, setting entity & world IDs in the component
+		MonoException* exception = nullptr;
+		unsigned int params[2] = { WorldID, entity };
+		ComponentMethodInitialise(instance->ManagedInstance, WorldID, entity, &exception);
+
+		// Call constructor
+		mono_runtime_object_init(instance->ManagedInstance);
+
+		// Call OnEnabled() and then Start()
+		ComponentMethodEnabled(instance->ManagedInstance, true, &exception);
+		ComponentMethodStart(instance->ManagedInstance, &exception);
+	}
 }
 
-void* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
+ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
+{
+	ScriptComponent* component = new ScriptComponent();
+	size_t typeHash = Scripting::Assembly::GetTypeHash(managedType);
+	if (m_ComponentArrays.find(typeHash) == m_ComponentArrays.end())
+		m_ComponentArrays.emplace(typeHash, ComponentData{ m_WorldID, typeHash });
+	m_ComponentArrays[typeHash].Add(component, id);
+
+	if (m_EntityComponents.find(id) == m_EntityComponents.end())
+		m_EntityComponents.emplace(id, std::vector<size_t>());
+	m_EntityComponents[id].push_back(typeHash);
+
+	// Set managed type in component
+	component->Type = managedType;
+
+	return component;
+}
+
+Component* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
 
 bool ComponentManager::ComponentData::Has(EntityID entity) { return EntityIndex.find(entity) != EntityIndex.end(); }
 

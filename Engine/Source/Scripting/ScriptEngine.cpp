@@ -5,18 +5,32 @@
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
+using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
 const char* AssembliesPath = "/Assets/Scripts/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
-ScriptEngine::ScriptEngine(std::string& coreDllPath) : m_CoreDLLPath(coreDllPath)
+string ScriptEngine::s_CoreDLLPath = "";
+bool ScriptEngine::s_AwaitingReload = false;
+MonoDomain* ScriptEngine::s_AppDomain = nullptr;
+Assembly* ScriptEngine::s_CoreAssembly = nullptr;
+MonoDomain* ScriptEngine::s_RootDomain = nullptr;
+vector<Assembly*> ScriptEngine::s_Assemblies = {};
+
+#ifndef NDEBUG
+vector<string> ScriptEngine::s_AssemblyPaths = {};
+#endif
+
+void ScriptEngine::Init(std::string& coreDllPath)
 {
-	if (m_RootDomain)
+	s_CoreDLLPath = coreDllPath;
+	if (s_RootDomain)
 		return; // Already initialised
 
 	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
@@ -27,35 +41,39 @@ ScriptEngine::ScriptEngine(std::string& coreDllPath) : m_CoreDLLPath(coreDllPath
 	}
 	mono_set_assemblies_path(assembliesPath.c_str());
 
-	m_RootDomain = mono_jit_init("AquaEngineRuntime");
-	if (!m_RootDomain)
+	s_RootDomain = mono_jit_init("AquaEngineRuntime");
+	if (!s_RootDomain)
 	{
 		spdlog::critical("Failed to create mono domain");
 		return;
 	}
 
-	m_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
-	mono_domain_set(m_AppDomain, true);
+	s_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
+	mono_domain_set(s_AppDomain, true);
 
 	LoadCoreAssembly();
 }
 
-ScriptEngine::~ScriptEngine()
+void ScriptEngine::Destroy()
 {
-	if (!m_RootDomain)
+	if (!s_RootDomain)
 		return; // Already destroyed
 
-	mono_jit_cleanup(m_RootDomain);
+	mono_jit_cleanup(s_RootDomain);
 
-	m_RootDomain = nullptr;
-	m_AppDomain = nullptr;
+	s_AppDomain = nullptr;
+	s_RootDomain = nullptr;
 }
 
-Assembly* ScriptEngine::LoadAssembly(string path) { return LoadAssembly(path, true); }
+Assembly* ScriptEngine::GetCoreAssembly() { return s_CoreAssembly; }
+vector<Assembly*>& ScriptEngine::GetAssemblies() { return s_Assemblies; }
+Assembly* ScriptEngine::LoadAssembly(string path) { return LoadAssembly(path, false); }
 
-Assembly* ScriptEngine::LoadAssembly(string& path, bool watch)
+Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly)
 {
-	if(path.empty() || !IO::VFS::Exists(path))
+	if(path.empty())
+		return nullptr;
+	if(!IO::VFS::Exists(path))
 	{
 		spdlog::warn("Failed to load '{}' - could not be found", path);
 		return nullptr;
@@ -70,12 +88,12 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool watch)
 	}
 
 	#ifndef NDEBUG
-	if(watch)
+	if(!isCoreAssembly)
 	{
 		// Debug mode, watch files and reload if any changes occur
-		m_AssemblyPaths.push_back(path);
+		s_AssemblyPaths.push_back(path);
 
-		IO::VFS::GetMapping(path)->Watch(path, std::bind(&ScriptEngine::OnAssemblyFileChanged, this, ::placeholders::_1, ::placeholders::_2));
+		IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
 	}
 	#endif
 
@@ -102,55 +120,58 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool watch)
 	);
 	mono_image_close(image);
 
-	Assembly* instance = new Assembly(this, assembly);
-	m_Assemblies.push_back(instance);
+	Assembly* instance = new Assembly(assembly, isCoreAssembly);
+	s_Assemblies.push_back(instance);
 	return instance;
 }
 
 void ScriptEngine::LoadCoreAssembly()
 {
-	Assembly* coreAssembly = LoadAssembly(m_CoreDLLPath, false);
-	if(coreAssembly)
-		coreAssembly->LoadScriptCoreTypes();
+	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true);
+	if(s_CoreAssembly)
+		s_CoreAssembly->LoadScriptCoreTypes();
 }
 
-MonoDomain* ScriptEngine::GetAppDomain() { return m_AppDomain; }
+MonoDomain* ScriptEngine::GetAppDomain() { return s_AppDomain; }
+bool ScriptEngine::IsLoaded() { return s_RootDomain != nullptr; }
 
-#ifndef NDEBUG
 void ScriptEngine::OnAssemblyFileChanged(const std::string& path, IO::FileWatchStatus status)
 {
 	spdlog::debug("Assembly '{}' was changed, flagging script engine as ready to reload", path);
-	m_AwaitingReload = true;
+	s_AwaitingReload = true;
 }
-#endif
 
-bool ScriptEngine::AwaitingReload() { return m_AwaitingReload; }
+bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
 
 void ScriptEngine::Reload(bool force)
 {
-#ifndef NDEBUG
-	if(!m_AwaitingReload && !force)
+	if(!s_AwaitingReload && !force)
 		return;
-	m_AwaitingReload = false;
+	s_AwaitingReload = false;
 
 	Timer timer;
 	timer.Start();
 
+	// Call OnDisable & OnDestroyed in all managed components
+	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
+	vector<World*> worlds = sceneSystem->GetActiveScenes();
+
 	// Release resources
 	mono_domain_set(mono_get_root_domain(), false);
-	mono_domain_unload(m_AppDomain);
+	mono_domain_unload(s_AppDomain);
 	
-	for(Assembly* instance : m_Assemblies)
+	for(Assembly* instance : s_Assemblies)
 		delete instance;
-	m_Assemblies.clear();
+	s_Assemblies.clear();
 
 	// Restart mono
-	m_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
-	mono_domain_set(m_AppDomain, true);
+	s_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
+	mono_domain_set(s_AppDomain, true);
 
-	std::vector<string> assemblyPaths = m_AssemblyPaths;
-	m_AssemblyPaths.clear();
+	std::vector<string> assemblyPaths = s_AssemblyPaths;
+	s_AssemblyPaths.clear();
 
+	// Load AquaScriptCore assembly
 	LoadCoreAssembly();
 
 	// Load all previously loaded assemblies, in same order
@@ -161,6 +182,18 @@ void ScriptEngine::Reload(bool force)
 		LoadAssembly(assemblyPath);
 	}
 
+	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
-#endif
+}
+
+/// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
+MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
+{
+	MonoType* type = nullptr;
+	for (Assembly* assembly : s_Assemblies)
+	{
+		if (type = assembly->GetTypeFromHash(hash))
+			break;
+	}
+	return type;
 }

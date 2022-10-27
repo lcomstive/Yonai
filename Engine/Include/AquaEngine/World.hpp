@@ -9,7 +9,7 @@
 
 namespace AquaEngine
 {
-	namespace Components { struct Component; }
+	namespace Components { struct Component; struct ScriptComponent; }
 
 	class World
 	{
@@ -38,6 +38,23 @@ namespace AquaEngine
 			AquaAPI AquaEngine::World* GetWorld();
 
 			AquaAPI void Destroy();
+
+			/// <summary>
+			/// Adds a managed (C#) script component to this entity
+			/// </summary>
+			/// <returns>Created instance of scripted component, or nullptr if invalid</returns>
+			AquaAPI Components::ScriptComponent* AddComponent(MonoType* managedType);
+
+			/// <returns>Instance of managed component, or nullptr if not found</returns>
+			AquaAPI Components::ScriptComponent* GetComponent(MonoType* managedType);
+
+			/// <returns>True if this entity has a managed component matching type</returns>
+			AquaAPI bool HasComponent(MonoType* managedType);
+
+			/// <summary>
+			/// Removes a managed (C#) script component from this entity
+			/// </summary>
+			AquaAPI void RemoveComponent(MonoType* managedType);
 
 			template<typename T>
 			T* AddComponent() { return m_World ? m_World->AddComponent<T>(m_ID) : nullptr; }
@@ -209,6 +226,23 @@ namespace AquaEngine
 				SetupEntityComponent(id, (Components::Component*)component);
 			return component;
 		}
+
+		/// <summary>
+		/// Adds a managed (C#) script component to entity
+		/// </summary>
+		/// <returns>Created instance of scripted component, or nullptr if invalid</returns>
+		AquaAPI Components::ScriptComponent* AddComponent(EntityID entity, MonoType* managedType);
+	
+		/// <returns>Instance of managed component, or nullptr if not found</returns>
+		AquaAPI Components::ScriptComponent* GetComponent(EntityID entity, MonoType* managedType);
+		
+		/// <returns>True if entity has a managed component matching type</returns>
+		AquaAPI bool HasComponent(EntityID entity, MonoType* managedType);
+
+		/// <summary>
+		/// Removes a managed (C#) script component from entity
+		/// </summary>
+		AquaAPI void RemoveComponent(EntityID entity, MonoType* managedType);
 
 		template<typename T>
 		T* AddComponent(EntityID entity)

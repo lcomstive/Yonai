@@ -76,6 +76,11 @@ void* World::GetComponent(EntityID entity, size_t type)
 	return m_ComponentManager->Get(entity, type);
 }
 
+ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType) { return m_ComponentManager->Add(entity, managedType); }
+void World::RemoveComponent(EntityID entity, MonoType* managedType) { m_ComponentManager->Remove(entity, Scripting::Assembly::GetTypeHash(managedType)); }
+bool World::HasComponent(EntityID entity, MonoType* managedType) { return m_ComponentManager->Has(entity, Scripting::Assembly::GetTypeHash(managedType)); }
+ScriptComponent* World::GetComponent(EntityID entity, MonoType* managedType) { return (ScriptComponent*)m_ComponentManager->Get(entity, Scripting::Assembly::GetTypeHash(managedType)); }
+
 bool World::HasComponents(EntityID entity) { return !m_ComponentManager->IsEmpty(entity); }
 void World::SetupEntityComponent(EntityID id, Component* component) { component->Entity = GetEntity(id); }
 
@@ -97,6 +102,15 @@ void World::Entity::Destroy()
 	
 	// Invalidate
 	m_World = nullptr;
+}
+
+ScriptComponent* Entity::AddComponent(MonoType* managedType) { return m_World ? m_World->AddComponent(m_ID, managedType) : nullptr; }
+ScriptComponent* Entity::GetComponent(MonoType* managedType) { return m_World ? m_World->GetComponent(m_ID, managedType) : nullptr; }
+bool Entity::HasComponent(MonoType* managedType) { return m_World ? m_World->HasComponent(m_ID, managedType) : false; }
+void Entity::RemoveComponent(MonoType* managedType)
+{
+	if (m_World)
+		m_World->RemoveComponent(m_ID, managedType);
 }
 #pragma endregion
 

@@ -7,7 +7,7 @@
 .vscode/
 
 # Generated Documentation
-Docs/html/
+Docs/Dist/
 
 # Generated files & artifacts
 [Bb]in/

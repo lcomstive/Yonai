@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
@@ -8,21 +9,51 @@
 
 using namespace std;
 using namespace AquaEngine;
+using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
-unordered_map<MonoType*, size_t> Assembly::s_TypeHashes;
+unordered_map<MonoType*, size_t> Assembly::s_TypeHashes = {};
+unordered_map<size_t, MonoType*> Assembly::s_ReverseTypeHashes = {};
 unordered_map<size_t, Assembly::ManagedComponentData> Assembly::s_InternalManagedComponentTypes = {};
 
-Assembly::Assembly(ScriptEngine* owner, MonoAssembly* handle) : Owner(owner), Handle(handle), Image(mono_assembly_get_image(handle))
+// Unmanaged thunks definition
+ComponentMethodStartFn ComponentMethodStart = nullptr;
+ComponentMethodUpdateFn ComponentMethodUpdate = nullptr;
+ComponentMethodEnabledFn ComponentMethodEnabled = nullptr;
+ComponentMethodDestroyedFn ComponentMethodDestroyed = nullptr;
+ComponentMethodInitialiseFn ComponentMethodInitialise = nullptr;
+
+SystemMethodDrawFn SystemMethodDraw = nullptr;
+SystemMethodStartFn SystemMethodStart = nullptr;
+SystemMethodUpdateFn SystemMethodUpdate = nullptr;
+SystemMethodEnabledFn SystemMethodEnabled = nullptr;
+SystemMethodDestroyedFn SystemMethodDestroyed = nullptr;
+SystemMethodInitialiseFn SystemMethodInitialise = nullptr;
+
+Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), Image(mono_assembly_get_image(handle))
 {
-	HashTypes();
+	CacheTypes(isCoreAssembly);
 	AddInternalCalls();
+}
+
+MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className)
+{ return mono_class_from_name(Image, namespaceName, className); }
+
+MonoType* Assembly::GetTypeFromClassName(const char* namespaceName, const char* className)
+{
+	MonoClass* klass = GetClassFromName(namespaceName, className);
+	return klass ? mono_class_get_type(klass) : nullptr;
+}
+
+MonoType* Assembly::GetTypeFromHash(size_t hash)
+{
+	auto it = s_ReverseTypeHashes.find(hash);
+	return it == s_ReverseTypeHashes.end() ? nullptr : it->second;
 }
 
 unique_ptr<Class> Assembly::InstantiateClass(const char* namespaceName, const char* className)
 {
-	MonoImage* image = mono_assembly_get_image(Handle);
-	MonoClass* klass = mono_class_from_name(image, namespaceName, className);
+	MonoClass* klass = mono_class_from_name(Image, namespaceName, className);
 
 	if(!klass)
 	{
@@ -30,7 +61,7 @@ unique_ptr<Class> Assembly::InstantiateClass(const char* namespaceName, const ch
 		return nullptr;
 	}
 
-	MonoObject* instance = mono_object_new(Owner->GetAppDomain(), klass);
+	MonoObject* instance = mono_object_new(ScriptEngine::GetAppDomain(), klass);
 
 	if(!instance)
 	{
@@ -55,35 +86,57 @@ size_t Assembly::GetTypeHash(MonoType* type)
 	return it->second;
 }
 
+size_t Assembly::GetTypeHash(MonoClass* monoClass) { return GetTypeHash(mono_class_get_type(monoClass)); }
+
 Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanagedType)
 {
 	auto it = s_InternalManagedComponentTypes.find(unmanagedType);
 	return it == s_InternalManagedComponentTypes.end() ? Assembly::ManagedComponentData{ unmanagedType } : it->second;
 }
 
-void Assembly::HashTypes()
+void Assembly::CacheTypes(bool isCore)
 {
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
-	spdlog::debug("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
+	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
+	MonoClass* coreSystemType    = coreAssembly->GetClassFromName("AquaEngine", "System");
+	MonoClass* coreComponentType = coreAssembly->GetClassFromName("AquaEngine", "Component");
+
+	spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
 	{
+		// Get metadata
 		uint32_t columns[MONO_TYPEDEF_SIZE];
 		mono_metadata_decode_row(typeDefinitionsTable, i, columns, MONO_TYPEDEF_SIZE);
 
+		// Get namespace, name & class pointer
 		const char* _name = mono_metadata_string_heap(Image, columns[MONO_TYPEDEF_NAME]);
 		const char* _namespace = mono_metadata_string_heap(Image, columns[MONO_TYPEDEF_NAMESPACE]);
 		MonoClass* klass = mono_class_from_name(Image, _namespace, _name);
 
-		string fullName(_namespace);
-		fullName += ".";
-		fullName += _name;
+		// Hash the type
+		string fullName = strlen(_namespace) == 0 ? _name : fmt::format("{}.{}", _namespace, _name);
 		size_t hash = std::hash<std::string>{}(fullName);
 
-		spdlog::debug("  {}.{} [{}]", _namespace, _name, hash);
+		// Check if derives from AquaEngine.System
+		if (klass != coreSystemType && mono_class_is_subclass_of(klass, coreSystemType, false))
+		{
+			m_ManagedSystemTypes.push_back(klass);
+			spdlog::trace("  {}.{} [System][{}]", _namespace, _name, hash);
+		}
+		// Check if derives from AquaEngine.Component
+		else if (klass != coreComponentType && mono_class_is_subclass_of(klass, coreComponentType, false))
+		{
+			m_ManagedComponentTypes.push_back(klass);
+			spdlog::trace("  {}.{} [Component][{}]", _namespace, _name, hash);
+		}
+		else
+			spdlog::trace("  {}.{} [{}]", _namespace, _name, hash);
 
-		s_TypeHashes.emplace(mono_class_get_type(klass), hash);
+		MonoType* monoType = mono_class_get_type(klass);
+		s_TypeHashes.emplace(monoType, hash);
+		s_ReverseTypeHashes.emplace(hash, monoType);
 	}
 }
 
@@ -96,33 +149,52 @@ void Assembly::AddInternalCalls()
 	AddTransformInternalCalls();
 }
 
-void (*ComponentMethodStart)(MonoObject*, MonoException**) = nullptr;
-void (*ComponentMethodUpdate)(MonoObject*, MonoException**) = nullptr;
-void (*ComponentMethodDestroy)(MonoObject*, MonoException**) = nullptr;
-void (*ComponentMethodEnable)(MonoObject*, bool, MonoException**) = nullptr;
-void (*ComponentMethodInitialise)(MonoObject*, unsigned int, unsigned int, MonoException**) = nullptr;
-
 #define AddComponentMethod(name) \
-	method = mono_class_get_method_from_name(component, "_"#name, 0); \
+	method = mono_class_get_method_from_name(component, #name, 0); \
 	if(ComponentMethod##name == nullptr && method) \
 		ComponentMethod##name = (void(*)(MonoObject*, MonoException**))mono_method_get_unmanaged_thunk(method);
+
+#define AddSystemMethod(name) \
+	method = mono_class_get_method_from_name(system, #name, 0); \
+	if(SystemMethod##name == nullptr && method) \
+		SystemMethod##name = (void(*)(MonoObject*, MonoException**))mono_method_get_unmanaged_thunk(method);
 
 void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
 
+#pragma region Component Methods
 	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");
 
 	// Component.Initialise
-	MonoMethod* method = mono_class_get_method_from_name(component, "Initialise", 2);
-	ComponentMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	MonoMethod* method = mono_class_get_method_from_name(component, "aqua_Initialise", 2);
+	void* thunk = mono_method_get_unmanaged_thunk(method);
+	ComponentMethodInitialise = (ComponentMethodInitialiseFn)mono_method_get_unmanaged_thunk(method);
 
-
-	method = mono_class_get_method_from_name(component, "_Enable", 1);
-	ComponentMethodEnable = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	// Component._Enable
+	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
+	ComponentMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddComponentMethod(Start)
 	AddComponentMethod(Update)
-	AddComponentMethod(Destroy)
+	AddComponentMethod(Destroyed)
+#pragma endregion
+
+#pragma region System Methods
+	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "System");
+
+	// System.aqua_Initialise
+	method = mono_class_get_method_from_name(system, "aqua_Initialise", 2);
+	SystemMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+
+	// System.aqua_Enable
+	method = mono_class_get_method_from_name(system, "aqua_Enable", 1);
+	SystemMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+
+	AddSystemMethod(Draw)
+	AddSystemMethod(Start)
+	AddSystemMethod(Update)
+	AddSystemMethod(Destroyed)
+#pragma endregion
 }

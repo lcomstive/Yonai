@@ -17,6 +17,7 @@
 // Scripting //
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Components/ScriptComponent.hpp>
 
 using namespace std;
 using namespace glm;
@@ -49,6 +50,8 @@ void EditorApp::Setup()
 	VFS::Mount("/Assets", m_ProjectPath + "Assets");
 	// VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
 
+	InitialiseScripting();
+
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
@@ -57,30 +60,6 @@ void EditorApp::Setup()
 	LoadScene();
 
 	Add<ViewportView>();
-
-	// Scripting
-	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
-	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
-	{
-		spdlog::critical("Core DLL path not specified or invalid. Set the '-core-dll-path' flag to 'AquaScriptCore.dll'");
-		Exit();
-		return;
-	}
-	m_ScriptEngine = new ScriptEngine(coreDllPath);
-
-	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
-	if (!assemblyPath.empty() || !VFS::Exists(assemblyPath))
-	{
-		m_ScriptEngine->LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
-	}
-	else
-	{
-		delete m_ScriptEngine;
-		m_ScriptEngine = nullptr;
-		
-		spdlog::warn("No C# DLL path found, scripting engine disabled");
-		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
-	}
 }
 
 void EditorApp::OnDraw()
@@ -94,13 +73,12 @@ void EditorApp::OnUpdate()
 	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
 
-	if(m_ScriptEngine->AwaitingReload())
-		m_ScriptEngine->Reload();
+	if(ScriptEngine::AwaitingReload())
+		ScriptEngine::Reload();
 }
 
 void EditorApp::LoadScene()
 {
-	
 	m_CurrentScene = new World("Test World");
 
 	// Add a camera
@@ -139,10 +117,39 @@ void EditorApp::LoadScene()
 		}
 	}
 
+	// Add managed component to first entity
+	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
+	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
+	if (monoType)
+		m_CurrentScene->GetEntity(0).AddComponent(monoType);
+	else
+		spdlog::error("Could not find type matching 'ScriptingTest.TestComponent'");
+
 	// Add scene to active scenes
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	sceneSystem->UnloadAllScenes();
 	sceneSystem->AddScene(m_CurrentScene);
+}
+
+void EditorApp::InitialiseScripting()
+{
+	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
+	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
+	{
+		spdlog::critical("Core DLL path not specified or invalid. Set the '-core-dll-path' flag to 'AquaScriptCore.dll'");
+		Exit();
+		return;
+	}
+	ScriptEngine::Init(coreDllPath);
+
+	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
+	if (assemblyPath.empty())
+	{
+		spdlog::warn("No C# DLL path found, scripting engine disabled");
+		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
+	}
+	else
+		Assembly* assembly = ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assemblyPath));
 }
 
 void EditorApp::DrawUI()
@@ -204,7 +211,7 @@ void EditorApp::DrawUI()
 			//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
 
 			if(ImGui::MenuItem("Reload Scripts"))
-				m_ScriptEngine->Reload(true);
+				ScriptEngine::Reload(true);
 
 			if (ImGui::MenuItem("Exit")) Exit();
 			ImGui::EndMenu();

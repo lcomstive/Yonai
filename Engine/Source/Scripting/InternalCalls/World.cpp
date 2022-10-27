@@ -4,17 +4,18 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 #include <AquaEngine/Components/ScriptComponent.hpp>
 
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 
-extern void (*ComponentMethodInitialise)(MonoObject*, unsigned int, unsigned int, MonoException**);
-extern void (*ComponentMethodStart)(MonoObject*, MonoException**);
-extern void (*ComponentMethodUpdate)(MonoObject*, MonoException**);
-extern void (*ComponentMethodDestroy)(MonoObject*, MonoException**);
-extern void (*ComponentMethodEnable)(MonoObject*, bool, MonoException**);
+extern ComponentMethodStartFn ComponentMethodStart;
+extern ComponentMethodUpdateFn ComponentMethodUpdate;
+extern ComponentMethodEnabledFn ComponentMethodEnabled;
+extern ComponentMethodDestroyedFn ComponentMethodDestroyed;
+extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
 #pragma region World
 bool WorldGet(unsigned int worldID, MonoString** outName)
@@ -100,40 +101,18 @@ MonoObject* EntityAddComponent(unsigned int worldID, unsigned int entityID, Mono
 		return nullptr;
 
 	MonoType* managedType = mono_reflection_type_get_type(componentType);
-	MonoClass* klass = mono_type_get_class(managedType);
-	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(Assembly::GetTypeHash(mono_class_get_type(klass)));
+	size_t typeHash = Assembly::GetTypeHash(managedType);
 
-	spdlog::debug("Trying to add component of type '{}' [{}]", mono_type_get_name(mono_reflection_type_get_type(componentType)), managedData.Type);
+	// Check for existing component of same type on entity
+	if (world->GetComponentManager()->Has(entityID, typeHash))
+		return world->GetComponentManager()->Get(entityID, typeHash)->ManagedInstance;
 
-	// Check for existing component of type
-	if (world->GetComponentManager()->Has(entityID, managedData.Type))
-		return EntityGetComponent(worldID, entityID, componentType);
-
-	Components::Component* unmanagedInstance = nullptr;
-
+	// Get unmanaged->managed data
+	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 	if (!managedData.AddFn)
-	{
-		unmanagedInstance = world->AddComponent<Components::ScriptComponent>(entityID, managedData.Type);
-		((Components::ScriptComponent*)unmanagedInstance)->Type = managedType;
-	}
+		return world->GetComponentManager()->Add(entityID, managedType)->ManagedInstance;
 	else
-		unmanagedInstance = managedData.AddFn(world, entityID);
-
-	unmanagedInstance->ManagedInstance = mono_object_new(mono_domain_get(), klass);
-
-	// Call initialise method, setting entity & world IDs in the component
-	MonoException* exception = nullptr;
-	unsigned int params[2] = { worldID, entityID };
-	ComponentMethodInitialise(unmanagedInstance->ManagedInstance, worldID, entityID, &exception);
-
-	// Call constructor
-	mono_runtime_object_init(unmanagedInstance->ManagedInstance);
-
-	// Call OnEnabled() and then Start()
-	ComponentMethodEnable(unmanagedInstance->ManagedInstance, true, &exception);
-	ComponentMethodStart(unmanagedInstance->ManagedInstance, &exception);
-
-	return unmanagedInstance->ManagedInstance;
+		return managedData.AddFn(world, entityID)->ManagedInstance;
 }
 
 bool EntityRemoveComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
@@ -148,8 +127,8 @@ bool EntityRemoveComponent(unsigned int worldID, unsigned int entityID, MonoRefl
 	{
 		// Call OnDisabled() and then OnDestroyed()
 		MonoException* exception = nullptr;
-		ComponentMethodEnable(component->ManagedInstance, false, &exception);
-		ComponentMethodDestroy(component->ManagedInstance, &exception);
+		ComponentMethodEnabled(component->ManagedInstance, false, &exception);
+		ComponentMethodDestroyed(component->ManagedInstance, &exception);
 	}
 
 	return world->GetComponentManager()->Remove(entityID, type);
