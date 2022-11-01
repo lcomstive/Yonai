@@ -187,4 +187,22 @@ namespace AquaEngine
 		Right	= 1,
 		Middle	= 2
 	};
+
+	enum class MouseState : int
+	{
+		/// <summary>
+		/// Normal, visible state of mouse
+		/// </summary>
+		Normal = 0,
+
+		/// <summary>
+		/// Hides the mouse, but is still moving
+		/// </summary>
+		Hidden,
+
+		/// <summary>
+		/// Hides the mouse and prevents movement
+		/// </summary>
+		Disabled
+	};
 }

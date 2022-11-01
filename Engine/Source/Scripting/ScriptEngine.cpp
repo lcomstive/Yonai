@@ -3,6 +3,7 @@
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/assembly.h>
+#include <mono/metadata/mono-debug.h>
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
@@ -26,7 +27,7 @@ vector<Assembly*> ScriptEngine::s_Assemblies = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
-void ScriptEngine::Init(std::string& coreDllPath)
+void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 {
 	s_CoreDLLPath = coreDllPath;
 	if (s_RootDomain)
@@ -39,6 +40,17 @@ void ScriptEngine::Init(std::string& coreDllPath)
 		return;
 	}
 	mono_set_assemblies_path(assembliesPath.c_str());
+
+	// Setup debugging session
+	if (allowDebugging)
+	{
+		static const char* options[] = {
+		  "--soft-breakpoints",
+		  "--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:55555"
+		};
+		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+	}
 
 	s_RootDomain = mono_jit_init("AquaEngineRuntime");
 	if (!s_RootDomain)
@@ -70,9 +82,9 @@ Assembly* ScriptEngine::LoadAssembly(string path, bool shouldWatch) { return Loa
 
 Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool shouldWatch)
 {
-	if(path.empty())
+	if (path.empty())
 		return nullptr;
-	if(!IO::VFS::Exists(path))
+	if (!IO::VFS::Exists(path))
 	{
 		spdlog::warn("Failed to load '{}' - could not be found", path);
 		return nullptr;
@@ -80,18 +92,18 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 
 	spdlog::debug("Loading C# script from '{}'", path);
 	auto data = IO::VFS::Read(path);
-	if(data.empty())
+	if (data.empty())
 	{
 		spdlog::warn("Failed to load '{}' - failed to read", path);
 		return nullptr;
 	}
 
-	if(!isCoreAssembly && shouldWatch)
+	if (!isCoreAssembly && shouldWatch)
 	{
 		s_AssemblyPaths.push_back({ path, shouldWatch });
 
 		// Watch files and reload if any changes occur
-		if(shouldWatch)
+		if (shouldWatch)
 			IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
 	}
 
@@ -104,7 +116,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 		0	// Bool. Load in reflection mode
 	);
 
-	if(status != MONO_IMAGE_OK)
+	if (status != MONO_IMAGE_OK)
 	{
 		spdlog::error("Failed to load '{}' - '{}'", path, mono_image_strerror(status));
 		return nullptr;
@@ -126,7 +138,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 void ScriptEngine::LoadCoreAssembly()
 {
 	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true, false);
-	if(s_CoreAssembly)
+	if (s_CoreAssembly)
 		s_CoreAssembly->LoadScriptCoreTypes();
 }
 
@@ -143,7 +155,7 @@ bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
 
 void ScriptEngine::Reload(bool force)
 {
-	if(!s_AwaitingReload && !force)
+	if (!s_AwaitingReload && !force)
 		return;
 	s_AwaitingReload = false;
 
@@ -152,16 +164,16 @@ void ScriptEngine::Reload(bool force)
 
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
-	vector<World*> worlds = sceneSystem->GetActiveScenes();
+	vector<World*> worlds = World::GetWorlds();
 	sceneSystem->UnloadAllScenes();
 	for (World* world : worlds)
 		world->GetComponentManager()->InvalidateAllManagedInstances();
 
 	// Release resources
-	mono_domain_set(mono_get_root_domain(), false);
+	mono_domain_set(mono_get_root_domain(), true);
 	mono_domain_unload(s_AppDomain);
-	
-	for(Assembly* instance : s_Assemblies)
+
+	for (Assembly* instance : s_Assemblies)
 		delete instance;
 	s_Assemblies.clear();
 	Assembly::ClearCachedTypes();
@@ -177,15 +189,17 @@ void ScriptEngine::Reload(bool force)
 	LoadCoreAssembly();
 
 	// Load all previously loaded assemblies, in same order
-	for(AssemblyPath& assemblyPath : assemblyPaths)
+	for (AssemblyPath& assemblyPath : assemblyPaths)
 	{
 		spdlog::debug("Reloading assembly {} {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
-		if(assemblyPath.WatchForChanges)
+		if (assemblyPath.WatchForChanges)
 			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
 	}
 
-	for(World* world : worlds)
+	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
+
+	for (World* world : worlds)
 		sceneSystem->LoadScene(world);
 
 	timer.Stop();

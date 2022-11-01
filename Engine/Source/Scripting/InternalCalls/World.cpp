@@ -105,14 +105,14 @@ MonoObject* EntityAddComponent(unsigned int worldID, unsigned int entityID, Mono
 
 	// Check for existing component of same type on entity
 	if (world->GetComponentManager()->Has(entityID, typeHash))
-		return world->GetComponentManager()->Get(entityID, typeHash)->ManagedInstance;
+		return world->GetComponentManager()->Get(entityID, typeHash)->ManagedData.Instance;
 
 	// Get unmanaged->managed data
 	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 	if (!managedData.AddFn)
-		return world->GetComponentManager()->Add(entityID, managedType)->ManagedInstance;
+		return world->GetComponentManager()->Add(entityID, managedType)->ManagedData.Instance;
 	else
-		return managedData.AddFn(world, entityID)->ManagedInstance;
+		return managedData.AddFn(world, entityID)->ManagedData.Instance;
 }
 
 bool EntityRemoveComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
@@ -123,12 +123,12 @@ bool EntityRemoveComponent(unsigned int worldID, unsigned int entityID, MonoRefl
 
 	size_t type = GetComponentType(componentType);
 	Components::Component* component = (Components::Component*)world->GetComponentManager()->Get(entityID, type);
-	if (component && component->ManagedInstance)
+	if (component && component->ManagedData.Instance)
 	{
 		// Call OnDisabled() and then OnDestroyed()
 		MonoException* exception = nullptr;
-		ComponentMethodEnabled(component->ManagedInstance, false, &exception);
-		ComponentMethodDestroyed(component->ManagedInstance, &exception);
+		ComponentMethodEnabled(component->ManagedData.Instance, false, &exception);
+		ComponentMethodDestroyed(component->ManagedData.Instance, &exception);
 	}
 
 	return world->GetComponentManager()->Remove(entityID, type);
@@ -139,25 +139,12 @@ MonoObject* EntityGetComponent(unsigned int worldID, unsigned int entityID, Mono
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
-	MonoClass* klass = mono_type_get_class(mono_reflection_type_get_type(componentType));
+	MonoType* managedType = mono_reflection_type_get_type(componentType);
+	MonoClass* klass = mono_type_get_class(managedType);
 	size_t type = Assembly::GetTypeHash(mono_class_get_type(klass));
 
 	Components::Component* instance = (Components::Component*)world->GetComponent(entityID, type);
-
-	if (!instance)
-		return nullptr;
-
-	if (!instance->ManagedInstance)
-	{
-		// Unmanaged (C++) type
-		instance->ManagedInstance = mono_object_new(mono_domain_get(), klass);
-
-		// Call initialise method
-		MonoException* exception = nullptr;
-		unsigned int params[2] = { worldID, entityID };
-		ComponentMethodInitialise(instance->ManagedInstance, worldID, entityID, &exception);
-	}
-	return instance->ManagedInstance;
+	return instance ? instance->ManagedData.Instance : nullptr;
 }
 #pragma endregion
 

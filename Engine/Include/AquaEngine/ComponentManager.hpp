@@ -13,7 +13,7 @@ namespace AquaEngine
 	// Forward declaration
 	class World;
 	namespace Scripting { class ScriptEngine; }
-	namespace Components { struct Component; struct ScriptComponent; }
+	namespace Components { struct ManagedComponentData; struct Component; struct ScriptComponent; }
 
 	/// <summary>
 	/// Handles many entities & their related component instances
@@ -91,7 +91,7 @@ namespace AquaEngine
 		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
 		
 		void OnWorldActiveStateChanged(bool isActive);
-		MonoObject* CreateManagedInstance(size_t typeHash, unsigned int entityID);
+		Components::ManagedComponentData CreateManagedInstance(size_t typeHash, unsigned int entityID);
 
 		/// <summary>
 		/// Releases all 'Component::ManagedInstance's,

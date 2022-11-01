@@ -43,7 +43,8 @@ namespace AquaEngine::Scripting
 		/// Begins the scripting engine and loads the core assembly
 		/// </summary>
 		/// <param name="coreDllPath">The path to AquaScriptCore.dll</param>
-		AquaAPI static void Init(std::string& coreDllPath);
+		/// <param name="allowDebugging">Should a debugger for managed code be setup?</param>
+		AquaAPI static void Init(std::string& coreDllPath, bool allowDebugging = false);
 
 		/// <summary>
 		/// Unloads scripting engine, releases resources &

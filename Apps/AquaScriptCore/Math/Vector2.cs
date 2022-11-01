@@ -29,6 +29,9 @@ namespace AquaEngine
 		public static Vector2 operator *(Vector2 a, Vector2 b) => new Vector2(a.x * b.x, a.y * b.y);
 		public static Vector2 operator /(Vector2 a, Vector2 b) => new Vector2(a.x / b.x, a.y / b.y);
 
+		public static Vector2 operator *(Vector2 a, float b) => new Vector2(a.x * b, a.y * b);
+		public static Vector2 operator /(Vector2 a, float b) => new Vector2(a.x / b, a.y / b);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Magnitude(ref Vector2 input);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Distance(ref Vector2 a, ref Vector2 b);

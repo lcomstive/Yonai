@@ -90,8 +90,23 @@ size_t Assembly::GetTypeHash(MonoClass* monoClass) { return GetTypeHash(mono_cla
 
 Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanagedType)
 {
+	// Check with input type
 	auto it = s_InternalManagedComponentTypes.find(unmanagedType);
-	return it == s_InternalManagedComponentTypes.end() ? Assembly::ManagedComponentData{ unmanagedType } : it->second;
+	if (it != s_InternalManagedComponentTypes.end())
+		return it->second;
+
+	// Lookup type compared to managed types
+	auto reverseIt = s_ReverseTypeHashes.find(unmanagedType);
+	if (reverseIt != s_ReverseTypeHashes.end())
+	{
+		unmanagedType = s_TypeHashes[reverseIt->second];
+		it = s_InternalManagedComponentTypes.find(unmanagedType);
+		if (it != s_InternalManagedComponentTypes.end())
+			return it->second;
+	}
+
+	// Not found, return empty
+	return Assembly::ManagedComponentData{ unmanagedType };
 }
 
 void Assembly::ClearCachedTypes()
@@ -151,7 +166,9 @@ void Assembly::AddInternalCalls()
 	AddLogInternalCalls();
 	AddTimeInternalCalls();
 	AddWorldInternalCalls();
+	AddInputInternalCalls();
 	AddVectorInternalCalls();
+	AddCameraInternalCalls();
 	AddTransformInternalCalls();
 }
 
@@ -178,6 +195,10 @@ void Assembly::LoadScriptCoreTypes()
 	// Component._Enable
 	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
 	ComponentMethodEnabled = method ? (ComponentMethodEnabledFn)mono_method_get_unmanaged_thunk(method) : nullptr;
+	spdlog::debug("Set component method enabled to {}", fmt::ptr(ComponentMethodEnabled));
+
+	method = mono_class_get_method_from_name(component, "Update", 0);
+	ComponentMethodUpdate = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddComponentMethod(Start)
 	AddComponentMethod(Update)

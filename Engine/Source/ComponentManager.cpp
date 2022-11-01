@@ -115,16 +115,16 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 		for (auto entityPair : componentPair.second.EntityIndex)
 		{
 			Component* instance = componentPair.second.Instances[entityPair.second];
-			if (!instance->ManagedInstance)
-				instance->ManagedInstance = CreateManagedInstance(componentPair.first, entityPair.first);
-			if (!instance->ManagedInstance)
+			if (!instance->ManagedData.Instance)
+				instance->ManagedData = CreateManagedInstance(componentPair.first, entityPair.first);
+			if (!instance->ManagedData.Instance)
 				continue;
 
-			ComponentMethodEnabled(instance->ManagedInstance, m_WorldIsActive, &exception);
+			ComponentMethodEnabled(instance->ManagedData.Instance, m_WorldIsActive, &exception);
 			if (m_WorldIsActive)
-				ComponentMethodStart(instance->ManagedInstance, &exception);
+				ComponentMethodStart(instance->ManagedData.Instance, &exception);
 			else
-				ComponentMethodDestroyed(instance->ManagedInstance, &exception);
+				ComponentMethodDestroyed(instance->ManagedData.Instance, &exception);
 		}
 	}
 }
@@ -135,19 +135,25 @@ void ComponentManager::InvalidateAllManagedInstances()
 	{
 		for (Component* instance : componentPair.second.Instances)
 		{
-			// mono_free(instance->ManagedInstance); // <-- Causes exception. TODO: Find way to delete or force GC on managed instances
-			instance->ManagedInstance = nullptr;
+			mono_gchandle_free(instance->ManagedData.GCHandle);
+			instance->ManagedData = {};
 		}
 	}
 }
 
-MonoObject* ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
+Components::ManagedComponentData ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
+	Assembly::ManagedComponentData managedData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
 	if (!managedType)
-		return nullptr;
+	{
+		if (managedData.AddFn)
+			return managedData.AddFn(World::GetWorld(m_WorldID), entityID)->ManagedData;
+		return {};
+	}
 
 	// Create managed (C#) instance
+	MonoDomain* domain = mono_domain_get();
 	MonoObject* instance = mono_object_new(mono_domain_get(), mono_class_from_mono_type(managedType));
 
 	// Initialise component
@@ -158,17 +164,40 @@ MonoObject* ComponentManager::CreateManagedInstance(size_t typeHash, unsigned in
 	// Call constructor
 	mono_runtime_object_init(instance);
 
-	return instance;
+	auto componentData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
+	return {
+		instance,
+		managedData.AddFn == nullptr,
+		mono_gchandle_new(instance, false),
+		managedType
+	};
 }
 
 void ComponentManager::CallUpdateFn()
 {
-	MonoException* exception = nullptr;
+	if (!ScriptEngine::IsLoaded())
+		return;
+
+	// Make local copy incase m_ComponentArrays gets modified
+	auto componentArraysCopy = m_ComponentArrays;
+
 	// Call all components' Update function
-	for (auto componentPair : m_ComponentArrays)
-		for (Component* instance : componentPair.second.Instances)
-			if(instance->ManagedInstance)
-				ComponentMethodUpdate(instance->ManagedInstance, &exception);
+	for (auto componentPair : componentArraysCopy)
+	{
+		for (size_t i = 0; i < componentPair.second.Instances.size(); i++)
+		{
+			Component* instance = componentPair.second.Instances[i];
+
+			if (!instance->Entity.GetWorld())
+				continue; // Invalid entity, world is not set?
+
+			if (instance->ManagedData.Instance && instance->ManagedData.ShouldCallUpdate)
+			{
+				MonoException* exception = nullptr;
+				ComponentMethodUpdate(instance->ManagedData.Instance, &exception);
+			}
+		}
+	}
 }
 
 #pragma region ComponentData
@@ -190,27 +219,42 @@ void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 		return;
 
 	// Create managed (C#) instance
-	instance->ManagedInstance = Owner->CreateManagedInstance(TypeHash, entity);
-	if (!instance->ManagedInstance)
+	instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
+	if (!instance->ManagedData.Instance)
 		return;
 
 	// If world is active, call Enabled and then Start
 	MonoException* exception = nullptr;
 	if (Owner->m_WorldIsActive)
 	{
-		ComponentMethodEnabled(instance->ManagedInstance, true, &exception);
-		ComponentMethodStart(instance->ManagedInstance, &exception);
+		ComponentMethodEnabled(instance->ManagedData.Instance, true, &exception);
+		ComponentMethodStart(instance->ManagedData.Instance, &exception);
 	}
 }
 
-Component* ComponentManager::ComponentData::Get(EntityID entity) { return Has(entity) ? Instances[EntityIndex[entity]] : nullptr; }
+Component* ComponentManager::ComponentData::Get(EntityID entity)
+{
+	if (!Has(entity))
+		return nullptr;
+	Component* instance = Instances[EntityIndex[entity]];
+	if (!instance->ManagedData.Instance)
+		instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
+	return instance;
+}
 
 bool ComponentManager::ComponentData::Has(EntityID entity) { return EntityIndex.find(entity) != EntityIndex.end(); }
 
 void ComponentManager::ComponentData::Remove(EntityID entity)
 {
 	unsigned int instanceIndex = EntityIndex[entity];
+
+	// Free managed memory
+	Component* instance = Instances[instanceIndex];
+	mono_gchandle_free(instance->ManagedData.GCHandle);
+	
+	// Free unmanaged memory
 	delete Instances[instanceIndex];
+
 	Instances.erase(Instances.begin() + instanceIndex);
 
 	EntityIndex.erase(entity);

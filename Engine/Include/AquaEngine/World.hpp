@@ -307,7 +307,8 @@ namespace AquaEngine
 		AquaAPI AquaEngine::EntityManager* GetEntityManager();
 		AquaAPI AquaEngine::ComponentManager* GetComponentManager();
 
-		static World* GetWorld(unsigned int id) { return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
+		static std::vector<World*> GetWorlds();
+		static World* GetWorld(unsigned int id);
 #pragma endregion
 
 	private:

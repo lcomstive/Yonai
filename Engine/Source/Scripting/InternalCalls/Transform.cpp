@@ -8,72 +8,88 @@
 using namespace AquaEngine;
 using namespace AquaEngine::Components;
 
-void TransformSetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* value)
+Transform* GetTransform(unsigned int worldID, unsigned int entityID)
 {
 	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	if (!world) return nullptr;
+	return world->GetEntity(entityID).GetComponent<Transform>();
+}
+
+void SetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* value)
+{
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Position = *value;
 }
 
-void TransformGetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+void GetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Position;
 }
 
-void TransformSetRotation(unsigned int worldID, unsigned int entityID, glm::quat* value)
+void SetRotation(unsigned int worldID, unsigned int entityID, glm::quat* value)
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Rotation = *value;
 }
 
-void TransformGetRotation(unsigned int worldID, unsigned int entityID, glm::quat* outValue)
+void GetRotation(unsigned int worldID, unsigned int entityID, glm::quat* outValue)
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Rotation;
 }
 
-void TransformSetScale(unsigned int worldID, unsigned int entityID, glm::vec3* value)
+void SetScale(unsigned int worldID, unsigned int entityID, glm::vec3* value)
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Scale = *value;
 }
 
-void TransformGetScale(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+void GetScale(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return;
-	Transform* transform = world->GetEntity(entityID).GetComponent<Transform>();
+	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Scale;
 }
 
+void GetUp(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+{
+	Transform* transform = GetTransform(worldID, entityID);
+	if (transform)
+		*outValue = transform->Up();
+}
+
+void GetForward(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+{
+	Transform* transform = GetTransform(worldID, entityID);
+	if (transform)
+		*outValue = transform->Forward();
+}
+
+void GetRight(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+{
+	Transform* transform = GetTransform(worldID, entityID);
+	if (transform)
+		*outValue = transform->Right();
+}
+
+#define ADD_TRANSFORM_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_"#name, (const void*)name);
+
 void AquaEngine::Scripting::Assembly::AddTransformInternalCalls()
 {
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_SetScale", (const void*)TransformSetScale);
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_GetScale", (const void*)TransformGetScale);
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_SetPosition", (const void*)TransformSetPosition);
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_GetPosition", (const void*)TransformGetPosition);
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_SetRotation", (const void*)TransformSetRotation);
-	mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_GetRotation", (const void*)TransformGetRotation);
+	ADD_TRANSFORM_INTERNAL_CALL(SetScale);
+	ADD_TRANSFORM_INTERNAL_CALL(GetScale);
+	ADD_TRANSFORM_INTERNAL_CALL(SetPosition);
+	ADD_TRANSFORM_INTERNAL_CALL(GetPosition);
+	ADD_TRANSFORM_INTERNAL_CALL(SetRotation);
+	ADD_TRANSFORM_INTERNAL_CALL(GetRotation);
+	
+	ADD_TRANSFORM_INTERNAL_CALL(GetUp);
+	ADD_TRANSFORM_INTERNAL_CALL(GetForward);
+	ADD_TRANSFORM_INTERNAL_CALL(GetRight);
 }

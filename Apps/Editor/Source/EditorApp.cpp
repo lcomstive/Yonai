@@ -57,9 +57,9 @@ void EditorApp::Setup()
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
 	m_RenderSystem->Enable(false);
 
-	LoadScene();
-
 	Add<ViewportView>();
+
+	LoadScene();
 }
 
 void EditorApp::OnDraw()
@@ -99,8 +99,12 @@ void EditorApp::LoadScene()
 			"/Assets/Shaders/Sprite.frag"
 		});
 
-	const unsigned int spriteRows = 20;
-	const unsigned int spriteColumns = 20;
+	// Test component
+	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
+	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
+
+	const unsigned int spriteRows = 15;
+	const unsigned int spriteColumns = 15;
 	for (unsigned int x = 0; x < spriteRows; x++)
 	{
 		for (unsigned int y = 0; y < spriteColumns; y++)
@@ -114,18 +118,10 @@ void EditorApp::LoadScene()
 			SpriteRenderer* sprite = entity.AddComponent<SpriteRenderer>();
 			sprite->Sprite = textureID;
 			sprite->Shader = spriteShader;
-		}
-	}
 
-	// Add managed component to first entity
-	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
-	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
-	for (int i = 0; i < spriteRows * spriteColumns; i++)
-	{
-		if (monoType)
-			m_CurrentScene->GetEntity(i).AddComponent(monoType);
-		else
-			spdlog::error("Could not find type matching 'ScriptingTest.TestComponent'");
+			if (monoType)
+				entity.AddComponent(monoType);
+		}
 	}
 
 	// Add scene to active scenes

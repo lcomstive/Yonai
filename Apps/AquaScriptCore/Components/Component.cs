@@ -44,9 +44,31 @@ namespace AquaEngine
 		/// </summary>
 		protected virtual void Destroyed() { }
 
+		/// <summary>
+		/// Returns true if object is not null
+		/// </summary>
+		public static implicit operator bool(Component component) => !ReferenceEquals(component, null);
+
+		#region Entity Proxy
+		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
+		public bool HasComponent<T>() where T : Component => Entity?.HasComponent<T>() ?? false;
+
+		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
+		public T AddComponent<T>() where T : Component => Entity?.AddComponent<T>() ?? null;
+
+		/// <returns>Instance of <see cref="Component"/> attached to entity, or null if not found</returns>
+		public T GetComponent<T>() where T : Component => Entity?.GetComponent<T>() ?? null;
+
+		/// <summary>
+		/// Removes a <see cref="Component"/> from this entity
+		/// </summary>
+		/// <returns>Success state of removal</returns>
+		public bool RemoveComponent<T>() where T : Component => Entity?.RemoveComponent<T>() ?? false;
+		#endregion
+
 		#region Unmanaged Calls
 		// Called from C++
-		private void aqua_Initialise(uint worldID, uint entityID) => Entity = new Entity(World.Get(worldID), entityID);
+		internal void aqua_Initialise(uint worldID, uint entityID) => Entity = new Entity(World.Get(worldID), entityID);
 
 		// Called from C++
 		private void aqua_Enable(bool enable)

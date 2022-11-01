@@ -86,9 +86,11 @@ namespace AquaEngine::Scripting
 #pragma region Internal Calls
 		void AddLogInternalCalls();
 		void AddTimeInternalCalls();
+		void AddInputInternalCalls();
+		void AddCameraInternalCalls();
+		void AddWorldInternalCalls();
 		void AddVectorInternalCalls();
 		void AddTransformInternalCalls();
-		void AddWorldInternalCalls();
 #pragma endregion
 
 		template<typename T>
@@ -101,14 +103,23 @@ namespace AquaEngine::Scripting
 				return;
 			}
 
+			MonoType* managedType = mono_class_get_type(klass);
+			size_t managedHash = GetTypeHash(managedType);
+			size_t hash = typeid(T).hash_code();
+
 			s_InternalManagedComponentTypes.emplace(
-				GetTypeHash(mono_class_get_type(klass)),
+				managedHash,
 				ManagedComponentData
 				{
-					typeid(T).hash_code(),
+					hash,
 					[](World* world, EntityID entityID) -> Components::Component* { return world->AddComponent<T>(entityID); }
 				}
 			);
+
+			// Store both native and non-native hashes of this type to the managed (C#) MonoType*
+			s_TypeHashes.emplace(managedType, managedHash);
+			s_ReverseTypeHashes.emplace(hash, managedType);
+			s_ReverseTypeHashes.emplace(managedHash, managedType);
 		}
 	};
 }

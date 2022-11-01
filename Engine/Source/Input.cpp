@@ -13,6 +13,7 @@ vec2 Input::s_MousePosition = { 0, 0 };
 vec2 Input::s_LastMousePosition = { 0, 0 };
 map<Key, Input::KeyState> Input::s_KeyStates;
 map<int, Input::KeyState> Input::s_MouseStates;
+MouseState Input::s_MouseState = MouseState::Normal;
 map<int, Input::JoystickType> Input::s_ConnectedGamepads;
 
 bool Input::IsEnabled() { return s_Enabled; }
@@ -89,18 +90,28 @@ bool Input::IsMouseReleased(int key)
 #pragma region Mouse
 vec2 Input::GetMousePosition() { return s_Enabled ? s_MousePosition : vec2(); }
 vec2 Input::GetMouseDelta() { return s_Enabled ? (s_MousePosition - s_LastMousePosition) : vec2(); }
+void Input::SetMousePosition(glm::vec2 value) { if(s_Enabled) glfwSetCursorPos(Window::GetNativeHandle(), value.x, value.y); }
 
 float Input::GetScrollDelta() { return s_Enabled ? s_ScrollDelta : 0; }
 
-void Input::ShowMouse(bool show)
+void Input::SetMouseState(MouseState state)
 {
 	if (!s_Enabled)
 		return;
 
 #if defined(AQUA_PLATFORM_DESKTOP)
-	glfwSetInputMode(Window::GetNativeHandle(), GLFW_CURSOR, show ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	int glfwState = GLFW_CURSOR_NORMAL;
+	if (state == MouseState::Hidden) glfwState = GLFW_CURSOR_HIDDEN;
+	else if (state == MouseState::Disabled) glfwState = GLFW_CURSOR_DISABLED;
+
+	glfwSetInputMode(Window::GetNativeHandle(), GLFW_CURSOR, glfwState);
+
+	s_MouseState = state;
 #endif
 }
+
+MouseState Input::GetMouseState() { return s_MouseState; }
+bool Input::IsMouseShowing() { return s_MouseState == MouseState::Normal; }
 #pragma endregion
 
 #pragma region Gamepad

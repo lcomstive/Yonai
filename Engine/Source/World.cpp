@@ -3,6 +3,7 @@
 #include <AquaEngine/ComponentManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/Component.hpp>
+#include <AquaEngine/Components/ScriptComponent.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -90,7 +91,12 @@ void World::OnActiveStateChanged(bool isActive)
 	m_ComponentManager->OnWorldActiveStateChanged(isActive);
 }
 
-ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType) { return m_ComponentManager->Add(entity, managedType); }
+ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType)
+{
+	ScriptComponent* instance = m_ComponentManager->Add(entity, managedType);
+	SetupEntityComponent(entity, instance);
+	return instance;
+}
 void World::RemoveComponent(EntityID entity, MonoType* managedType) { m_ComponentManager->Remove(entity, Scripting::Assembly::GetTypeHash(managedType)); }
 bool World::HasComponent(EntityID entity, MonoType* managedType) { return m_ComponentManager->Has(entity, Scripting::Assembly::GetTypeHash(managedType)); }
 ScriptComponent* World::GetComponent(EntityID entity, MonoType* managedType) { return (ScriptComponent*)m_ComponentManager->Get(entity, Scripting::Assembly::GetTypeHash(managedType)); }
@@ -103,6 +109,17 @@ EntityManager* World::GetEntityManager() { return m_EntityManager.get(); }
 ComponentManager* World::GetComponentManager() { return m_ComponentManager.get(); }
 
 void World::ClearComponents(EntityID entity) { m_ComponentManager->Clear(entity); }
+
+World* World::GetWorld(unsigned int id)
+{ return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
+
+vector<World*> World::GetWorlds()
+{
+	vector<World*> worlds = {};
+	for (auto pair : s_Worlds)
+		worlds.push_back(pair.second);
+	return worlds;
+}
 
 #pragma region World::Entity
 EntityID World::Entity::ID() { return m_ID; }
