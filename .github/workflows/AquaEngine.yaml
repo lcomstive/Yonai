@@ -86,9 +86,18 @@ jobs:
 
     # Copy desired artifacts to output folder
     - name: Gather artifacts
+      if: matrix.config.os != 'windows-latest'
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
+        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
+
+    - name: Gather artifacts
+      if: matrix.config.os == 'windows-latest'
+      run: |
+        mkdir -p ${{ github.workspace }}/build/artifact
+        cp ${{ env.BINARY_DIR }}/*.dll ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/*.exe ${{ github.workspace }}/build/artifact/
         cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
 
     # Upload artifact
