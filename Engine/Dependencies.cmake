@@ -12,7 +12,7 @@ endif()
 
 # Linux requires some specific libraries for compilation
 if(UNIX AND NOT APPLE)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS dl rt)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS dl rt z)
 endif()
 
 # OpenGL
@@ -73,10 +73,7 @@ if(WIN32)
 elseif(APPLE)
 	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.1.dylib)
 elseif(UNIX)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS
-		libz.so
-		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.a
-	)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.a)
 endif()
 
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")
