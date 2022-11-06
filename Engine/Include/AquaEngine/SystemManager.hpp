@@ -4,11 +4,14 @@
 #include <typeindex>
 #include <type_traits>
 #include <unordered_map>
+#include <mono/jit/jit.h>
 #include <AquaEngine/Systems/System.hpp>
+#include <AquaEngine/Scripting/ManagedData.hpp>
 
 namespace AquaEngine
 {
 	class World;
+	namespace Systems { struct ScriptSystem; }
 
 	class SystemManager
 	{
@@ -29,45 +32,56 @@ namespace AquaEngine
 		AquaAPI static SystemManager* Global();
 
 		template<typename T>
-		T* Add()
+		T* Add(size_t type)
 		{
 			if (!std::is_base_of<Systems::System, T>())
+			{
+				spdlog::warn("Cannot add system of type '{}' because it does not derive from AquaEngine::Systems::System",
+					typeid(T).name());
 				return nullptr;
+			}
 
 			T* system = Get<T>();
 			if (system) // Check if system already added
 				return system;
 			system = new T();
 			system->m_Owner = this;
-			m_Systems.emplace(typeid(T), system);
+			m_Systems.emplace(type, system);
 			return system;
 		}
 
 		template<typename T>
-		void Remove()
+		T* Add() { return Add<T>(typeid(T).hash_code()); }
+
+		AquaAPI Systems::ScriptSystem* Add(MonoType* managedType);
+
+		template<typename T>
+		bool Remove()
 		{
 			if (!Has<T>())
-				return;
-			std::type_index type = typeid(T);
+				return false;
+			size_t type = typeid(T).hash_code();
 			delete m_Systems[type];
 			m_Systems.erase(type);
+			return true;
 		}
 
 		template<typename T>
-		bool Has() { return m_Systems.find(typeid(T)) != m_Systems.end(); }
+		bool Has() { return Has(typeid(T).hash_code()); }
 
 		template<typename T>
 		/// <returns>Pointer to system, or nullptr if not available</returns>
-		T* Get()
-		{
-			if (!Has<T>())
-				return nullptr;
-			return (T*)m_Systems[typeid(T)];
-		}
+		T* Get() { return (T*)Get(typeid(T).hash_code()); }
+
+		bool Has(size_t hash);
+		bool Remove(size_t hash);
+		Systems::System* Get(size_t hash);
 
 		AquaAPI std::vector<Systems::System*> All();
 
 	private:
-		std::unordered_map<std::type_index, Systems::System*> m_Systems = {};
+		std::unordered_map<size_t, Systems::System*> m_Systems = {};
+
+		Scripting::ManagedData CreateManagedInstance(size_t typeHash);
 	};
 }

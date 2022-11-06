@@ -1,10 +1,14 @@
 #pragma once
 #include <AquaEngine/API.hpp>
-	
+#include <AquaEngine/Scripting/ManagedData.hpp>
+
+// Forward declarations
+struct _MonoType;
+struct _MonoObject;
 namespace AquaEngine { class World; class SystemManager; }
 
 namespace AquaEngine::Systems
-{
+{	
 	class System
 	{
 	private:
@@ -25,6 +29,8 @@ namespace AquaEngine::Systems
 #pragma endregion
 
 	public:
+		AquaEngine::Scripting::ManagedData ManagedData;
+
 		AquaAPI bool IsEnabled();
 
 		AquaAPI void ToggleEnabled();

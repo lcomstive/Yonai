@@ -89,6 +89,11 @@ void World::OnActiveStateChanged(bool isActive)
 {
 	spdlog::debug("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
 	m_ComponentManager->OnWorldActiveStateChanged(isActive);
+
+	if (isActive)
+		m_SystemManager->Init();
+	else
+		m_SystemManager->Destroy();
 }
 
 ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType)

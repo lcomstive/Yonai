@@ -31,6 +31,11 @@ namespace AquaEngine
 			ID = id;
 		}
 
+		/// <summary>
+		/// Removes an entity from <see cref="World"/>
+		/// </summary>
+		public void Destroy() => World.DestroyEntity(ID);
+
 		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
 		public bool HasComponent<T>() where T : Component => _aqua_internal_Entity_HasComponent(World.ID, ID, typeof(T));
 

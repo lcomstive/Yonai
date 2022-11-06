@@ -7,6 +7,9 @@
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Components/Transform.hpp>
 
+// Systems to map, unmanaged -> managed
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Systems;
@@ -14,6 +17,7 @@ using namespace AquaEngine::Scripting;
 
 unordered_map<MonoType*, size_t> Assembly::s_TypeHashes = {};
 unordered_map<size_t, MonoType*> Assembly::s_ReverseTypeHashes = {};
+unordered_map<size_t, Assembly::ManagedSystemData> Assembly::s_InternalManagedSystemTypes = {};
 unordered_map<size_t, Assembly::ManagedComponentData> Assembly::s_InternalManagedComponentTypes = {};
 
 // Unmanaged thunks definition
@@ -106,7 +110,28 @@ Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanage
 	}
 
 	// Not found, return empty
-	return Assembly::ManagedComponentData{ unmanagedType };
+	return Assembly::ManagedComponentData { unmanagedType };
+}
+
+Assembly::ManagedSystemData Assembly::GetManagedSystemData(size_t unmanagedType)
+{
+	// Check with input type
+	auto it = s_InternalManagedSystemTypes.find(unmanagedType);
+	if (it != s_InternalManagedSystemTypes.end())
+		return it->second;
+
+	// Lookup type compared to managed types
+	auto reverseIt = s_ReverseTypeHashes.find(unmanagedType);
+	if (reverseIt != s_ReverseTypeHashes.end())
+	{
+		unmanagedType = s_TypeHashes[reverseIt->second];
+		it = s_InternalManagedSystemTypes.find(unmanagedType);
+		if (it != s_InternalManagedSystemTypes.end())
+			return it->second;
+	}
+
+	// Not found, return empty
+	return Assembly::ManagedSystemData { unmanagedType };
 }
 
 void Assembly::ClearCachedTypes()
@@ -140,6 +165,12 @@ void Assembly::CacheTypes(bool isCore)
 		string fullName = strlen(_namespace) == 0 ? _name : fmt::format("{}.{}", _namespace, _name);
 		size_t hash = std::hash<std::string>{}(fullName);
 
+		if (!klass)
+		{
+			spdlog::warn("Failed to cache type '{}.{}'", _namespace, _name);
+			continue;
+		}
+
 		// Check if derives from AquaEngine.System
 		if (klass != coreSystemType && mono_class_is_subclass_of(klass, coreSystemType, false))
 		{
@@ -169,6 +200,7 @@ void Assembly::AddInternalCalls()
 	AddInputInternalCalls();
 	AddVectorInternalCalls();
 	AddCameraInternalCalls();
+	AddSystemInternalCalls();
 	AddTransformInternalCalls();
 }
 
@@ -184,6 +216,8 @@ void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
+
+	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
 
 #pragma region Component Methods
 	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");
@@ -209,8 +243,8 @@ void Assembly::LoadScriptCoreTypes()
 	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "System");
 
 	// System.aqua_Initialise
-	method = mono_class_get_method_from_name(system, "aqua_Initialise", 2);
-	SystemMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	method = mono_class_get_method_from_name(system, "aqua_Initialise", 1);
+	SystemMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	// System.aqua_Enable
 	method = mono_class_get_method_from_name(system, "aqua_Enable", 1);

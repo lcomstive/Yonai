@@ -51,6 +51,12 @@ namespace AquaEngine::Systems
 		/// Unloads all scenes from being active
 		/// </summary>
 		AquaAPI static void UnloadAllScenes();
+
+		/// <summary>
+		/// Resets all active scenes by unloading and reloading them,
+		/// in order they were added
+		/// </summary>
+		AquaAPI static void ReloadActiveScenes();
 		
 		/// <summary>
 		/// Gets all actively loaded scenes

@@ -45,7 +45,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CameraControlSystem.cs" />
     <Compile Include="TestComponent.cs" />
+    <Compile Include="TransformScaleSystem.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="CopyFiles" AfterTargets="Build">

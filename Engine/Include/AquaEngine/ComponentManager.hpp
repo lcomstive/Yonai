@@ -7,13 +7,14 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Entity.hpp>
+#include <AquaEngine/Scripting/ManagedData.hpp>
 
 namespace AquaEngine
 {	
 	// Forward declaration
 	class World;
 	namespace Scripting { class ScriptEngine; }
-	namespace Components { struct ManagedComponentData; struct Component; struct ScriptComponent; }
+	namespace Components { struct Component; struct ScriptComponent; }
 
 	/// <summary>
 	/// Handles many entities & their related component instances
@@ -91,7 +92,7 @@ namespace AquaEngine
 		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
 		
 		void OnWorldActiveStateChanged(bool isActive);
-		Components::ManagedComponentData CreateManagedInstance(size_t typeHash, unsigned int entityID);
+		AquaEngine::Scripting::ManagedData CreateManagedInstance(size_t typeHash, unsigned int entityID);
 
 		/// <summary>
 		/// Releases all 'Component::ManagedInstance's,
@@ -138,7 +139,7 @@ namespace AquaEngine
 			return component;
 		}
 
-		Components::ScriptComponent* Add(EntityID id, MonoType* managedType);
+		AquaAPI Components::ScriptComponent* Add(EntityID id, MonoType* managedType);
 
 		/// <summary>
 		/// Create a component and add it to an entity

@@ -25,9 +25,20 @@ namespace AquaEngine::Scripting
 
 			/// <summary>
 			/// Component* (World* world, unsigned int entityID).
-			/// Returns created instance of component matching type has <see cref="Type" />
+			/// Returns created instance of component matching type <see cref="Type" />
 			/// </summary>
 			std::function<Components::Component* (World*, unsigned int)> AddFn;
+		};
+
+		AquaAPI struct ManagedSystemData
+		{
+			size_t Type;
+
+			/// <summary>
+			/// System* (World* world).
+			/// Returns created instance of system matching type <see cref="Type" />
+			/// </summary>
+			std::function<Systems::System* (SystemManager*)> AddFn;
 		};
 
 	private:
@@ -37,6 +48,7 @@ namespace AquaEngine::Scripting
 		///				unmanaged (C++) component (hash code of type_info),
 		///				and function for when component is added to an entity
 		/// </summary>
+		static std::unordered_map<size_t, ManagedSystemData> s_InternalManagedSystemTypes;
 		static std::unordered_map<size_t, ManagedComponentData> s_InternalManagedComponentTypes;
 
 		std::vector<MonoClass*> m_ManagedSystemTypes = {};
@@ -61,11 +73,8 @@ namespace AquaEngine::Scripting
 		AquaAPI static size_t GetTypeHash(MonoType* type);
 		AquaAPI static size_t GetTypeHash(MonoClass* monoClass);
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
+		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
-
-		template<typename T>
-		static ManagedComponentData GetManagedComponentData()
-		{ return GetManagedComponentData(typeid(T).hash_code()); }
 	
 	private:
 		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
@@ -87,25 +96,42 @@ namespace AquaEngine::Scripting
 		void AddLogInternalCalls();
 		void AddTimeInternalCalls();
 		void AddInputInternalCalls();
-		void AddCameraInternalCalls();
 		void AddWorldInternalCalls();
+		void AddCameraInternalCalls();
+		void AddSystemInternalCalls();
 		void AddVectorInternalCalls();
 		void AddTransformInternalCalls();
 #pragma endregion
 
 		template<typename T>
-		void AddInternalManagedComponent(char* managedNamespace, char* managedName)
+		bool AddInternalManagedType(char* managedNamespace, char* managedName, size_t* managedHash)
 		{
 			MonoClass* klass = mono_class_from_name(Image, managedNamespace, managedName);
 			if (!klass)
 			{
 				spdlog::warn("Failed to add internal managed component definition for '{}' - not found in assembly '{}'", managedName, mono_image_get_name(Image));
-				return;
+				return false;
 			}
 
 			MonoType* managedType = mono_class_get_type(klass);
-			size_t managedHash = GetTypeHash(managedType);
+			*managedHash = GetTypeHash(managedType);
 			size_t hash = typeid(T).hash_code();
+
+			// Store both native and non-native hashes of this type to the managed (C#) MonoType*
+			s_TypeHashes.emplace(managedType, *managedHash);
+			s_ReverseTypeHashes.emplace(hash, managedType);
+			s_ReverseTypeHashes.emplace(*managedHash, managedType);
+
+			return true;
+		}
+
+		template<typename T>
+		void AddInternalManagedComponent(char* managedNamespace, char* managedName)
+		{
+			size_t managedHash = 0;
+			size_t hash = typeid(T).hash_code();
+			if (!AddInternalManagedType<T>(managedNamespace, managedName, &managedHash))
+				return;
 
 			s_InternalManagedComponentTypes.emplace(
 				managedHash,
@@ -115,11 +141,25 @@ namespace AquaEngine::Scripting
 					[](World* world, EntityID entityID) -> Components::Component* { return world->AddComponent<T>(entityID); }
 				}
 			);
+		}
 
-			// Store both native and non-native hashes of this type to the managed (C#) MonoType*
-			s_TypeHashes.emplace(managedType, managedHash);
-			s_ReverseTypeHashes.emplace(hash, managedType);
-			s_ReverseTypeHashes.emplace(managedHash, managedType);
+		template<typename T>
+		void AddInternalManagedSystem(char* managedNamespace, char* managedName)
+		{
+			size_t managedHash = 0;
+			size_t hash = typeid(T).hash_code();
+			if (!AddInternalManagedType<T>(managedNamespace, managedName, &managedHash))
+				return;
+
+			s_InternalManagedSystemTypes.emplace(
+				managedHash,
+				ManagedSystemData
+				{
+					hash,
+					[](SystemManager* systemManager) -> Systems::System* { return systemManager->Add<T>(); }
+				}
+			);
+
 		}
 	};
 }

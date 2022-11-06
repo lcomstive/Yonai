@@ -1,10 +1,10 @@
 #include <AquaEngine/ComponentManager.hpp>
 #include <AquaEngine/Components/Component.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
 
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <AquaEngine/Components/ScriptComponent.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -42,6 +42,9 @@ ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
 {
 	ScriptComponent* component = new ScriptComponent();
 	size_t typeHash = Scripting::Assembly::GetTypeHash(managedType);
+
+	// TODO: Check if component already exists on entity, and return existing component
+
 	if (m_ComponentArrays.find(typeHash) == m_ComponentArrays.end())
 		m_ComponentArrays.emplace(typeHash, ComponentData{ this, typeHash });
 	m_ComponentArrays[typeHash].Add(component, id);
@@ -141,7 +144,7 @@ void ComponentManager::InvalidateAllManagedInstances()
 	}
 }
 
-Components::ManagedComponentData ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
+AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedComponentData managedData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
@@ -158,7 +161,6 @@ Components::ManagedComponentData ComponentManager::CreateManagedInstance(size_t 
 
 	// Initialise component
 	MonoException* exception = nullptr;
-	unsigned int params[2] = { m_WorldID, entityID };
 	ComponentMethodInitialise(instance, m_WorldID, entityID, &exception);
 
 	// Call constructor
@@ -191,7 +193,7 @@ void ComponentManager::CallUpdateFn()
 			if (!instance->Entity.GetWorld())
 				continue; // Invalid entity, world is not set?
 
-			if (instance->ManagedData.Instance && instance->ManagedData.ShouldCallUpdate)
+			if (instance->ManagedData.Instance && instance->ManagedData.ShouldSendMessages)
 			{
 				MonoException* exception = nullptr;
 				ComponentMethodUpdate(instance->ManagedData.Instance, &exception);
@@ -250,7 +252,8 @@ void ComponentManager::ComponentData::Remove(EntityID entity)
 
 	// Free managed memory
 	Component* instance = Instances[instanceIndex];
-	mono_gchandle_free(instance->ManagedData.GCHandle);
+	if(instance->ManagedData.Instance)
+		mono_gchandle_free(instance->ManagedData.GCHandle);
 	
 	// Free unmanaged memory
 	delete Instances[instanceIndex];

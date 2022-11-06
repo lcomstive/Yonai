@@ -57,6 +57,7 @@
     <Compile Include="Core\Time.cs" />
     <Compile Include="Core\World.cs" />
     <Compile Include="Core\System.cs" />
+    <Compile Include="Systems\SceneManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

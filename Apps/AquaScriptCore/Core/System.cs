@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
 	public abstract class System
 	{
-		public World World { get; private set; }
+		/// <summary>
+		/// World that created this system
+		/// </summary>
+		public World World { get; private set; } = null;
 
 		/// <summary>
 		/// Called once per frame after <see cref="Update"/>,
@@ -41,9 +45,35 @@ namespace AquaEngine
 		/// </summary>
 		protected virtual void Destroyed() { }
 
-		#region Unmanaged Calls
-		private void aqua_Initialise(uint worldID) => World = World.Get(worldID);
+		#region Global Systems
+		private static uint GlobalWorldID = uint.MaxValue;
 
+		/// <summary>
+		/// Checks if a system exists globally
+		/// </summary>
+		public static bool Has<T>() => World._aqua_internal_World_HasSystem(GlobalWorldID, typeof(T));
+
+		/// <summary>
+		/// Adds a global system
+		/// </summary>
+		public static T Add<T>() => (T)World._aqua_internal_World_AddSystem(GlobalWorldID, typeof(T));
+
+		/// <summary>
+		/// Gets a global system
+		/// </summary>
+		public static T Get<T>() => (T)World._aqua_internal_World_GetSystem(GlobalWorldID, typeof(T));
+
+		/// <summary>
+		/// Removes a global system
+		/// </summary>
+		public static bool Remove<T>() => World._aqua_internal_World_RemoveSystem(GlobalWorldID, typeof(T));
+		#endregion
+
+		#region Unmanaged Calls
+		// Called from C++
+		internal void aqua_Initialise(uint worldID) => World = worldID != uint.MaxValue ? World.Get(worldID) : null;
+
+		// Called from C++
 		private void aqua_Enable(bool enable)
 		{
 			if (enable)
