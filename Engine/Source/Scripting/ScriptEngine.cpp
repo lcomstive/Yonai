@@ -2,6 +2,7 @@
 #include <AquaEngine/Timer.hpp>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/IO/VFS.hpp>
+#include <mono/metadata/threads.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
 #include <AquaEngine/SystemManager.hpp>
@@ -20,6 +21,7 @@ const char* AppDomainName = "AquaEngineAppDomain";
 
 string ScriptEngine::s_CoreDLLPath = "";
 bool ScriptEngine::s_AwaitingReload = false;
+bool ScriptEngine::s_DebuggingEnabled = false;
 MonoDomain* ScriptEngine::s_AppDomain = nullptr;
 Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
@@ -32,6 +34,8 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	s_CoreDLLPath = coreDllPath;
 	if (s_RootDomain)
 		return; // Already initialised
+
+	s_DebuggingEnabled = allowDebugging;
 
 	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
 	if (!VFS::Exists(assembliesPath))
@@ -46,10 +50,12 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	{
 		static const char* options[] = {
 		  "--soft-breakpoints",
-		  "--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:55555"
+		  "--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:55555,suspend=n,loglevel=3,logfile=MonoDebugger.log"
 		};
 		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+
+		spdlog::debug("C# debugging is enabled");
 	}
 
 	s_RootDomain = mono_jit_init("AquaEngineRuntime");
@@ -58,6 +64,11 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 		spdlog::critical("Failed to create mono domain");
 		return;
 	}
+
+	if (allowDebugging)
+		mono_debug_domain_create(s_RootDomain);
+
+	mono_thread_set_main(mono_thread_current());
 
 	s_AppDomain = mono_domain_create_appdomain((char*)AppDomainName, nullptr);
 	mono_domain_set(s_AppDomain, true);
@@ -122,6 +133,19 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 		return nullptr;
 	}
 
+	// Load debugging info
+	if (DebuggingEnabled())
+	{
+		// Try and load .pdb file next to .dll file
+		std::filesystem::path pdbPath(path);
+		pdbPath.replace_extension(".mdb");
+		if (VFS::Exists(pdbPath.string()))
+		{
+			auto pdbContents = VFS::Read(pdbPath.string());
+			mono_debug_open_image_from_memory(image, pdbContents.data(), pdbContents.size());
+		}
+	}
+
 	MonoAssembly* assembly = mono_assembly_load_from_full(
 		image,
 		path.c_str(), // Friendly name, used for warnings & errors
@@ -152,6 +176,7 @@ void ScriptEngine::OnAssemblyFileChanged(const std::string& path, IO::FileWatchS
 }
 
 bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
+bool ScriptEngine::DebuggingEnabled() { return s_DebuggingEnabled; }
 
 void ScriptEngine::Reload(bool force)
 {

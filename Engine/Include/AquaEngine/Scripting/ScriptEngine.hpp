@@ -12,6 +12,7 @@ namespace AquaEngine::Scripting
 	{
 		static std::string s_CoreDLLPath;
 		static bool s_AwaitingReload;
+		static bool s_DebuggingEnabled;
 		static MonoDomain* s_AppDomain;
 		static MonoDomain* s_RootDomain;
 		static Assembly* s_CoreAssembly;
@@ -80,6 +81,9 @@ namespace AquaEngine::Scripting
 		/// or nullptr if <see cref="Init"/> has not been called
 		/// </returns>
 		AquaAPI static MonoDomain* GetAppDomain();
+
+		/// <returns>True if Init() was called with debugging enabled</returns>
+		AquaAPI static bool DebuggingEnabled();
 
 		/// <summary>
 		/// Unloads & reloads all loaded assemblies.

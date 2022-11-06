@@ -8,7 +8,6 @@ namespace TestGame
 	{
 		protected override void Update()
 		{
-
 		}
 	}
 }

@@ -141,7 +141,7 @@ void EditorApp::InitialiseScripting()
 		Exit();
 		return;
 	}
-	ScriptEngine::Init(coreDllPath);
+	ScriptEngine::Init(coreDllPath, true);
 
 	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
 	if (assemblyPath.empty())

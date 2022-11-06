@@ -52,7 +52,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="CopyFiles" AfterTargets="Build">
     <ItemGroup>
-      <CopySourceFiles Include="$(TargetDir)\*.dll" />
+      <CopySourceFiles Include="$(TargetDir)\*" />
     </ItemGroup>
     <Copy SourceFiles="@(CopySourceFiles)" DestinationFolder="$(SolutionDir)..\..\Assets\Scripts\" />
     <Message Text="Copied build output to shared Assets/Scripts directory" Importance="High" />

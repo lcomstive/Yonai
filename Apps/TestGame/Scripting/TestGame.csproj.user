@@ -3,8 +3,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>
     <StartProgram>D:\Projects\AquaEngine\Build\bin\Debug\AquaEditor.exe</StartProgram>
-    <StartArguments>--dll-path="D:\Projects\AquaEngine\Apps\Assets\Scripts\TestGame.dll" --core-dll-path="D:\Projects\AquaEngine\Apps\Assets\Scripts\AquaScriptCore.dll"</StartArguments>
-    <StartWorkingDirectory>D:\Projects\AquaEngine\Build\bin\Debug\</StartWorkingDirectory>
+    <StartArguments>
+    </StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
