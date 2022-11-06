@@ -2,7 +2,7 @@
 
 namespace AquaEngine
 {
-	public class SceneManager : System
+	public class SceneManager : AquaSystem
 	{
 		private static List<World> s_ActiveScenes = new List<World>();
 

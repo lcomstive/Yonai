@@ -123,9 +123,9 @@ void EditorApp::LoadScene()
 	m_CurrentScene->GetEntity(0).AddComponent(monoType);
 
 	// Camera control system, implemented in C#
-	MonoType* cameraControlSystem = assembly->GetTypeFromClassName("TestGame", "CameraControlSystem");
-	if(cameraControlSystem)
-		m_CurrentScene->GetSystemManager()->Add(cameraControlSystem);
+	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
+	if(testSystem)
+		m_CurrentScene->GetSystemManager()->Add(testSystem);
 
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();

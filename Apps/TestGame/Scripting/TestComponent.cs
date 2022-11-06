@@ -6,13 +6,17 @@ namespace ScriptingTest
 {
 	public class TestComponent : Component
 	{
-		protected override void Start()
+		private SpriteRenderer m_SpriteRenderer;
+
+		protected override void Start() => m_SpriteRenderer = GetComponent<SpriteRenderer>();
+
+		protected override void Update()
 		{
-			if (!World.HasSystem<TransformScaleSystem>())
-			{
-				Log.Info("Adding transform scale system...");
-				World.AddSystem<TransformScaleSystem>();
-			}
+			float time = Time.TimeSinceLaunch;
+			float cos = (float)Math.Cos(time);
+			float sin = (float)Math.Sin(time);
+			m_SpriteRenderer.Colour = new Colour(cos, sin, cos + sin);
 		}
 	}
+
 }

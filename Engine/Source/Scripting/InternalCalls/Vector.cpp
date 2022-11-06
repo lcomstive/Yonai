@@ -13,6 +13,12 @@ float Vector3Dot(glm::vec3* a, glm::vec3* b) { return glm::dot(*a, *b); }
 float Vector3Magnitude(glm::vec3* input) { return glm::length(*input); }
 #pragma endregion
 
+#pragma region Vector4
+float Vector4Magnitude(glm::vec4* input) { return glm::length(*input); }
+#pragma endregion
+
+#define ADD_VECTOR_INTERNAL_CALL(name, fn) mono_add_internal_call("AquaEngine."#name"::_aqua_internal_"#fn, (const void*)##name##fn);
+
 void AquaEngine::Scripting::Assembly::AddVectorInternalCalls()
 {
 #pragma region Vector2
@@ -24,4 +30,13 @@ void AquaEngine::Scripting::Assembly::AddVectorInternalCalls()
 	mono_add_internal_call("AquaEngine.Vector3::_aqua_internal_Distance", (const void*)Vector3Distance);
 	mono_add_internal_call("AquaEngine.Vector3::_aqua_internal_Magnitude", (const void*)Vector3Magnitude);
 #pragma endregion
+
+	ADD_VECTOR_INTERNAL_CALL(Vector2, Magnitude)
+	ADD_VECTOR_INTERNAL_CALL(Vector2, Distance)
+
+	ADD_VECTOR_INTERNAL_CALL(Vector3, Dot)
+	ADD_VECTOR_INTERNAL_CALL(Vector3, Distance)
+	ADD_VECTOR_INTERNAL_CALL(Vector3, Magnitude)
+
+	ADD_VECTOR_INTERNAL_CALL(Vector4, Magnitude)
 }

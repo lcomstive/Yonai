@@ -10,7 +10,7 @@ namespace AquaEngine::Components
 		/// <summary>
 		/// Texture to draw
 		/// </summary>
-		ResourceID Sprite;
+		ResourceID Sprite = InvalidResourceID;
 
 		/// <summary>
 		/// Tint to give drawn sprite

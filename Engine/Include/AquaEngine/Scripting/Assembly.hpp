@@ -93,6 +93,7 @@ namespace AquaEngine::Scripting
 		static void ClearCachedTypes();
 
 #pragma region Internal Calls
+		// TODO: Find a better way to do this
 		void AddLogInternalCalls();
 		void AddTimeInternalCalls();
 		void AddInputInternalCalls();
@@ -101,6 +102,7 @@ namespace AquaEngine::Scripting
 		void AddSystemInternalCalls();
 		void AddVectorInternalCalls();
 		void AddTransformInternalCalls();
+		void AddSpriteRendererInternalCalls();
 #pragma endregion
 
 		template<typename T>

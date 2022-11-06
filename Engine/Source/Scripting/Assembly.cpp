@@ -6,6 +6,7 @@
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
@@ -146,8 +147,8 @@ void Assembly::CacheTypes(bool isCore)
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
 	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
-	MonoClass* coreSystemType    = coreAssembly->GetClassFromName("AquaEngine", "System");
 	MonoClass* coreComponentType = coreAssembly->GetClassFromName("AquaEngine", "Component");
+	MonoClass* coreSystemType    = coreAssembly->GetClassFromName("AquaEngine", "AquaSystem");
 
 	spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
@@ -202,6 +203,7 @@ void Assembly::AddInternalCalls()
 	AddCameraInternalCalls();
 	AddSystemInternalCalls();
 	AddTransformInternalCalls();
+	AddSpriteRendererInternalCalls();
 }
 
 #define AddComponentMethod(name) \
@@ -216,6 +218,7 @@ void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
+	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 
 	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
 
@@ -240,7 +243,7 @@ void Assembly::LoadScriptCoreTypes()
 #pragma endregion
 
 #pragma region System Methods
-	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "System");
+	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "AquaSystem");
 
 	// System.aqua_Initialise
 	method = mono_class_get_method_from_name(system, "aqua_Initialise", 1);

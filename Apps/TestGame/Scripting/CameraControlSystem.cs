@@ -3,7 +3,7 @@ using AquaEngine;
 
 namespace TestGame
 {
-	public class CameraControlSystem : AquaEngine.System
+	public class CameraControlSystem : AquaSystem
 	{
 		public const float ScrollSpeed = 100;
 		public const float SideMoveSpeed = 1.0f;

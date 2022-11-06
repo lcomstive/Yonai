@@ -135,6 +135,7 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 			shader->Bind();
 			texture->Bind();
 			shader->Set("inputTexture", 0);
+			shader->Set("colour", renderer->Colour);
 
 			DrawMesh(m_QuadMesh, shader, transform, camera, currentResolution);
 		}

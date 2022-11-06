@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public abstract class System
+	public abstract class AquaSystem
 	{
 		/// <summary>
 		/// World that created this system
