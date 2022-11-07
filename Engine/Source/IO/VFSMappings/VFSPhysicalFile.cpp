@@ -11,7 +11,7 @@ namespace fs = std::filesystem;
 
 VFSPhysicalFileMapping::VFSPhysicalFileMapping(string mountPoint, string path) : VFSMapping::VFSMapping(mountPoint, path)
 {
-	if(!fs::exists(path))
+	if(!path.empty() && !fs::exists(path))
 		fs::create_directories(path);
 }
 

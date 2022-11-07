@@ -40,6 +40,7 @@ namespace AquaEngine
 
 		static bool s_Enabled;
 		static float s_ScrollDelta;
+		static MouseState s_MouseState;
 		static glm::vec2 s_MousePosition;
 		static glm::vec2 s_LastMousePosition;
 		static std::map<Key, KeyState> s_KeyStates;
@@ -76,6 +77,11 @@ namespace AquaEngine
 		/// <returns>Mouse position relative to the top-left of the window</returns>
 		AquaAPI static glm::vec2 GetMousePosition();
 
+		/// <summary>
+		/// Sets the mouse position, in pixels relative to top-left of window
+		/// </summary>
+		AquaAPI static void SetMousePosition(glm::vec2 value);
+
 		/// <returns>Pixels moved since last frame</returns>
 		AquaAPI static glm::vec2 GetMouseDelta();
 
@@ -88,9 +94,15 @@ namespace AquaEngine
 		AquaAPI static bool IsMouseReleased(int button);
 
 		/// <summary>
-		/// Can hide or show the mouse. When hidden mouse is locked and cannot exit window.
+		/// Sets the mouse visibility & disabled state
 		/// </summary>
-		AquaAPI static void ShowMouse(bool show = true);
+		AquaAPI static void SetMouseState(MouseState state);
+
+		/// <returns>Gets the mouse visibility & disabled state</returns>
+		AquaAPI static MouseState GetMouseState();
+
+		/// <returns>Visible state of mouse</returns>
+		AquaAPI static bool IsMouseShowing();
 #pragma endregion
 
 #pragma region Gamepad

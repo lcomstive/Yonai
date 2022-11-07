@@ -1,14 +1,17 @@
 # Mac OS Meta
 .DS_Store
+*.DS_Store
 
 # Visual Studio & VS Code
 .vs/
 .vscode/
 
 # Generated Documentation
-Docs/html/
+Docs/Dist/
 
 # Generated files & artifacts
+[Bb]in/
+[Oo]bj/
 [Bb]uild/
 AquaEngine*.zip
 

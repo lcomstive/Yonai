@@ -3,6 +3,18 @@ cmake_policy(SET CMP0072 NEW) # Prefer newer OpenGL libraries over legacy ones
 set(AQUA_ENGINE_DEPENDENCY_LIBS)
 set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "")
 
+# Unix requires pthread
+if(UNIX)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+	find_package(Threads REQUIRED)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS Threads::Threads pthread)
+endif()
+
+# Linux requires some specific libraries for compilation
+if(UNIX AND NOT APPLE)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS dl rt z)
+endif()
+
 # OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -48,3 +60,20 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui::imgui)
 if(LINUX)
     list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS X11)
 endif()
+
+# Mono
+if(WIN32)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS
+		ws2_32.lib
+		version.lib
+		Bcrypt.lib
+		winmm.lib
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmono-static-sgen.lib
+	)
+elseif(APPLE)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.1.dylib)
+elseif(UNIX)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.a)
+endif()
+
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")

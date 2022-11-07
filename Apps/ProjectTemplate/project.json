@@ -1,0 +1,7 @@
+{
+	"name": "$NAME",
+	"assetsDir": "Assets",
+	"assemblies": [
+		"Scripting/bin/Debug/$NAME.dll"
+	]
+}

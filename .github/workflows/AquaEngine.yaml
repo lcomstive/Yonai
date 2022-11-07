@@ -15,14 +15,15 @@ jobs:
             os: windows-latest,
             triplet: 'x64-windows-static'
           }
-        - {
-            name: "Linux",
-            os: ubuntu-latest,
-            triplet: 'x64-linux'
-          }
+        # Disabling Linux cloud builds until further notice
+        # - {
+        #     name: "Linux",
+        #     os: ubuntu-latest,
+        #     triplet: 'x64-linux'
+        #   }
         - {
             name: "MacOS",
-            os: macos-latest,
+            os: [ macos, arm64, self-hosted ],
             triplet: 'arm64-osx'
           }
 
@@ -37,7 +38,7 @@ jobs:
     - uses: lukka/get-cmake@latest
 
     - if: matrix.config.os == 'ubuntu-latest'
-      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev
 
     - name: VCPKG
       uses: lukka/run-vcpkg@v10
@@ -86,9 +87,18 @@ jobs:
 
     # Copy desired artifacts to output folder
     - name: Gather artifacts
+      if: matrix.config.os != 'windows-latest'
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
+        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
+
+    - name: Gather artifacts
+      if: matrix.config.os == 'windows-latest'
+      run: |
+        mkdir -p ${{ github.workspace }}/build/artifact
+        cp ${{ env.BINARY_DIR }}/*.dll ${{ github.workspace }}/build/artifact/
+        cp ${{ env.BINARY_DIR }}/*.exe ${{ github.workspace }}/build/artifact/
         cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
 
     # Upload artifact

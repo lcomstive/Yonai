@@ -111,6 +111,9 @@ Window::Window() :
 	// Set instance to this
 	s_Instance = this;
 
+	// Set VSync enabled by default
+	SetVSync(true);
+
 	// Update gamepad mappings from local file
 	if (AquaEngine::IO::Exists(GamepadMappingPath))
 	{
@@ -253,7 +256,7 @@ void Window::SetFullscreen(FullscreenMode mode)
 bool Window::GetVSync() { return s_Instance ? s_Instance->m_VSync : false; }
 void Window::SetVSync(bool enable)
 {
-	if (!s_Instance)
+	if (!s_Instance || s_Instance->m_VSync == enable)
 		return;
 
 	spdlog::trace("Setting VSync to {}", enable ? "on" : "off");

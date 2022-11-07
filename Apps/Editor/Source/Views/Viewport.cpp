@@ -22,6 +22,9 @@ ViewportView::ViewportView()
 	transform->Position = { 0, 0, -10 };
 
 	m_CameraControlSystem = new CameraControlSystem();
+
+	// Temp //
+	m_EditorCamera->SetMainCamera();
 }
 
 ViewportView::~ViewportView()

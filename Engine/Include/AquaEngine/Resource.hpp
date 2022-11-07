@@ -132,8 +132,6 @@ namespace AquaEngine
 		template<typename T>
 		static void PrintResourceTypes()
 		{
-			PROFILE_FN();
-
 			const std::type_info& typeInfo = typeid(T);
 			spdlog::trace("Printing resources [{}]", typeInfo.name());
 			for (auto& pair : s_InstancePaths)

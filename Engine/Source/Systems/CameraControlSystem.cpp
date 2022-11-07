@@ -80,7 +80,7 @@ quat GetCameraRotation(float deltaTime)
 {
 	static float xRot = 0, yRot = 0;
 
-	Input::ShowMouse(!Input::IsMouseDown(MouseButton::Right));
+	Input::SetMouseState(Input::IsMouseDown(MouseButton::Right) ? MouseState::Disabled : MouseState::Normal);
 	if(Input::IsMouseDown(MouseButton::Right))
 	{
 		vec2 mouseDelta = Input::GetMouseDelta() * deltaTime;

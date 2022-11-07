@@ -14,13 +14,24 @@
 #include <Views/Stats.hpp>
 #include <Views/Viewport.hpp>
 
+// Scripting //
+#include <AquaEngine/Scripting/Class.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Components/ScriptComponent.hpp>
+
+using namespace std;
 using namespace glm;
 using namespace AquaEditor;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Systems;
+using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
+
+string ProjectPathArg = "ProjectPath";
+string CSharpDLLPath = "dll-path";
+string CSharpCoreDLLPath = "core-dll-path";
 
 void EditorApp::Setup()
 {
@@ -28,26 +39,27 @@ void EditorApp::Setup()
 
 	Window::SetTitle("Aqua Editor");
 
-	if (HasArg("ProjectPath"))
-		m_ProjectPath = GetArg("ProjectPath");
-	else
-		m_ProjectPath = "./";
+	m_ProjectPath = GetArg(ProjectPathArg, "./");
+	if (m_ProjectPath.empty())
+		spdlog::warn("Empty project path!");
 	if (m_ProjectPath[m_ProjectPath.size() - 1] != '/')
 		m_ProjectPath += '/';
 	spdlog::info("Project path: {}", m_ProjectPath);
 
 	VFS::Mount("/Project", m_ProjectPath);
 	VFS::Mount("/Assets", m_ProjectPath + "Assets");
-	VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
+	// VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
+
+	InitialiseScripting();
 
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
 	m_RenderSystem->Enable(false);
 
-	LoadScene();
-
 	Add<ViewportView>();
+
+	LoadScene();
 }
 
 void EditorApp::OnDraw()
@@ -60,6 +72,9 @@ void EditorApp::OnUpdate()
 	// Iterate over & update views
 	for (auto& viewPair : m_Views)
 		viewPair.second->Update();
+
+	if(ScriptEngine::AwaitingReload())
+		ScriptEngine::Reload();
 }
 
 void EditorApp::LoadScene()
@@ -84,8 +99,12 @@ void EditorApp::LoadScene()
 			"/Assets/Shaders/Sprite.frag"
 		});
 
-	const unsigned int spriteRows = 10;
-	const unsigned int spriteColumns = 10;
+	// Test C# component
+	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
+	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
+
+	const unsigned int spriteRows = 15;
+	const unsigned int spriteColumns = 15;
 	for (unsigned int x = 0; x < spriteRows; x++)
 	{
 		for (unsigned int y = 0; y < spriteColumns; y++)
@@ -99,13 +118,41 @@ void EditorApp::LoadScene()
 			SpriteRenderer* sprite = entity.AddComponent<SpriteRenderer>();
 			sprite->Sprite = textureID;
 			sprite->Shader = spriteShader;
+
+			if (x % 2 == 0 && y % 2 == 0)
+				entity.AddComponent(monoType);
 		}
 	}
 
+	// Camera control system, implemented in C#
+	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
+	if(testSystem)
+		m_CurrentScene->GetSystemManager()->Add(testSystem);
+
 	// Add scene to active scenes
-	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
-	sceneSystem->UnloadAllScenes();
-	sceneSystem->AddScene(m_CurrentScene);
+	SceneSystem::UnloadAllScenes();
+	SceneSystem::AddScene(m_CurrentScene);
+}
+
+void EditorApp::InitialiseScripting()
+{
+	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
+	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
+	{
+		spdlog::critical("Core DLL path not specified or invalid. Set the '-core-dll-path' flag to 'AquaScriptCore.dll'");
+		Exit();
+		return;
+	}
+	ScriptEngine::Init(coreDllPath, true);
+
+	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
+	if (assemblyPath.empty())
+	{
+		spdlog::warn("No C# DLL path found, scripting engine disabled");
+		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
+	}
+	else
+		Assembly* assembly = ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assemblyPath), true);
 }
 
 void EditorApp::DrawUI()
@@ -166,6 +213,9 @@ void EditorApp::DrawUI()
 			// which we can't undo at the moment without finer window depth/z control.
 			//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
 
+			if(ImGui::MenuItem("Reload Scripts"))
+				ScriptEngine::Reload(true);
+
 			if (ImGui::MenuItem("Exit")) Exit();
 			ImGui::EndMenu();
 		}
@@ -173,10 +223,10 @@ void EditorApp::DrawUI()
 		if (ImGui::BeginMenu("View"))
 		{
 			if (ImGui::MenuItem("Viewport"))
-				Add<ViewportView>();
+				Add<ViewportView>()->Open();
 
 			if (ImGui::MenuItem("Stats"))
-				Add<StatsView>();
+				Add<StatsView>()->Open();
 
 			ImGui::EndMenu();
 		}

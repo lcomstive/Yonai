@@ -12,55 +12,65 @@ namespace AquaEngine::Systems
 		/// <summary>
 		/// All currently loaded scenes
 		/// </summary>
-		std::vector<World*> m_ActiveScenes;
+		static std::vector<World*> m_ActiveScenes;
 
 		/// <summary>
 		/// Callback listeners for when scenes are added & removed
 		/// </summary>
-		std::vector<SceneCallback> m_SceneCallbacks;
+		static std::vector<SceneCallback> m_SceneCallbacks;
+
+		static SceneSystem* s_Instance;
 
 	public:
+		AquaAPI void Init() override;
 		AquaAPI void Draw() override;
 		AquaAPI void Update() override;
+		AquaAPI void Destroy() override;
 
 		/// <summary>
 		/// Clears all current scenes & loads a new scene
 		/// </summary>
-		AquaAPI void LoadScene(World* scene);
+		AquaAPI static void LoadScene(World* scene);
 
 		/// <summary>
 		/// Adds a scene, alongsdide already loaded scenes
 		/// </summary>
-		AquaAPI void AddScene(World* scene);
+		AquaAPI static void AddScene(World* scene);
 
 		/// <summary>
 		/// Removes a scene being active
 		/// </summary>
-		AquaAPI void UnloadScene(int index);
+		AquaAPI static void UnloadScene(int index);
 
 		/// <summary>
 		/// Removes a scene being active
 		/// </summary>
-		AquaAPI void UnloadScene(World* scene);
+		AquaAPI static void UnloadScene(World* scene);
 
 		/// <summary>
 		/// Unloads all scenes from being active
 		/// </summary>
-		AquaAPI void UnloadAllScenes();
+		AquaAPI static void UnloadAllScenes();
+
+		/// <summary>
+		/// Resets all active scenes by unloading and reloading them,
+		/// in order they were added
+		/// </summary>
+		AquaAPI static void ReloadActiveScenes();
 		
 		/// <summary>
 		/// Gets all actively loaded scenes
 		/// </summary>
-		AquaAPI std::vector<World*>& GetActiveScenes();
+		AquaAPI static std::vector<World*>& GetActiveScenes();
 
 		/// <summary>
 		/// Adds a listener for when scenes are added & removed
 		/// </summary>
-		AquaAPI void AddSceneCallback(SceneCallback callback);
+		AquaAPI static void AddSceneCallback(SceneCallback callback);
 
 		/// <summary>
 		/// Removes a listener for when scenes are added & removed
 		/// </summary>
-		AquaAPI void RemoveSceneCallback(SceneCallback callback);
+		AquaAPI static void RemoveSceneCallback(SceneCallback callback);
 	};
 }

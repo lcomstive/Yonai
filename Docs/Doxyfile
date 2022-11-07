@@ -1,16 +1,14 @@
 DOXYFILE_ENCODING		= UTF-8
 PROJECT_NAME			= AquaEngine
 # PROJECT_LOGO			= "Media/Logo.png"
-OUTPUT_DIRECTORY		= ./
+OUTPUT_DIRECTORY		= ./Dist/Public
 CREATE_SUBDIRS			= NO
 ALLOW_UNICODE_NAMES		= NO
 OUTPUT_LANGUAGE			= English
 BRIEF_MEMBER_DESC		= YES
 REPEAT_BRIEF			= NO
 INPUT					= Markdown \
-							../Engine/Source \
-							../Engine/Include \
-							../Apps/Editor
+							../Apps/AquaScriptCore
 RECURSIVE				= YES
 GENERATE_LATEX			= NO
 INLINE_INHERITED_MEMB 	= YES
@@ -21,8 +19,6 @@ FULL_PATH_NAMES			= NO
 AUTOLINK_SUPPORT		= YES
 SHOW_USED_FILES			= NO
 LAYOUT_FILE				= DoxygenLayout.xml
-
-EXCLUDE_SYMBOLS			= ImGui_ImplGlfw_Data ImGui_ImplOpenGL3_Data
 
 # Theming
 GENERATE_TREEVIEW		= YES
