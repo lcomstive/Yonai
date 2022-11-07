@@ -15,11 +15,12 @@ jobs:
             os: windows-latest,
             triplet: 'x64-windows-static'
           }
-        - {
-            name: "Linux",
-            os: ubuntu-latest,
-            triplet: 'x64-linux'
-          }
+        # Disabling Linux cloud builds until further notice
+        # - {
+        #     name: "Linux",
+        #     os: ubuntu-latest,
+        #     triplet: 'x64-linux'
+        #   }
         - {
             name: "MacOS",
             os: [ macos, arm64, self-hosted ],

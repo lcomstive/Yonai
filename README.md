@@ -1,5 +1,8 @@
 # Aqua Engine
-Author - [@lcomstive](https://lewiscomstive.com) | [GitHub](https://www.github.com/jwrmg)
+Author - [@lcomstive](https://lewiscomstive.com) | [GitHub](https://www.github.com/lcomstive)
+
+[![Version](https://img.shields.io/badge/Version-v0.0.1-4287f5?style=flat-square)](https://github.com/lcomstive/AquaEngine/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lcomstive/AquaEngine/Aqua%20Engine?logo=GitHub&style=flat-square)](https://github.com/lcomstive/AquaEngine/actions/workflows/AquaEngine.yaml)
 
 Table of Contents
 ====================
@@ -39,8 +42,8 @@ All releases of the editor can be found [here](https://github.com/lcomstive/Aqua
 Currently the only way to implement the engine in your own application is to build from source.
 This can be done by cloning or adding [the repository](https://github.com/lcomstive/AquaEngine) as a submodule.
 
-> Submodules are used!
-> When cloning
+> When cloning remember to get submodules.
+> On the command line this can be done using the `--recurse-submodules` flag.
 
 [CMake](https://cmake.org/) is used for cross-platform project generation.
 
@@ -94,7 +97,7 @@ Features
 ========
 * ### Completed
 	* Core Engine
-		* Custom ECS style systems
+		* Custom "hybrid ECS" style systems
 		* Centralised resource management
 	* Components & Systems
 		* 2D Sprite & 3D Mesh renderers
@@ -106,11 +109,16 @@ Features
 			* w/ hot reloading
 		* ImGUI implementation
 	* Debugging
-		* Profiling in debug mode, using Chrome's tracing format
 		* Logging to console & file
+
 * ### In Development
 	* Graphics
 		* Texture Maps (normal, diffuse, specular)
+	* Scripting - C#
+		* Communication between managed & unmanaged code (C++ <-> C#)
+		* A core C# library - *[AquaScriptCore](./Apps/AquaScriptCore)*
+		* Reloadable scripting engine support
+
 * ### Planned
 	* Core Engine
 		* Asset database
@@ -120,6 +128,9 @@ Features
 		* Shadow mapping
 		* Particles
 		* Rigged Animations
+	* Physics
+		* Third party 2D physics library - [Box2D](https://box2d.org/)
+		* Third party 3D physics library - TBD
 		
 Dependencies
 =========
@@ -131,6 +142,7 @@ Dependencies are installed using [VCPKG](https://github.com/microsoft/vcpkg) dur
 * [GLM](https://github.com/g-truc/glm)
 * [GoogleTest](https://github.com/google/googletest)
 * [ImGUI](https://github.com/ocornut/imgui)
+* [Mono](https://github.com/mono/mono)
 * [SPDLog](https://github.com/gabime/spdlog)
 * [STB](https://github.com/nothings/stb)
 
@@ -145,10 +157,10 @@ This project is released under the **MIT license**, and can be found in the [LIC
   * [GLM License](https://github.com/g-truc/glm/blob/master/copying.txt)
   * [GoogleTest License](https://github.com/google/googletest/blob/main/LICENSE)
   * [ImGUI License](https://github.com/ocornut/imgui/blob/master/LICENSE.txt)
+  * [Mono License](https://github.com/mono/mono/blob/main/LICENSE)
   * [SPDLog License](https://github.com/gabime/spdlog/blob/v1.x/LICENSE)
   * [STB License](https://github.com/nothings/stb/blob/master/LICENSE)
   * [VCPKG License](https://github.com/microsoft/vcpkg/blob/master/LICENSE.txt)
-
 
 Contact
 ==========
@@ -157,9 +169,9 @@ Feel free to contact me at [lewiscomstive@gmail.com](mailto:lewiscomstive@gmail.
 
 Resources of study
 ==========
-> Please [contact](#contact) for removal if you or your resources are in this section.
+> Please [contact](#contact) me for removal if you or your resources are in this section and you do not want them to be.
 
-* [CppOpenGLEngine \[Calvin Soueid\]](https://github.com/BlackxSnow/CppOpenGLEngine)
-* [Eclipse \[James Greensill\]](https://github.com/jwrmg/Eclipse)
+* [Thera Engine \[Calvin Soueid\]](https://github.com/BlackxSnow/TheraEngine)
+* [Eclipse Engine \[James Greensill\]](https://github.com/jwrmg/Eclipse)
 * [Hazel Engine \[Yan Chernikov\]](https://github.com/TheCherno/Hazel)
 * [LearnOpenGL.com \[Joey de Vries\]](https://learnopengl.com/)
