@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <mono/jit/jit.h>
+#include <spdlog/spdlog.h>
 #include <AquaEngine/Systems/System.hpp>
 #include <AquaEngine/Scripting/ManagedData.hpp>
 
