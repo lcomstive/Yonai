@@ -124,7 +124,7 @@ bool Application::IsRunning() { return m_Running; }
 void Application::Run()
 {
 	Setup();
-	SystemManager::Global()->Init();
+	SystemManager::Global()->Enable(true);
 
 	while (IsRunning())
 	{
@@ -230,7 +230,7 @@ void WindowedApplication::Run()
 		return;
 
 	Setup();
-	SystemManager::Global()->Init();
+	SystemManager::Global()->Enable(true);
 
 	while (IsRunning() && !Window::RequestedToClose())
 	{

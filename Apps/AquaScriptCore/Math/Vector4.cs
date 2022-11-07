@@ -21,6 +21,14 @@ namespace AquaEngine
 
 		public Vector4(float scalar) => x = y = z = w = scalar;
 
+		public static Vector4 Lerp(Vector4 a, Vector4 b, float time) =>
+			new Vector4(
+				MathUtils.Lerp(a.x, b.x, time),
+				MathUtils.Lerp(a.y, b.y, time),
+				MathUtils.Lerp(a.z, b.z, time),
+				MathUtils.Lerp(a.w, b.w, time)
+				);
+
 		public override string ToString() => $"({x}, {y}, {z}, {w})";
 
 		public static implicit operator string(Vector4 v) => v.ToString();

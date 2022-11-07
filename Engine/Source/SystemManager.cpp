@@ -18,22 +18,30 @@ SystemManager* SystemManager::s_Global = nullptr;
 
 SystemManager::SystemManager(World* owner) : m_Owner(owner) { }
 
-void SystemManager::Init()
+void SystemManager::Enable(bool enable)
 {
-	for (auto& iterator : m_Systems)
-		iterator.second->Init();
+	if(enable)
+		for (auto& iterator : m_Systems)
+			iterator.second->Init();
 
 	// Do initial Enabled calls
 	for (auto& iterator : m_Systems)
-		if (iterator.second->IsEnabled())
+	{
+		if (!iterator.second->IsEnabled())
+			continue;
+		if (enable)
 			iterator.second->OnEnabled();
+		else
+			iterator.second->OnDisabled();
+	}
 }
 
 void SystemManager::Destroy()
 {
 	for (auto& iterator : m_Systems)
 	{
-		iterator.second->OnDisabled();
+		if(iterator.second->IsEnabled())
+			iterator.second->OnDisabled();
 		iterator.second->Destroy();
 		delete iterator.second;
 	}
@@ -105,11 +113,27 @@ AquaEngine::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t t
 
 	auto componentData = ScriptEngine::GetCoreAssembly()->GetManagedSystemData(typeHash);
 	return {
-		instance,
 		managedData.AddFn == nullptr,
 		mono_gchandle_new(instance, false),
 		managedType
 	};
+}
+
+void SystemManager::InvalidateAllManagedInstances()
+{
+	for (auto pair : m_Systems)
+	{
+		if (!pair.second->ManagedData.IsValid())
+			continue;
+		mono_gchandle_free(pair.second->ManagedData.GCHandle);
+		pair.second->ManagedData = {};
+	}
+}
+
+void SystemManager::CreateAllManagedInstances()
+{
+	for (auto pair : m_Systems)
+		pair.second->ManagedData = CreateManagedInstance(pair.first);
 }
 
 ScriptSystem* SystemManager::Add(MonoType* managedType)
@@ -130,6 +154,8 @@ ScriptSystem* SystemManager::Add(MonoType* managedType)
 	if (Scripting::ScriptEngine::IsLoaded())
 		system->ManagedData = CreateManagedInstance(typeHash);
 		
+	((System*)system)->Init();
+
 	return system;
 }
 
@@ -139,7 +165,7 @@ bool SystemManager::Remove(size_t hash)
 		return false;
 	
 	// Free managed memory
-	if (m_Systems[hash]->ManagedData.Instance)
+	if (m_Systems[hash]->ManagedData.IsValid())
 		mono_gchandle_free(m_Systems[hash]->ManagedData.GCHandle);
 
 	// Free unmanaged memory

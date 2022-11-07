@@ -99,6 +99,10 @@ void EditorApp::LoadScene()
 			"/Assets/Shaders/Sprite.frag"
 		});
 
+	// Test C# component
+	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
+	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
+
 	const unsigned int spriteRows = 15;
 	const unsigned int spriteColumns = 15;
 	for (unsigned int x = 0; x < spriteRows; x++)
@@ -114,13 +118,11 @@ void EditorApp::LoadScene()
 			SpriteRenderer* sprite = entity.AddComponent<SpriteRenderer>();
 			sprite->Sprite = textureID;
 			sprite->Shader = spriteShader;
+
+			if (x % 2 == 0 && y % 2 == 0)
+				entity.AddComponent(monoType);
 		}
 	}
-
-	// Test C# component
-	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
-	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
-	m_CurrentScene->GetEntity(0).AddComponent(monoType);
 
 	// Camera control system, implemented in C#
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");

@@ -34,6 +34,8 @@ void World::Destroy()
 	m_ComponentManager->Destroy();
 	m_ComponentManager = nullptr;
 
+	m_SystemManager->Destroy();
+
 	s_Worlds.erase(m_ID);
 }
 
@@ -90,10 +92,7 @@ void World::OnActiveStateChanged(bool isActive)
 	spdlog::debug("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
 	m_ComponentManager->OnWorldActiveStateChanged(isActive);
 
-	if (isActive)
-		m_SystemManager->Init();
-	else
-		m_SystemManager->Destroy();
+	m_SystemManager->Enable(isActive);
 }
 
 ScriptComponent* World::AddComponent(EntityID entity, MonoType* managedType)

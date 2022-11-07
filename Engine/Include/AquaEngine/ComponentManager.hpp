@@ -181,10 +181,10 @@ namespace AquaEngine
 			Add<T4>(id);
 		}
 
-		Components::Component* Get(EntityID id, size_t type)
-		{
-			return IsEmpty(id) ? nullptr : m_ComponentArrays[type].Get(id);
-		}
+		Components::Component* Get(EntityID id, size_t type);
+
+		std::vector<EntityID> GetEntities(size_t type);
+		std::vector<EntityID> GetEntities(std::vector<size_t> types);
 
 		/// <summary>
 		/// Gets component from entity

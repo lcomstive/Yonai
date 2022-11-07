@@ -1,4 +1,5 @@
 #pragma once
+#include <mono/jit/jit.h>
 
 // Forward declaration
 struct _MonoType;
@@ -9,12 +10,6 @@ namespace AquaEngine::Scripting
 	struct ManagedData
 	{
 		/// <summary>
-		/// A reference to the managed instance of this component.
-		/// Handled by scripting engine.
-		/// </summary>
-		_MonoObject* Instance = nullptr;
-
-		/// <summary>
 		/// When true, try to call message functions such as Update & Draw on Instance every frame
 		/// </summary>
 		bool ShouldSendMessages = false;
@@ -22,11 +17,15 @@ namespace AquaEngine::Scripting
 		/// <summary>
 		/// Garbage collection handle, used to prevent premature destruction of component objects
 		/// </summary>
-		unsigned int GCHandle;
+		unsigned int GCHandle = 0;
 
 		/// <summary>
 		/// The managed type of Instance
 		/// </summary>
-		_MonoType* Type = nullptr;
+		MonoType* Type = nullptr;
+
+		MonoObject* GetInstance() { return mono_gchandle_get_target(GCHandle); }
+
+		bool IsValid() { return GCHandle != 0; }
 	};
 }

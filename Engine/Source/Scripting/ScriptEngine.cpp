@@ -142,7 +142,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 		if (VFS::Exists(pdbPath.string()))
 		{
 			auto pdbContents = VFS::Read(pdbPath.string());
-			mono_debug_open_image_from_memory(image, pdbContents.data(), pdbContents.size());
+			mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
 		}
 	}
 
@@ -192,7 +192,10 @@ void ScriptEngine::Reload(bool force)
 	vector<World*> worlds = World::GetWorlds();
 	sceneSystem->UnloadAllScenes();
 	for (World* world : worlds)
+	{
+		world->GetSystemManager()->InvalidateAllManagedInstances();
 		world->GetComponentManager()->InvalidateAllManagedInstances();
+	}
 
 	// Release resources
 	mono_domain_set(mono_get_root_domain(), true);
@@ -225,7 +228,10 @@ void ScriptEngine::Reload(bool force)
 	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
 	for (World* world : worlds)
-		sceneSystem->LoadScene(world);
+	{
+		world->GetSystemManager()->CreateAllManagedInstances();
+		sceneSystem->AddScene(world);
+	}
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());

@@ -22,57 +22,63 @@ unsigned int ScriptSystem::GetWorldID()
 
 void ScriptSystem::Init()
 {
-	if (!ManagedData.Instance)
+	spdlog::debug("ScriptSystem::Init");
+
+	if (!ManagedData.IsValid())
 		return;
 
+	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
-	SystemMethodInitialise(ManagedData.Instance, GetWorldID(), &exception);
-	SystemMethodStart(ManagedData.Instance, &exception);
+	SystemMethodInitialise(instance, GetWorldID(), &exception);
+	SystemMethodStart(instance, &exception);
 }
 
 void ScriptSystem::Destroy()
 {
-	if (!ManagedData.Instance)
+	spdlog::debug("ScriptSystem::Destroy");
+	if (!ManagedData.IsValid())
 		return;
 
 	MonoException* exception = nullptr;
-	SystemMethodDestroyed(ManagedData.Instance, &exception);
+	SystemMethodDestroyed(ManagedData.GetInstance(), &exception);
 }
 
 void ScriptSystem::OnEnabled()
 {
-	if (!ManagedData.Instance)
+	spdlog::debug("ScriptSystem::OnEnabled");
+	if (!ManagedData.IsValid())
 		return;
 
 	MonoException* exception = nullptr;
-	SystemMethodEnabled(ManagedData.Instance, true, &exception);
+	SystemMethodEnabled(ManagedData.GetInstance(), true, &exception);
 }
 
 void ScriptSystem::OnDisabled()
 {
-	if (!ManagedData.Instance)
+	spdlog::debug("ScriptSystem::OnDisabled");
+	if (!ManagedData.IsValid())
 		return;
 
 	MonoException* exception = nullptr;
-	SystemMethodEnabled(ManagedData.Instance, false, &exception);
+	SystemMethodEnabled(ManagedData.GetInstance(), false, &exception);
 }
 
 void ScriptSystem::Update()
 {
-	if (!ManagedData.Instance || !ManagedData.ShouldSendMessages)
+	if (!ManagedData.IsValid() || !ManagedData.ShouldSendMessages)
 		return;
 	
 	MonoException* exception = nullptr;
-	SystemMethodUpdate(ManagedData.Instance, &exception);
+	SystemMethodUpdate(ManagedData.GetInstance(), &exception);
 	if (exception)
 		mono_raise_exception(exception);
 }
 
 void ScriptSystem::Draw()
 {
-	if (!ManagedData.Instance || !ManagedData.ShouldSendMessages)
+	if (!ManagedData.IsValid() || !ManagedData.ShouldSendMessages)
 		return;
 
 	MonoException* exception = nullptr;
-	SystemMethodDraw(ManagedData.Instance, &exception);
+	SystemMethodDraw(ManagedData.GetInstance(), &exception);
 }

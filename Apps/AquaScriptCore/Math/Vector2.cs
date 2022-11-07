@@ -20,6 +20,12 @@ namespace AquaEngine
 		public float Distance(Vector2 other) => _aqua_internal_Distance(ref this, ref other);
 		public static float Distance(Vector2 a, Vector2 b) => _aqua_internal_Distance(ref a, ref b);
 
+		public static Vector2 Lerp(Vector2 a, Vector2 b, float time) =>
+			new Vector2(
+				MathUtils.Lerp(a.x, b.x, time),
+				MathUtils.Lerp(a.y, b.y, time)
+				);
+
 		public override string ToString() => "(" + x + ", " + y + ")";
 
 		public static implicit operator string(Vector2 v) => v.ToString();

@@ -118,18 +118,53 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 		for (auto entityPair : componentPair.second.EntityIndex)
 		{
 			Component* instance = componentPair.second.Instances[entityPair.second];
-			if (!instance->ManagedData.Instance)
+			if (!instance->ManagedData.IsValid())
 				instance->ManagedData = CreateManagedInstance(componentPair.first, entityPair.first);
-			if (!instance->ManagedData.Instance)
+			if (!instance->ManagedData.IsValid() )
 				continue;
 
-			ComponentMethodEnabled(instance->ManagedData.Instance, m_WorldIsActive, &exception);
+			MonoObject* monoInstance = instance->ManagedData.GetInstance();
+			ComponentMethodEnabled(monoInstance, m_WorldIsActive, &exception);
 			if (m_WorldIsActive)
-				ComponentMethodStart(instance->ManagedData.Instance, &exception);
+				ComponentMethodStart(monoInstance, &exception);
 			else
-				ComponentMethodDestroyed(instance->ManagedData.Instance, &exception);
+				ComponentMethodDestroyed(monoInstance, &exception);
 		}
 	}
+}
+
+Component* ComponentManager::Get(EntityID id, size_t type)
+{ return IsEmpty(id) ? nullptr : m_ComponentArrays[type].Get(id); }
+
+vector<EntityID> ComponentManager::GetEntities(size_t type)
+{
+	return m_ComponentArrays.find(type) == m_ComponentArrays.end() ? vector<EntityID>() : m_ComponentArrays[type].GetEntities();
+}
+
+vector<EntityID> ComponentManager::GetEntities(vector<size_t> types)
+{
+	vector<EntityID> output;
+	
+	// Store all possible entity IDs in output
+	output.reserve(m_EntityComponents.size());
+	for (auto pair : m_EntityComponents)
+		output.push_back(pair.first);
+
+	// Check for intersection of each type against 'output' entity IDs.
+	// This removes any IDs where that entity does not have any of the types
+	for (size_t type : types)
+	{
+		vector<EntityID> entities = GetEntities(type);
+		sort(entities.begin(), entities.end());
+
+		// Calculate intersection, and resize using returned iterator
+		output.resize(set_intersection(
+			entities.begin(), entities.end(),
+			output.begin(), output.end(),
+			output.begin()
+		) - output.begin());
+	}
+	return output;
 }
 
 void ComponentManager::InvalidateAllManagedInstances()
@@ -138,6 +173,9 @@ void ComponentManager::InvalidateAllManagedInstances()
 	{
 		for (Component* instance : componentPair.second.Instances)
 		{
+			if (!instance->ManagedData.IsValid())
+				continue;
+
 			mono_gchandle_free(instance->ManagedData.GCHandle);
 			instance->ManagedData = {};
 		}
@@ -168,7 +206,6 @@ AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_
 
 	auto componentData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
 	return {
-		instance,
 		managedData.AddFn == nullptr,
 		mono_gchandle_new(instance, false),
 		managedType
@@ -193,10 +230,10 @@ void ComponentManager::CallUpdateFn()
 			if (!instance->Entity.GetWorld())
 				continue; // Invalid entity, world is not set?
 
-			if (instance->ManagedData.Instance && instance->ManagedData.ShouldSendMessages)
+			if (instance->ManagedData.IsValid() && instance->ManagedData.ShouldSendMessages)
 			{
 				MonoException* exception = nullptr;
-				ComponentMethodUpdate(instance->ManagedData.Instance, &exception);
+				ComponentMethodUpdate(instance->ManagedData.GetInstance(), &exception);
 			}
 		}
 	}
@@ -222,15 +259,16 @@ void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 
 	// Create managed (C#) instance
 	instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
-	if (!instance->ManagedData.Instance)
+	if (!instance->ManagedData.IsValid())
 		return;
 
 	// If world is active, call Enabled and then Start
 	MonoException* exception = nullptr;
 	if (Owner->m_WorldIsActive)
 	{
-		ComponentMethodEnabled(instance->ManagedData.Instance, true, &exception);
-		ComponentMethodStart(instance->ManagedData.Instance, &exception);
+		MonoObject* monoInstance = instance->ManagedData.GetInstance();
+		ComponentMethodEnabled(monoInstance, true, &exception);
+		ComponentMethodStart(monoInstance, &exception);
 	}
 }
 
@@ -239,7 +277,7 @@ Component* ComponentManager::ComponentData::Get(EntityID entity)
 	if (!Has(entity))
 		return nullptr;
 	Component* instance = Instances[EntityIndex[entity]];
-	if (!instance->ManagedData.Instance)
+	if (!instance->ManagedData.IsValid())
 		instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
 	return instance;
 }
@@ -252,7 +290,7 @@ void ComponentManager::ComponentData::Remove(EntityID entity)
 
 	// Free managed memory
 	Component* instance = Instances[instanceIndex];
-	if(instance->ManagedData.Instance)
+	if(instance->ManagedData.IsValid())
 		mono_gchandle_free(instance->ManagedData.GCHandle);
 	
 	// Free unmanaged memory

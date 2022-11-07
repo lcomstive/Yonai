@@ -33,6 +33,13 @@ namespace AquaEngine
 		public float Distance(Vector3 other) => _aqua_internal_Distance(ref this, ref other);
 		public static float Distance(Vector3 a, Vector3 b) => _aqua_internal_Distance(ref a, ref b);
 
+		public static Vector3 Lerp(Vector3 a, Vector3 b, float time) =>
+			new Vector3(
+				MathUtils.Lerp(a.x, b.x, time),
+				MathUtils.Lerp(a.y, b.y, time),
+				MathUtils.Lerp(a.z, b.z, time)
+				);
+
 		public override string ToString() => $"({x}, {y}, {z})";
 
 		public static implicit operator string(Vector3 v) => v.ToString();

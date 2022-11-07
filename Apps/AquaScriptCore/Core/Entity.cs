@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
@@ -25,6 +26,8 @@ namespace AquaEngine
 		/// </summary>
 		public bool IsValid => ID != InvalidEntityID;
 
+		private Dictionary<Type, object> m_Components = new Dictionary<Type, object>();
+
 		internal Entity(World world, uint id)
 		{
 			World = world;
@@ -40,16 +43,40 @@ namespace AquaEngine
 		public bool HasComponent<T>() where T : Component => _aqua_internal_Entity_HasComponent(World.ID, ID, typeof(T));
 
 		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
-		public T AddComponent<T>() where T : Component => (T)_aqua_internal_Entity_AddComponent(World.ID, ID, typeof(T));
+		public T AddComponent<T>() where T : Component
+		{
+			Type type = typeof(T);
+			T component = (T)_aqua_internal_Entity_AddComponent(World.ID, ID, type);
+			if (component == null)
+				return null;
+			m_Components.Add(type, component);
+			return component;
+		}
 
 		/// <returns>Instance of <see cref="Component"/> attached to entity, or null if not found</returns>
-		public T GetComponent<T>() where T : Component => (T)_aqua_internal_Entity_GetComponent(World.ID, ID, typeof(T));
+		public T GetComponent<T>() where T : Component
+		{
+			if (!HasComponent<T>())
+				return null;
 
+			Type type = typeof(T);
+			if (!m_Components.ContainsKey(type))
+				m_Components.Add(type, _aqua_internal_Entity_GetComponent(World.ID, ID, typeof(T)));
+			return (T)m_Components[type];
+		}
 		/// <summary>
 		/// Removes a <see cref="Component"/> from this entity
 		/// </summary>
 		/// <returns>Success state of removal</returns>
-		public bool RemoveComponent<T>() where T : Component => _aqua_internal_Entity_RemoveComponent(World.ID, ID, typeof(T));
+		public bool RemoveComponent<T>() where T : Component
+		{
+			Type type = typeof(T);
+
+			if (m_Components.ContainsKey(type))
+				m_Components.Remove(type);
+
+			return _aqua_internal_Entity_RemoveComponent(World.ID, ID, type);
+		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_Entity_HasComponent(uint worldID, uint entityID, Type type);

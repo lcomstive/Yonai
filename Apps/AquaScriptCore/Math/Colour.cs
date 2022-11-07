@@ -22,6 +22,14 @@ namespace AquaEngine
 
 		public Colour(float scalar) => r = g = b = a = scalar;
 
+		public static Colour Lerp(Colour a, Colour b, float time) =>
+			new Colour(
+				MathUtils.Lerp(a.r, b.r, time),
+				MathUtils.Lerp(a.g, b.g, time),
+				MathUtils.Lerp(a.b, b.b, time),
+				MathUtils.Lerp(a.a, b.a, time)
+				);
+
 		public override string ToString() => $"({r}, {g}, {b}, {a})";
 
 		public static implicit operator string(Colour v) => v.ToString();

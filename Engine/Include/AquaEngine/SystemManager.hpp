@@ -12,6 +12,7 @@ namespace AquaEngine
 {
 	class World;
 	namespace Systems { struct ScriptSystem; }
+	namespace Scripting { class ScriptEngine; }
 
 	class SystemManager
 	{
@@ -22,7 +23,7 @@ namespace AquaEngine
 	public:
 		AquaAPI SystemManager(World* owner);
 
-		AquaAPI void Init();
+		AquaAPI void Enable(bool enable = true);
 		AquaAPI void Destroy();
 
 		AquaAPI void Draw();
@@ -83,5 +84,10 @@ namespace AquaEngine
 		std::unordered_map<size_t, Systems::System*> m_Systems = {};
 
 		Scripting::ManagedData CreateManagedInstance(size_t typeHash);
+
+		void CreateAllManagedInstances();
+		void InvalidateAllManagedInstances();
+
+		friend class Scripting::ScriptEngine;
 	};
 }

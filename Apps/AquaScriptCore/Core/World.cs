@@ -67,12 +67,80 @@ namespace AquaEngine
 				m_Entities.Remove(entityID);
 		}
 
-		public List<Entity> GetEntities()
+		public Entity[] GetEntities()
 		{
-			List<Entity> entities = new List<Entity>();
-			foreach (var pair in m_Entities)
-				entities.Add(pair.Value);
+			uint[] entityIDs = _aqua_internal_World_GetEntities(ID);
+			if(entityIDs == null)
+				return null;
+
+			// Get all entities from IDs
+			Entity[] entities = new Entity[entityIDs.Length];
+			for (int i = 0; i < entityIDs.Length; i++)
+			{
+				uint id = entityIDs[i];
+				if (!m_Entities.ContainsKey(id))
+					m_Entities.Add(id, new Entity(this, id));
+				entities[i] = m_Entities[id];
+			}
+
 			return entities;
+		}
+
+		public T[] GetComponents<T>() where T : Component
+		{
+			uint[] entityIDs = _aqua_internal_World_GetComponents(ID, typeof(T));
+			if (entityIDs == null)
+				return new T[0];
+
+			T[] components = new T[entityIDs.Length];
+			for (int i = 0; i < entityIDs.Length; i++)
+			{
+				uint entityID = entityIDs[i];
+				if (!m_Entities.ContainsKey(entityID))
+					m_Entities.Add(entityID, new Entity(this, entityID));
+				components[i] = m_Entities[entityID].GetComponent<T>();
+			}
+			return components;
+		}
+		
+		public (T1[], T2[]) GetComponents<T1, T2>() where T1 : Component where T2 : Component
+		{
+			uint[] entityIDs = _aqua_internal_World_GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) });
+			if (entityIDs == null)
+				return (new T1[0], new T2[0]);
+
+			T1[] components1 = new T1[entityIDs.Length];
+			T2[] components2 = new T2[entityIDs.Length];
+			for (int i = 0; i < entityIDs.Length; i++)
+			{
+				uint entityID = entityIDs[i];
+				if (!m_Entities.ContainsKey(entityID))
+					m_Entities.Add(entityID, new Entity(this, entityID));
+				components1[i] = m_Entities[entityID].GetComponent<T1>();
+				components2[i] = m_Entities[entityID].GetComponent<T2>();
+			}
+			return (components1, components2);
+		}
+		
+		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>() where T1 : Component where T2 : Component where T3 : Component
+		{
+			uint[] entityIDs = _aqua_internal_World_GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) });
+			if (entityIDs == null)
+				return (new T1[0], new T2[0], new T3[0]);
+
+			T1[] components1 = new T1[entityIDs.Length];
+			T2[] components2 = new T2[entityIDs.Length];
+			T3[] components3 = new T3[entityIDs.Length];
+			for (int i = 0; i < entityIDs.Length; i++)
+			{
+				uint entityID = entityIDs[i];
+				if (!m_Entities.ContainsKey(entityID))
+					m_Entities.Add(entityID, new Entity(this, entityID));
+				components1[i] = m_Entities[entityID].GetComponent<T1>();
+				components2[i] = m_Entities[entityID].GetComponent<T2>();
+				components3[i] = m_Entities[entityID].GetComponent<T3>();
+			}
+			return (components1, components2, components3);
 		}
 		#endregion
 
@@ -119,6 +187,10 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _aqua_internal_World_Create(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_Exists(uint worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_Get(uint worldID, out string name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetEntities(uint worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetComponents(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetComponentsMultiple(uint worldID, Type[] types);
 
 		// Entities
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_HasEntity(uint worldID, uint entityID);
