@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include <functional>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
@@ -75,6 +76,8 @@ namespace AquaEngine::Scripting
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
 		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
+
+		AquaAPI static void AddInternalCall(const char* internalName, const void* fn);
 	
 	private:
 		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
@@ -101,7 +104,9 @@ namespace AquaEngine::Scripting
 		void AddCameraInternalCalls();
 		void AddSystemInternalCalls();
 		void AddVectorInternalCalls();
+		void AddWindowInternalCalls();
 		void AddTransformInternalCalls();
+		void AddApplicationInternalCalls();
 		void AddSpriteRendererInternalCalls();
 #pragma endregion
 

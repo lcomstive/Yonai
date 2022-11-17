@@ -71,7 +71,11 @@ namespace AquaEngine
 
 		#region Unmanaged Calls
 		// Called from C++
-		internal void aqua_Initialise(uint worldID) => World = worldID != uint.MaxValue ? World.Get(worldID) : null;
+		internal void aqua_Initialise(uint worldID)
+		{
+			Log.Info($"System '{GetType().Name}' created in world #{worldID}");
+			World = worldID != uint.MaxValue ? World.Get(worldID) : null;
+		}
 
 		// Called from C++
 		private void aqua_Enable(bool enable)

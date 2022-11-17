@@ -23,14 +23,6 @@ unsigned int ScriptSystem::GetWorldID()
 void ScriptSystem::Init()
 {
 	spdlog::debug("ScriptSystem::Init");
-
-	if (!ManagedData.IsValid())
-		return;
-
-	MonoObject* instance = ManagedData.GetInstance();
-	MonoException* exception = nullptr;
-	SystemMethodInitialise(instance, GetWorldID(), &exception);
-	SystemMethodStart(instance, &exception);
 }
 
 void ScriptSystem::Destroy()
@@ -81,4 +73,19 @@ void ScriptSystem::Draw()
 
 	MonoException* exception = nullptr;
 	SystemMethodDraw(ManagedData.GetInstance(), &exception);
+}
+
+void ScriptSystem::OnScriptingReloaded()
+{
+	if (!ManagedData.IsValid())
+	{
+		spdlog::critical("Managed data is invalid on ScriptSystem?");
+		return;
+	}
+	spdlog::debug("ScriptSystem::OnScriptingReloaded");
+
+	MonoObject* instance = ManagedData.GetInstance();
+	MonoException* exception = nullptr;
+	SystemMethodInitialise(instance, GetWorldID(), &exception);
+	SystemMethodStart(instance, &exception);
 }

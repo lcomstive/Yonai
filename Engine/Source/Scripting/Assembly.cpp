@@ -201,8 +201,10 @@ void Assembly::AddInternalCalls()
 	AddInputInternalCalls();
 	AddVectorInternalCalls();
 	AddCameraInternalCalls();
+	AddWindowInternalCalls();
 	AddSystemInternalCalls();
 	AddTransformInternalCalls();
+	AddApplicationInternalCalls();
 	AddSpriteRendererInternalCalls();
 }
 
@@ -232,7 +234,6 @@ void Assembly::LoadScriptCoreTypes()
 	// Component._Enable
 	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
 	ComponentMethodEnabled = method ? (ComponentMethodEnabledFn)mono_method_get_unmanaged_thunk(method) : nullptr;
-	spdlog::debug("Set component method enabled to {}", fmt::ptr(ComponentMethodEnabled));
 
 	method = mono_class_get_method_from_name(component, "Update", 0);
 	ComponentMethodUpdate = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;

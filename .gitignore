@@ -17,3 +17,5 @@ AquaEngine*.zip
 
 # VCPKG packages
 vcpkg_installed
+*.mdb
+*.pdb

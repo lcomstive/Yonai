@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <AquaEngine/Time.hpp>
 #include <AquaEngine/Application.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
 
 // spdlog //
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -21,6 +22,8 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
+
+Application* Application::s_Instance = nullptr;
 
 string LogFile = "./Engine-Log.txt";
 void Application::InitLogger()
@@ -101,6 +104,8 @@ Application::Application()
 	spdlog::debug("DYLD_LIBRARY_PATH = {}", getenv("DYLD_LIBRARY_PATH"));
 #endif
 #pragma endregion
+
+	s_Instance = this;
 }
 
 void Application::Setup()
@@ -117,6 +122,8 @@ Application::~Application()
 {
 	SystemManager::Global()->Destroy();
 	spdlog::shutdown();
+
+	s_Instance = nullptr;
 }
 
 bool Application::IsRunning() { return m_Running; }
@@ -140,6 +147,7 @@ void Application::Run()
 }
 
 void Application::Exit() { m_Running = false; }
+Application* Application::Current() { return s_Instance; }
 
 void ToLower(std::string& input) { transform(input.begin(), input.end(), input.begin(), ::tolower); }
 
@@ -252,5 +260,28 @@ void WindowedApplication::Run()
 	Window::Close();
 	Cleanup();
 	SystemManager::Global()->Destroy();
+}
+#pragma endregion
+
+#pragma region Managed Glue
+#include <AquaEngine/Scripting/Assembly.hpp>
+
+void Exit() { Application::Current()->Exit(); }
+
+MonoString* GetArg(MonoString* name, MonoString* defaultValue)
+{
+	string value = Application::Current()->GetArg(mono_string_to_utf8(name), mono_string_to_utf8(defaultValue));
+	return mono_string_new(mono_domain_get(), value.c_str());
+}
+
+bool HasArg(MonoString* name) { return Application::Current()->HasArg(mono_string_to_utf8(name)); }
+
+#define ADD_APP_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Application::_aqua_internal_"#name, (const void*)name);
+
+void AquaEngine::Scripting::Assembly::AddApplicationInternalCalls()
+{
+	ADD_APP_INTERNAL_CALL(Exit)
+	ADD_APP_INTERNAL_CALL(GetArg)
+	ADD_APP_INTERNAL_CALL(HasArg)
 }
 #pragma endregion

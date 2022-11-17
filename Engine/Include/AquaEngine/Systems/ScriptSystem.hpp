@@ -17,6 +17,8 @@ namespace AquaEngine::Systems
 		AquaAPI void OnEnabled() override;
 		AquaAPI void OnDisabled() override;
 
+		AquaAPI void OnScriptingReloaded() override;
+
 	private:
 		unsigned int GetWorldID();
 	};

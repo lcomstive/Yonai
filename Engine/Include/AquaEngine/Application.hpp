@@ -3,11 +3,13 @@
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/SystemManager.hpp>
 
+#include <iostream>
+
 namespace AquaEngine
 {
 	// Forward declaration
 	namespace Systems { struct RenderSystem; }
-
+		
 	/// <summary>
 	/// Base application class
 	/// </summary>
@@ -18,6 +20,8 @@ namespace AquaEngine
 
 		void InitVFS();
 		void InitLogger();
+
+		static Application* s_Instance;
 
 	protected:
 		/// <summary>
@@ -60,6 +64,8 @@ namespace AquaEngine
 		/// <param name="default">Default value to return if argument is not found</param>
 		AquaAPI std::string GetArg(std::string name, std::string defaultValue = "");
 		#pragma endregion
+
+		AquaAPI static Application* Current();
 	};
 
 	/// <summary>

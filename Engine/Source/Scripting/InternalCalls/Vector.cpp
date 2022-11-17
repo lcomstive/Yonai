@@ -17,9 +17,6 @@ float Vector3Magnitude(glm::vec3* input) { return glm::length(*input); }
 float Vector4Magnitude(glm::vec4* input) { return glm::length(*input); }
 #pragma endregion
 
-#define ADD_VECTOR_INTERNAL_FN(name, fn) (##name##fn
-#define ADD_VECTOR_INTERNAL_CALL(name, fn) mono_add_internal_call("AquaEngine."#name"::_aqua_internal_"#fn, (const void*)ADD_VECTOR_INTERNAL_FN(name, fn));
-
 void AquaEngine::Scripting::Assembly::AddVectorInternalCalls()
 {
 #pragma region Vector2

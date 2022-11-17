@@ -19,6 +19,8 @@ namespace TestGame
 			TestComponent[] testComponents = World.GetComponents<TestComponent>();
 			for(int i = 0; i < testComponents.Length; i++)
 				testComponents[i].Value = ColourValues[i % ColourValues.Length];
+
+			Log.Debug($"DLL Path Arg: " + Application.GetArg("dll-path"));
 		}
 
 		protected override void Update()
@@ -36,6 +38,12 @@ namespace TestGame
 					Colour.Black,
 					t * testComponents[i].ValueChangeSpeed
 				);
+
+			if (Input.IsKeyPressed(Key.F11))
+				Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
+
+			if (Input.IsKeyDown(Key.Q) && Input.IsKeyDown(Key.Control))
+				Application.Exit();
 		}
 	}
 }

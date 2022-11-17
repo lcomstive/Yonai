@@ -3,10 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Log
+	public static class Log
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string _aqua_internal_NativeLog(string msg, int level);
+		private static extern void _aqua_internal_NativeLog(string msg, int level);
 
 		public static void Debug(string msg) => _aqua_internal_NativeLog(msg, 0);
 		public static void Info(string msg) => _aqua_internal_NativeLog(msg, 1);

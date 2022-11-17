@@ -20,10 +20,6 @@ SystemManager::SystemManager(World* owner) : m_Owner(owner) { }
 
 void SystemManager::Enable(bool enable)
 {
-	if(enable)
-		for (auto& iterator : m_Systems)
-			iterator.second->Init();
-
 	// Do initial Enabled calls
 	for (auto& iterator : m_Systems)
 	{
@@ -104,10 +100,6 @@ AquaEngine::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t t
 	MonoDomain* domain = mono_domain_get();
 	MonoObject* instance = mono_object_new(mono_domain_get(), mono_class_from_mono_type(managedType));
 
-	// Initialise component
-	MonoException* exception = nullptr;
-	SystemMethodInitialise(instance, m_Owner ? m_Owner->ID() : InvalidEntityID, &exception);
-
 	// Call constructor
 	mono_runtime_object_init(instance);
 
@@ -133,7 +125,10 @@ void SystemManager::InvalidateAllManagedInstances()
 void SystemManager::CreateAllManagedInstances()
 {
 	for (auto pair : m_Systems)
+	{
 		pair.second->ManagedData = CreateManagedInstance(pair.first);
+		pair.second->OnScriptingReloaded();
+	}
 }
 
 ScriptSystem* SystemManager::Add(MonoType* managedType)
@@ -154,7 +149,9 @@ ScriptSystem* SystemManager::Add(MonoType* managedType)
 	if (Scripting::ScriptEngine::IsLoaded())
 		system->ManagedData = CreateManagedInstance(typeHash);
 		
-	((System*)system)->Init();
+	System* rawSystem = (System*)system;
+	rawSystem->Init();
+	rawSystem->OnScriptingReloaded();
 
 	return system;
 }

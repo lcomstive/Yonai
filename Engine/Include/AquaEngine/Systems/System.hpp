@@ -26,6 +26,13 @@ namespace AquaEngine::Systems
 
 		AquaAPI virtual void OnEnabled() { }
 		AquaAPI virtual void OnDisabled() { }
+
+		/// <summary>
+		/// Called when system is added to SystemManager (after Init),
+		/// and when the scripting engine has reloaded assemblies
+		/// </summary>
+		/// <returns></returns>
+		AquaAPI virtual void OnScriptingReloaded() { }
 #pragma endregion
 
 	public:

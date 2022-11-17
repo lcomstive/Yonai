@@ -23,7 +23,7 @@
 
 namespace AquaEngine
 {
-	enum class FullscreenMode
+	enum class FullscreenMode : int
 	{
 		None,
 		Borderless,

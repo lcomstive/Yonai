@@ -46,11 +46,14 @@
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\SpriteRenderer.cs" />
     <Compile Include="Components\Transform.cs" />
+    <Compile Include="Core\Application.cs" />
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\Keys.cs" />
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Mouse.cs" />
+    <Compile Include="Graphics\Screen.cs" />
+    <Compile Include="Graphics\Window.cs" />
     <Compile Include="Math\MathUtils.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs" />
