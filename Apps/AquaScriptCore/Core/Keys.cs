@@ -126,10 +126,6 @@
 		RightAlt = 346,
 		RightSuper = 347,
 		MENU = 348,
-
-		Shift = LeftShift | RightShift,
-		Control = LeftControl | RightControl,
-		Super = LeftSuper | RightSuper
 	}
 
 	public enum GamepadButton : int
