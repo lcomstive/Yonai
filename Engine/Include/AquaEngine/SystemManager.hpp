@@ -48,7 +48,7 @@ namespace AquaEngine
 				return system;
 			system = new T();
 			system->m_Owner = this;
-			((System*)system)->Init();
+			((Systems::System*)system)->Init();
 			m_Systems.emplace(type, system);
 			return system;
 		}

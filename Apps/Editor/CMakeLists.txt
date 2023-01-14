@@ -1,5 +1,5 @@
 project(AquaEditor)
-file(GLOB_RECURSE SOURCE_FILES  "Source/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "Source/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "Include/*.hpp")
 
 add_executable(
@@ -17,14 +17,22 @@ if(WIN32)
 		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
 	)
 elseif(APPLE)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
+	set_target_properties(
+		${PROJECT_NAME} PROPERTIES
+		BUNDLE TRUE
+		MACOSX_BUNDLE TRUE
+		MACOSX_BUNDLE_GUI_IDENTIFIER com.madissia.${PROJECT_NAME}
+		MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+		MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_STRING_LONG}
+		MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_STRING}
+		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
 		XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.madissia.AquaEditor"
 	)
 endif()
 
 # Group source files inside IDE
 source_group("Resources" FILES ${EXECUTABLE_RESOURCES})
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source" PREFIX "Source" FILES ${SOURCE_FILES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source" FILES ${SOURCE_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${INCLUDE_FILES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -64,7 +72,7 @@ else() # Dev build
 endif()
 
 if(APPLE)
-	configure_file(${CMAKE_SOURCE_DIR}/Platforms/Mac/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
 
 	set(CPACK_GENERATOR "Bundle")
 	set(CPACK_MONOLITHIC_INSTALL 1)

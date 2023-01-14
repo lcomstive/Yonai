@@ -40,7 +40,7 @@ namespace TestGame
 				);
 
 			if (Input.IsKeyPressed(Key.F11))
-				Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
+				Window.CycleFullscreen();
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
 				Application.Exit();
