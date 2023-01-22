@@ -6,7 +6,7 @@ namespace TestGame
 {
 	public class TestSystem : AquaSystem
 	{
-		private static readonly Colour[] ColourValues =
+		private Colour[] ColourValues =
 		{
 			Colour.White,
 			Colour.Red,
@@ -16,11 +16,22 @@ namespace TestGame
 
 		protected override void Start()
 		{
-			TestComponent[] testComponents = World.GetComponents<TestComponent>();
-			for(int i = 0; i < testComponents.Length; i++)
-				testComponents[i].Value = ColourValues[i % ColourValues.Length];
+			Log.Debug("Colours:");
+			foreach(var colour in ColourValues)
+					Log.Debug($"{colour.r}, {colour.g}, {colour.b}, {colour.a}");
 
-			Log.Debug($"DLL Path Arg: " + Application.GetArg("dll-path"));
+			Colour c = new Colour(1, 0, 1, 1);
+			c.g = 0.75f;
+			Log.Debug($"{c} ({c.r}, {c.g})");
+
+			TestComponent[] testComponents = World.GetComponents<TestComponent>();
+			for (int i = 0; i < testComponents.Length; i++)
+			{
+				testComponents[i].Value = ColourValues[i % ColourValues.Length];
+				Log.Debug($"TestComponent#{i}[{testComponents[i].Entity}]: {testComponents[i].Value}, {testComponents[i].ValueChangeSpeed}");
+			}
+
+			Log.Info($"Test components: {testComponents.Length}");
 		}
 
 		protected override void Update()
@@ -32,6 +43,7 @@ namespace TestGame
 			 = World.GetComponents<Transform, SpriteRenderer, TestComponent>();
 
 			float t = (float)Math.Sin(Time.TimeSinceLaunch) + 0.1f;
+			Log.Debug($"Transform: {transform.Length}, Renderers: {renderers.Length}");
 			for(int i = 0; i < transform.Length; i++)
 				renderers[i].Colour = Colour.Lerp(
 					testComponents[i].Value,

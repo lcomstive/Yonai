@@ -79,6 +79,9 @@ namespace AquaEngine::IO
 				if (mountPoint[mountPoint.size() - 1] == '/' && mountPoint.size() > 1)
 					mountPoint.erase(mountPoint.size() - 1);
 			}
+
+			// Configure mountPath
+			mountPath = VFS::GetAbsolutePath(mountPath);
 			if (!mountPath.empty() && mountPath[mountPath.size() - 1] == '/')
 				mountPath.erase(mountPath.size() - 1);
 

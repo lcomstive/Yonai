@@ -42,7 +42,15 @@ Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), 
 }
 
 MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className)
-{ return mono_class_from_name(Image, namespaceName, className); }
+// { return mono_class_from_name(Image, namespaceName, className); }
+{
+	// Get type hash
+	string fullName = strlen(namespaceName) == 0 ? className : fmt::format("{}.{}", namespaceName, className);
+	size_t hash = std::hash<std::string>{}(fullName);
+
+	return s_ReverseTypeHashes.find(hash) == s_ReverseTypeHashes.end() ?
+		nullptr : mono_class_from_mono_type(s_ReverseTypeHashes[hash]);
+}
 
 MonoType* Assembly::GetTypeFromClassName(const char* namespaceName, const char* className)
 {
@@ -147,8 +155,8 @@ void Assembly::CacheTypes(bool isCore)
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
 	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
-	MonoClass* coreComponentType = coreAssembly->GetClassFromName("AquaEngine", "Component");
-	MonoClass* coreSystemType    = coreAssembly->GetClassFromName("AquaEngine", "AquaSystem");
+	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
+	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
 
 	spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
@@ -176,16 +184,16 @@ void Assembly::CacheTypes(bool isCore)
 		if (klass != coreSystemType && mono_class_is_subclass_of(klass, coreSystemType, false))
 		{
 			m_ManagedSystemTypes.push_back(klass);
-			spdlog::trace("  {}.{} [System][{}]", _namespace, _name, hash);
+			// spdlog::trace("  {}.{} [System][{}]", _namespace, _name, hash);
 		}
 		// Check if derives from AquaEngine.Component
 		else if (klass != coreComponentType && mono_class_is_subclass_of(klass, coreComponentType, false))
 		{
 			m_ManagedComponentTypes.push_back(klass);
-			spdlog::trace("  {}.{} [Component][{}]", _namespace, _name, hash);
+			// spdlog::trace("  {}.{} [Component][{}]", _namespace, _name, hash);
 		}
-		else
-			spdlog::trace("  {}.{} [{}]", _namespace, _name, hash);
+		// else
+			// spdlog::trace("  {}.{} [{}]", _namespace, _name, hash);
 
 		MonoType* monoType = mono_class_get_type(klass);
 		s_TypeHashes.emplace(monoType, hash);

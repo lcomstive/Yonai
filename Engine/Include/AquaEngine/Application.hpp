@@ -1,9 +1,8 @@
 #pragma once
+#include <filesystem>
 #include <unordered_map>
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/SystemManager.hpp>
-
-#include <iostream>
 
 namespace AquaEngine
 {
@@ -16,6 +15,7 @@ namespace AquaEngine
 	class Application
 	{
 		bool m_Running = true;
+		std::filesystem::path m_ExecutablePath;
 		std::unordered_map<std::string, std::string> m_Args = {};
 
 		void InitVFS();
@@ -54,6 +54,11 @@ namespace AquaEngine
 		/// Stops the engine loop and releases resources
 		/// </summary>
 		AquaAPI void Exit();
+
+		/// <summary>
+		/// The path to the launched executable.
+		/// </summary>
+		AquaAPI std::filesystem::path& GetExecutablePath();
 
 		#pragma region Arguments
 		AquaAPI void ProcessArgs(int argc, char** argv);

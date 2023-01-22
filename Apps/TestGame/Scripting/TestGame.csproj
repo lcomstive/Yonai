@@ -41,7 +41,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="AquaScriptCore">
-      <HintPath>..\..\AquaScriptCore\bin\Debug\AquaScriptCore.dll</HintPath>
+      <HintPath>..\..\AquaScriptCore\bin\Release\AquaScriptCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

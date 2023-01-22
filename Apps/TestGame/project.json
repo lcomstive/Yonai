@@ -1,7 +1,7 @@
 {
-	"name": "TestGame",
+	"name": "Test Project Name",
 	"assetsDir": "Assets",
 	"assemblies": [
-		"Scripting/bin/Debug/TestGame.dll"
+		"/Project/Scripting/bin/Release/TestGame.dll"
 	]
 }

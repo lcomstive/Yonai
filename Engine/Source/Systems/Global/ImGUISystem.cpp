@@ -10,7 +10,7 @@ using namespace glm;
 using namespace AquaEngine;
 using namespace AquaEngine::Systems;
 
-void ImGUISystem::OnEnabled()
+ImGUISystem::ImGUISystem()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -19,7 +19,10 @@ void ImGUISystem::OnEnabled()
 	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
+}
 
+void ImGUISystem::OnEnabled()
+{
 	ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
 	ImGui_ImplOpenGL3_Init();
 

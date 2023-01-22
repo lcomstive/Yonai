@@ -18,6 +18,18 @@
 
 #include <AquaEngine/Window.hpp>
 
+// Platform Specific //
+#if defined(AQUA_PLATFORM_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#elif defined(AQUA_PLATFORM_LINUX)
+	#include <libgen.h>         // dirname
+	#include <unistd.h>         // readlink
+	#include <linux/limits.h>   // PATH_MAX
+#elif defined(AQUA_PLATFORM_APPLE)
+	#include <mach-o/dyld.h>
+#endif
+
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
@@ -25,7 +37,20 @@ using namespace AquaEngine::Systems;
 
 Application* Application::s_Instance = nullptr;
 
-string LogFile = "./Engine-Log.txt";
+string GetPersistentDir()
+{
+#if defined(AQUA_PLATFORM_WINDOWS)
+#pragma warning(disable : 4996) // "This function may be unsafe"
+		return string(getenv("appdata")) + "/Aqua Engine/";
+#pragma warning(default : 4996) // Restore warning
+#elif defined(AQUA_PLATFORM_MAC)
+		return string(getenv("HOME")) + "/Library/Caches/Aqua Engine/";
+#else
+		return "./.data/";
+#endif
+}
+
+string LogFile = "Engine-Log.txt";
 void Application::InitLogger()
 {
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -37,7 +62,7 @@ void Application::InitLogger()
 	consoleSink->set_level(spdlog::level::info);
 #endif
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDir() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -48,26 +73,20 @@ void Application::InitLogger()
 
 void Application::InitVFS()
 {
-	VFSMapping* mapping = VFS::Mount("/PersistentData/",
-#if defined(AQUA_PLATFORM_WINDOWS)
-#pragma warning(disable : 4996) // "This function may be unsafe"
-		string(getenv("appdata")) + "/Aqua Engine/"
-#pragma warning(default : 4996) // Restore warning
-#elif defined(AQUA_PLATFORM_MAC)
-		string(getenv("HOME")) + "/Library/Caches/Aqua Engine/"
-#else
-		"./.data/"
-#endif
-	);
+	VFSMapping* mapping = VFS::Mount("/PersistentData/", GetPersistentDir());
 
+	/*
 #if !defined(NDEBUG)
 	// Debug mode, mount 'Apps/Assets/' to '/Assets/'
 	#if defined(AQUA_PLATFORM_WINDOWS) 
 		AquaEngine::IO::VFS::Mount("/Assets", "../../../Apps/Assets");
+	#elif defined(AQUA_PLATFORM_MAC) 
+		AquaEngine::IO::VFS::Mount("/Assets", "../../../../../Apps/Assets");
 	#else
 		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
 	#endif
 #endif
+*/
 
 	// Default mapping for local filesystem.
 	// Useful for absolute paths
@@ -79,7 +98,28 @@ Application::Application()
 	InitLogger();
 	InitVFS();
 
-#pragma region Log engine information
+	// Get executable path and directory
+#if defined(AQUA_PLATFORM_WINDOWS)
+	wchar_t exeResult[MAX_PATH];
+	if(GetModuleFileName(NULL, exeResult, MAX_PATH) > 0)
+#elif defined(AQUA_PLATFORM_LINUX)
+	char exeResult[PATH_MAX];
+	if(readlink("/proc/self/exe", exeResult, PATH_MAX) > 0)
+#elif defined(AQUA_PLATFORM_APPLE)
+	char exeResult[PATH_MAX];
+	uint32_t exeResultSize = PATH_MAX;
+	if(_NSGetExecutablePath(exeResult, &exeResultSize) == 0)
+#endif
+		m_ExecutablePath = std::filesystem::path(exeResult);
+
+	s_Instance = this;
+}
+
+void Application::Setup()
+{
+	SystemManager::Global()->Add<SceneSystem>();
+
+	#pragma region Log engine information
 	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
 		"Engine",
 		AQUA_ENGINE_VERSION_MAJOR,
@@ -90,11 +130,14 @@ Application::Application()
 	);
 	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
 	spdlog::info("");
-	spdlog::debug("{:>12}: {}", "Log File", VFS::GetAbsolutePath(LogFile));
-	spdlog::debug("{:>12}: {}", "Persistent", VFS::GetMapping("/PersistentData/")->GetMountPath());
-#ifdef AQUA_PLATFORM_DESKTOP
+
+	string persistentPath = VFS::GetMapping("/PersistentData/")->GetMountPath() + "/";
+	spdlog::debug("{:>12}: {}", "Persistent", persistentPath);
+	spdlog::debug("{:>12}: {}", "Log File", persistentPath + LogFile);
 	spdlog::debug("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
-#endif
+
+	auto exePath = GetExecutablePath();
+	spdlog::debug("{:>12}: {}", "Executable", exePath.string());
 
 #if !defined(NDEBUG)
 	spdlog::debug("{:>12}: {}", "Configuration", "Debug");
@@ -104,13 +147,6 @@ Application::Application()
 	spdlog::debug("DYLD_LIBRARY_PATH = {}", getenv("DYLD_LIBRARY_PATH"));
 #endif
 #pragma endregion
-
-	s_Instance = this;
-}
-
-void Application::Setup()
-{
-	SystemManager::Global()->Add<SceneSystem>();
 }
 
 void Application::Cleanup()
@@ -205,6 +241,8 @@ std::string Application::GetArg(string name, string defaultValue)
 	return HasArg(name) ? m_Args[name] : defaultValue;
 }
 
+filesystem::path& Application::GetExecutablePath() { return m_ExecutablePath; }
+
 #pragma region Windowed Application
 void WindowedApplication::Setup()
 {
@@ -225,7 +263,10 @@ void WindowedApplication::Cleanup()
 AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
 {
 	if (!m_RenderSystem)
+	{
 		m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+		spdlog::debug("No render system found in application, creating one");
+	}
 	return m_RenderSystem;
 }
 
@@ -248,8 +289,8 @@ void WindowedApplication::Run()
 		OnUpdate();
 		SystemManager::Global()->Update();
 			
-		SystemManager::Global()->Draw();
 		OnDraw();
+		SystemManager::Global()->Draw();
 
 		Window::SwapBuffers();
 		Window::PollEvents();

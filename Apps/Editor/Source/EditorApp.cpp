@@ -29,9 +29,10 @@ using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
-string ProjectPathArg = "ProjectPath";
-string CSharpDLLPath = "dll-path";
-string CSharpCoreDLLPath = "core-dll-path";
+namespace fs = std::filesystem;
+
+string ProjectPathArg = "projectpath";
+string AquaScriptCorePath = "./AquaScriptCore.dll";
 
 void EditorApp::Setup()
 {
@@ -39,18 +40,29 @@ void EditorApp::Setup()
 
 	Window::SetTitle("Aqua Editor");
 
-	m_ProjectPath = GetArg(ProjectPathArg, "./");
+	if(!HasArg(ProjectPathArg))
+	{
+		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
+		Exit();
+		return;
+	}
+	
+	m_ProjectPath = fs::path(GetArg(ProjectPathArg));
 	if (m_ProjectPath.empty())
 		spdlog::warn("Empty project path!");
-	if (m_ProjectPath[m_ProjectPath.size() - 1] != '/')
-		m_ProjectPath += '/';
-	spdlog::info("Project path: {}", m_ProjectPath);
+	spdlog::info("Project path: {}", m_ProjectPath.c_str());
 
 	VFS::Mount("/Project", m_ProjectPath);
-	VFS::Mount("/Assets", m_ProjectPath + "Assets");
-	// VFS::Mount("/EditorCache", m_ProjectPath + ".aqua");
+	VFS::Mount("/Assets", "./Assets"); // Default assets
+	VFS::Mount("/Assets", "/Project/Assets");
+	VFS::Mount("/EditorCache", "/Project/.aqua");
+
+	ImGuiIO io = ImGui::GetIO();
+	io.IniFilename = VFS::GetAbsolutePath("/EditorCache/EditorLayout.ini").c_str();
 
 	InitialiseScripting();
+
+	LoadProject();
 
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
@@ -100,7 +112,10 @@ void EditorApp::LoadScene()
 		});
 
 	// Test C# component
-	Assembly* assembly = ScriptEngine::GetAssemblies()[1];
+	auto assemblies = ScriptEngine::GetAssemblies();
+	if(assemblies.empty())
+		return;
+	Assembly* assembly = assemblies[1];
 	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
 
 	const unsigned int spriteRows = 15;
@@ -134,25 +149,38 @@ void EditorApp::LoadScene()
 	SceneSystem::AddScene(m_CurrentScene);
 }
 
-void EditorApp::InitialiseScripting()
+void EditorApp::LoadProject()
 {
-	string coreDllPath = GetArg(CSharpCoreDLLPath, "/Assets/Scripts/AquaScriptCore.dll");
-	if (coreDllPath.empty() || !VFS::Exists(coreDllPath))
+	const string projectInfoPath = "/Project/project.json";
+	m_ProjectInfo = ReadProject(projectInfoPath);
+
+	if(m_ProjectInfo.Name.empty())
 	{
-		spdlog::critical("Core DLL path not specified or invalid. Set the '-core-dll-path' flag to 'AquaScriptCore.dll'");
+		// Failed to load, exit application
 		Exit();
 		return;
 	}
-	ScriptEngine::Init(coreDllPath, false);
-
-	string assemblyPath = GetArg(CSharpDLLPath, "/Assets/Scripts/TestGame.dll");
-	if (assemblyPath.empty())
-	{
-		spdlog::warn("No C# DLL path found, scripting engine disabled");
-		spdlog::warn("C# DLL can be set using the '-dll-path' flag");
-	}
 	else
-		Assembly* assembly = ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assemblyPath), true);
+		// Successfully loaded
+		spdlog::info("Loaded project '{}'", m_ProjectInfo.Name.c_str());
+
+	for(const string& assembly : m_ProjectInfo.Assemblies)
+	{
+		if(assembly.empty())
+			continue;
+		ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assembly), true);
+	}
+}
+
+void EditorApp::InitialiseScripting()
+{
+	if (AquaScriptCorePath.empty() || !VFS::Exists(AquaScriptCorePath))
+	{
+		spdlog::critical("Core DLL path not specified or file '{}' does not exist.", AquaScriptCorePath.c_str());
+		Exit();
+		return;
+	}
+	ScriptEngine::Init(AquaScriptCorePath, false);
 }
 
 void EditorApp::DrawUI()

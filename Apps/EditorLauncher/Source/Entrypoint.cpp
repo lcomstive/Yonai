@@ -1,8 +1,10 @@
-#include <EditorApp.hpp>
+#include <EditorLauncherApp.hpp>
+
+using namespace AquaEditorLauncher;
 
 int main(int argc, char** argv)
 {
-	AquaEditor::EditorApp app;
+	EditorLauncherApp app;
 	app.ProcessArgs(argc, argv);
 	
 	app.Run(); // Application loop

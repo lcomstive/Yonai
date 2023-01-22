@@ -78,6 +78,10 @@ namespace AquaEngine
 			return _aqua_internal_Entity_RemoveComponent(World.ID, ID, type);
 		}
 
+		public override string ToString() => $"{ID}#{World.ID}";
+
+		public static implicit operator string(Entity v) => v.ToString();
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_Entity_HasComponent(uint worldID, uint entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _aqua_internal_Entity_GetComponent(uint worldID, uint entityID, Type type);

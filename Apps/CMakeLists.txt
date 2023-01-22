@@ -15,4 +15,5 @@ endif()
 # Editor
 if(AQUA_BUILD_EDITOR)
 	add_subdirectory(Editor)
+	add_subdirectory(EditorLauncher)
 endif()

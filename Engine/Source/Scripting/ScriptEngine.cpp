@@ -16,7 +16,7 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
-const char* AssembliesPath = "/Assets/Scripts/";
+const char* AssembliesPath = "./mono/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
 string ScriptEngine::s_CoreDLLPath = "";
@@ -243,7 +243,7 @@ MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
 	MonoType* type = nullptr;
 	for (Assembly* assembly : s_Assemblies)
 	{
-		if (type = assembly->GetTypeFromHash(hash))
+		if ((type = assembly->GetTypeFromHash(hash)))
 			break;
 	}
 	return type;

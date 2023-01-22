@@ -12,6 +12,8 @@ namespace AquaEngine::Systems
 		void EndFrame();
 
 	public:
+		AquaAPI ImGUISystem();
+
 		AquaAPI void OnEnabled() override;
 		AquaAPI void OnDisabled() override;
 

@@ -157,10 +157,10 @@ void BaseGame::OnUpdate()
 #include <imgui.h>
 void BaseGame::OnDraw()
 {
+	// Blit output to default framebuffer (screen)
+	GetRenderSystem()->GetPipeline()->GetOutput()->BlitTo(nullptr);
+
 	ImGui::Begin("FPS");
 	ImGui::Text("FPS: %.2f", Time::FPS());
 	ImGui::End();
-
-	// Blit output to default framebuffer (screen)
-	GetRenderSystem()->GetPipeline()->GetOutput()->BlitTo(nullptr);
 }
