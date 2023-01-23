@@ -75,13 +75,18 @@ namespace AquaEngine::IO
 				// Replace all backslashes (Windows style) to forward slashes
 				replace(mountPoint.begin(), mountPoint.end(), '\\', '/');
 
-				// Remove end slashes
+				// Remove end slash
 				if (mountPoint[mountPoint.size() - 1] == '/' && mountPoint.size() > 1)
 					mountPoint.erase(mountPoint.size() - 1);
 			}
 
 			// Configure mountPath
-			mountPath = VFS::GetAbsolutePath(mountPath);
+			mountPath = VFS::GetAbsolutePath(mountPath, true);
+
+			// Replace all backslashes (Windows style) to forward slashes
+			replace(mountPath.begin(), mountPath.end(), '\\', '/');
+
+			// Remove end slash
 			if (!mountPath.empty() && mountPath[mountPath.size() - 1] == '/')
 				mountPath.erase(mountPath.size() - 1);
 
@@ -117,7 +122,7 @@ namespace AquaEngine::IO
 		/// <summary>
 		/// Gets an absolute path from the first appropriate mount
 		/// </summary>
-		AquaAPI static std::string GetAbsolutePath(std::string path);
+		AquaAPI static std::string GetAbsolutePath(std::string path, bool suppressWarning = false);
 
 		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
 		AquaAPI static VFSMapping* GetMapping(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);

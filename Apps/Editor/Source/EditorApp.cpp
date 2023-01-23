@@ -32,7 +32,7 @@ using namespace AquaEngine::Components;
 namespace fs = std::filesystem;
 
 string ProjectPathArg = "projectpath";
-string AquaScriptCorePath = "./AquaScriptCore.dll";
+string AquaScriptCorePath = "app://AquaScriptCore.dll";
 
 void EditorApp::Setup()
 {
@@ -50,15 +50,16 @@ void EditorApp::Setup()
 	m_ProjectPath = fs::path(GetArg(ProjectPathArg));
 	if (m_ProjectPath.empty())
 		spdlog::warn("Empty project path!");
-	spdlog::info("Project path: {}", m_ProjectPath.c_str());
+	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
 
-	VFS::Mount("/Project", m_ProjectPath);
-	VFS::Mount("/Assets", "./Assets"); // Default assets
-	VFS::Mount("/Assets", "/Project/Assets");
-	VFS::Mount("/EditorCache", "/Project/.aqua");
+	string projectDir = m_ProjectPath.parent_path().string();
+	VFS::Mount("project://", projectDir);
+	VFS::Mount("assets://", "app://Assets"); // Default assets
+	VFS::Mount("assets://", "project://Assets");
+	VFS::Mount("editor://", "project://.aqua");
 
 	ImGuiIO io = ImGui::GetIO();
-	io.IniFilename = VFS::GetAbsolutePath("/EditorCache/EditorLayout.ini").c_str();
+	io.IniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini").c_str();
 
 	InitialiseScripting();
 
@@ -104,19 +105,19 @@ void EditorApp::LoadScene()
 	*/
 
 	// 2D Sprite Test
-	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "/Assets/Textures/Test.png");
-	ResourceID spriteShader = Resource::Load<Shader>("Shaders/Sprite", ShaderStageInfo
+	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "assets://Textures/Test.png");
+	ResourceID spriteShader = Resource::Load<Shader>("assets://Shaders/Sprite", ShaderStageInfo
 		{
-			"/Assets/Shaders/Sprite.vert",
-			"/Assets/Shaders/Sprite.frag"
+			"assets://Shaders/Sprite.vert",
+			"assets://Shaders/Sprite.frag"
 		});
 
 	// Test C# component
 	auto assemblies = ScriptEngine::GetAssemblies();
-	if(assemblies.empty())
+	if(assemblies.size() <= 1)
 		return;
 	Assembly* assembly = assemblies[1];
-	MonoType* monoType = assembly->GetTypeFromClassName("ScriptingTest", "TestComponent");
+	MonoType* monoType = assembly->GetTypeFromClassName("TestGame", "TestComponent");
 
 	const unsigned int spriteRows = 15;
 	const unsigned int spriteColumns = 15;
@@ -151,8 +152,7 @@ void EditorApp::LoadScene()
 
 void EditorApp::LoadProject()
 {
-	const string projectInfoPath = "/Project/project.json";
-	m_ProjectInfo = ReadProject(projectInfoPath);
+	m_ProjectInfo = ReadProject("file://" + m_ProjectPath.string());
 
 	if(m_ProjectInfo.Name.empty())
 	{
@@ -168,7 +168,7 @@ void EditorApp::LoadProject()
 	{
 		if(assembly.empty())
 			continue;
-		ScriptEngine::LoadAssembly(VFS::GetAbsolutePath(assembly), true);
+		ScriptEngine::LoadAssembly(assembly, true);
 	}
 }
 

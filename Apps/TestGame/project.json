@@ -2,6 +2,6 @@
 	"name": "Test Project Name",
 	"assetsDir": "Assets",
 	"assemblies": [
-		"/Project/Scripting/bin/Release/TestGame.dll"
+		"project://Scripting/bin/TestGame.dll"
 	]
 }

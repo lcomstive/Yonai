@@ -5,6 +5,10 @@
 #include <AquaEngine/SystemManager.hpp>
 #include "../Include/EditorLauncherApp.hpp"
 #include <AquaEngine/Systems/Global/ImGUISystem.hpp>
+#include <AquaEngine/Platform/NativeFileBrowser.hpp>
+
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include <AquaEngine/Graphics/RenderPipeline.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
@@ -17,24 +21,22 @@
 #endif
 
 using namespace std;
+using namespace rapidjson;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEditorLauncher;
 
 namespace fs = std::filesystem;
 
-struct ProjectInfo
+struct LauncherSettings
 {
-	string Name;
-	string Path;
+	bool CloseLaucherOnEditorOpen = false;
 };
 
-vector<ProjectInfo> TestProjects = {
-	{ "TestApp", "/Users/lcomstive/Projects/AquaEngine/Apps/TestGame" },
-	{ "Another One", "/Users/lcomstive/Projects/AquaEngine/Apps/AnotherOne" },
-	{ "Game Project", "/Users/lcomstive/Projects/AquaEngine/Apps/GameProject" },
-	{ "Tutorials", "/Users/lcomstive/Projects/AquaEngine/Apps/Tutorials" }
-};
+const char* LauncherSettingsPath = "data://Launcher.json";
+
+LauncherSettings Settings = {};
+vector<ProjectInfo> Projects = {};
 
 void EditorLauncherApp::Setup()
 {
@@ -44,6 +46,11 @@ void EditorLauncherApp::Setup()
 
 	SystemManager::Global()->Remove<Systems::RenderSystem>();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (VFS::Exists(LauncherSettingsPath))
+		ReadSettings();
+	else
+		WriteSettings();
 }
 
 #include <imgui.h>
@@ -80,6 +87,10 @@ void EditorLauncherApp::OnDraw()
 		ImGui::EndMenuBar();
 	}
 
+	// Add project
+	if (ImGui::Button("Add Project"))
+		AddProjectPrompt();
+
 	ImGui::BeginTable("Projects", 3, ImGuiTableFlags_RowBg);
 
 	ImGui::TableSetupColumn("Name", 	ImGuiTableColumnFlags_WidthStretch);
@@ -93,8 +104,10 @@ void EditorLauncherApp::OnDraw()
 	ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, rowBgAlt);
 
 	// Existing Projects
-	for(ProjectInfo& info : TestProjects)
+	for(size_t i = 0; i < Projects.size(); i++)
 	{
+		ProjectInfo info = Projects[i];
+
 		ImGui::TableNextRow(ImGuiTableRowFlags_None);
 		ImGui::TableNextColumn();
 
@@ -106,11 +119,12 @@ void EditorLauncherApp::OnDraw()
 		ImGui::TableNextColumn();
 
 		if(ImGui::Button(("->##" + info.Path).c_str()))
-			LaunchEditor(info.Path);
-		// { spdlog::debug("Opening project at path '{}'", info.Path.c_str()); }
+			LaunchEditor(info);
 
 		ImGui::TableNextColumn();
-		if(ImGui::Button(("X##" + info.Path).c_str()))  { spdlog::debug("Removing project at path '{}'", info.Path.c_str()); }
+		if (ImGui::Button(("X##" + info.Path).c_str()))
+			// { spdlog::debug("Removing project at path '{}'", info.Path.c_str()); }
+			RemoveProject(info);
 	}
 	ImGui::PopStyleColor(2);
 	ImGui::EndTable();
@@ -119,16 +133,21 @@ void EditorLauncherApp::OnDraw()
 	ImGui::PopStyleVar();
 }
 
-bool EditorLauncherApp::LaunchEditor(std::string& projectPath)
+bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 {
 	// Get path to editor
 	fs::path& launcherPath = GetExecutablePath();
 	fs::path editorPath = launcherPath.parent_path();
+
+#if defined(AQUA_PLATFORM_WINDOWS)
+	editorPath.append("AquaEditor.exe");
+#else
 	editorPath.append("AquaEditor");
+#endif
 
-	std::string args = "-ProjectPath=" + projectPath;
+	std::string args = "-ProjectPath=\"" + project.Path + "\"";
 
-	spdlog::debug("Launching editor - '{} {}'", editorPath.c_str(), args.c_str());
+	spdlog::debug("Launching editor - '{} {}'", editorPath.string().c_str(), args.c_str());
 
 	// Create new process of AquaEditor
 #if defined(AQUA_PLATFORM_WINDOWS)
@@ -145,8 +164,8 @@ bool EditorLauncherApp::LaunchEditor(std::string& projectPath)
 
 	// start the program up
 	if(!CreateProcess(
-		editorPath.append(".exe").c_str(),   // the path
-		argv[1],        // Command line
+		editorPath.string().c_str(),   // the path
+		(char*)args.c_str(),        // Command line
 		NULL,           // Process handle not inheritable
 		NULL,           // Thread handle not inheritable
 		FALSE,          // Set handle inheritance to FALSE
@@ -154,19 +173,27 @@ bool EditorLauncherApp::LaunchEditor(std::string& projectPath)
 		NULL,           // Use parent's environment block
 		NULL,           // Use parent's starting directory 
 		&startupInfo,   // Pointer to STARTUPINFO structure
-		&processIfno    // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
+		&processInfo    // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
 	))
 	{
-		spdlog::error("Failed to launch editor - {}", GetLastError());
+		LPSTR messageBuffer = nullptr;
+
+		//Ask Win32 to give us the string version of that message ID.
+		//The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
+		size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+		//Copy the error message into a std::string.
+		std::string errMessage(messageBuffer, size);
+
+		//Free the Win32's string's buffer.
+		LocalFree(messageBuffer);
+
+		spdlog::error("Failed to launch editor - {}", errMessage);
 		return false;
 	}
 
 	spdlog::debug("Successfully launcher editor");
-
-	// Close process and thread handles. 
-	CloseHandle( pi.hProcess );
-	CloseHandle( pi.hThread );
-
 #elif defined(AQUA_PLATFORM_MAC) || defined(AQUA_PLATFORM_LINUX)
 	if(!fs::exists(editorPath))
 	{
@@ -181,9 +208,178 @@ bool EditorLauncherApp::LaunchEditor(std::string& projectPath)
 	}
 
 	spdlog::debug("Successfully launcher editor");
-#else
-	// TODO: Implement launching editor process
 #endif
+
+	// If editor is opening and setting enabled, close the launcher
+	if (Settings.CloseLaucherOnEditorOpen)
+		Exit();
 	
 	return true;
+}
+
+void EditorLauncherApp::RemoveProject(ProjectInfo& project)
+{
+	spdlog::debug("Removing reference to project '{}'", project.Name.c_str());
+	spdlog::debug("Path: {}", project.Path.c_str());
+	
+	for (auto it = Projects.rbegin(); it != Projects.rend(); it++)
+	{
+		if (project.Path.compare(it->Path) != 0)
+			continue; // Not this one
+
+		// Remove project
+		Projects.erase(--it.base());
+		break;
+	}
+	WriteSettings();
+}
+
+void EditorLauncherApp::ReadSettings()
+{
+	m_Settings.Parse(VFS::ReadText(LauncherSettingsPath).c_str());
+
+	// Projects
+	const Value& projectsArray = m_Settings["projects"];
+	if (!projectsArray.IsNull() && projectsArray.IsArray())
+	{
+		for (SizeType i = 0; i < projectsArray.Size(); i++)
+		{
+			Projects.emplace_back(ProjectInfo{
+				projectsArray[i]["name"].GetString(),
+				projectsArray[i]["path"].GetString()
+				});
+		}
+	}
+	else
+		m_Settings["projects"].SetArray();
+
+	if (!m_Settings.HasMember("settings"))
+		m_Settings["settings"] = Value();
+
+	// settings.closeLauncherOnEditorOpen
+	if (m_Settings["settings"].HasMember("closeLauncherOnEditorOpen"))
+			Settings.CloseLaucherOnEditorOpen = m_Settings["settings"]["closeLauncherOnEditorOpen"].GetBool();
+	else
+		m_Settings["settings"]["closeLauncherOnEditorOpen"].SetBool(Settings.CloseLaucherOnEditorOpen);
+}
+
+void EditorLauncherApp::WriteSettings()
+{
+	m_Settings.SetObject();
+
+	// Create projects array
+	Value projectsArray(kArrayType);
+	Document::AllocatorType& allocator = m_Settings.GetAllocator();
+
+	for (int i = 0; i < Projects.size(); i++)
+	{
+		Value objValue(kObjectType);
+		objValue.AddMember("name", Value(Projects[i].Name.c_str(), allocator), allocator);
+		objValue.AddMember("path", Value(Projects[i].Path.c_str(), allocator), allocator);
+
+		projectsArray.PushBack(objValue, allocator);
+	}
+	m_Settings.AddMember("projects", projectsArray, allocator);
+
+	// Create settings object
+	Value settings(kObjectType);
+	settings.AddMember("closeLauncherOnEditorOpen", Settings.CloseLaucherOnEditorOpen, allocator);
+
+	m_Settings.AddMember("settings", settings, allocator);
+
+	// Write data to file
+	StringBuffer buffer;
+	PrettyWriter<StringBuffer> writer(buffer);
+	m_Settings.Accept(writer);
+
+	VFS::WriteText(LauncherSettingsPath, buffer.GetString());
+}
+
+void EditorLauncherApp::AddProjectPrompt()
+{
+	fs::path folderPath = Platform::OpenFolderDialog("Aqua Project Location");
+
+	// No folder chosen
+	if (folderPath.empty())
+		return;
+
+	fs::path projectPath = folderPath / "project.json";
+
+	if (fs::exists(projectPath))
+		AddExistingProject(projectPath);
+	else
+		AddNewProject(folderPath);
+}
+
+void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
+{
+	string projectInfoStr = projectInfoPath.string();
+	replace(projectInfoStr.begin(), projectInfoStr.end(), '\\', '/');
+
+	spdlog::info("Adding existing project at path '{}'", projectInfoStr.c_str());
+
+	Document projectInfo;
+	string json = VFS::ReadText("file://" + projectInfoStr);
+	projectInfo.Parse(json.c_str());
+
+	string projectName = projectInfoPath.parent_path().filename().string();
+	if (projectInfo.HasMember("name"))
+		projectName = projectInfo["name"].GetString();
+
+	Projects.emplace_back(ProjectInfo
+		{
+			projectName,
+			projectInfoStr
+		});
+	WriteSettings();
+}
+
+// Based off https://stackoverflow.com/a/3418285
+void ReplaceAll(string& input, const string& from, const string& to)
+{
+	if (from.empty())
+		return;
+
+	size_t startPos = 0;
+	while ((startPos = input.find(from, startPos)) != string::npos)
+	{
+		input.replace(startPos, from.length(), to);
+		startPos += to.length();
+	}
+}
+
+void ReplaceTextInNewProjectFile(string& path, string projectName, string editorDir)
+{
+	string contents = VFS::ReadText(path);
+
+	ReplaceAll(contents, "$<ProjectName>", projectName);
+	ReplaceAll(contents, "$<EditorDir>", editorDir);
+
+	VFS::WriteText(path, contents);
+}
+
+void EditorLauncherApp::AddNewProject(fs::path projectDir)
+{
+	spdlog::info("Adding new project at path '{}'", projectDir.string().c_str());
+
+	VFS::Copy("app://Assets/ProjectTemplate/", "file://" + projectDir.string());
+	fs::path projectInfo = projectDir / "project.json";
+
+	string projectName = projectDir.filename().string();
+	string editorDir = GetExecutablePath().parent_path().string();
+
+	string vfsDir = "file://" + projectDir.string() + "/";
+	ReplaceTextInNewProjectFile(vfsDir + "project.json", projectName, editorDir);
+	ReplaceTextInNewProjectFile(vfsDir + "Scripting/AquaTemplateProject.sln", projectName, editorDir);
+	ReplaceTextInNewProjectFile(vfsDir + "Scripting/AquaTemplateProject.csproj", projectName, editorDir);
+
+	fs::rename(projectDir / "Scripting/AquaTemplateProject.sln",	projectDir / ("Scripting/" + projectName + ".sln"));
+	fs::rename(projectDir / "Scripting/AquaTemplateProject.csproj", projectDir / ("Scripting/" + projectName + ".csproj"));
+
+	Projects.emplace_back(ProjectInfo
+		{
+			projectName,
+			projectInfo.string()
+		});
+	WriteSettings();
 }

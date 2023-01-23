@@ -16,7 +16,7 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
-const char* AssembliesPath = "./mono/";
+const char* AssembliesPath = "app://Assets/Mono/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
 string ScriptEngine::s_CoreDLLPath = "";

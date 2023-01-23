@@ -7,8 +7,8 @@
     <ProjectGuid>{3B038445-2895-4429-AE9B-068AA46B5F19}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestGame</RootNamespace>
-    <AssemblyName>TestGame</AssemblyName>
+    <RootNamespace>Example</RootNamespace>
+    <AssemblyName>Example</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -32,16 +32,12 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="AquaScriptCore">
-      <HintPath>..\..\..\build\bin\Release\AquaScriptCore.dll</HintPath>
-      <HintPath>..\..\..\build\bin\MinSizeRel\AquaScriptCore.dll</HintPath>
-      <HintPath>..\..\..\build\bin\RelWithDebInfo\AquaScriptCore.dll</HintPath>
-      <HintPath>..\..\..\build\bin\Debug\AquaScriptCore.dll</HintPath>
+      <HintPath>D:\Lewis Projects\AquaEngine\build\bin\Debug\AquaScriptCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CameraControlSystem.cs" />
-    <Compile Include="TestComponent.cs" />
     <Compile Include="TestSystem.cs" />
+    <Compile Include="TestComponent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

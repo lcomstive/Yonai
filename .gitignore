@@ -13,6 +13,8 @@ Docs/Dist/
 [Bb]in/
 [Oo]bj/
 [Bb]uild/
+
+.aqua/
 AquaEngine*.zip
 
 # VCPKG packages

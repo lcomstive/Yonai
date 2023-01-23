@@ -7,6 +7,9 @@ else()
 	set(EXECUTABLE_RESOURCES "")
 endif()
 
+# AquaScriptCore
+add_subdirectory(AquaScriptCore)
+
 # Base Game
 if(AQUA_BUILD_BASE_GAME)
 	add_subdirectory(BaseGame)

@@ -5,8 +5,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
 # Engine
 
 # Apps
-set_target_properties(BaseGame 	 PROPERTIES FOLDER "Apps")
-set_target_properties(AquaEditor PROPERTIES FOLDER "Apps")
+set_target_properties(BaseGame 	 		 PROPERTIES FOLDER "Apps")
+set_target_properties(AquaEditor 		 PROPERTIES FOLDER "Apps")
+set_target_properties(AquaEditorLauncher PROPERTIES FOLDER "Apps")
 
 # Tests
 if(AQUA_ENGINE_BUILD_TESTS)

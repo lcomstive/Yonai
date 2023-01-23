@@ -16,6 +16,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 
+# Add dependency to the C# binding project
+add_dependencies(${PROJECT_NAME} AquaScriptCore)
+
 if(WIN32)
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
@@ -45,28 +48,18 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES $
 # Post-Build, compile and copy AquaScriptCore to output directory
 if(APPLE)
 	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditor.app/Contents/Resources)
+elseif(MSVC)
+	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
+	set(VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
 else()
 	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
 
 # Compile AquaScriptCore to runtime output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	# Build AquaScriptCore in release mode
-	# COMMAND ${CMAKE_VS_MSBUILD_COMMAND} AquaScriptCore.sln /property:Configuration=Release
-
-	COMMAND "echo" "Copying 'AquaScriptCore.dll' to output directory. This will fail if 	not built in Release mode."
-
-	# Copy to binary output directory
-	COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_CURRENT_SOURCE_DIR}/../AquaScriptCore/bin/Release/AquaScriptCore.dll
-		${AQUA_SCRIPTCORE_OUTPUT_DIR}/AquaScriptCore.dll
-
-	# Copy Mono library to output directory
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/lib/4.5
-		${AQUA_SCRIPTCORE_OUTPUT_DIR}/mono
-
 	# Copy standard assets to output directory
+	COMMAND echo Copying standard assets to output directory
+	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
 		${AQUA_SCRIPTCORE_OUTPUT_DIR}/Assets/

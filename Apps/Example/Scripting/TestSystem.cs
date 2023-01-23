@@ -16,8 +16,8 @@ namespace TestGame
 		protected override void Start()
 		{
 			Log.Debug("Colours:");
-			foreach(var colour in ColourValues)
-					Log.Debug($"{colour.r}, {colour.g}, {colour.b}, {colour.a}");
+			foreach (var colour in ColourValues)
+				Log.Debug($"{colour.r}, {colour.g}, {colour.b}, {colour.a}");
 
 			Colour c = new Colour(1, 0, 1, 1);
 			c.g = 0.75f;
@@ -43,11 +43,11 @@ namespace TestGame
 
 			float t = (float)Math.Sin(Time.TimeSinceLaunch) + 0.1f;
 			for (int i = 0; i < transform.Length; i++)
-				renderers[i].Colour = Colour.Lerp(
-					testComponents[i].Value,
-					Colour.Black,
-					t * testComponents[i].ValueChangeSpeed
-				);
+			{
+				Vector3 pos = transform[i].Position;
+				pos.z = t;
+				transform[i].Position = pos;
+			}
 
 			if (Input.IsKeyPressed(Key.F11))
 				Window.CycleFullscreen();

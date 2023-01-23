@@ -1,8 +1,8 @@
 #ifndef _INCLUDE_PBR_
 #define _INCLUDE_PBR_
-#include "/Assets/Shaders/Include/Light.inc"
-#include "/Assets/Shaders/Include/Camera.inc"
-#include "/Assets/Shaders/Include/PBRFunctions.inc"
+#include "assets://Shaders/Include/Light.inc"
+#include "assets://Shaders/Include/Camera.inc"
+#include "assets://Shaders/Include/PBRFunctions.inc"
 
 struct PBRInput
 {

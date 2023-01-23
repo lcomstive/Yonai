@@ -1,8 +1,11 @@
+#include <filesystem>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/IO/VFS/VFSPhysicalFile.hpp>
 
 using namespace std;
 using namespace AquaEngine::IO;
+
+namespace fs = std::filesystem;
 
 unordered_map<string, list<VFSMapping*>> VFS::s_Mappings;
 
@@ -39,7 +42,7 @@ bool VFS::Exists(string path)
 			if (mapping->Exists(mapping->GetMountedPath(path)))
 				return true;
 	}
-	return false;
+	return fs::exists(path);
 }
 
 VFSMapping* VFS::GetMapping(string path, bool needExistingFile, FilePermissions requiredPerms)
@@ -187,12 +190,14 @@ vector<VFSFile> VFS::GetFiles(string directory, bool recursive)
 	return files;
 }
 
-string VFS::GetAbsolutePath(string path)
+string VFS::GetAbsolutePath(string path, bool suppressWarning)
 {
 	VFSMapping* mapping = GetMapping(path, false);
 	if (mapping)
 		return mapping->GetMountedPath(path);
 
-	spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+	if(!suppressWarning)
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+
 	return path;
 }

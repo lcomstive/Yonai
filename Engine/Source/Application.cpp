@@ -73,44 +73,37 @@ void Application::InitLogger()
 
 void Application::InitVFS()
 {
-	VFSMapping* mapping = VFS::Mount("/PersistentData/", GetPersistentDir());
-
-	/*
-#if !defined(NDEBUG)
-	// Debug mode, mount 'Apps/Assets/' to '/Assets/'
-	#if defined(AQUA_PLATFORM_WINDOWS) 
-		AquaEngine::IO::VFS::Mount("/Assets", "../../../Apps/Assets");
-	#elif defined(AQUA_PLATFORM_MAC) 
-		AquaEngine::IO::VFS::Mount("/Assets", "../../../../../Apps/Assets");
-	#else
-		AquaEngine::IO::VFS::Mount("/Assets", "../../Apps/Assets");
-	#endif
-#endif
-*/
+	// Map persistent data
+	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDir());
 
 	// Default mapping for local filesystem.
 	// Useful for absolute paths
-	VFS::Mount(string());
+	// VFS::Mount(string());
+
+	// Get executable path and directory
+#if defined(AQUA_PLATFORM_WINDOWS)
+	wchar_t exeResult[MAX_PATH];
+	if (GetModuleFileNameW(NULL, exeResult, MAX_PATH) > 0)
+#elif defined(AQUA_PLATFORM_LINUX)
+	char exeResult[PATH_MAX];
+	if (readlink("/proc/self/exe", exeResult, PATH_MAX) > 0)
+#elif defined(AQUA_PLATFORM_APPLE)
+	char exeResult[PATH_MAX];
+	uint32_t exeResultSize = PATH_MAX;
+	if (_NSGetExecutablePath(exeResult, &exeResultSize) == 0)
+#endif
+		m_ExecutablePath = std::filesystem::path(exeResult);
+
+	// Map /Exe/ to launched executable directory
+	VFS::Mount("app://", m_ExecutablePath.parent_path().string());
+
+	VFS::Mount("file:///", "");
 }
 
 Application::Application()
 {
 	InitLogger();
 	InitVFS();
-
-	// Get executable path and directory
-#if defined(AQUA_PLATFORM_WINDOWS)
-	wchar_t exeResult[MAX_PATH];
-	if(GetModuleFileName(NULL, exeResult, MAX_PATH) > 0)
-#elif defined(AQUA_PLATFORM_LINUX)
-	char exeResult[PATH_MAX];
-	if(readlink("/proc/self/exe", exeResult, PATH_MAX) > 0)
-#elif defined(AQUA_PLATFORM_APPLE)
-	char exeResult[PATH_MAX];
-	uint32_t exeResultSize = PATH_MAX;
-	if(_NSGetExecutablePath(exeResult, &exeResultSize) == 0)
-#endif
-		m_ExecutablePath = std::filesystem::path(exeResult);
 
 	s_Instance = this;
 }
@@ -131,7 +124,7 @@ void Application::Setup()
 	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
 	spdlog::info("");
 
-	string persistentPath = VFS::GetMapping("/PersistentData/")->GetMountPath() + "/";
+	string persistentPath = VFS::GetMapping("data://")->GetMountPath() + "/";
 	spdlog::debug("{:>12}: {}", "Persistent", persistentPath);
 	spdlog::debug("{:>12}: {}", "Log File", persistentPath + LogFile);
 	spdlog::debug("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
