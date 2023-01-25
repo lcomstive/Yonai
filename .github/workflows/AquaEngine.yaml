@@ -71,6 +71,13 @@ jobs:
     - name: Configure
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }}
 
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build AquaScriptCore
+      if: matrix.config.os != 'windows-latest'
+      run: msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
+
     # Build
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --config ${{ env.CMAKE_CONFIG }}
