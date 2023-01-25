@@ -6,7 +6,7 @@ add_executable(
 	${PROJECT_NAME}
 	${SOURCE_FILES}
 	${HEADER_FILES}
-	${EXECUTABLE_RESOURCES}
+	${AQUA_EXECUTABLE_RESOURCES}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -27,17 +27,23 @@ if(WIN32)
 		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
 	)
 elseif(APPLE)
+	# Configure Mac OS app bundle
 	set_target_properties(
 		${PROJECT_NAME} PROPERTIES
 		BUNDLE TRUE
 		MACOSX_BUNDLE TRUE
 		MACOSX_BUNDLE_GUI_IDENTIFIER com.madissia.${PROJECT_NAME}
 		MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+		MACOSX_BUNDLE_COPYRIGHT "© 2023 Madissia Technologies"
+		MACOSX_BUNDLE_EXECUTABLE_NAME "AquaEditorLauncher"
+		MACOSX_BUNDLE_ICON_FILE ${AQUA_ICON}
 		MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_STRING_LONG}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_STRING}
 		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
 		XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.madissia.AquaEditor"
 	)
+
+	set_source_files_properties(${AQUA_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
 # Group source files inside IDE
@@ -45,85 +51,13 @@ source_group("Resources" FILES ${EXECUTABLE_RESOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source" FILES ${SOURCE_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${INCLUDE_FILES})
 
-# Post-Build, compile and copy AquaScriptCore to output directory
-if(APPLE)
-	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditor.app/Contents/Resources)
-elseif(MSVC)
-	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
-	set(VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
-else()
-	set(AQUA_SCRIPTCORE_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-endif()
-
-# Compile AquaScriptCore to runtime output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	# Copy standard assets to output directory
 	COMMAND echo Copying standard assets to output directory
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
-		${AQUA_SCRIPTCORE_OUTPUT_DIR}/Assets/
-
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../AquaScriptCore
+		${AQUA_RESOURCES_DIR}/Assets/
 )
 
-# Installation
-install(
-	TARGETS ${PROJECT_NAME}
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-	BUNDLE DESTINATION .
-	RUNTIME DESTINATION bin
-)
-
-set(CPACK_PACKAGE_NAME "Aqua Engine")
-set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
-set(CPACK_PACKAGE_VENDOR "Madissia Technologies")
-set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "Aqua Engine/v${VERSION_STRING}")
-set(CPACK_STRIP_FILES
-	"bin/AquaEditor;.DS_Store;.git;Engine/Vendor"
-)
-
-if("${GIT_BRANCH}" STREQUAL "main") # Production build
-	set(CPACK_PACKAGE_FILE_NAME "Aqua Engine v${VERSION_STRING}")
-elseif("${GIT_BRANCH}" STREQUAL "staging") # Staging build
-	set(CPACK_PACKAGE_FILE_NAME "Aqua Engine v${VERSION_STRING_LONG}")
-else() # Dev build
-	set(CPACK_PACKAGE_FILE_NAME "Aqua Engine v${VERSION_STRING_LONG}-dev")
-endif()
-
-if(APPLE)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
-
-	set(CPACK_GENERATOR "Bundle")
-	set(CPACK_MONOLITHIC_INSTALL 1)
-	set(CPACK_BUNDLE_NAME "Aqua Engine")
-	set(CPACK_BUNDLE_PLIST ${CMAKE_BINARY_DIR}/Info.plist)
-	set(CPACK_DMG_VOLUME_NAME ${CPACK_SOURCE_PACKAGE_FILE_NAME})
-	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AquaIcon.icns)
-	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AquaIcon.icns)
-	set(CPACK_BUNDLE_STARTUP_COMMAND ${CMAKE_SOURCE_DIR}/Platforms/Mac/launcher.sh)
-elseif(WIN32)
-	# Replace '/' with '\\'; regex so have to escape characters
-	STRING(REGEX REPLACE "/" "\\\\\\\\" CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_INSTALL_DIRECTORY} )
-
-	set(CPACK_GENERATOR "NSIS64")
-	set(CPACK_NSIS_DISPLAY_NAME ${CPACK_PACKAGE_NAME})
-	set(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "Aqua Engine")
-	set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
-	set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
-	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
-	install(
-		FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-		DESTINATION ${CMAKE_BINARY_DIR}
-	)
-else()
-	set(CPACK_MONOLITHIC_INSTALL 1)
-	set(CPACK_GENERATOR "TGZ")
-endif()
-
-include(CPack)
+include(${CMAKE_CURRENT_SOURCE_DIR}/Install.cmake)

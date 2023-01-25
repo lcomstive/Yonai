@@ -13,7 +13,10 @@ namespace AquaEditorLauncher
 	{
 		std::string Name;
 		std::string Path;
+		std::string Directory;
 	};
+
+	void ReplaceAll(std::string& input, const std::string& from, const std::string& to);
 
 	class EditorLauncherApp : public AquaEngine::WindowedApplication
 	{
@@ -33,5 +36,6 @@ namespace AquaEditorLauncher
 
 		void AddNewProject(std::filesystem::path projectDir);
 		void AddExistingProject(std::filesystem::path projectInfoPath);
+		void CreateCSharpProject(std::filesystem::path projectDir, std::string projectName);
 	};
 }

@@ -77,3 +77,6 @@ elseif(UNIX)
 endif()
 
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")
+
+# Portable File Dialogs
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/portable-file-dialogs")

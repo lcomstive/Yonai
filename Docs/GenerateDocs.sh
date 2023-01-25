@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Set directory to /Docs/
-cd ../../Docs
-
 # Retrieve version from file
 VERSION=$(cat ../Version.txt)
 
@@ -20,6 +17,14 @@ fi
 
 echo "Generating documents for v$VERSION"
 
+# Create output directory
+mkdir -p ./Dist/
+
 ### Generate documentation
 # Pipe output with project version to doxygen command
+
+# Public facing documentation
 ( cat Doxyfile ; echo ; echo "PROJECT_NUMBER=$VERSION" ) | doxygen -
+
+# Internal (C++ Engine) documentation
+( cat DoxyfileInternal ; echo ; echo "PROJECT_NUMBER=$VERSION" ) | doxygen -

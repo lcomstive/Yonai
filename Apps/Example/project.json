@@ -1,7 +1,0 @@
-{
-	"name": "Example",
-	"assetsDir": "Assets",
-	"assemblies": [
-		"project://Scripting/bin/Example.dll"
-	]
-}

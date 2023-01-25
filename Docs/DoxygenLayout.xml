@@ -13,6 +13,10 @@
 		<tab type="user" url="@ref Tutorial1" title="Tutorial #1" />
 	</tab>
 
+  <tab type="usergroup" title="Usage" url="[none]">
+  	<tab type="user" url="@ref VFS" title="Virtual File System" />
+  </tab>
+
 	<tab type="user" url="@ref License" title="License" />
 
 	<!-- Defaults -->

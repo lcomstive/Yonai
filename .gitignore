@@ -21,3 +21,11 @@ AquaEngine*.zip
 vcpkg_installed
 *.mdb
 *.pdb
+
+# C# projects
+*.vcproj
+*.sln
+
+# Except AquaScriptCore, for Unix platforms
+!Apps/AquaScriptCore/AquaScriptCore.sln
+!Apps/AquaScriptCore/AquaScriptCore.csproj

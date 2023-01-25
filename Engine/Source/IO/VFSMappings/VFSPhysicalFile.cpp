@@ -27,6 +27,9 @@ VFSPhysicalFileMapping::~VFSPhysicalFileMapping()
 
 string VFSPhysicalFileMapping::ReadText(string path)
 {
+	if(!fs::exists(path) || fs::is_directory(path))
+		return "";
+
 	// Open file for read and get size
 	ifstream filestream(path, ios::in | ios::binary);
 
@@ -103,15 +106,13 @@ void VFSPhysicalFileMapping::GetFiles(std::string directory, vector<VFSFile>& fi
 }
 
 void VFSPhysicalFileMapping::WriteText(string path, string text, bool append)
-{
-	if (!fs::exists(path) && !fs::create_directories(path))
+{	
+	// Check if parent directory already exists
+	fs::path parentDir = fs::path(path).parent_path();
+	if (!fs::exists(parentDir) && !fs::create_directories(parentDir))
 	{
-		// Check if directory already exists, if not then error is for different reason
-		if (!fs::exists(path))
-		{
-			spdlog::error("Failed to write to '{}' - could not create parent directory", path);
-			return;
-		}
+		spdlog::error("Failed to write to '{}' - could not create parent directory", path);
+		return;
 	}
 
 	ofstream filestream(path, ios::out | (append ? ios::app : ios::trunc));

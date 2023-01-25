@@ -94,8 +94,13 @@ void Application::InitVFS()
 #endif
 		m_ExecutablePath = std::filesystem::path(exeResult);
 
-	// Map /Exe/ to launched executable directory
+	// Map app:// to launched executable directory
+#if defined(AQUA_PLATFORM_APPLE)
+	// On Mac OS, assets for app are found in Resources subfolder in the app bundle
+	VFS::Mount("app://", (m_ExecutablePath.parent_path().parent_path() / "Resources").string());
+#else
 	VFS::Mount("app://", m_ExecutablePath.parent_path().string());
+#endif
 
 	VFS::Mount("file:///", "");
 }
@@ -198,14 +203,25 @@ void Application::ProcessArgs(int argc, char** argv)
 		auto splitPos = name.find('=');
 		if(splitPos == string::npos)
 		{
+			// Add key without value as argument,
+			// this typically represents a flag, like '-headless'
 			ToLower(name);
 			m_Args.emplace(name, "");
 		}
 		else
 		{
+			// Extract key
 			string key = name.substr(0, splitPos);
 			ToLower(key);
-			m_Args.emplace(key, name.substr(splitPos + 1));
+
+			// Extract value
+			string value = name.substr(splitPos + 1);
+			// Remove quotations, if present
+			if(value[0] == '"' && value[value.size() - 1] == '"')
+				value = value.substr(1, value.size() - 2);
+
+			// Add to list of found arguments
+			m_Args.emplace(key, value);
 		}
 	}
 

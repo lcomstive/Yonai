@@ -2,6 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/IO/VFS.hpp>
+#include <portable-file-dialogs.h>
 #include <AquaEngine/SystemManager.hpp>
 #include "../Include/EditorLauncherApp.hpp"
 #include <AquaEngine/Systems/Global/ImGUISystem.hpp>
@@ -118,12 +119,11 @@ void EditorLauncherApp::OnDraw()
 
 		ImGui::TableNextColumn();
 
-		if(ImGui::Button(("->##" + info.Path).c_str()))
+		if(ImGui::Button(("->##" + info.Directory).c_str()))
 			LaunchEditor(info);
 
 		ImGui::TableNextColumn();
-		if (ImGui::Button(("X##" + info.Path).c_str()))
-			// { spdlog::debug("Removing project at path '{}'", info.Path.c_str()); }
+		if (ImGui::Button(("X##" + info.Directory).c_str()))
 			RemoveProject(info);
 	}
 	ImGui::PopStyleColor(2);
@@ -148,6 +148,9 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 	std::string args = "-ProjectPath=\"" + project.Path + "\"";
 
 	spdlog::debug("Launching editor - '{} {}'", editorPath.string().c_str(), args.c_str());
+
+	if(!fs::exists(fs::path(project.Path) / ("Scripting/" + project.Name + ".vcproj")))
+		CreateCSharpProject(project.Directory, project.Name);
 
 	// Create new process of AquaEditor
 #if defined(AQUA_PLATFORM_WINDOWS)
@@ -201,7 +204,7 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 		return false;
 	}
 
-	if(execl(editorPath.c_str(), editorPath.c_str(), args.c_str()))
+	if(execl(editorPath.c_str(), editorPath.c_str(), args.c_str(), nullptr))
 	{
 		spdlog::error("[{}] Failed to launch editor", errno);
 		return false;
@@ -246,7 +249,8 @@ void EditorLauncherApp::ReadSettings()
 		{
 			Projects.emplace_back(ProjectInfo{
 				projectsArray[i]["name"].GetString(),
-				projectsArray[i]["path"].GetString()
+				projectsArray[i]["path"].GetString(),
+				projectsArray[i]["directory"].GetString()
 				});
 		}
 	}
@@ -276,6 +280,7 @@ void EditorLauncherApp::WriteSettings()
 		Value objValue(kObjectType);
 		objValue.AddMember("name", Value(Projects[i].Name.c_str(), allocator), allocator);
 		objValue.AddMember("path", Value(Projects[i].Path.c_str(), allocator), allocator);
+		objValue.AddMember("directory", Value(Projects[i].Directory.c_str(), allocator), allocator);
 
 		projectsArray.PushBack(objValue, allocator);
 	}
@@ -297,18 +302,17 @@ void EditorLauncherApp::WriteSettings()
 
 void EditorLauncherApp::AddProjectPrompt()
 {
-	fs::path folderPath = Platform::OpenFolderDialog("Aqua Project Location");
-
-	// No folder chosen
-	if (folderPath.empty())
+	string folderPathRaw = pfd::select_folder("Aqua Project Location").result();
+	if(folderPathRaw.empty())
 		return;
 
+	fs::path folderPath(folderPathRaw);
 	fs::path projectPath = folderPath / "project.json";
 
 	if (fs::exists(projectPath))
 		AddExistingProject(projectPath);
 	else
-		AddNewProject(folderPath);
+		AddNewProject(folderPath);		
 }
 
 void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
@@ -326,16 +330,21 @@ void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
 	if (projectInfo.HasMember("name"))
 		projectName = projectInfo["name"].GetString();
 
+	fs::path projectDir = projectInfoPath.parent_path();
+	if(!fs::exists(projectDir / ("Scripting/" + projectName + ".vcproj")))
+		CreateCSharpProject(projectDir, projectName);
+
 	Projects.emplace_back(ProjectInfo
 		{
 			projectName,
-			projectInfoStr
+			projectInfoStr,
+			projectDir.string()
 		});
 	WriteSettings();
 }
 
 // Based off https://stackoverflow.com/a/3418285
-void ReplaceAll(string& input, const string& from, const string& to)
+void AquaEditorLauncher::ReplaceAll(string& input, const string& from, const string& to)
 {
 	if (from.empty())
 		return;
@@ -348,7 +357,7 @@ void ReplaceAll(string& input, const string& from, const string& to)
 	}
 }
 
-void ReplaceTextInNewProjectFile(string& path, string projectName, string editorDir)
+void ReplaceTextInNewProjectFile(string path, string projectName, string editorDir)
 {
 	string contents = VFS::ReadText(path);
 
@@ -366,20 +375,22 @@ void EditorLauncherApp::AddNewProject(fs::path projectDir)
 	fs::path projectInfo = projectDir / "project.json";
 
 	string projectName = projectDir.filename().string();
+
+#if defined(AQUA_PLATFORM_APPLE)
+	string editorDir = (GetExecutablePath().parent_path().parent_path() / "Resources").string();
+#else
 	string editorDir = GetExecutablePath().parent_path().string();
+#endif
 
-	string vfsDir = "file://" + projectDir.string() + "/";
-	ReplaceTextInNewProjectFile(vfsDir + "project.json", projectName, editorDir);
-	ReplaceTextInNewProjectFile(vfsDir + "Scripting/AquaTemplateProject.sln", projectName, editorDir);
-	ReplaceTextInNewProjectFile(vfsDir + "Scripting/AquaTemplateProject.csproj", projectName, editorDir);
+	ReplaceTextInNewProjectFile("file://" + projectDir.string() + "/project.json", projectName, editorDir);
 
-	fs::rename(projectDir / "Scripting/AquaTemplateProject.sln",	projectDir / ("Scripting/" + projectName + ".sln"));
-	fs::rename(projectDir / "Scripting/AquaTemplateProject.csproj", projectDir / ("Scripting/" + projectName + ".csproj"));
+	CreateCSharpProject(projectDir, projectName);
 
 	Projects.emplace_back(ProjectInfo
 		{
 			projectName,
-			projectInfo.string()
+			projectInfo.string(),
+			projectDir.string()
 		});
 	WriteSettings();
 }

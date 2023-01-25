@@ -171,7 +171,7 @@ Resources of study
 ==========
 > Please [contact](#contact) me for removal if you or your resources are in this section and you do not want them to be.
 
-* [Thera Engine \[Calvin Soueid\]](https://github.com/BlackxSnow/TheraEngine)
+* [Thera Engine \[Celeste Soueid\]](https://github.com/BlackxSnow/TheraEngine)
 * [Eclipse Engine \[James Greensill\]](https://github.com/jwrmg/Eclipse)
 * [Hazel Engine \[Yan Chernikov\]](https://github.com/TheCherno/Hazel)
 * [LearnOpenGL.com \[Joey de Vries\]](https://learnopengl.com/)
