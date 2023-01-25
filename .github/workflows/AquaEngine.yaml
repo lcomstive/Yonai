@@ -96,7 +96,6 @@ jobs:
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
-        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
@@ -111,4 +110,4 @@ jobs:
       with:
         if-no-files-found: error
         name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
-        path: ${{ env.BINARY_DIR }}/AquaEditor.app
+        path: ${{ env.BINARY_DIR }}/AquaEditor.app/
