@@ -92,22 +92,13 @@ jobs:
 
     # Copy desired artifacts to output folder
     - name: Gather artifacts
-      if: matrix.config.os != 'macos'
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
-      if: matrix.config.os != 'macos'
       with:
         if-no-files-found: error
         name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
         path: ${{ github.workspace }}/build/artifact/
-
-    - uses: actions/upload-artifact@v3
-      if: matrix.config.os == 'macos'
-      with:
-        if-no-files-found: error
-        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
-        path: ${{ env.BINARY_DIR }}/AquaEditor.app/
