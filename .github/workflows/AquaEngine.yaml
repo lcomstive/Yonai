@@ -71,9 +71,7 @@ jobs:
     - name: Configure
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }}
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
-
+    # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore
       if: matrix.config.os != 'windows-latest'
       run: msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
@@ -94,23 +92,23 @@ jobs:
 
     # Copy desired artifacts to output folder
     - name: Gather artifacts
-      if: matrix.config.os != 'windows-latest'
+      if: matrix.config.os != 'macos'
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
         cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
 
-    - name: Gather artifacts
-      if: matrix.config.os == 'windows-latest'
-      run: |
-        mkdir -p ${{ github.workspace }}/build/artifact
-        cp ${{ env.BINARY_DIR }}/*.dll ${{ github.workspace }}/build/artifact/
-        cp ${{ env.BINARY_DIR }}/*.exe ${{ github.workspace }}/build/artifact/
-        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
-
     # Upload artifact
     - uses: actions/upload-artifact@v3
+      if: matrix.config.os != 'macos'
       with:
         if-no-files-found: error
         name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
         path: ${{ github.workspace }}/build/artifact/
+
+    - uses: actions/upload-artifact@v3
+      if: matrix.config.os == 'macos'
+      with:
+        if-no-files-found: error
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
+        path: ${{ env.BINARY_DIR }}/AquaEditor.app
