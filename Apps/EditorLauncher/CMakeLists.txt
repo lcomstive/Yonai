@@ -33,6 +33,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES $
 
 if(APPLE)
 	set_target_properties(${PROJECT_NAME} PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/AquaEditor.app/Contents/MacOS/
+		OUTPUT_NAME "Aqua Editor Launcher"
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Aqua\ Editor.app/Contents/MacOS/
 	)
 endif()

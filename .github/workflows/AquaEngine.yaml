@@ -80,6 +80,11 @@ jobs:
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --config ${{ env.CMAKE_CONFIG }}
 
+    # Package
+    - name: Package
+      if: matrix.config.os == 'macos'
+      run: cpack
+
     # Test
     - name: Run Test
       run: ${{ env.BINARY_DIR }}/AquaEngineTest
@@ -92,9 +97,17 @@ jobs:
 
     # Copy desired artifacts to output folder
     - name: Gather artifacts
+      if: matrix.config.os != 'macos'
       run: |
         mkdir -p ${{ github.workspace }}/build/artifact
         cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
+
+    # Copy desired artifacts to output folder
+    - name: Gather artifacts
+      if: matrix.config.os == 'macos'
+      run: |
+        mkdir -p ${{ github.workspace }}/build/artifact
+        cp ${{ env.BINARY_DIR }}/*.dmg ${{ github.workspace }}/build/artifact/
 
     # Upload artifact
     - uses: actions/upload-artifact@v3

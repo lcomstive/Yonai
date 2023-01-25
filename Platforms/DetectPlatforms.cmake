@@ -10,7 +10,7 @@ if(APPLE)
     set(AQUA_ICON ${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
     set(AQUA_EXECUTABLE_RESOURCES ${AQUA_ICON})
 
-    set(AQUA_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditor.app/Contents/Resources)
+    set(AQUA_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/Resources)
 elseif(WIN32)
     set(AQUA_ICON ${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Windows/AppIcon.ico)
     set(AQUA_EXECUTABLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Windows/AppIcon.rc)
