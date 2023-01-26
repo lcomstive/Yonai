@@ -12,7 +12,7 @@ jobs:
         config:
         - {
             name: "Windows",
-            os: [ windows-latest, self-hosted ],
+            os: [ windows, self-hosted ],
             triplet: 'x64-windows-static'
           }
         # Disabling Linux cloud builds until further notice
@@ -23,7 +23,7 @@ jobs:
         #   }
         - {
             name: "MacOS",
-            os: [ macos, arm64, self-hosted ],
+            os: [ macOS, arm64, self-hosted ],
             triplet: 'arm64-osx'
           }
 
