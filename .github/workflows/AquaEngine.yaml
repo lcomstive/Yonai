@@ -12,7 +12,7 @@ jobs:
         config:
         - {
             name: "Windows",
-            os: windows-latest,
+            os: [ windows-latest, self-hosted ],
             triplet: 'x64-windows-static'
           }
         # Disabling Linux cloud builds until further notice
@@ -97,9 +97,9 @@ jobs:
 
     # Create installation package
     - name: Package
-      run: cpack
+      run: cd ${{ github.workspace }}/build; cpack
 
-    # Upload artifact
+    # Upload generated artifact
     - uses: actions/upload-artifact@v3
       with:
         if-no-files-found: error
