@@ -18,6 +18,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if(WIN32)
 	set_target_properties(${PROJECT_NAME} PROPERTIES
+		OUTPUT_NAME "Aqua Editor Launcher"
 		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
 		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
 		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
@@ -37,3 +38,5 @@ if(APPLE)
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Aqua\ Editor.app/Contents/MacOS/
 	)
 endif()
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/Install.cmake)

@@ -21,6 +21,7 @@ add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
 if(WIN32)
 	set_target_properties(${PROJECT_NAME} PROPERTIES
+		OUTPUT_NAME "Aqua Editor"
 		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
 		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
 		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
@@ -40,7 +41,7 @@ elseif(APPLE)
 		MACOSX_BUNDLE_ICON_FILE ${AQUA_ICON}
 		MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_STRING_LONG}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_STRING}
-		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
+		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/../AquaEditorLauncher/Info.plist.in
 		XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.madissia.AquaEditor"
 	)
 
@@ -55,10 +56,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES $
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	# Copy standard assets to output directory
 	COMMAND echo Copying standard assets to output directory
+	COMMAND echo "${CMAKE_CURRENT_SOURCE_DIR}/Assets/ -> ${AQUA_RESOURCES_DIR}/Assets/"
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
 		${AQUA_RESOURCES_DIR}/Assets/
 )
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/Install.cmake)

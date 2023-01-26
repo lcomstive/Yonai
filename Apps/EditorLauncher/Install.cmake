@@ -1,20 +1,13 @@
 # Installation using CPack
-install(
-	TARGETS ${PROJECT_NAME}
-	BUNDLE DESTINATION .
-)
-
 set(CPACK_PACKAGE_NAME "Aqua Editor")
 set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set(CPACK_PACKAGE_VENDOR "Madissia Technologies")
 set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
+set(CPACK_STRIP_FILES ".DS_Store;.git;Engine/Vendor;")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Aqua Editor/v${VERSION_STRING}")
-set(CPACK_STRIP_FILES
-	".DS_Store;.git;Engine/Vendor;"
-)
 
 if("${GIT_BRANCH}" STREQUAL "main") # Production build
 	set(CPACK_PACKAGE_FILE_NAME "Aqua Editor v${VERSION_STRING}")
@@ -25,6 +18,11 @@ else() # Dev build
 endif()
 
 if(APPLE)
+	install(
+		TARGETS AquaEditor
+		BUNDLE DESTINATION .
+	)
+
 	set(CPACK_GENERATOR "DragNDrop")
 	set(CPACK_MONOLITHIC_INSTALL 0)
 	set(CPACK_PACKAGE_EXECUTABLES "AquaEditor.app" "Aqua Editor")
@@ -34,20 +32,24 @@ if(APPLE)
 	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 elseif(WIN32)
+	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/ DESTINATION .)
+
+	# Add start menu shortcut(s)
+	set(CPACK_NSIS_CREATE_ICONS_EXTRA
+		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Aqua Editor.lnk' '$INSTDIR\\\\Aqua Editor Launcher.exe'"
+	)
+
 	# Replace '/' with '\\'; regex so have to escape characters
 	STRING(REGEX REPLACE "/" "\\\\\\\\" CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_INSTALL_DIRECTORY} )
 
 	set(CPACK_GENERATOR "NSIS64")
 	set(CPACK_NSIS_DISPLAY_NAME ${CPACK_PACKAGE_NAME})
-	set(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "Aqua Editor")
 	set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
 	set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
 	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
-	install(
-		FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-		DESTINATION ${CMAKE_BINARY_DIR}
-	)
 else()
+	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION .)
+
 	set(CPACK_MONOLITHIC_INSTALL 1)
 	set(CPACK_GENERATOR "TGZ")
 endif()

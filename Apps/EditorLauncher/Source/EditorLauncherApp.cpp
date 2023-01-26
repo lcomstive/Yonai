@@ -140,7 +140,9 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 	fs::path editorPath = launcherPath.parent_path();
 
 #if defined(AQUA_PLATFORM_WINDOWS)
-	editorPath.append("AquaEditor.exe");
+	editorPath.append("Aqua Editor.exe");
+#elif defined(AQUA_PLATFORM_APPLE)
+	editorPath.append("Aqua Editor");
 #else
 	editorPath.append("AquaEditor");
 #endif
@@ -247,6 +249,13 @@ void EditorLauncherApp::ReadSettings()
 	{
 		for (SizeType i = 0; i < projectsArray.Size(); i++)
 		{
+			// Make sure proper values are present
+			if (!projectsArray[i].HasMember("name") ||
+				!projectsArray[i].HasMember("path") ||
+				!projectsArray[i].HasMember("directory"))
+				continue;
+
+			// Add to list of available projects
 			Projects.emplace_back(ProjectInfo{
 				projectsArray[i]["name"].GetString(),
 				projectsArray[i]["path"].GetString(),

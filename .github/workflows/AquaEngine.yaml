@@ -40,6 +40,11 @@ jobs:
     - if: matrix.config.os == 'ubuntu-latest'
       run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev
 
+    - uses: actions/cache@v3
+      with:
+        path: build/vcpkg_installed
+        key: ${{ matrix.config.name }}-vcpkg_cache
+
     - name: VCPKG
       uses: lukka/run-vcpkg@v10
       with:
@@ -80,11 +85,6 @@ jobs:
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --config ${{ env.CMAKE_CONFIG }}
 
-    # Package
-    - name: Package
-      if: matrix.config.os == 'macos'
-      run: cpack
-
     # Test
     - name: Run Test
       run: ${{ env.BINARY_DIR }}/AquaEngineTest
@@ -95,23 +95,13 @@ jobs:
       with:
         path: ./Version.txt
 
-    # Copy desired artifacts to output folder
-    - name: Gather artifacts
-      if: matrix.config.os != 'macos'
-      run: |
-        mkdir -p ${{ github.workspace }}/build/artifact
-        cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
-
-    # Copy desired artifacts to output folder
-    - name: Gather artifacts
-      if: matrix.config.os == 'macos'
-      run: |
-        mkdir -p ${{ github.workspace }}/build/artifact
-        cp ${{ env.BINARY_DIR }}/*.dmg ${{ github.workspace }}/build/artifact/
+    # Create installation package
+    - name: Package
+      run: cpack
 
     # Upload artifact
     - uses: actions/upload-artifact@v3
       with:
         if-no-files-found: error
         name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
-        path: ${{ github.workspace }}/build/artifact/
+        path: ${{ env.BINARY_DIR }}/build/Aqua\ Editor\ v*
