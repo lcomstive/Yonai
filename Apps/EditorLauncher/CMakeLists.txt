@@ -6,7 +6,7 @@ add_executable(
 	${PROJECT_NAME}
 	${SOURCE_FILES}
 	${HEADER_FILES}
-	${EXECUTABLE_RESOURCES}
+	${AQUA_EXECUTABLE_RESOURCES}
 )
 
 add_dependencies(${PROJECT_NAME} AquaEditor)
@@ -27,10 +27,9 @@ if(WIN32)
 endif()
 
 # Group source files inside IDE
-source_group("Resources" FILES ${EXECUTABLE_RESOURCES})
+source_group("Resources" FILES ${AQUA_EXECUTABLE_RESOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source" FILES ${SOURCE_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${INCLUDE_FILES})
-
 
 if(APPLE)
 	set_target_properties(${PROJECT_NAME} PROPERTIES

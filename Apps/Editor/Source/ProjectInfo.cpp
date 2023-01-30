@@ -20,7 +20,8 @@ ProjectInfo AquaEditor::ReadProject(const std::string& path)
 	}
 
 	Document json;
-	json.Parse(VFS::ReadText(path).c_str());
+	string contents = VFS::ReadText(path);
+	json.Parse(contents.c_str());
 
 	const char* requiredFields[] = { "name", "assetsDir", "assemblies" };
 	for(int i = 0; i < 3; i++)

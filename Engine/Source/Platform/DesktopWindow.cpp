@@ -131,6 +131,8 @@ Window::Window() :
 		else
 			Input::s_ConnectedGamepads[i] = Input::JoystickType::Disconnected;
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Window* Window::Create() { return s_Instance ? s_Instance : (s_Instance = new Window()); }

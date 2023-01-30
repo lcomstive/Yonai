@@ -76,9 +76,9 @@ namespace AquaEngine
 		/// <returns>Pointer to system, or nullptr if not available</returns>
 		T* Get() { return (T*)Get(typeid(T).hash_code()); }
 
-		bool Has(size_t hash);
-		bool Remove(size_t hash);
-		Systems::System* Get(size_t hash);
+		AquaAPI bool Has(size_t hash);
+		AquaAPI bool Remove(size_t hash);
+		AquaAPI Systems::System* Get(size_t hash);
 
 		AquaAPI std::vector<Systems::System*> All();
 

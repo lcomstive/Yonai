@@ -20,7 +20,7 @@ namespace AquaEngine::Scripting
 
 	struct Assembly
 	{
-		AquaAPI struct ManagedComponentData
+		struct ManagedComponentData
 		{
 			size_t Type;
 
@@ -31,7 +31,7 @@ namespace AquaEngine::Scripting
 			std::function<Components::Component* (World*, unsigned int)> AddFn;
 		};
 
-		AquaAPI struct ManagedSystemData
+		struct ManagedSystemData
 		{
 			size_t Type;
 

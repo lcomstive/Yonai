@@ -17,13 +17,13 @@ namespace AquaEngine::Components
 
 		Graphics::RenderTexture* RenderTarget = nullptr;
 
-		glm::mat4 GetViewMatrix();
-		glm::mat4 GetProjectionMatrix(glm::ivec2 resolution);
-		glm::mat4 GetProjectionMatrix(int resolutionWidth, int resolutionHeight);
+		AquaAPI glm::mat4 GetViewMatrix();
+		AquaAPI glm::mat4 GetProjectionMatrix(glm::ivec2 resolution);
+		AquaAPI glm::mat4 GetProjectionMatrix(int resolutionWidth, int resolutionHeight);
 
-		void FillShader(Graphics::Shader* shader, glm::ivec2 resolution);
+		AquaAPI void FillShader(Graphics::Shader* shader, glm::ivec2 resolution);
 
-		void SetMainCamera();
+		AquaAPI void SetMainCamera();
 		static Camera* GetMainCamera();
 
 	private:

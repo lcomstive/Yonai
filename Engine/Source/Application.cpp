@@ -76,10 +76,6 @@ void Application::InitVFS()
 	// Map persistent data
 	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDir());
 
-	// Default mapping for local filesystem.
-	// Useful for absolute paths
-	// VFS::Mount(string());
-
 	// Get executable path and directory
 #if defined(AQUA_PLATFORM_WINDOWS)
 	wchar_t exeResult[MAX_PATH];

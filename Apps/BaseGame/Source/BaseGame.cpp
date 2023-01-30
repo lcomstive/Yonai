@@ -7,6 +7,7 @@
 #include <AquaEngine/Graphics/Model.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/FPSCamera.hpp>
+#include <AquaEngine/Platform/FixDLLBoundaries.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
@@ -31,20 +32,21 @@ Transform* cameraTransform;
 void BaseGame::Setup()
 {
 	WindowedApplication::Setup();
+	FIX_DLL_BOUNDARIES();
 
 	Window::SetTitle("Base Game");
 	Window::SetVSync(false);
 
-	VFS::Mount("/Assets", "./Assets");
+	VFS::Mount("assets://", "app://Assets");
 
 	Scene = new World();
 
 	// 2D Sprite Test
-	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "/Assets/Textures/Test.png");
+	ResourceID textureID = Resource::Load<Texture>("assets://Texture/Test", "assets://Textures/Test.png");
 	ResourceID spriteShader = Resource::Load<Shader>("Shaders/Sprite", ShaderStageInfo
 		{
-			"/Assets/Shaders/Sprite.vert",
-			"/Assets/Shaders/Sprite.frag"
+			"assets://Shaders/Sprite.vert",
+			"assets://Shaders/Sprite.frag"
 		});
 	const unsigned int spriteRows = 10;
 	const unsigned int spriteColumns = 10;
@@ -88,8 +90,8 @@ void BaseGame::Setup()
 			Material* modelMaterial = Resource::Get<Material>(modelRenderer->Material);
 			modelMaterial->Shader = Resource::Load<Shader>("Shaders/Lit", ShaderStageInfo
 				{
-					"/Assets/Shaders/Lit.vert",
-					"/Assets/Shaders/Lit.frag"
+					"assets://Shaders/Lit.vert",
+					"assets://Shaders/Lit.frag"
 				});
 		}
 	}

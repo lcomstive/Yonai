@@ -55,15 +55,24 @@ string GetCompileItems(fs::path directory)
 }
 
 const string TemplateProjectDLLName = "AquaProject";
-const string TemplateProjectPath = "AquaTemplateProject.csproj.template";
+const string TemplateProjectPath = "AquaProject.csproj.template";
 void EditorLauncherApp::CreateCSharpProject(fs::path projectPath, string projectName)
 {
 	projectPath /= "Scripting";
 	string projectDir = projectPath.string();
+
 	// Convert Windows path to Unix-like path for consistency
 	replace(projectDir.begin(), projectDir.end(), '\\', '/');
+	
+	if(VFS::Exists(fmt::format("{}/{}.csproj", projectDir, projectName)))
+		return; // No need to create project
 
 	string vfsPath = fmt::format("file://{}/{}", projectDir, TemplateProjectPath);
+
+	VFS::Copy(
+		"assets://ProjectTemplate/Scripting/" + TemplateProjectPath,
+		vfsPath
+	);
 
 	VFS::ReplaceText(vfsPath,
 		{

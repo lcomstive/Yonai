@@ -13,7 +13,7 @@ using namespace AquaEngine::Systems;
 ImGUISystem::ImGUISystem()
 {
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	m_Context = ImGui::CreateContext();
 
 	m_IO = &ImGui::GetIO();
 	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
@@ -63,3 +63,4 @@ void ImGUISystem::EndFrame()
 }
 
 ImGuiIO* ImGUISystem::GetIO() { return m_IO; }
+ImGuiContext* ImGUISystem::GetContext() { return m_Context; }

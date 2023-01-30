@@ -5,6 +5,7 @@
 #include <portable-file-dialogs.h>
 #include <AquaEngine/SystemManager.hpp>
 #include "../Include/EditorLauncherApp.hpp"
+#include <AquaEngine/Platform/FixDLLBoundaries.hpp>
 #include <AquaEngine/Systems/Global/ImGUISystem.hpp>
 
 #include <rapidjson/prettywriter.h>
@@ -27,10 +28,13 @@ void EditorLauncherApp::Setup()
 {
 	WindowedApplication::Setup();
 
+	FIX_DLL_BOUNDARIES();
+
 	Window::SetTitle("Aqua Editor");
 
 	SystemManager::Global()->Remove<Systems::RenderSystem>();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	VFS::Mount("assets://", "app://Assets/");
 
 	if (VFS::Exists(LauncherSettingsPath))
 		ReadSettings();
@@ -131,11 +135,11 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 	editorPath.append("AquaEditor");
 #endif
 
-	std::string args = "-ProjectPath=\"" + project.Path + "\"";
+	std::string args = "-ProjectPath=\"" + project.Directory + "\"";
 
 	spdlog::debug("Launching editor - '{} {}'", editorPath.string().c_str(), args.c_str());
 
-	if(!fs::exists(fs::path(project.Path) / ("Scripting/" + project.Name + ".vcproj")))
+	if(!fs::exists(fmt::format("{}/Scripting/{}.csproj", project.Directory, project.Name)))
 		CreateCSharpProject(project.Directory, project.Name);
 
 	// Create new process of AquaEditor
