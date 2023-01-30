@@ -12,14 +12,12 @@
 			ImGui::SetCurrentContext(SystemManager::Global()->Get<Systems::ImGUISystem>()->GetContext()); \
 			\
 			glfwMakeContextCurrent(Window::GetNativeHandle()); \
-			gladLoadGL(glfwGetProcAddress); \
-			\
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			gladLoadGL(glfwGetProcAddress);
 	#else
 		#define FIX_DLL_BOUNDARIES() \
 				ImGuiContext* context = SystemManager::Global()->Get<Systems::ImGUISystem>()->GetContext(); \
 				ImGui::SetCurrentContext(context);
 	#endif
 #else
-#define FIX_DLL_BOUNDARIES
+#define FIX_DLL_BOUNDARIES()
 #endif

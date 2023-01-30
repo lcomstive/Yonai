@@ -29,6 +29,7 @@ void EditorLauncherApp::Setup()
 	WindowedApplication::Setup();
 
 	FIX_DLL_BOUNDARIES();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	Window::SetTitle("Aqua Editor");
 

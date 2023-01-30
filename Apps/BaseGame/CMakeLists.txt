@@ -37,3 +37,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 	_CRT_SECURE_NO_WARNINGS
 	__STDC_FORMAT_MACROS
 )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	# Copy standard assets to output directory
+	COMMAND echo Copying standard assets to output directory
+	
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets/
+)

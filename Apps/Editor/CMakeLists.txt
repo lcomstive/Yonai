@@ -75,4 +75,15 @@ if(APPLE)
 		COMMAND echo Adding rpath to executable
 		COMMAND install_name_tool -add_rpath @executable_path/../Resources/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/MacOS/Aqua\ Editor
 		)
+
+	if(NOT AQUA_ENGINE_BUILD_STATIC)
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+			# Copy AquaEngine library to output
+			COMMAND echo Copying AquaEngine dynamic lib to output
+
+			COMMAND ${CMAKE_COMMAND} -E copy
+				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libAquaEngine.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.dylib
+				${AQUA_RESOURCES_DIR}
+		)
+	endif()
 endif()

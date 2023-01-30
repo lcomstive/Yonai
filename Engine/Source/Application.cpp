@@ -35,6 +35,8 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
+namespace fs = std::filesystem;
+
 Application* Application::s_Instance = nullptr;
 
 string GetPersistentDir()
@@ -92,8 +94,12 @@ void Application::InitVFS()
 
 	// Map app:// to launched executable directory
 #if defined(AQUA_PLATFORM_APPLE)
-	// On Mac OS, assets for app are found in Resources subfolder in the app bundle
-	VFS::Mount("app://", (m_ExecutablePath.parent_path().parent_path() / "Resources").string());
+	fs::path executableDir = m_ExecutablePath.parent_path();
+	if(executableDir.filename().compare("MacOS") == 0) // App Bundle
+		// Assets for app are found in Resources subfolder in the app bundle
+		VFS::Mount("app://", (executableDir.parent_path() / "Resources").string());
+	else
+		VFS::Mount("app://", executableDir.string());
 #else
 	VFS::Mount("app://", m_ExecutablePath.parent_path().string());
 #endif
@@ -135,10 +141,6 @@ void Application::Setup()
 
 #if !defined(NDEBUG)
 	spdlog::debug("{:>12}: {}", "Configuration", "Debug");
-#endif
-
-#if defined(AQUA_ENGINE_PLATFORM_MAC) || defined(AQUA_ENGINE_PLATFORM_LINUX)
-	spdlog::debug("DYLD_LIBRARY_PATH = {}", getenv("DYLD_LIBRARY_PATH"));
 #endif
 #pragma endregion
 }
