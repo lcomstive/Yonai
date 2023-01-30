@@ -6,20 +6,12 @@
 #include <AquaEngine/SystemManager.hpp>
 #include "../Include/EditorLauncherApp.hpp"
 #include <AquaEngine/Systems/Global/ImGUISystem.hpp>
-#include <AquaEngine/Platform/NativeFileBrowser.hpp>
 
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
 #include <AquaEngine/Graphics/RenderPipeline.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
-
-#if defined(AQUA_PLATFORM_WINDOWS)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#elif defined(AQUA_PLATFORM_MAC) || defined(AQUA_PLATFORM_LINUX)
-#include <unistd.h>
-#endif
 
 using namespace std;
 using namespace rapidjson;
@@ -29,15 +21,7 @@ using namespace AquaEditorLauncher;
 
 namespace fs = std::filesystem;
 
-struct LauncherSettings
-{
-	bool CloseLaucherOnEditorOpen = false;
-};
-
 const char* LauncherSettingsPath = "data://Launcher.json";
-
-LauncherSettings Settings = {};
-vector<ProjectInfo> Projects = {};
 
 void EditorLauncherApp::Setup()
 {
@@ -92,7 +76,7 @@ void EditorLauncherApp::OnDraw()
 	if (ImGui::Button("Add Project"))
 		AddProjectPrompt();
 
-	ImGui::BeginTable("Projects", 3, ImGuiTableFlags_RowBg);
+	ImGui::BeginTable("m_Projects", 3, ImGuiTableFlags_RowBg);
 
 	ImGui::TableSetupColumn("Name", 	ImGuiTableColumnFlags_WidthStretch);
 	ImGui::TableSetupColumn("Open", 	ImGuiTableColumnFlags_WidthFixed);
@@ -104,10 +88,10 @@ void EditorLauncherApp::OnDraw()
 	ImGui::PushStyleColor(ImGuiCol_TableRowBg, rowBg);
 	ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, rowBgAlt);
 
-	// Existing Projects
-	for(size_t i = 0; i < Projects.size(); i++)
+	// Existing m_Projects
+	for(size_t i = 0; i < m_Projects.size(); i++)
 	{
-		ProjectInfo info = Projects[i];
+		ProjectInfo info = m_Projects[i];
 
 		ImGui::TableNextRow(ImGuiTableRowFlags_None);
 		ImGui::TableNextColumn();
@@ -216,7 +200,7 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 #endif
 
 	// If editor is opening and setting enabled, close the launcher
-	if (Settings.CloseLaucherOnEditorOpen)
+	if (m_Settings.CloseLaucherOnEditorOpen)
 		Exit();
 	
 	return true;
@@ -227,13 +211,13 @@ void EditorLauncherApp::RemoveProject(ProjectInfo& project)
 	spdlog::debug("Removing reference to project '{}'", project.Name.c_str());
 	spdlog::debug("Path: {}", project.Path.c_str());
 	
-	for (auto it = Projects.rbegin(); it != Projects.rend(); it++)
+	for (auto it = m_Projects.rbegin(); it != m_Projects.rend(); it++)
 	{
 		if (project.Path.compare(it->Path) != 0)
 			continue; // Not this one
 
 		// Remove project
-		Projects.erase(--it.base());
+		m_Projects.erase(--it.base());
 		break;
 	}
 	WriteSettings();
@@ -241,70 +225,70 @@ void EditorLauncherApp::RemoveProject(ProjectInfo& project)
 
 void EditorLauncherApp::ReadSettings()
 {
-	m_Settings.Parse(VFS::ReadText(LauncherSettingsPath).c_str());
+	m_SettingsJSON.Parse(VFS::ReadText(LauncherSettingsPath).c_str());
 
-	// Projects
-	const Value& projectsArray = m_Settings["projects"];
-	if (!projectsArray.IsNull() && projectsArray.IsArray())
+	// m_Projects
+	const Value& m_ProjectsArray = m_SettingsJSON["projects"];
+	if (!m_ProjectsArray.IsNull() && m_ProjectsArray.IsArray())
 	{
-		for (SizeType i = 0; i < projectsArray.Size(); i++)
+		for (SizeType i = 0; i < m_ProjectsArray.Size(); i++)
 		{
 			// Make sure proper values are present
-			if (!projectsArray[i].HasMember("name") ||
-				!projectsArray[i].HasMember("path") ||
-				!projectsArray[i].HasMember("directory"))
+			if (!m_ProjectsArray[i].HasMember("name") ||
+				!m_ProjectsArray[i].HasMember("path") ||
+				!m_ProjectsArray[i].HasMember("directory"))
 				continue;
 
-			// Add to list of available projects
-			Projects.emplace_back(ProjectInfo{
-				projectsArray[i]["name"].GetString(),
-				projectsArray[i]["path"].GetString(),
-				projectsArray[i]["directory"].GetString()
+			// Add to list of available m_Projects
+			m_Projects.emplace_back(ProjectInfo{
+				m_ProjectsArray[i]["name"].GetString(),
+				m_ProjectsArray[i]["path"].GetString(),
+				m_ProjectsArray[i]["directory"].GetString()
 				});
 		}
 	}
 	else
-		m_Settings["projects"].SetArray();
+		m_SettingsJSON["m_Projects"].SetArray();
 
-	if (!m_Settings.HasMember("settings"))
-		m_Settings["settings"] = Value();
+	if (!m_SettingsJSON.HasMember("settings"))
+		m_SettingsJSON["settings"] = Value();
 
 	// settings.closeLauncherOnEditorOpen
-	if (m_Settings["settings"].HasMember("closeLauncherOnEditorOpen"))
-			Settings.CloseLaucherOnEditorOpen = m_Settings["settings"]["closeLauncherOnEditorOpen"].GetBool();
+	if (m_SettingsJSON["settings"].HasMember("closeLauncherOnEditorOpen"))
+			m_Settings.CloseLaucherOnEditorOpen = m_SettingsJSON["settings"]["closeLauncherOnEditorOpen"].GetBool();
 	else
-		m_Settings["settings"]["closeLauncherOnEditorOpen"].SetBool(Settings.CloseLaucherOnEditorOpen);
+		m_SettingsJSON["settings"]["closeLauncherOnEditorOpen"].SetBool(m_Settings.CloseLaucherOnEditorOpen);
 }
 
 void EditorLauncherApp::WriteSettings()
 {
-	m_Settings.SetObject();
+	m_SettingsJSON.SetObject();
 
-	// Create projects array
-	Value projectsArray(kArrayType);
-	Document::AllocatorType& allocator = m_Settings.GetAllocator();
+	// Create m_Projects array
+	Value m_ProjectsArray(kArrayType);
+	Document::AllocatorType& allocator = m_SettingsJSON.GetAllocator();
 
-	for (int i = 0; i < Projects.size(); i++)
+	for (int i = 0; i < m_Projects.size(); i++)
 	{
 		Value objValue(kObjectType);
-		objValue.AddMember("name", Value(Projects[i].Name.c_str(), allocator), allocator);
-		objValue.AddMember("path", Value(Projects[i].Path.c_str(), allocator), allocator);
-		objValue.AddMember("directory", Value(Projects[i].Directory.c_str(), allocator), allocator);
+		objValue.AddMember("name", Value(m_Projects[i].Name.c_str(), allocator), allocator);
+		objValue.AddMember("path", Value(m_Projects[i].Path.c_str(), allocator), allocator);
+		objValue.AddMember("directory", Value(m_Projects[i].Directory.c_str(), allocator), allocator);
 
-		projectsArray.PushBack(objValue, allocator);
+		m_ProjectsArray.PushBack(objValue, allocator);
 	}
-	m_Settings.AddMember("projects", projectsArray, allocator);
+	m_SettingsJSON.AddMember("projects", m_ProjectsArray, allocator);
 
 	// Create settings object
 	Value settings(kObjectType);
-	settings.AddMember("closeLauncherOnEditorOpen", Settings.CloseLaucherOnEditorOpen, allocator);
+	settings.AddMember("closeLauncherOnEditorOpen", m_Settings.CloseLaucherOnEditorOpen, allocator);
 
-	m_Settings.AddMember("settings", settings, allocator);
+	m_SettingsJSON.AddMember("settings", settings, allocator);
 
 	// Write data to file
 	StringBuffer buffer;
 	PrettyWriter<StringBuffer> writer(buffer);
-	m_Settings.Accept(writer);
+	m_SettingsJSON.Accept(writer);
 
 	VFS::WriteText(LauncherSettingsPath, buffer.GetString());
 }
@@ -343,7 +327,7 @@ void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
 	if(!fs::exists(projectDir / ("Scripting/" + projectName + ".vcproj")))
 		CreateCSharpProject(projectDir, projectName);
 
-	Projects.emplace_back(ProjectInfo
+	m_Projects.emplace_back(ProjectInfo
 		{
 			projectName,
 			projectInfoStr,
@@ -352,54 +336,3 @@ void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
 	WriteSettings();
 }
 
-// Based off https://stackoverflow.com/a/3418285
-void AquaEditorLauncher::ReplaceAll(string& input, const string& from, const string& to)
-{
-	if (from.empty())
-		return;
-
-	size_t startPos = 0;
-	while ((startPos = input.find(from, startPos)) != string::npos)
-	{
-		input.replace(startPos, from.length(), to);
-		startPos += to.length();
-	}
-}
-
-void ReplaceTextInNewProjectFile(string path, string projectName, string editorDir)
-{
-	string contents = VFS::ReadText(path);
-
-	ReplaceAll(contents, "$<ProjectName>", projectName);
-	ReplaceAll(contents, "$<EditorDir>", editorDir);
-
-	VFS::WriteText(path, contents);
-}
-
-void EditorLauncherApp::AddNewProject(fs::path projectDir)
-{
-	spdlog::info("Adding new project at path '{}'", projectDir.string().c_str());
-
-	VFS::Copy("app://Assets/ProjectTemplate/", "file://" + projectDir.string());
-	fs::path projectInfo = projectDir / "project.json";
-
-	string projectName = projectDir.filename().string();
-
-#if defined(AQUA_PLATFORM_APPLE)
-	string editorDir = (GetExecutablePath().parent_path().parent_path() / "Resources").string();
-#else
-	string editorDir = GetExecutablePath().parent_path().string();
-#endif
-
-	ReplaceTextInNewProjectFile("file://" + projectDir.string() + "/project.json", projectName, editorDir);
-
-	CreateCSharpProject(projectDir, projectName);
-
-	Projects.emplace_back(ProjectInfo
-		{
-			projectName,
-			projectInfo.string(),
-			projectDir.string()
-		});
-	WriteSettings();
-}

@@ -29,3 +29,6 @@ vcpkg_installed
 # Except AquaScriptCore, for Unix platforms
 !Apps/AquaScriptCore/AquaScriptCore.sln
 !Apps/AquaScriptCore/AquaScriptCore.csproj
+
+# Keep template scripting output
+!Apps/Editor/Assets/ProjectTemplate/Scripting/bin/AquaProject.dll

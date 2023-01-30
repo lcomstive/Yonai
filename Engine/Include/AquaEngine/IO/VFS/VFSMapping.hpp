@@ -114,6 +114,16 @@ namespace AquaEngine::IO
 		AquaAPI virtual void Write(std::string path, std::vector<unsigned char> data, bool append = false) { }
 
 		/// <summary>
+		/// Replaces specified text in a file
+		/// </summary>
+		AquaAPI virtual void ReplaceText(std::string path, const std::string& from, const std::string& to) { }
+
+		/// <summary>
+		/// Replaces specified pairs of text in a file
+		/// </summary>
+		AquaAPI virtual void ReplaceText(std::string path, std::vector<std::pair<std::string, std::string>> pairs) { }
+
+		/// <summary>
 		/// Copies a file
 		/// </summary>
 		AquaAPI virtual void Copy(std::string originalPath, std::string newPath) { }

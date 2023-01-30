@@ -15,12 +15,17 @@ namespace AquaEditorLauncher
 		std::string Path;
 		std::string Directory;
 	};
-
-	void ReplaceAll(std::string& input, const std::string& from, const std::string& to);
+	
+	struct LauncherSettings
+	{
+		bool CloseLaucherOnEditorOpen = false;
+	};
 
 	class EditorLauncherApp : public AquaEngine::WindowedApplication
 	{
-		rapidjson::Document m_Settings;
+		LauncherSettings m_Settings = {};
+		rapidjson::Document m_SettingsJSON;
+		std::vector<ProjectInfo> m_Projects = {};
 
 		void ReadSettings();
 		void WriteSettings();

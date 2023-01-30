@@ -115,6 +115,9 @@ namespace AquaEngine::IO
 		AquaAPI static void WriteText(const std::string& path, std::string contents);
 		AquaAPI static void Write(const std::string& path, std::vector<unsigned char> contents);
 
+		AquaAPI static void ReplaceText(const std::string& path, const std::string& from, const std::string& to);
+		AquaAPI static void ReplaceText(const std::string& path, std::vector<std::pair<std::string, std::string>> pairs);
+
 		AquaAPI static void Remove(const std::string& path);
 		AquaAPI static void Move(const std::string& originalPath, const std::string& newPath);
 		AquaAPI static void Copy(const std::string& originalPath, const std::string& copyPath);

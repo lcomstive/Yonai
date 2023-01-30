@@ -121,6 +121,31 @@ void VFSPhysicalFileMapping::WriteText(string path, string text, bool append)
 	filestream.close();
 }
 
+void VFSPhysicalFileMapping::ReplaceText(string path, const string& from, const string& to)
+{
+	if (from.empty() || !Exists(path))
+		return;
+
+	string content = ReadText(path);
+
+	size_t startPos = 0;
+	while ((startPos = content.find(from, startPos)) != string::npos)
+	{
+		content.replace(startPos, from.length(), to);
+		startPos += to.length();
+	}
+
+	WriteText(path, content);
+}
+
+void VFSPhysicalFileMapping::ReplaceText(string path, vector<pair<string, string>> pairs)
+{
+	string content = ReadText(path);
+	for(auto pair : pairs)
+		ReplaceText(content, pair.first, pair.second);
+	WriteText(path, content);
+}
+
 void VFSPhysicalFileMapping::Write(string path, vector<unsigned char> data, bool append)
 {
 	fs::path parentDir = fs::path(path).parent_path();

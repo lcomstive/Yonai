@@ -12,7 +12,7 @@ jobs:
         config:
         - {
             name: "Windows",
-            os: [ windows, self-hosted ],
+            os: windows-latest,
             triplet: 'x64-windows-static'
           }
         # Disabling Linux cloud builds until further notice
@@ -53,23 +53,23 @@ jobs:
         VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     # Set CMake configuration based on branch
-    - if: github.ref == 'refs/heads/main' && matrix.config.os != 'windows-latest'
+    - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
       run: echo "CMAKE_CONFIG=Release" >> $GITHUB_ENV
 
-    - if: github.ref != 'refs/heads/main' && matrix.config.os != 'windows-latest'
+    - if: github.ref != 'refs/heads/main' && matrix.config.name != 'Windows'
       run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
 
-    - if: github.ref == 'refs/heads/main' && matrix.config.os == 'windows-latest'
+    - if: github.ref == 'refs/heads/main' && matrix.config.name == 'Windows'
       run: echo "CMAKE_CONFIG=Release" >> $env:GITHUB_ENV
 
-    - if: github.ref != 'refs/heads/main' && matrix.config.os == 'windows-latest'
+    - if: github.ref != 'refs/heads/main' && matrix.config.name == 'Windows'
       run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $env:GITHUB_ENV
 
     # Set binary directory based on OS
-    - if: matrix.config.os == 'windows-latest'
+    - if: matrix.config.name == 'Windows'
       run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}" >> $env:GITHUB_ENV
 
-    - if: matrix.config.os != 'windows-latest'
+    - if: matrix.config.name != 'Windows'
       run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/" >> $GITHUB_ENV
 
     # Configure CMake
@@ -78,7 +78,7 @@ jobs:
 
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore
-      if: matrix.config.os != 'windows-latest'
+      if: matrix.config.name != 'Windows'
       run: msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
 
     # Build
