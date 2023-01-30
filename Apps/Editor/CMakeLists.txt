@@ -62,3 +62,17 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		${AQUA_RESOURCES_DIR}/Assets/
 )
 
+if(APPLE)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		# Copy mono library to output
+		COMMAND echo Copying mono lib to output
+
+		COMMAND ${CMAKE_COMMAND} -E copy
+			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/native/libmonosgen-2.0.1.dylib
+			${AQUA_RESOURCES_DIR}
+
+		# Add @rpath to executable
+		COMMAND echo Adding rpath to executable
+		COMMAND install_name_tool -add_rpath @executable_path/../Resources/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/MacOS/Aqua\ Editor
+		)
+endif()
