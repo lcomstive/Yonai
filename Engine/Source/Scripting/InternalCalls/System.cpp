@@ -5,6 +5,7 @@
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Systems/System.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 
 using namespace std;
@@ -18,14 +19,7 @@ extern EmptyMethodFn SystemMethodDestroyed;
 extern SystemMethodEnabledFn SystemMethodEnabled;
 extern SystemMethodInitialiseFn SystemMethodInitialise;
 
-bool Exists(unsigned int worldID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(System, Exists, bool, (unsigned int worldID, MonoReflectionType* componentType))
 {
 	return false;
-}
-
-#define ADD_SYSTEM_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.System::_aqua_internal_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddSystemInternalCalls()
-{
-	ADD_SYSTEM_INTERNAL_CALL(Exists)
 }

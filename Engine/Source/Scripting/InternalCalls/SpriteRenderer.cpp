@@ -50,6 +50,7 @@ void SetColour(unsigned int worldID, unsigned int entityID, glm::vec4* colour)
 		renderer->Colour = *colour;
 }
 
+/*
 #define ADD_SPRITE_RENDERER_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.SpriteRenderer::_aqua_internal_"#name, (const void*)name);
 
 void AquaEngine::Scripting::Assembly::AddSpriteRendererInternalCalls()
@@ -61,3 +62,4 @@ void AquaEngine::Scripting::Assembly::AddSpriteRendererInternalCalls()
 	ADD_SPRITE_RENDERER_INTERNAL_CALL(SetColour)
 	ADD_SPRITE_RENDERER_INTERNAL_CALL(GetColour)
 }
+*/

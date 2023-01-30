@@ -76,8 +76,6 @@ namespace AquaEngine::Scripting
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
 		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
-
-		AquaAPI static void AddInternalCall(const char* internalName, const void* fn);
 	
 	private:
 		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
@@ -94,21 +92,6 @@ namespace AquaEngine::Scripting
 		// Clears s_TypeHashes & s_ReverseTypeHashes.
 		// Intended to be used when reloading assemblies
 		static void ClearCachedTypes();
-
-#pragma region Internal Calls
-		// TODO: Find a better way to do this
-		void AddLogInternalCalls();
-		void AddTimeInternalCalls();
-		void AddInputInternalCalls();
-		void AddWorldInternalCalls();
-		void AddCameraInternalCalls();
-		void AddSystemInternalCalls();
-		void AddVectorInternalCalls();
-		void AddWindowInternalCalls();
-		void AddTransformInternalCalls();
-		void AddApplicationInternalCalls();
-		void AddSpriteRendererInternalCalls();
-#pragma endregion
 
 		template<typename T>
 		bool AddInternalManagedType(char* managedNamespace, char* managedName, size_t* managedHash)

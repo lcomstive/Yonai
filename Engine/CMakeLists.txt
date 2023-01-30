@@ -5,6 +5,8 @@ project(AquaEngine)
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
 
+list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
+
 set(AQUA_ENGINE_BUILD_STATIC ON CACHE BOOL "")
 set(AQUA_ENGINE_BUILD_TESTS  ON CACHE BOOL "")
 
@@ -49,3 +51,11 @@ endif()
 if(AQUA_ENGINE_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
+
+# Glue generator
+add_subdirectory(./GlueGenerator)
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
+	DEPENDS GlueGenerator
+)

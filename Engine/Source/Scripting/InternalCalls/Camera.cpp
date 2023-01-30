@@ -95,20 +95,25 @@ void GetMainCamera(unsigned int* worldID, unsigned int* entityID)
 	*entityID = mainCamera ? mainCamera->Entity.ID() : InvalidEntityID;
 }
 
+/*
 #define ADD_CAMERA_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Camera::_aqua_internal_Camera_"#name, (const void*)name);
 
-void AquaEngine::Scripting::Assembly::AddCameraInternalCalls()
+namespace AquaEngine::Scripting::Internal
 {
-	ADD_CAMERA_INTERNAL_CALL(GetFOV)
-	ADD_CAMERA_INTERNAL_CALL(SetFOV)
-	ADD_CAMERA_INTERNAL_CALL(GetNear)
-	ADD_CAMERA_INTERNAL_CALL(SetNear)
-	ADD_CAMERA_INTERNAL_CALL(GetFar)
-	ADD_CAMERA_INTERNAL_CALL(SetFar)
-	ADD_CAMERA_INTERNAL_CALL(GetOrtho)
-	ADD_CAMERA_INTERNAL_CALL(SetOrtho)
-	ADD_CAMERA_INTERNAL_CALL(GetOrthoSize)
-	ADD_CAMERA_INTERNAL_CALL(SetOrthoSize)
-	ADD_CAMERA_INTERNAL_CALL(GetMainCamera)
-	ADD_CAMERA_INTERNAL_CALL(SetMainCamera)
+	void AddCameraInternalCalls()
+	{
+		ADD_CAMERA_INTERNAL_CALL(GetFOV)
+		ADD_CAMERA_INTERNAL_CALL(SetFOV)
+		ADD_CAMERA_INTERNAL_CALL(GetNear)
+		ADD_CAMERA_INTERNAL_CALL(SetNear)
+		ADD_CAMERA_INTERNAL_CALL(GetFar)
+		ADD_CAMERA_INTERNAL_CALL(SetFar)
+		ADD_CAMERA_INTERNAL_CALL(GetOrtho)
+		ADD_CAMERA_INTERNAL_CALL(SetOrtho)
+		ADD_CAMERA_INTERNAL_CALL(GetOrthoSize)
+		ADD_CAMERA_INTERNAL_CALL(SetOrthoSize)
+		ADD_CAMERA_INTERNAL_CALL(GetMainCamera)
+		ADD_CAMERA_INTERNAL_CALL(SetMainCamera)
+	}
 }
+*/

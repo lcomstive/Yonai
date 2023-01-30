@@ -225,3 +225,21 @@ string VFS::GetAbsolutePath(string path, bool suppressWarning)
 
 	return path;
 }
+
+/*
+#pragma region Managed Glue
+#include <AquaEngine/Scripting/Assembly.hpp>
+
+MonoString* Managed_GetCurrentDirectory()
+{ return mono_string_new(mono_domain_get(), VFS::GetCurrentDirectory().string().c_str()); }
+
+#define ADD_VFS_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.VFS::_aqua_internal_"#name, (const void*)name);
+
+void AquaEngine::Scripting::Assembly::AddVFSInternalCalls()
+{
+	ADD_APP_INTERNAL_CALL(Exit)
+		ADD_APP_INTERNAL_CALL(GetArg)
+		ADD_APP_INTERNAL_CALL(HasArg)
+}
+#pragma endregion
+*/

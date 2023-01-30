@@ -201,21 +201,6 @@ void Assembly::CacheTypes(bool isCore)
 	}
 }
 
-void Assembly::AddInternalCalls()
-{
-	AddLogInternalCalls();
-	AddTimeInternalCalls();
-	AddWorldInternalCalls();
-	AddInputInternalCalls();
-	AddVectorInternalCalls();
-	AddCameraInternalCalls();
-	AddWindowInternalCalls();
-	AddSystemInternalCalls();
-	AddTransformInternalCalls();
-	AddApplicationInternalCalls();
-	AddSpriteRendererInternalCalls();
-}
-
 #define AddComponentMethod(name) \
 	method = mono_class_get_method_from_name(component, #name, 0); \
 	ComponentMethod##name = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;
@@ -268,3 +253,17 @@ void Assembly::LoadScriptCoreTypes()
 	AddSystemMethod(Destroyed)
 #pragma endregion
 }
+
+#pragma region Internal Calls
+#define ADD_INTERNAL_CALLS(name) AquaEngine::Scripting::Internal::AddInternalCalls_##name();
+
+#include <AquaEngine/Glue.hpp>
+void Assembly::AddInternalCalls()
+{
+	for (auto pair : _InternalMethods)
+	{
+		spdlog::debug("Adding {}", pair.first);
+		mono_add_internal_call(pair.first.c_str(), pair.second);
+	}
+}
+#pragma endregion

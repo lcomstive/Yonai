@@ -77,19 +77,3 @@ void GetRight(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
 	if (transform)
 		*outValue = transform->Right();
 }
-
-#define ADD_TRANSFORM_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddTransformInternalCalls()
-{
-	ADD_TRANSFORM_INTERNAL_CALL(SetScale);
-	ADD_TRANSFORM_INTERNAL_CALL(GetScale);
-	ADD_TRANSFORM_INTERNAL_CALL(SetPosition);
-	ADD_TRANSFORM_INTERNAL_CALL(GetPosition);
-	ADD_TRANSFORM_INTERNAL_CALL(SetRotation);
-	ADD_TRANSFORM_INTERNAL_CALL(GetRotation);
-	
-	ADD_TRANSFORM_INTERNAL_CALL(GetUp);
-	ADD_TRANSFORM_INTERNAL_CALL(GetForward);
-	ADD_TRANSFORM_INTERNAL_CALL(GetRight);
-}

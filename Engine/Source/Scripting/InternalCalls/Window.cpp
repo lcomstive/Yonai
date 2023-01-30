@@ -42,6 +42,7 @@ int GetVideoModes(MonoArray** outBits, MonoArray** outWidths, MonoArray** outHei
 #define ADD_WINDOW_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Window::_aqua_internal_"#name, (const void*)name);
 #define ADD_SCREEN_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Screen::_aqua_internal_"#name, (const void*)name);
 
+/*
 void AquaEngine::Scripting::Assembly::AddWindowInternalCalls()
 {
 	ADD_WINDOW_INTERNAL_CALL(GetResolution)
@@ -52,3 +53,4 @@ void AquaEngine::Scripting::Assembly::AddWindowInternalCalls()
 	ADD_WINDOW_INTERNAL_CALL(GetFullscreenMode)
 	ADD_WINDOW_INTERNAL_CALL(SetFullscreenMode)
 }
+*/
