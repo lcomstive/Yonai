@@ -1,8 +1,8 @@
 #include <glm/glm.hpp>
 #include <mono/jit/jit.h>
 #include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
 using namespace AquaEngine;
@@ -15,63 +15,63 @@ Transform* GetTransform(unsigned int worldID, unsigned int entityID)
 	return world->GetEntity(entityID).GetComponent<Transform>();
 }
 
-void SetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* value)
+ADD_MANAGED_METHOD(Transform, SetPosition, void, (unsigned int worldID, unsigned int entityID, glm::vec3* value))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Position = *value;
 }
 
-void GetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+ADD_MANAGED_METHOD(Transform, GetPosition, void, (unsigned int worldID, unsigned int entityID, glm::vec3* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Position;
 }
 
-void SetRotation(unsigned int worldID, unsigned int entityID, glm::quat* value)
+ADD_MANAGED_METHOD(Transform, SetRotation, void, (unsigned int worldID, unsigned int entityID, glm::quat* value))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Rotation = *value;
 }
 
-void GetRotation(unsigned int worldID, unsigned int entityID, glm::quat* outValue)
+ADD_MANAGED_METHOD(Transform, GetRotation, void, (unsigned int worldID, unsigned int entityID, glm::quat* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Rotation;
 }
 
-void SetScale(unsigned int worldID, unsigned int entityID, glm::vec3* value)
+ADD_MANAGED_METHOD(Transform, SetScale, void, (unsigned int worldID, unsigned int entityID, glm::vec3* value))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		transform->Scale = *value;
 }
 
-void GetScale(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+ADD_MANAGED_METHOD(Transform, GetScale, void, (unsigned int worldID, unsigned int entityID, glm::vec3* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Scale;
 }
 
-void GetUp(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+ADD_MANAGED_METHOD(Transform, GetUp, void, (unsigned int worldID, unsigned int entityID, glm::vec3* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Up();
 }
 
-void GetForward(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+ADD_MANAGED_METHOD(Transform, GetForward, void, (unsigned int worldID, unsigned int entityID, glm::vec3* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)
 		*outValue = transform->Forward();
 }
 
-void GetRight(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
+ADD_MANAGED_METHOD(Transform, GetRight, void, (unsigned int worldID, unsigned int entityID, glm::vec3* outValue))
 {
 	Transform* transform = GetTransform(worldID, entityID);
 	if (transform)

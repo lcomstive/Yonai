@@ -94,7 +94,7 @@ namespace AquaEngine::Scripting
 		static void ClearCachedTypes();
 
 		template<typename T>
-		bool AddInternalManagedType(char* managedNamespace, char* managedName, size_t* managedHash)
+		bool AddInternalManagedType(const char* managedNamespace, const char* managedName, size_t* managedHash)
 		{
 			MonoClass* klass = mono_class_from_name(Image, managedNamespace, managedName);
 			if (!klass)
@@ -116,7 +116,7 @@ namespace AquaEngine::Scripting
 		}
 
 		template<typename T>
-		void AddInternalManagedComponent(char* managedNamespace, char* managedName)
+		void AddInternalManagedComponent(const char* managedNamespace, const char* managedName)
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();
@@ -134,7 +134,7 @@ namespace AquaEngine::Scripting
 		}
 
 		template<typename T>
-		void AddInternalManagedSystem(char* managedNamespace, char* managedName)
+		void AddInternalManagedSystem(const char* managedNamespace, const char* managedName)
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();

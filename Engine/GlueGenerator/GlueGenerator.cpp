@@ -81,12 +81,12 @@ int main(int argc, char** argv)
 		contents += info.ReturnType + " _managed_internal_" + info.ClassName + info.FunctionName + "(" + info.Parameters + ");\n";
 
 	// Array of methods
-	contents += "\n\nconst vector<pair<string, const void*>> _InternalMethods = {\n";
+	contents += "\n\nconst vector<pair<const char*, const void*>> _InternalMethods = {\n";
 	for (size_t i = 0; i < internalMethods.size(); i++)
 	{
 		FunctionInfo info = internalMethods[i];
-		contents += "\t{ \"AquaEngine." + info.ClassName + "::_aqua_internal_" + info.FunctionName + "\", ";
-		contents += "_managed_internal_" + info.ClassName + info.FunctionName + " }";
+		contents += "\tpair<const char*, const void*>(\"AquaEngine." + info.ClassName + "::_aqua_internal_" + info.FunctionName + "\", ";
+		contents += "(const void*)_managed_internal_" + info.ClassName + info.FunctionName + ")";
 
 		if (i < internalMethods.size() - 1)
 			contents += ",";

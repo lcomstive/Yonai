@@ -261,9 +261,6 @@ void Assembly::LoadScriptCoreTypes()
 void Assembly::AddInternalCalls()
 {
 	for (auto pair : _InternalMethods)
-	{
-		spdlog::debug("Adding {}", pair.first);
-		mono_add_internal_call(pair.first.c_str(), pair.second);
-	}
+		mono_add_internal_call(pair.first, pair.second);
 }
 #pragma endregion

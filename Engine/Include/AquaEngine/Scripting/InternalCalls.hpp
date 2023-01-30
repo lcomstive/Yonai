@@ -2,8 +2,8 @@
 #include <tuple>
 #include <utility> // for std::pair
 
-#define ADD_MANAGED_METHOD_4(className, functionName, returnType, params)				\
-	returnType _managed_internal_##className##functionName##params
+#define ADD_MANAGED_METHOD_4(className, functionName, returnType, params) \
+	returnType _managed_internal_##className##functionName params
 #define ADD_MANAGED_METHOD_3(className, functionName, returnType) ADD_MANAGED_METHOD_4(className, functionName, returnType, ())
 #define ADD_MANAGED_METHOD_2(className, functionName) ADD_MANAGED_METHOD_4(className, functionName, void, ())
 
