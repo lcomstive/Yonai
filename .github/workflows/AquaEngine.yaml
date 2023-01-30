@@ -103,4 +103,4 @@ jobs:
       with:
         if-no-files-found: error
         name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
-        path: ${{ env.BINARY_DIR }}/build/Aqua\ Editor\ v*
+        path: ${{ github.workspace }}/build/Aqua\ Editor\ v*
