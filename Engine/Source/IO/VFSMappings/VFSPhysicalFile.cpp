@@ -121,12 +121,10 @@ void VFSPhysicalFileMapping::WriteText(string path, string text, bool append)
 	filestream.close();
 }
 
-void VFSPhysicalFileMapping::ReplaceText(string path, const string& from, const string& to)
+void _ReplaceText(string& content, const string& from, const string& to)
 {
-	if (from.empty() || !Exists(path))
+	if (from.empty())
 		return;
-
-	string content = ReadText(path);
 
 	size_t startPos = 0;
 	while ((startPos = content.find(from, startPos)) != string::npos)
@@ -134,7 +132,12 @@ void VFSPhysicalFileMapping::ReplaceText(string path, const string& from, const 
 		content.replace(startPos, from.length(), to);
 		startPos += to.length();
 	}
+}
 
+void VFSPhysicalFileMapping::ReplaceText(string path, const string& from, const string& to)
+{
+	string content = ReadText(path);
+	_ReplaceText(content, from, to);
 	WriteText(path, content);
 }
 
@@ -142,7 +145,7 @@ void VFSPhysicalFileMapping::ReplaceText(string path, vector<pair<string, string
 {
 	string content = ReadText(path);
 	for(auto pair : pairs)
-		ReplaceText(content, pair.first, pair.second);
+		_ReplaceText(content, pair.first, pair.second);
 	WriteText(path, content);
 }
 
