@@ -1,16 +1,23 @@
 #pragma once
 #include <AquaEngine/API.hpp>
-	
-namespace AquaEngine { class World; }
+#include <AquaEngine/Scripting/ManagedData.hpp>
+
+// Forward declarations
+struct _MonoType;
+struct _MonoObject;
+namespace AquaEngine { class World; class SystemManager; }
 
 namespace AquaEngine::Systems
-{
+{	
 	class System
 	{
 	private:
 		bool m_Enabled = true;
+		SystemManager* m_Owner = nullptr;
 
-	public:
+		friend class AquaEngine::SystemManager;
+
+	protected:
 #pragma region Virtual Functions
 		AquaAPI virtual void Init() { }
 		AquaAPI virtual void Update() { }
@@ -19,12 +26,25 @@ namespace AquaEngine::Systems
 
 		AquaAPI virtual void OnEnabled() { }
 		AquaAPI virtual void OnDisabled() { }
+
+		/// <summary>
+		/// Called when system is added to SystemManager (after Init),
+		/// and when the scripting engine has reloaded assemblies
+		/// </summary>
+		/// <returns></returns>
+		AquaAPI virtual void OnScriptingReloaded() { }
 #pragma endregion
+
+	public:
+		AquaEngine::Scripting::ManagedData ManagedData;
 
 		AquaAPI bool IsEnabled();
 
 		AquaAPI void ToggleEnabled();
 
 		AquaAPI void Enable(bool enable = true);
+
+		AquaAPI World* GetWorld();
+		AquaAPI SystemManager* GetManager();
 	};
 }

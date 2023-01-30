@@ -13,7 +13,7 @@
 
 namespace AquaEngine::IO
 {
-	typedef std::function<void(std::string, FileWatchStatus)> VFSMappingCallback;
+	typedef std::function<void(const std::string&, FileWatchStatus)> VFSMappingCallback;
 
 	enum class FilePermissions : unsigned int
 	{
@@ -114,9 +114,29 @@ namespace AquaEngine::IO
 		AquaAPI virtual void Write(std::string path, std::vector<unsigned char> data, bool append = false) { }
 
 		/// <summary>
+		/// Replaces specified text in a file
+		/// </summary>
+		AquaAPI virtual void ReplaceText(std::string path, const std::string& from, const std::string& to) { }
+
+		/// <summary>
+		/// Replaces specified pairs of text in a file
+		/// </summary>
+		AquaAPI virtual void ReplaceText(std::string path, std::vector<std::pair<std::string, std::string>> pairs) { }
+
+		/// <summary>
 		/// Copies a file
 		/// </summary>
 		AquaAPI virtual void Copy(std::string originalPath, std::string newPath) { }
+
+		/// <summary>
+		/// Moves file at path to a new path 
+		/// </summary>
+		AquaAPI virtual void Move(std::string originalPath, std::string newPath) { }
+
+		/// <summary>
+		/// Permanently deletes a file from system
+		/// </summary>
+		AquaAPI virtual void Remove(std::string path) { }
 
 		AquaAPI virtual bool CanWrite();
 		AquaAPI virtual bool CanWatch();

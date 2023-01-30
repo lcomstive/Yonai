@@ -181,6 +181,12 @@ void RenderTexture::CreateColourTexture()
 
 	switch (m_Format)
 	{
+	case TextureFormat::None:
+	case TextureFormat:: RedInteger:
+	case TextureFormat::Depth24Stencil8:
+		// TODO: Properly implement these
+		spdlog::warn("The '{}' texture format is not currently implemented!", (unsigned char)m_Format);
+		break;
 	case TextureFormat::RGBA8:
 	case TextureFormat::RGBA16:
 	case TextureFormat::RGBA16F:

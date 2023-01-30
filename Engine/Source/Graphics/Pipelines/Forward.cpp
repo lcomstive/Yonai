@@ -1,6 +1,7 @@
 #include <AquaEngine/Time.hpp>
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Mesh.hpp>
+#include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/Light.hpp>
 #include <AquaEngine/Graphics/Material.hpp>
@@ -13,6 +14,7 @@
 using namespace glm;
 using namespace std;
 using namespace AquaEngine;
+using namespace AquaEngine::Systems;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 using namespace AquaEngine::Graphics::Pipelines;
@@ -30,6 +32,8 @@ ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 	
 	m_Framebuffer = new Framebuffer(framebufferSpecs);
 	m_QuadMesh = Resource::Get<Mesh>(Mesh::Quad());
+
+	m_SceneSystem = SystemManager::Global()->Get<SceneSystem>();
 }
 
 ForwardRenderPipeline::~ForwardRenderPipeline()
@@ -43,6 +47,8 @@ void ForwardRenderPipeline::Draw(Camera* camera)
 {
 	ForwardPass(camera);
 }
+
+Framebuffer* ForwardRenderPipeline::GetOutput() { return m_Framebuffer; }
 
 void DrawMesh(Mesh* mesh, Shader* shader, Transform* transform, Camera* camera, ivec2 resolution)
 {
@@ -60,6 +66,11 @@ void DrawMesh(Mesh* mesh, Shader* shader, Transform* transform, Camera* camera, 
 	shader->Unbind();
 }
 
+void ForwardRenderPipeline::OnResized(glm::ivec2 resolution)
+{
+	m_Framebuffer->SetResolution(resolution);
+}
+
 void ForwardRenderPipeline::ForwardPass(Camera* camera)
 {
 	m_Framebuffer->Bind();
@@ -68,57 +79,66 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	vector<MeshRenderer*> meshes = camera->Entity.GetWorld()->GetComponents<MeshRenderer>();
+	vector<World*>& scenes = m_SceneSystem->GetActiveScenes();
 
-	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : Window::GetFramebufferResolution();
+	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : GetResolution();
+
+	if (currentResolution.x <= 0 || currentResolution.y <= 0)
+		return; // Nothing to draw
+
 	glViewport(0, 0, currentResolution.x, currentResolution.y);
-	m_Framebuffer->SetResolution(currentResolution);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	// Draw objects
-	for (MeshRenderer* renderer : meshes)
+	for(World* scene : scenes)
 	{
-		if (renderer->Mesh == InvalidResourceID ||
-			renderer->Material == InvalidResourceID)
-			continue; // Invalid parameters
+		vector<MeshRenderer*> meshes = scene->GetComponents<MeshRenderer>();
+		
+		// Draw objects
+		for (MeshRenderer* renderer : meshes)
+		{
+			if (renderer->Mesh == InvalidResourceID ||
+				renderer->Material == InvalidResourceID)
+				continue; // Invalid parameters
 
-#pragma region Getting pointerrsss
-		Mesh* mesh = Resource::Get<Mesh>(renderer->Mesh);
-		Material* material = Resource::Get<Material>(renderer->Material);
-		Transform* transform = renderer->Entity.GetComponent<Transform>();
+	#pragma region Getting pointers
+			Mesh* mesh = Resource::Get<Mesh>(renderer->Mesh);
+			Material* material = Resource::Get<Material>(renderer->Material);
+			Transform* transform = renderer->Entity.GetComponent<Transform>();
 
-		if (!mesh || !material || !transform ||
-			material->Shader == InvalidResourceID)
-			continue; // Invalid resource(s)
-#pragma endregion
+			if (!mesh || !material || !transform ||
+				material->Shader == InvalidResourceID)
+				continue; // Invalid resource(s)
+	#pragma endregion
 
-		Shader* shader = material->PrepareShader();
-		DrawMesh(mesh, shader, transform, camera, currentResolution);
-	}
+			Shader* shader = material->PrepareShader();
+			DrawMesh(mesh, shader, transform, camera, currentResolution);
+		}
 
-	glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 
-	// Draw sprites
-	vector<SpriteRenderer*> sprites = camera->Entity.GetWorld()->GetComponents<SpriteRenderer>();
-	for(SpriteRenderer* renderer : sprites)
-	{
-		if (renderer->Shader == InvalidResourceID)
-			continue; // Invalid parameters
+		// Draw sprites
+		vector<SpriteRenderer*> sprites = scene->GetComponents<SpriteRenderer>();
+		for(SpriteRenderer* renderer : sprites)
+		{
+			if (renderer->Shader == InvalidResourceID)
+				continue; // Invalid parameters
 
-		Shader* shader = Resource::Get<Shader>(renderer->Shader);
-		Texture* texture = Resource::Get<Texture>(renderer->Sprite);
-		Transform* transform = renderer->Entity.GetComponent<Transform>();
+			Shader* shader = Resource::Get<Shader>(renderer->Shader);
+			Texture* texture = Resource::Get<Texture>(renderer->Sprite);
+			Transform* transform = renderer->Entity.GetComponent<Transform>();
 
-		if (!shader || !transform || !texture)
-			continue; // Invalid resource(s)
+			if (!shader || !transform || !texture)
+				continue; // Invalid resource(s)
 
-		shader->Bind();
-		texture->Bind();
-		shader->Set("inputTexture", 0);
+			shader->Bind();
+			texture->Bind();
+			shader->Set("inputTexture", 0);
+			shader->Set("colour", renderer->Colour);
 
-		DrawMesh(m_QuadMesh, shader, transform, camera, currentResolution);
+			DrawMesh(m_QuadMesh, shader, transform, camera, currentResolution);
+		}
 	}
 
 	// Draw skybox
@@ -129,7 +149,4 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 	if (camera->RenderTarget)
 		// Copy to camera's render target
 		m_Framebuffer->CopyAttachmentTo(camera->RenderTarget);
-	else
-		// Blit to default framebuffer (screen)
-		m_Framebuffer->BlitTo(nullptr);
 }

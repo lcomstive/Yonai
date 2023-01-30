@@ -21,10 +21,14 @@ namespace AquaEngine::IO
 
 		AquaAPI virtual void WriteText(std::string path, std::string text, bool append = false) override;
 		AquaAPI virtual void Write(std::string path, std::vector<unsigned char> data, bool append = false) override;
+		AquaAPI virtual void ReplaceText(std::string path, const std::string& from, const std::string& to) override;
+		AquaAPI virtual void ReplaceText(std::string path, std::vector<std::pair<std::string, std::string>> pairs) override;
 
 		AquaAPI virtual bool CreateDirectory(std::string path) override;
 		AquaAPI virtual bool DeleteDirectory(std::string path) override;
 
+		AquaAPI virtual void Remove(std::string path) override;
+		AquaAPI virtual void Move(std::string originalPath, std::string newPath) override;
 		AquaAPI virtual void Copy(std::string originalPath, std::string newPath) override;
 
 		AquaAPI virtual void Watch(std::string path, VFSMappingCallback callback) override;

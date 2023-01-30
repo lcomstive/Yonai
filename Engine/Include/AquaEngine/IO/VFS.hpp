@@ -12,34 +12,35 @@ namespace AquaEngine::IO
 	class VFS
 	{
 		// MountPoint, list of mappings in order of priority
-		static std::unordered_map<std::string, std::list<AquaEngine::IO::VFSMapping*>> m_Mappings;
+		AquaAPI static std::unordered_map<std::string, std::list<AquaEngine::IO::VFSMapping*>> s_Mappings;
 
 	public:
-		static std::filesystem::path GetCurrentDirectory();
+		AquaAPI static std::filesystem::path GetCurrentDirectory();
 
-		static bool HasMount(std::string mountPoint);
+		/// <returns>True if mountPoint exists</returns>
+		AquaAPI static bool HasMount(std::string mountPoint);
 
 		/// <summary>
 		/// Mounts mountPoint to a local directory of the same name
 		/// </summary>
 		/// <returns>Created mapping, or nullptr if failed</returns>
-		static VFSMapping* Mount(std::string mountPoint);
+		AquaAPI static VFSMapping* Mount(std::string mountPoint);
 
 		/// <summary>
 		/// Mounts a path with alias mountPoint
 		/// </summary>
 		/// <returns>Created mapping, or nullptr if failed</returns>
-		static VFSMapping* Mount(std::string mountPoint, std::string mountPath);
+		AquaAPI static VFSMapping* Mount(std::string mountPoint, std::string mountPath);
 
 		/// <summary>
 		/// Removes all aliases for point
 		/// </summary>
-		static void Unmount(std::string mountPoint);
+		AquaAPI static void Unmount(std::string mountPoint);
 
 		/// <summary>
 		/// Removes first alias that matches path
 		/// </summary>
-		static void Unmount(std::string mountPoint, std::string mountPath);
+		AquaAPI static void Unmount(std::string mountPoint, std::string mountPath);
 
 		/// <summary>
 		/// Creates an alias using local directory of same name
@@ -51,7 +52,8 @@ namespace AquaEngine::IO
 		static T* Mount(std::string mountPoint)
 		{
 			if (mountPoint.empty())
-				return nullptr;
+				return Mount<T>(mountPoint, mountPoint);
+
 			if (mountPoint[0] != '/' && mountPoint[0] != '\\')
 				mountPoint = "/" + mountPoint;
 			return Mount<T>(mountPoint, "." + mountPoint);
@@ -68,15 +70,24 @@ namespace AquaEngine::IO
 		static T* Mount(std::string mountPoint, std::string mountPath)
 		{
 			// Check for valid parameters
-			if (mountPoint.empty() || mountPath.empty())
-				return nullptr;
-			// Replace all backslashes (Windows style) to forward slashes
-			replace(mountPoint.begin(), mountPoint.end(), '\\', '/');
+			if (!mountPoint.empty())
+			{
+				// Replace all backslashes (Windows style) to forward slashes
+				replace(mountPoint.begin(), mountPoint.end(), '\\', '/');
 
-			// Remove end slashes
-			if (mountPoint[mountPoint.size() - 1] == '/' && mountPoint.size() > 1)
-				mountPoint.erase(mountPoint.size() - 1);
-			if (mountPath[mountPath.size() - 1] == '/' && mountPath.size() > 1)
+				// Remove end slash
+				if (mountPoint[mountPoint.size() - 1] == '/' && mountPoint.size() > 1)
+					mountPoint.erase(mountPoint.size() - 1);
+			}
+
+			// Configure mountPath
+			mountPath = VFS::GetAbsolutePath(mountPath, true);
+
+			// Replace all backslashes (Windows style) to forward slashes
+			replace(mountPath.begin(), mountPath.end(), '\\', '/');
+
+			// Remove end slash
+			if (!mountPath.empty() && mountPath[mountPath.size() - 1] == '/')
 				mountPath.erase(mountPath.size() - 1);
 
 			// Check that template type derives from the VFSMapping class
@@ -87,38 +98,43 @@ namespace AquaEngine::IO
 			}
 
 			// Add list if the mount point hasn't been used before
-			if (m_Mappings.find(mountPoint) == m_Mappings.end())
-				m_Mappings.emplace(mountPoint, std::list<VFSMapping*>());
+			if (s_Mappings.find(mountPoint) == s_Mappings.end())
+				s_Mappings.emplace(mountPoint, std::list<VFSMapping*>());
 
 			// Add the mounting
 			T* instance = new T(mountPoint, mountPath);
-			m_Mappings[mountPoint].emplace_back(instance);
+			s_Mappings[mountPoint].emplace_back(instance);
 
 			spdlog::debug("Mounted '{}' to '{}'", mountPoint, mountPath);
 			return instance;
 		}
 
-		static std::string ReadText(std::string path);
-		static std::vector<unsigned char> Read(std::string path);
+		AquaAPI static std::string ReadText(const std::string& path);
+		AquaAPI static std::vector<unsigned char> Read(const std::string& path);
 
-		static void WriteText(std::string path, std::string contents);
-		static void Write(std::string path, std::vector<unsigned char> contents);
+		AquaAPI static void WriteText(const std::string& path, std::string contents);
+		AquaAPI static void Write(const std::string& path, std::vector<unsigned char> contents);
 
-		static void Copy(std::string originalPath, std::string copyPath);
+		AquaAPI static void ReplaceText(const std::string& path, const std::string& from, const std::string& to);
+		AquaAPI static void ReplaceText(const std::string& path, std::vector<std::pair<std::string, std::string>> pairs);
+
+		AquaAPI static void Remove(const std::string& path);
+		AquaAPI static void Move(const std::string& originalPath, const std::string& newPath);
+		AquaAPI static void Copy(const std::string& originalPath, const std::string& copyPath);
 
 		/// <summary>
 		/// Gets an absolute path from the first appropriate mount
 		/// </summary>
-		static std::string GetAbsolutePath(std::string path);
+		AquaAPI static std::string GetAbsolutePath(std::string path, bool suppressWarning = false);
 
 		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
-		static VFSMapping* GetMapping(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);
+		AquaAPI static VFSMapping* GetMapping(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);
 
 		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
-		static std::vector<VFSMapping*> GetMappings(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);
+		AquaAPI static std::vector<VFSMapping*> GetMappings(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);
 
-		static bool Exists(std::string path);
+		AquaAPI static bool Exists(std::string path);
 
-		static std::vector<VFSFile> GetFiles(std::string directory, bool recursive = false);
+		AquaAPI static std::vector<VFSFile> GetFiles(std::string directory, bool recursive = false);
 	};
 }

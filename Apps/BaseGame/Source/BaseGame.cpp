@@ -6,7 +6,9 @@
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Model.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Systems/SceneSystem.hpp>
+#include <AquaEngine/Components/FPSCamera.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/CameraControlSystem.hpp>
 
 #include <glm/gtc/quaternion.hpp>
 #include <AquaEngine/Components/Camera.hpp>
@@ -17,20 +19,23 @@
 using namespace std;
 using namespace glm;
 using namespace AquaEngine;
+using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
+World* Scene;
 Camera* camera;
 Transform* cameraTransform;
-World* Scene;
 
 void BaseGame::Setup()
 {
 	WindowedApplication::Setup();
 
 	Window::SetTitle("Base Game");
-	Window::SetVSync(true);
+	Window::SetVSync(false);
+
+	VFS::Mount("/Assets", "./Assets");
 
 	Scene = new World();
 
@@ -93,12 +98,14 @@ void BaseGame::Setup()
 	Entity cameraEntity = Scene->CreateEntity();
 	cameraTransform = cameraEntity.AddComponent<Transform>();
 	cameraTransform->Position = { 0, 0, -10 };
-	cameraTransform->Rotation = quat(vec3(0, 0, 0));
 	camera = cameraEntity.AddComponent<Camera>();
 	camera->Orthographic = false;
+	cameraEntity.AddComponent<FPSCamera>();
+
+	Scene->GetSystemManager()->Add<CameraControlSystem>();
 
 	// Add scene to active scenes
-	SystemManager::Get<SceneSystem>()->AddScene(Scene);
+	SystemManager::Global()->Get<SceneSystem>()->AddScene(Scene);
 }
 
 void BaseGame::Cleanup()
@@ -121,36 +128,6 @@ bool IsQuitKeyPressed()
 }
 
 const float ScrollSpeed = 30.0f;
-const float ControllerDeadzone = 0.1f;
-glm::vec3 GetPlayerMovement(float deltaTime)
-{
-	glm::vec3 movement = { 0, 0, 0 };
-
-	if (Input::IsKeyDown(Key::W) || Input::IsKeyDown(Key::ArrowUp)) 	movement.z += deltaTime;
-	if (Input::IsKeyDown(Key::S) || Input::IsKeyDown(Key::ArrowDown)) 	movement.z -= deltaTime;
-	if (Input::IsKeyDown(Key::A) || Input::IsKeyDown(Key::ArrowLeft)) 	movement.x += deltaTime;
-	if (Input::IsKeyDown(Key::D) || Input::IsKeyDown(Key::ArrowRight)) 	movement.x -= deltaTime;
-	if (Input::IsKeyDown(Key::E)) 										movement.y += deltaTime;
-	if (Input::IsKeyDown(Key::Q)) 										movement.y -= deltaTime;
-
-	float scrollDelta = Input::GetScrollDelta();
-	if (!camera->Orthographic && abs(scrollDelta) > 0.1f)
-		movement.z += ScrollSpeed * scrollDelta * deltaTime;
-
-	// Check if a gamepad is connected
-	if (Input::IsGamepadConnected(0))
-	{
-		// Left stick X axis
-		float gamepadAxis = Input::GetAxis(0, GamepadAxis::AxisLeftX);
-		if (abs(gamepadAxis) > ControllerDeadzone) movement.x += gamepadAxis;
-
-		// Left stick Y axis
-		gamepadAxis = Input::GetAxis(0, GamepadAxis::AxisLeftY);
-		if (abs(gamepadAxis) > ControllerDeadzone) movement.y -= gamepadAxis;
-	}
-
-	return movement;
-}
 
 void BaseGame::OnUpdate()
 {
@@ -171,35 +148,17 @@ void BaseGame::OnUpdate()
 	if (Input::IsKeyPressed(Key::Space))
 		camera->Orthographic = !camera->Orthographic;
 
-	float speedMultiplier = Input::IsKeyDown(Key::LeftShift) ? 2.0f : 1.0f;
-
 	if (camera->Orthographic)
-		camera->OrthographicSize -= ScrollSpeed * Input::GetScrollDelta() * deltaTime * speedMultiplier;
+		camera->OrthographicSize -= ScrollSpeed * Input::GetScrollDelta() * deltaTime;
 
-	// Player Movement //
-	cameraTransform->Position += inverse(cameraTransform->Rotation) * GetPlayerMovement(deltaTime) * speedMultiplier;
-
-	Input::ShowMouse(!Input::IsMouseDown(MouseButton::Right));
-	if (Input::IsMouseDown(MouseButton::Right))
-	{
-		static float xRot = 0, yRot = 0;
-
-		vec2 mouseDelta = Input::GetMouseDelta() * deltaTime;
-		xRot -= mouseDelta.y;
-		yRot += mouseDelta.x;
-
-		quat pitch	= angleAxis(xRot, vec3(1, 0, 0));
-		quat yaw	= angleAxis(yRot, vec3(0, 1, 0));
-
-		cameraTransform->Rotation = normalize(pitch * yaw);
-	}
+	GetRenderSystem()->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
 }
 
 #include <imgui.h>
 void BaseGame::OnDraw()
 {
-	static bool showDemoWindow = true;
-	// ImGui::ShowDemoWindow(&showDemoWindow);
+	// Blit output to default framebuffer (screen)
+	GetRenderSystem()->GetPipeline()->GetOutput()->BlitTo(nullptr);
 
 	ImGui::Begin("FPS");
 	ImGui::Text("FPS: %.2f", Time::FPS());

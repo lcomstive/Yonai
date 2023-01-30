@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 	AquaEditor::EditorApp app;
 	app.ProcessArgs(argc, argv);
 	
-	app.Run(); // Game loop
+	app.Run(); // Application loop
 
 	return 0;
 }

@@ -10,7 +10,9 @@
 #include <AquaEngine/IO/Files.hpp>
 
 #if defined(AQUA_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
+#include <imgui.h>
 #include <spdlog/spdlog.h>
+#include <imgui_internal.h>
 #include <AquaEngine/Window.hpp>
 
 using namespace std;
@@ -109,6 +111,9 @@ Window::Window() :
 	// Set instance to this
 	s_Instance = this;
 
+	// Set VSync enabled by default
+	SetVSync(true);
+
 	// Update gamepad mappings from local file
 	if (AquaEngine::IO::Exists(GamepadMappingPath))
 	{
@@ -180,11 +185,18 @@ string Window::GetTitle() { return s_Instance ? s_Instance->m_Title : ""; }
 
 ivec2 Window::GetResolution() { return s_Instance ? s_Instance->m_Resolution : glm::ivec2(0, 0); }
 
-ivec2 Window::GetFramebufferResolution()
+ivec2 Window::GetFramebufferResolution(bool useImGui)
 {
 	ivec2 resolution(0, 0);
 	if(!s_Instance)
 		return resolution;
+
+	if(useImGui && GImGui && GImGui->CurrentWindow)
+	{
+		// If inside ImGui window, get window size
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		return { viewportPanelSize.x, viewportPanelSize.y };
+	}
 	
 	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
 	return resolution;
@@ -194,7 +206,6 @@ void Window::SetResolution(glm::ivec2 resolution)
 {
 	if (!s_Instance)
 		return;
-
 
 	s_Instance->m_Resolution = resolution;
 	if (s_Instance->m_FullscreenMode == FullscreenMode::None)
@@ -245,7 +256,7 @@ void Window::SetFullscreen(FullscreenMode mode)
 bool Window::GetVSync() { return s_Instance ? s_Instance->m_VSync : false; }
 void Window::SetVSync(bool enable)
 {
-	if (!s_Instance)
+	if (!s_Instance || s_Instance->m_VSync == enable)
 		return;
 
 	spdlog::trace("Setting VSync to {}", enable ? "on" : "off");

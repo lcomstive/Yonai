@@ -13,20 +13,17 @@ jobs:
         - {
             name: "Windows",
             os: windows-latest,
-            triplet: 'x64-windows-static',
-            artifact: "AquaEngine_Windows.zip"
+            triplet: 'x64-windows-static'
           }
         - {
             name: "Linux",
             os: ubuntu-latest,
-            triplet: 'x64-linux',
-            artifact: "AquaEngine_Linux.txz"
+            triplet: 'x64-linux'
           }
         - {
             name: "MacOS",
-            os: macos-latest,
-            triplet: 'arm64-osx',
-            artifact: "AquaEngine_MacOS.txz"
+            os: [ macOS, arm64, self-hosted ],
+            triplet: 'arm64-osx'
           }
 
     # Get source
@@ -40,7 +37,7 @@ jobs:
     - uses: lukka/get-cmake@latest
 
     - if: matrix.config.os == 'ubuntu-latest'
-      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev
 
     - name: VCPKG
       uses: lukka/run-vcpkg@v10
@@ -50,28 +47,33 @@ jobs:
         VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     # Set CMake configuration based on branch
-    - if: github.ref == 'refs/heads/main' && matrix.config.os != 'windows-latest'
+    - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
       run: echo "CMAKE_CONFIG=Release" >> $GITHUB_ENV
 
-    - if: github.ref != 'refs/heads/main' && matrix.config.os != 'windows-latest'
+    - if: github.ref != 'refs/heads/main' && matrix.config.name != 'Windows'
       run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $GITHUB_ENV
 
-    - if: github.ref == 'refs/heads/main' && matrix.config.os == 'windows-latest'
+    - if: github.ref == 'refs/heads/main' && matrix.config.name == 'Windows'
       run: echo "CMAKE_CONFIG=Release" >> $env:GITHUB_ENV
 
-    - if: github.ref != 'refs/heads/main' && matrix.config.os == 'windows-latest'
+    - if: github.ref != 'refs/heads/main' && matrix.config.name == 'Windows'
       run: echo "CMAKE_CONFIG=RelWithDebInfo" >> $env:GITHUB_ENV
 
     # Set binary directory based on OS
-    - if: matrix.config.os == 'windows-latest'
+    - if: matrix.config.name == 'Windows'
       run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/${{ env.CMAKE_CONFIG }}" >> $env:GITHUB_ENV
 
-    - if: matrix.config.os != 'windows-latest'
+    - if: matrix.config.name != 'Windows'
       run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/" >> $GITHUB_ENV
 
     # Configure CMake
     - name: Configure
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }}
+
+    # Build AquaScriptCore C# project manually on Unix systems
+    - name: Build AquaScriptCore
+      if: matrix.config.name != 'Windows'
+      run: msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
 
     # Build
     - name: Build
@@ -87,17 +89,21 @@ jobs:
       with:
         path: ./Version.txt
 
-    # Copy desired artifacts to output folder
-    - name: Gather artifacts
-      run: |
-        mkdir -p ${{ github.workspace }}/build/artifact
-        cp ${{ env.BINARY_DIR }}/BaseGame* ${{ github.workspace }}/build/artifact/
-        cp -r ${{ github.workspace }}/Apps/Assets/ ${{ github.workspace }}/build/artifact/Assets/
-        cp ${{ env.BINARY_DIR }}/* ${{ github.workspace }}/build/artifact/
+    # Create installation package
+    - name: Package
+      run: cd ${{ github.workspace }}/build; cpack
 
-    # Upload artifact
+    # Upload generated artifact
     - uses: actions/upload-artifact@v3
+      if: matrix.config.name != 'Windows'
       with:
         if-no-files-found: error
-        name: ${{ matrix.config.artifact }}-${{ steps.readFile.outputs.content }}
-        path: ${{ github.workspace }}/build/artifact/
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
+        path: ${{ github.workspace }}/build/Aqua\ Editor\ v*
+
+    - uses: actions/upload-artifact@v3
+      if: matrix.config.name == 'Windows'
+      with:
+        if-no-files-found: error
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
+        path: ${{ github.workspace }}\build\Aqua Editor v*

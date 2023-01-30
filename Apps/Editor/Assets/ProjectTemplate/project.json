@@ -1,0 +1,7 @@
+{
+	"name": "$<ProjectName>",
+	"assetsDir": "Assets",
+	"assemblies": [
+		"project://Scripting/bin/$<ProjectName>.dll"
+	]
+}

@@ -129,10 +129,6 @@ namespace AquaEngine
 		RightAlt = 346,
 		RightSuper = 347,
 		MENU = 348,
-
-		Shift = LeftShift | RightShift,
-		Control = LeftControl | RightControl,
-		Super = LeftSuper | RightSuper
 	};
 
 	enum class GamepadButton : int
@@ -186,5 +182,23 @@ namespace AquaEngine
 		Left	= 0,
 		Right	= 1,
 		Middle	= 2
+	};
+
+	enum class MouseState : int
+	{
+		/// <summary>
+		/// Normal, visible state of mouse
+		/// </summary>
+		Normal = 0,
+
+		/// <summary>
+		/// Hides the mouse, but is still moving
+		/// </summary>
+		Hidden,
+
+		/// <summary>
+		/// Hides the mouse and prevents movement
+		/// </summary>
+		Disabled
 	};
 }

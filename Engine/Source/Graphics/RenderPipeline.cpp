@@ -40,3 +40,15 @@ void RenderPipeline::DrawSkybox(ResourceID skyboxTextureID)
 	skyboxShader->Unbind();
 	glDepthFunc(GL_LESS);
 }
+
+void RenderPipeline::SetResolution(ivec2 resolution)
+{
+	if(m_Resolution == resolution)
+		return; // Same, ignore
+		
+	spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
+	m_Resolution = resolution;
+	OnResized(resolution);
+}
+
+ivec2 RenderPipeline::GetResolution() { return m_Resolution; }

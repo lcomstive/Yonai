@@ -40,9 +40,10 @@ namespace AquaEngine::Graphics::Pipelines
 		void LightingPass();
 
 	public:
-		DeferredRenderPipeline();
-		~DeferredRenderPipeline();
+		AquaAPI DeferredRenderPipeline();
+		AquaAPI ~DeferredRenderPipeline();
 
-		void Draw(Components::Camera* camera) override;
+		AquaAPI Framebuffer* GetOutput() override;
+		AquaAPI void Draw(Components::Camera* camera) override;
 	};
 }

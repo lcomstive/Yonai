@@ -4,7 +4,7 @@
 
 namespace AquaEngine::Graphics
 {
-	enum class TextureFormat
+	enum class TextureFormat : unsigned char
 	{
 		None = 0,
 

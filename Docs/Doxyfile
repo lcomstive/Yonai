@@ -1,16 +1,14 @@
 DOXYFILE_ENCODING		= UTF-8
 PROJECT_NAME			= AquaEngine
 # PROJECT_LOGO			= "Media/Logo.png"
-OUTPUT_DIRECTORY		= ./
+OUTPUT_DIRECTORY		= ./Dist/Public
 CREATE_SUBDIRS			= NO
 ALLOW_UNICODE_NAMES		= NO
 OUTPUT_LANGUAGE			= English
 BRIEF_MEMBER_DESC		= YES
 REPEAT_BRIEF			= NO
 INPUT					= Markdown \
-							../Engine/Source \
-							../Engine/Include \
-							../Apps/Editor
+							../Apps/AquaScriptCore
 RECURSIVE				= YES
 GENERATE_LATEX			= NO
 INLINE_INHERITED_MEMB 	= YES

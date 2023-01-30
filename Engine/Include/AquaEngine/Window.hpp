@@ -23,7 +23,7 @@
 
 namespace AquaEngine
 {
-	enum class FullscreenMode
+	enum class FullscreenMode : int
 	{
 		None,
 		Borderless,
@@ -120,9 +120,10 @@ namespace AquaEngine
 
 		AquaAPI static void SetResolution(glm::ivec2 resolution);
 		AquaAPI static void SetResolution(uint32_t width, uint32_t height);
-
+		
+		/// <param name="useImGui">Whether to check ImGui window size, as opposed to the application window</param>
 		/// <returns>Size of the window's framebuffer to draw to, in pixels</returns>
-		AquaAPI static glm::ivec2 GetFramebufferResolution();
+		AquaAPI static glm::ivec2 GetFramebufferResolution(bool useImGui = false);
 
 		AquaAPI static FullscreenMode GetFullscreen();
 		AquaAPI static void SetFullscreen(FullscreenMode mode);

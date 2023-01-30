@@ -9,7 +9,11 @@ using namespace AquaEngine::IO;
 
 namespace fs = std::filesystem;
 
-VFSPhysicalFileMapping::VFSPhysicalFileMapping(string mountPoint, string path) : VFSMapping::VFSMapping(mountPoint, path) { }
+VFSPhysicalFileMapping::VFSPhysicalFileMapping(string mountPoint, string path) : VFSMapping::VFSMapping(mountPoint, path)
+{
+	if(!path.empty() && !fs::exists(path))
+		fs::create_directories(path);
+}
 
 VFSPhysicalFileMapping::~VFSPhysicalFileMapping()
 {
@@ -23,6 +27,9 @@ VFSPhysicalFileMapping::~VFSPhysicalFileMapping()
 
 string VFSPhysicalFileMapping::ReadText(string path)
 {
+	if(!fs::exists(path) || fs::is_directory(path))
+		return "";
+
 	// Open file for read and get size
 	ifstream filestream(path, ios::in | ios::binary);
 
@@ -99,17 +106,47 @@ void VFSPhysicalFileMapping::GetFiles(std::string directory, vector<VFSFile>& fi
 }
 
 void VFSPhysicalFileMapping::WriteText(string path, string text, bool append)
-{
-	if (!fs::create_directories(path))
+{	
+	// Check if parent directory already exists
+	fs::path parentDir = fs::path(path).parent_path();
+	if (!fs::exists(parentDir) && !fs::create_directories(parentDir))
 	{
 		spdlog::error("Failed to write to '{}' - could not create parent directory", path);
 		return;
 	}
 
 	ofstream filestream(path, ios::out | (append ? ios::app : ios::trunc));
-	filestream.write(path.c_str(), path.length());
+	filestream.write(text.c_str(), text.length());
 	filestream.flush();
 	filestream.close();
+}
+
+void _ReplaceText(string& content, const string& from, const string& to)
+{
+	if (from.empty())
+		return;
+
+	size_t startPos = 0;
+	while ((startPos = content.find(from, startPos)) != string::npos)
+	{
+		content.replace(startPos, from.length(), to);
+		startPos += to.length();
+	}
+}
+
+void VFSPhysicalFileMapping::ReplaceText(string path, const string& from, const string& to)
+{
+	string content = ReadText(path);
+	_ReplaceText(content, from, to);
+	WriteText(path, content);
+}
+
+void VFSPhysicalFileMapping::ReplaceText(string path, vector<pair<string, string>> pairs)
+{
+	string content = ReadText(path);
+	for(auto pair : pairs)
+		_ReplaceText(content, pair.first, pair.second);
+	WriteText(path, content);
 }
 
 void VFSPhysicalFileMapping::Write(string path, vector<unsigned char> data, bool append)
@@ -127,7 +164,7 @@ void VFSPhysicalFileMapping::Write(string path, vector<unsigned char> data, bool
 	filestream.close();
 }
 
-void VFSPhysicalFileMapping::Copy(std::string originalPath, std::string newPath)
+void VFSPhysicalFileMapping::Copy(string originalPath, string newPath)
 {
 	// Check new path parent directory
 	fs::path parentDir = fs::path(newPath).parent_path();
@@ -137,7 +174,19 @@ void VFSPhysicalFileMapping::Copy(std::string originalPath, std::string newPath)
 		return;
 	}
 
-	fs::copy(originalPath, newPath, fs::copy_options::overwrite_existing);
+	fs::copy(originalPath, newPath, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+}
+
+void VFSPhysicalFileMapping::Remove(string path)
+{
+	if(fs::exists(path))
+		fs::remove_all(path);
+}
+	
+void VFSPhysicalFileMapping::Move(string originalPath, string newPath)
+{
+	if(fs::exists(originalPath))
+		fs::rename(originalPath, newPath);
 }
 
 void VFSPhysicalFileMapping::Watch(string path, VFSMappingCallback callback)

@@ -18,4 +18,10 @@ Write-Output "Generating documents for $ProjectVersion"
 
 ### Generate documentation
 # Pipe output with project version to doxygen command
+New-Item "./Dist/" -Type Directory
+
+# Public facing documentation
 cmd.exe /c "(type Doxyfile & echo. & echo PROJECT_NUMBER=$ProjectVersion) | doxygen -"
+
+# Internal (C++ Engine) documentation
+cmd.exe /c "(type DoxyfileInternal & echo. & echo PROJECT_NUMBER=$ProjectVersion) | doxygen -"

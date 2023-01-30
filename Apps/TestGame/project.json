@@ -1,0 +1,7 @@
+{
+	"name": "Test Project Name",
+	"assetsDir": "Assets",
+	"assemblies": [
+		"project://Scripting/bin/TestGame.dll"
+	]
+}

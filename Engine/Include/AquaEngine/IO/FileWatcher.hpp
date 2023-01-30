@@ -20,7 +20,7 @@ namespace AquaEngine::IO
 		std::thread m_LoopThread;
 		std::atomic_bool m_Running;
 		std::chrono::duration<int, std::milli> m_Interval; // Time between checking for changes
-		std::function<void(std::string, FileWatchStatus)> m_Callback;
+		std::function<void(const std::string&, FileWatchStatus)> m_Callback;
 		std::unordered_map<std::string, std::filesystem::file_time_type> m_WatchedPaths;
 
 		void BeginWatching();
@@ -32,7 +32,7 @@ namespace AquaEngine::IO
 		// Constructor using default interval of 1000ms
 		AquaAPI FileWatcher(std::string path, bool multithread);
 
-		AquaAPI void Start(std::function<void(std::string, FileWatchStatus)> callback);
+		AquaAPI void Start(std::function<void(const std::string&, FileWatchStatus)> callback);
 		AquaAPI void Stop();
 	};
 }

@@ -1,3 +1,4 @@
+#include <AquaEngine/Time.hpp>
 #include <AquaEngine/Timer.hpp>
 
 using namespace std;
@@ -6,9 +7,9 @@ using namespace std::chrono;
 
 const milliseconds Timer::DefaultInterval = milliseconds(1000);
 
-Timer::Timer(milliseconds interval) : Timer(nullptr, interval) { }
-Timer::Timer(unsigned int intervalMS) : Timer(nullptr, milliseconds(intervalMS)) { }
-Timer::Timer(TimerCallback callback, milliseconds interval) : m_Interval(interval), m_Callback(callback), m_IsRunning(false) { }
+Timer::Timer(milliseconds interval) : Timer(nullptr, interval) { Start(); }
+Timer::Timer(unsigned int intervalMS) : Timer(nullptr, milliseconds(intervalMS)) { Start(); }
+Timer::Timer(TimerCallback callback, milliseconds interval) : m_Interval(interval), m_Callback(callback), m_IsRunning(false) { Start(); }
 
 Timer::~Timer()
 {

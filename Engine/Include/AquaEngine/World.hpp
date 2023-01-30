@@ -9,7 +9,9 @@
 
 namespace AquaEngine
 {
-	namespace Components { struct Component; }
+	// Forward declarations
+	namespace Systems { class SceneSystem;  }
+	namespace Components { struct Component; struct ScriptComponent; }
 
 	class World
 	{
@@ -17,11 +19,20 @@ namespace AquaEngine
 		unsigned int m_ID;
 		std::string m_Name;
 		std::unique_ptr<EntityManager> m_EntityManager;
+		std::unique_ptr<SystemManager> m_SystemManager;
 		std::unique_ptr<ComponentManager> m_ComponentManager;
 
 		static std::unordered_map<unsigned int, World*> s_Worlds;
 
 		AquaAPI void SetupEntityComponent(EntityID id, Components::Component* component);
+
+		// When this world is added or removed from active scenes
+		void OnActiveStateChanged(bool isActive);
+
+		// Called once per frame
+		void Update();
+
+		friend class Systems::SceneSystem;
 
 	public:
 		struct Entity
@@ -37,6 +48,23 @@ namespace AquaEngine
 			AquaAPI AquaEngine::World* GetWorld();
 
 			AquaAPI void Destroy();
+
+			/// <summary>
+			/// Adds a managed (C#) script component to this entity
+			/// </summary>
+			/// <returns>Created instance of scripted component, or nullptr if invalid</returns>
+			AquaAPI Components::ScriptComponent* AddComponent(MonoType* managedType);
+
+			/// <returns>Instance of managed component, or nullptr if not found</returns>
+			AquaAPI Components::ScriptComponent* GetComponent(MonoType* managedType);
+
+			/// <returns>True if this entity has a managed component matching type</returns>
+			AquaAPI bool HasComponent(MonoType* managedType);
+
+			/// <summary>
+			/// Removes a managed (C#) script component from this entity
+			/// </summary>
+			AquaAPI void RemoveComponent(MonoType* managedType);
 
 			template<typename T>
 			T* AddComponent() { return m_World ? m_World->AddComponent<T>(m_ID) : nullptr; }
@@ -83,10 +111,15 @@ namespace AquaEngine
 
 		AquaAPI void Destroy();
 
-		/// ENTITY ///
+#pragma region Entity
+		AquaAPI Entity CreateEntity();
+		AquaAPI bool HasEntity(EntityID entity);
 		AquaAPI void DestroyEntity(EntityID entity);
 		AquaAPI void PrepareEntities(unsigned int count);
-		AquaAPI Entity CreateEntity();
+
+		/// <summary>
+		/// Gets an entity with matching ID, or creates entity if it does not exist
+		/// </summary>
 		AquaAPI Entity GetEntity(EntityID entity);
 
 		template<typename T>
@@ -168,8 +201,17 @@ namespace AquaEngine
 				entities[i] = GetEntity(IDs[i]);
 			return entities;
 		}
+#pragma endregion
 
-		/// COMPONENT ///
+#pragma region Components
+		/// <summary>
+		/// Gets an instance of a component
+		/// </summary>
+		void* GetComponent(EntityID entity, size_t type);
+
+		/// <summary>
+		/// Gets an instance of a component
+		/// </summary>
 		template<typename T>
 		T* GetComponent(EntityID entity) { return m_ComponentManager->Get<T>(entity); }
 
@@ -184,16 +226,37 @@ namespace AquaEngine
 		std::vector<std::pair<T1*, T2*>> GetComponents() { return m_ComponentManager->Get<T1, T2>(); }
 
 		template<typename T>
-		T* AddComponent(EntityID entity)
+		T* AddComponent(EntityID id, size_t type)
 		{
-			if (HasComponent<T>(entity))
-				return GetComponent<T>(entity);
+			if (HasComponent<T>(id))
+				return GetComponent<T>(id);
 
-			T* component = m_ComponentManager->Add<T>(entity);
+			T* component = m_ComponentManager->Add<T>(id, type);
 			if (std::is_base_of<Components::Component, T>())
-				SetupEntityComponent(entity, (Components::Component*)component);
+				SetupEntityComponent(id, (Components::Component*)component);
 			return component;
 		}
+
+		/// <summary>
+		/// Adds a managed (C#) script component to entity
+		/// </summary>
+		/// <returns>Created instance of scripted component, or nullptr if invalid</returns>
+		AquaAPI Components::ScriptComponent* AddComponent(EntityID entity, MonoType* managedType);
+	
+		/// <returns>Instance of managed component, or nullptr if not found</returns>
+		AquaAPI Components::ScriptComponent* GetComponent(EntityID entity, MonoType* managedType);
+		
+		/// <returns>True if entity has a managed component matching type</returns>
+		AquaAPI bool HasComponent(EntityID entity, MonoType* managedType);
+
+		/// <summary>
+		/// Removes a managed (C#) script component from entity
+		/// </summary>
+		AquaAPI void RemoveComponent(EntityID entity, MonoType* managedType);
+
+		template<typename T>
+		T* AddComponent(EntityID entity)
+		{ return AddComponent<T>(entity, typeid(T).hash_code()); }
 
 		template<typename T1, typename T2>
 		void AddComponent(EntityID entity)
@@ -237,12 +300,16 @@ namespace AquaEngine
 		bool HasComponents(EntityID entity) { return m_ComponentManager->Has<T1, T2, T3, T4>(entity); }
 
 		AquaAPI void ClearComponents(EntityID entity);
+#pragma endregion
 
-		/// Getters ///
+#pragma region Getters
+		AquaAPI AquaEngine::SystemManager* GetSystemManager();
 		AquaAPI AquaEngine::EntityManager* GetEntityManager();
 		AquaAPI AquaEngine::ComponentManager* GetComponentManager();
 
-		static World* GetWorld(unsigned int id) { return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
+		static std::vector<World*> GetWorlds();
+		static World* GetWorld(unsigned int id);
+#pragma endregion
 
 	private:
 		std::unordered_map<EntityID, Entity> m_Entities;
