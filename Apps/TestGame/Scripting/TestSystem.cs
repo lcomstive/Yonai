@@ -15,6 +15,7 @@ namespace TestGame
 
 		protected override void Start()
 		{
+			/*
 			Log.Debug("Colours:");
 			foreach(var colour in ColourValues)
 					Log.Debug($"{colour.r}, {colour.g}, {colour.b}, {colour.a}");
@@ -31,6 +32,13 @@ namespace TestGame
 			}
 
 			Log.Info($"Test components: {testComponents.Length}");
+			*/
+
+			string vfsPath = "assets://Textures/texture_09.png";
+			Log.Info($"Checking for '{vfsPath}': " + (VFS.Exists(vfsPath) ? "Exists" : "Not found"));
+
+			string textFile = "assets://TestRead.txt";
+			Log.Info("Test read file contents:\n" + VFS.ReadText(textFile));
 		}
 
 		protected override void Update()

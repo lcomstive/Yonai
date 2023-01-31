@@ -87,6 +87,21 @@ bool _managed_internal_WorldHasSystem(unsigned int worldID, MonoReflectionType* 
 MonoObject* _managed_internal_WorldGetSystem(unsigned int worldID, MonoReflectionType* systemType);
 MonoObject* _managed_internal_WorldAddSystem(unsigned int worldID, MonoReflectionType* systemType);
 bool _managed_internal_WorldRemoveSystem(unsigned int worldID, MonoReflectionType* systemType);
+MonoString* _managed_internal_VFSGetCurrentDirectory();
+bool _managed_internal_VFSHasMount(MonoString* path);
+void _managed_internal_VFSMount(MonoString* mountPoint);
+void _managed_internal_VFSMountPath(MonoString* mountPoint, MonoString* mountPath);
+void _managed_internal_VFSUnmount(MonoString* mountPoint);
+void _managed_internal_VFSUnmountPath(MonoString* mountPoint, MonoString* mountPath);
+MonoString* _managed_internal_VFSReadText(MonoString* path);
+void _managed_internal_VFSWriteText(MonoString* path, MonoString* content);
+MonoArray* _managed_internal_VFSRead(MonoString* path);
+void _managed_internal_VFSWrite(MonoString* path, MonoArray* array);
+void _managed_internal_VFSRemove(MonoString* path);
+void _managed_internal_VFSMove(MonoString* from, MonoString* to);
+void _managed_internal_VFSCopy(MonoString* from, MonoString* to);
+MonoString* _managed_internal_VFSGetAbsolutePath(MonoString* path, bool suppressWarnings);
+bool _managed_internal_VFSExists(MonoString* path);
 float _managed_internal_TimeFPS();
 float _managed_internal_TimeDeltaTime();
 float _managed_internal_TimeTimeSinceLaunch();
@@ -177,6 +192,21 @@ const vector<pair<const char*, const void*>> _InternalMethods = {
 	pair<const char*, const void*>("AquaEngine.World::_aqua_internal_GetSystem", (const void*)_managed_internal_WorldGetSystem),
 	pair<const char*, const void*>("AquaEngine.World::_aqua_internal_AddSystem", (const void*)_managed_internal_WorldAddSystem),
 	pair<const char*, const void*>("AquaEngine.World::_aqua_internal_RemoveSystem", (const void*)_managed_internal_WorldRemoveSystem),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_GetCurrentDirectory", (const void*)_managed_internal_VFSGetCurrentDirectory),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_HasMount", (const void*)_managed_internal_VFSHasMount),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Mount", (const void*)_managed_internal_VFSMount),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_MountPath", (const void*)_managed_internal_VFSMountPath),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Unmount", (const void*)_managed_internal_VFSUnmount),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_UnmountPath", (const void*)_managed_internal_VFSUnmountPath),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_ReadText", (const void*)_managed_internal_VFSReadText),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_WriteText", (const void*)_managed_internal_VFSWriteText),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Read", (const void*)_managed_internal_VFSRead),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Write", (const void*)_managed_internal_VFSWrite),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Remove", (const void*)_managed_internal_VFSRemove),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Move", (const void*)_managed_internal_VFSMove),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Copy", (const void*)_managed_internal_VFSCopy),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_GetAbsolutePath", (const void*)_managed_internal_VFSGetAbsolutePath),
+	pair<const char*, const void*>("AquaEngine.VFS::_aqua_internal_Exists", (const void*)_managed_internal_VFSExists),
 	pair<const char*, const void*>("AquaEngine.Time::_aqua_internal_FPS", (const void*)_managed_internal_TimeFPS),
 	pair<const char*, const void*>("AquaEngine.Time::_aqua_internal_DeltaTime", (const void*)_managed_internal_TimeDeltaTime),
 	pair<const char*, const void*>("AquaEngine.Time::_aqua_internal_TimeSinceLaunch", (const void*)_managed_internal_TimeTimeSinceLaunch),

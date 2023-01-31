@@ -64,6 +64,7 @@
     <Compile Include="Core\World.cs" />
     <Compile Include="Core\System.cs" />
     <Compile Include="Systems\SceneManager.cs" />
+    <Compile Include="Core\VFS.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
