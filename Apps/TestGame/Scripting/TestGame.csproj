@@ -32,13 +32,13 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="AquaScriptCore">
-      <HintPath>/Users/lcomstive/Projects/AquaEngine/build/bin/Aqua Editor.app/Contents/Resources/AquaScriptCore.dll</HintPath>
+      <HintPath>D:\Lewis Projects\AquaEngine\build\bin\Debug/AquaScriptCore.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-<Compile Include="TestSystem.cs" />
-<Compile Include="CameraControlSystem.cs" />
-<Compile Include="TestComponent.cs" />
+  <ItemGroup>
+<Compile Include="CameraControlSystem.cs" />
+<Compile Include="TestComponent.cs" />
+<Compile Include="TestSystem.cs" />
 </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

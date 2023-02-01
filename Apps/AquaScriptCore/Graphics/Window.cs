@@ -8,16 +8,16 @@ namespace AquaEngine
 		{
 			get
 			{
-				_aqua_internal_GetResolution(out Vector2 value);
+				_GetResolution(out Vector2 value);
 				return value;
 			}
-			set => _aqua_internal_SetResolution(ref value);
+			set => _SetResolution(ref value);
 		}
 
 		public static FullscreenMode Fullscreen
 		{
-			get => (FullscreenMode)_aqua_internal_GetFullscreenMode();
-			set => _aqua_internal_SetFullscreenMode((int)value);
+			get => (FullscreenMode)_GetFullscreenMode();
+			set => _SetFullscreenMode((int)value);
 		}
 
 		/// <summary>
@@ -44,10 +44,10 @@ namespace AquaEngine
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_GetResolution(out Vector2 value);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_SetResolution(ref Vector2 value);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _aqua_internal_GetFullscreenMode();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_SetFullscreenMode(int value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(out Vector2 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetResolution(ref Vector2 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFullscreenMode();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFullscreenMode(int value);
 		#endregion
 	}
 }

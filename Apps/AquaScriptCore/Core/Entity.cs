@@ -40,13 +40,13 @@ namespace AquaEngine
 		public void Destroy() => World.DestroyEntity(ID);
 
 		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
-		public bool HasComponent<T>() where T : Component => _aqua_internal_HasComponent(World.ID, ID, typeof(T));
+		public bool HasComponent<T>() where T : Component => _HasComponent(World.ID, ID, typeof(T));
 
 		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
 		public T AddComponent<T>() where T : Component
 		{
 			Type type = typeof(T);
-			T component = (T)_aqua_internal_AddComponent(World.ID, ID, type);
+			T component = (T)_AddComponent(World.ID, ID, type);
 			if (component == null)
 				return null;
 			m_Components.Add(type, component);
@@ -61,7 +61,7 @@ namespace AquaEngine
 
 			Type type = typeof(T);
 			if (!m_Components.ContainsKey(type))
-				m_Components.Add(type, _aqua_internal_GetComponent(World.ID, ID, typeof(T)));
+				m_Components.Add(type, _GetComponent(World.ID, ID, typeof(T)));
 			return (T)m_Components[type];
 		}
 		/// <summary>
@@ -75,7 +75,7 @@ namespace AquaEngine
 			if (m_Components.ContainsKey(type))
 				m_Components.Remove(type);
 
-			return _aqua_internal_RemoveComponent(World.ID, ID, type);
+			return _RemoveComponent(World.ID, ID, type);
 		}
 
 		public override string ToString() => $"{ID}#{World.ID}";
@@ -83,10 +83,10 @@ namespace AquaEngine
 		public static implicit operator string(Entity v) => v.ToString();
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool	  _aqua_internal_HasComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _aqua_internal_GetComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _aqua_internal_AddComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool   _aqua_internal_RemoveComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool	  _HasComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _GetComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AddComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool   _RemoveComponent(uint worldID, uint entityID, Type type);
 		#endregion
 	}
 }

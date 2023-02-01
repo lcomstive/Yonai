@@ -9,8 +9,8 @@ namespace AquaEngine
 		/// </summary>
 		public uint Sprite
 		{
-			get => _aqua_internal_GetSprite(World.ID, Entity.ID);
-			set => _aqua_internal_SetSprite(World.ID, Entity.ID, value);
+			get => _GetSprite(World.ID, Entity.ID);
+			set => _SetSprite(World.ID, Entity.ID, value);
 		}
 
 		/// <summary>
@@ -20,10 +20,10 @@ namespace AquaEngine
 		{
 			get
 			{
-				_aqua_internal_GetColour(World.ID, Entity.ID, out Colour colour);
+				_GetColour(World.ID, Entity.ID, out Colour colour);
 				return colour;
 			}
-			set => _aqua_internal_SetColour(World.ID, Entity.ID, ref value);
+			set => _SetColour(World.ID, Entity.ID, ref value);
 		}
 
 		/// <summary>
@@ -31,17 +31,17 @@ namespace AquaEngine
 		/// </summary>
 		public uint Shader
 		{
-			get => _aqua_internal_GetShader(World.ID, Entity.ID);
-			set => _aqua_internal_SetShader(World.ID, Entity.ID, value);
+			get => _GetShader(World.ID, Entity.ID);
+			set => _SetShader(World.ID, Entity.ID, value);
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _aqua_internal_GetSprite(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_SetSprite(uint worldID, uint entityID, uint position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_GetColour(uint worldID, uint entityID, out Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_SetColour(uint worldID, uint entityID, ref Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _aqua_internal_GetShader(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_SetShader(uint worldID, uint entityID, uint shader);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetSprite(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSprite(uint worldID, uint entityID, uint position);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetColour(uint worldID, uint entityID, out Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetColour(uint worldID, uint entityID, ref Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetShader(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(uint worldID, uint entityID, uint shader);
 		#endregion
 	}
 }

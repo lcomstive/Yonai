@@ -37,8 +37,38 @@ namespace TestGame
 			string vfsPath = "assets://Textures/texture_09.png";
 			Log.Info($"Checking for '{vfsPath}': " + (VFS.Exists(vfsPath) ? "Exists" : "Not found"));
 
-			string textFile = "assets://TestRead.txt";
-			Log.Info("Test read file contents:\n" + VFS.ReadText(textFile));
+			AquaEngine.Graphics.Texture texture = Resource.Load<AquaEngine.Graphics.Texture>("Texture/Test", vfsPath);
+
+			foreach (string resourcePath in new string[] {
+				"Texture/Test",
+				"Shaders/Sprite",
+				"Should/Not/Exist",
+			})
+			{
+				uint resourceID = Resource.GetID(resourcePath);
+				Log.Info($"ID for resource at '{resourcePath}' is " + (resourceID == uint.MaxValue ? "invalid" : resourceID.ToString()));
+
+				if(resourceID == uint.MaxValue)
+				{
+					Log.Warning($"Resource at path '{resourcePath}' was not found");
+					continue;
+				}
+
+				if(Resource.GetPath(resourceID) != resourcePath)
+				{
+					Log.Warning("Getting path did not match original resource path?");
+					continue;
+				}
+
+				Type resourceType = Resource.GetResourceType(resourceID);
+				if(resourceType == null)
+				{
+					Log.Warning($"Could not get type for '{resourcePath}'");
+					continue;
+				}
+
+				Log.Info($"Resource '{resourcePath}' [{resourceID}] " + resourceType.FullName);
+			}
 		}
 
 		protected override void Update()

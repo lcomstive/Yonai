@@ -6,7 +6,7 @@ namespace AquaEngine
 	{
 		public float x, y, z;
 
-		public float Magnitude => _aqua_internal_Magnitude(ref this);
+		public float Magnitude => _Magnitude(ref this);
 
 		public static Vector3 Zero		=> new Vector3(0, 0, 0);
 		public static Vector3 One		=> new Vector3(1, 1, 1);
@@ -27,11 +27,11 @@ namespace AquaEngine
 
 		public Vector3(float scalar) => x = y = z = scalar;
 
-		public float Dot(Vector3 other) => _aqua_internal_Dot(ref this, ref other);
-		public static float Dot(Vector3 a, Vector3 b) => _aqua_internal_Dot(ref a, ref b);
+		public float Dot(Vector3 other) => _Dot(ref this, ref other);
+		public static float Dot(Vector3 a, Vector3 b) => _Dot(ref a, ref b);
 
-		public float Distance(Vector3 other) => _aqua_internal_Distance(ref this, ref other);
-		public static float Distance(Vector3 a, Vector3 b) => _aqua_internal_Distance(ref a, ref b);
+		public float Distance(Vector3 other) => _Distance(ref this, ref other);
+		public static float Distance(Vector3 a, Vector3 b) => _Distance(ref a, ref b);
 
 		public static Vector3 Lerp(Vector3 a, Vector3 b, float time) =>
 			new Vector3(
@@ -53,9 +53,9 @@ namespace AquaEngine
 		public static Vector3 operator /(Vector3 a, float b) => new Vector3(a.x / b, a.y / b, a.z / b);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Magnitude(ref Vector3 input);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Dot(ref Vector3 a, ref Vector3 b);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Distance(ref Vector3 a, ref Vector3 b);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector3 input);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Dot(ref Vector3 a, ref Vector3 b);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Distance(ref Vector3 a, ref Vector3 b);
 		#endregion
 	}
 }

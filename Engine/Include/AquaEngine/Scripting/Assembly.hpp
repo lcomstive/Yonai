@@ -72,8 +72,9 @@ namespace AquaEngine::Scripting
 		AquaAPI std::unique_ptr<Class> InstantiateClass(const char* namespaceName, const char* className);
 
 		AquaAPI static size_t GetTypeHash(MonoType* type);
-		AquaAPI static size_t GetTypeHash(MonoClass* monoClass);
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
+		AquaAPI static size_t GetTypeHash(MonoClass* monoClass);
+		AquaAPI static size_t GetTypeHash(std::type_index& type);
 		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
 	
@@ -93,8 +94,7 @@ namespace AquaEngine::Scripting
 		// Intended to be used when reloading assemblies
 		static void ClearCachedTypes();
 
-		template<typename T>
-		bool AddInternalManagedType(const char* managedNamespace, const char* managedName, size_t* managedHash)
+		bool AddInternalManagedType(size_t unmanagedTypeHash, const char* managedNamespace, const char* managedName, size_t* managedHash)
 		{
 			MonoClass* klass = mono_class_from_name(Image, managedNamespace, managedName);
 			if (!klass)
@@ -105,11 +105,10 @@ namespace AquaEngine::Scripting
 
 			MonoType* managedType = mono_class_get_type(klass);
 			*managedHash = GetTypeHash(managedType);
-			size_t hash = typeid(T).hash_code();
 
 			// Store both native and non-native hashes of this type to the managed (C#) MonoType*
 			s_TypeHashes.emplace(managedType, *managedHash);
-			s_ReverseTypeHashes.emplace(hash, managedType);
+			s_ReverseTypeHashes.emplace(unmanagedTypeHash, managedType);
 			s_ReverseTypeHashes.emplace(*managedHash, managedType);
 
 			return true;
@@ -120,7 +119,7 @@ namespace AquaEngine::Scripting
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();
-			if (!AddInternalManagedType<T>(managedNamespace, managedName, &managedHash))
+			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
 				return;
 
 			s_InternalManagedComponentTypes.emplace(
@@ -138,7 +137,7 @@ namespace AquaEngine::Scripting
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();
-			if (!AddInternalManagedType<T>(managedNamespace, managedName, &managedHash))
+			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
 				return;
 
 			s_InternalManagedSystemTypes.emplace(

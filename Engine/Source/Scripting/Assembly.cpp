@@ -99,6 +99,7 @@ size_t Assembly::GetTypeHash(MonoType* type)
 	return it->second;
 }
 
+size_t Assembly::GetTypeHash(std::type_index& type) { return type.hash_code(); }
 size_t Assembly::GetTypeHash(MonoClass* monoClass) { return GetTypeHash(mono_class_get_type(monoClass)); }
 
 Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanagedType)
@@ -254,13 +255,10 @@ void Assembly::LoadScriptCoreTypes()
 #pragma endregion
 }
 
-#pragma region Internal Calls
-#define ADD_INTERNAL_CALLS(name) AquaEngine::Scripting::Internal::AddInternalCalls_##name();
-
+// Add internal calls to mono. Binding C++ to C#
 #include <AquaEngine/Glue.hpp>
 void Assembly::AddInternalCalls()
 {
 	for (auto pair : _InternalMethods)
 		mono_add_internal_call(pair.first, pair.second);
 }
-#pragma endregion

@@ -45,7 +45,7 @@ namespace AquaEngine
 		{
 			get
 			{
-				int modesCount = _aqua_internal_GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
+				int modesCount = _GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
 				VideoMode[] modes = new VideoMode[modesCount];
 				for(int i = 0; i < modesCount; i++)
 				{
@@ -58,7 +58,7 @@ namespace AquaEngine
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _aqua_internal_GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
 		#endregion
 	}
 }

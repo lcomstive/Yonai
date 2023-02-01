@@ -22,15 +22,8 @@ extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 extern EmptyMethodFn SystemMethodDestroyed;
 extern SystemMethodEnabledFn SystemMethodEnabled;
 
-ADD_MANAGED_METHOD(World, GetComponentType, size_t, (MonoReflectionType* componentType))
-{
-	MonoClass* klass = mono_type_get_class(mono_reflection_type_get_type(componentType));
-	size_t managedType = Assembly::GetTypeHash(mono_class_get_type(klass));
-
-	size_t type = Assembly::GetTypeHash(mono_class_get_type(klass));
-
-	return Assembly::GetManagedComponentData(managedType).Type;
-}
+size_t _GetComponentType(MonoReflectionType* componentType)
+{ return Assembly::GetTypeHash(mono_reflection_type_get_type(componentType)); }
 
 #pragma region World
 ADD_MANAGED_METHOD(World, Get, bool, (unsigned int worldID, MonoString** outName))
@@ -102,7 +95,7 @@ ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (unsigned int worldID, Mono
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
-	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_managed_internal_WorldGetComponentType(componentType));
+	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType));
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
 		mono_array_set(output, unsigned int, i, entities[i]);
@@ -118,7 +111,7 @@ ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (unsigned int world
 	size_t inputTypesLength = mono_array_length(inputTypes);
 	componentTypes.reserve(inputTypesLength);
 	for (size_t i = 0; i < inputTypesLength; i++)
-		componentTypes.emplace_back(_managed_internal_WorldGetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
+		componentTypes.emplace_back(_GetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
 
 	vector<EntityID> entities = world->GetComponentManager()->GetEntities(componentTypes);
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
@@ -135,7 +128,7 @@ ADD_MANAGED_METHOD(Entity, HasComponent, bool, (unsigned int worldID, unsigned i
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
-	return world->GetComponentManager()->Has(entityID, _managed_internal_WorldGetComponentType(componentType));
+	return world->GetComponentManager()->Has(entityID, _GetComponentType(componentType));
 }
 
 ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType));
@@ -166,7 +159,7 @@ ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (unsigned int worldID, unsigne
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
-	size_t type = _managed_internal_WorldGetComponentType(componentType);
+	size_t type = _GetComponentType(componentType);
 	Components::Component* component = (Components::Component*)world->GetComponentManager()->Get(entityID, type);
 	if (component && component->ManagedData.IsValid())
 	{

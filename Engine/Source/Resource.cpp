@@ -15,6 +15,26 @@ string Resource::GetPath(ResourceID id)
 	return "";
 }
 
+ResourceID Resource::GetID(const string& path)
+{
+	return s_InstancePaths.find(path) == s_InstancePaths.end() ?
+		InvalidResourceID : s_InstancePaths[path];
+}
+
+void* Resource::Get(ResourceID id)
+{
+	ResourceInstance* instance = GetInstance(id);
+	return instance ? instance->Data : nullptr;
+}
+
+void* Resource::Get(string path)
+{
+	if (!Exists(path))
+		return nullptr;
+	ResourceInstance* instance = GetInstance(s_InstancePaths[path]);
+	return instance ? instance->Data : nullptr;
+}
+
 void Resource::Unload(ResourceID resource)
 {
 	if (!IsValidResourceID(resource))
@@ -122,4 +142,10 @@ ResourceID Resource::Duplicate(ResourceID original, string newPath)
 	s_InstancePaths.emplace(newPath, id);
 
 	return id;
+}
+
+type_index Resource::GetType(ResourceID id)
+{
+	ResourceInstance* instance = GetInstance(id);
+	return instance ? instance->Type : typeid(void);
 }

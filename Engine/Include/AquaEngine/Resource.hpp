@@ -81,7 +81,15 @@ namespace AquaEngine
 			return Get<T>(Load<T>(path, constructorArgs...));
 		}
 
+		/// <summary>
+		/// Duplicates a resource at the new given path
+		/// </summary>
 		static ResourceID Duplicate(ResourceID original, std::string newPath);
+
+		/// <summary>
+		/// Gets the C++ type related to a resource, or type of void if not found
+		/// </summary>
+		static std::type_index GetType(ResourceID id);
 
 		/// <summary>
 		/// Generic getter for resources whose types have a parameterless constructor
@@ -99,10 +107,20 @@ namespace AquaEngine
 		static T* Get(ResourceID id)
 		{
 			ResourceInstance* instance = GetInstance(id);
-			bool typeMatch = instance && instance->Type == typeid(T);
 			return (T*)(instance && instance->Type == typeid(T) ? instance->Data : nullptr);
 		}
 
+		static void* Get(ResourceID id);
+		static void* Get(std::string path);
+
+		/// <summary>
+		/// Gets the ID of resource at path, or InvalidResourceID if not found
+		/// </summary>
+		static ResourceID GetID(const std::string& path);
+
+		/// <summary>
+		/// Gets the path of a resource, or empty if not valid
+		/// </summary>
 		static std::string GetPath(ResourceID id);
 
 		/// <summary>

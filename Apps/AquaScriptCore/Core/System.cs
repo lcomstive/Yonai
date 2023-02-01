@@ -51,22 +51,22 @@ namespace AquaEngine
 		/// <summary>
 		/// Checks if a system exists globally
 		/// </summary>
-		public static bool Has<T>() => World._aqua_internal_HasSystem(GlobalWorldID, typeof(T));
+		public static bool Has<T>() => World._HasSystem(GlobalWorldID, typeof(T));
 
 		/// <summary>
 		/// Adds a global system
 		/// </summary>
-		public static T Add<T>() => (T)World._aqua_internal_AddSystem(GlobalWorldID, typeof(T));
+		public static T Add<T>() => (T)World._AddSystem(GlobalWorldID, typeof(T));
 
 		/// <summary>
 		/// Gets a global system
 		/// </summary>
-		public static T Get<T>() => (T)World._aqua_internal_GetSystem(GlobalWorldID, typeof(T));
+		public static T Get<T>() => (T)World._GetSystem(GlobalWorldID, typeof(T));
 
 		/// <summary>
 		/// Removes a global system
 		/// </summary>
-		public static bool Remove<T>() => World._aqua_internal_RemoveSystem(GlobalWorldID, typeof(T));
+		public static bool Remove<T>() => World._RemoveSystem(GlobalWorldID, typeof(T));
 		#endregion
 
 		#region Unmanaged Calls

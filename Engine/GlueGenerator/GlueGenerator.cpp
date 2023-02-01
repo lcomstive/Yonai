@@ -4,6 +4,8 @@
 #include <iostream>
 #include <filesystem>
 
+#define SHOW_DEBUG_OUTPUT 0
+
 using namespace std;
 
 namespace fs = std::filesystem;
@@ -12,7 +14,7 @@ string ReadFile(fs::path path);
 
 struct FunctionInfo
 {
-	string ClassName, FunctionName, ReturnType, Parameters;
+	string ClassName, FunctionName, ReturnType, Parameters, NamespaceName;
 };
 
 string BaseContent = string("#pragma once\n") +
@@ -45,7 +47,7 @@ int main(int argc, char** argv)
 
 	// Find all internal methods in C++ source files
 	smatch matches;
-	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*]+)(,\\s*\\((.*)\\))?)?");
+	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*]+)(,\\s*\\(([\\w\\* _,:]+)\\)(,\\s*([\\w\\._]+))?)?)?");
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{
 		fs::path path = it->path();
@@ -60,14 +62,17 @@ int main(int argc, char** argv)
 			// matches[2] = function name
 			FunctionInfo info = { matches[1], matches[2] };
 			info.ReturnType = matches[4].matched ? matches[4] : string("void");
+			info.NamespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
 
 			if (matches[6].matched)
-			{
 				info.Parameters = matches[6];
-				info.Parameters = info.Parameters.substr(0, info.Parameters.length() - 1);
-			}
 				
 			internalMethods.push_back(info);
+
+#if SHOW_DEBUG_OUTPUT // Debugging output
+			cout << info.ReturnType << " " << info.NamespaceName;
+			cout << "." << info.ClassName << "::" << info.FunctionName << "(" << info.Parameters << ")" << endl;
+#endif
 
 			// Prevent searching same portion of content
 			content = matches.suffix().str();
@@ -85,7 +90,7 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < internalMethods.size(); i++)
 	{
 		FunctionInfo info = internalMethods[i];
-		contents += "\tpair<const char*, const void*>(\"AquaEngine." + info.ClassName + "::_aqua_internal_" + info.FunctionName + "\", ";
+		contents += "\tpair<const char*, const void*>(\"" + info.NamespaceName + "." + info.ClassName + "::_" + info.FunctionName + "\", ";
 		contents += "(const void*)_managed_internal_" + info.ClassName + info.FunctionName + ")";
 
 		if (i < internalMethods.size() - 1)
@@ -99,6 +104,10 @@ int main(int argc, char** argv)
 	outputStream.flush();
 
 	cout << "Written glue contents to '" << outputFile << "'" << endl;
+
+#if SHOW_DEBUG_OUTPUT
+	int _ = getchar();
+#endif
 	return 0;
 }
 
