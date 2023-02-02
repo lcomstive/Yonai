@@ -22,8 +22,8 @@ jobs:
           }
         - {
             name: "MacOS",
-            os: [ macOS, arm64, self-hosted ],
-            triplet: 'arm64-osx'
+            os: macOS-latest,
+            triplet: 'x64-osx'
           }
 
     # Get source
