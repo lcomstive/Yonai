@@ -11,5 +11,7 @@ namespace AquaEngine
 		internal abstract bool Load(string path, params object[] args);
 
 		internal virtual void OnUnload() { }
+
+		public static implicit operator uint(ResourceBase resourceBase) => resourceBase.ResourceID;
 	}
 }

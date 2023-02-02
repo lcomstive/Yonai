@@ -7,6 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
 # Apps
 set_target_properties(BaseGame 	 		 PROPERTIES FOLDER "Apps")
 set_target_properties(AquaEditor 		 PROPERTIES FOLDER "Apps")
+set_target_properties(GlueGenerator		 PROPERTIES FOLDER "Apps")
 set_target_properties(AquaEditorLauncher PROPERTIES FOLDER "Apps")
 
 # Tests

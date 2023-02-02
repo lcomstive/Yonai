@@ -46,12 +46,12 @@ float _managed_internal_InputGetAxis(int gamepadIndex, int axis);
 bool _managed_internal_InputIsButtonUp(int gamepadIndex, int button);
 bool _managed_internal_InputIsButtonDown(int gamepadIndex, int button);
 void _managed_internal_LogNativeLog(MonoString* rawMsg, int level);
-MonoType* _managed_internal_ResourceGetType(unsigned int resourceID);
 unsigned int _managed_internal_ResourceDuplicate(unsigned int originalID, MonoString* newPath);
 MonoString* _managed_internal_ResourceGetPath(unsigned int id);
 unsigned int _managed_internal_ResourceGetID(MonoString* path);
 void _managed_internal_ResourceUnload(unsigned int resourceID);
 void* _managed_internal_ResourceGetInstance(unsigned int resourceID);
+bool _managed_internal_ResourceExists(unsigned int resourceID);
 unsigned int _managed_internal_SpriteRendererGetSprite(unsigned int worldID, unsigned int entityID);
 void _managed_internal_SpriteRendererSetSprite(unsigned int worldID, unsigned int entityID, unsigned int sprite);
 unsigned int _managed_internal_SpriteRendererGetShader(unsigned int worldID, unsigned int entityID);
@@ -159,12 +159,12 @@ const vector<pair<const char*, const void*>> _InternalMethods = {
 	pair<const char*, const void*>("AquaEngine.Input::_IsButtonUp", (const void*)_managed_internal_InputIsButtonUp),
 	pair<const char*, const void*>("AquaEngine.Input::_IsButtonDown", (const void*)_managed_internal_InputIsButtonDown),
 	pair<const char*, const void*>("AquaEngine.Log::_NativeLog", (const void*)_managed_internal_LogNativeLog),
-	pair<const char*, const void*>("AquaEngine.Resource::_GetType", (const void*)_managed_internal_ResourceGetType),
 	pair<const char*, const void*>("AquaEngine.Resource::_Duplicate", (const void*)_managed_internal_ResourceDuplicate),
 	pair<const char*, const void*>("AquaEngine.Resource::_GetPath", (const void*)_managed_internal_ResourceGetPath),
 	pair<const char*, const void*>("AquaEngine.Resource::_GetID", (const void*)_managed_internal_ResourceGetID),
 	pair<const char*, const void*>("AquaEngine.Resource::_Unload", (const void*)_managed_internal_ResourceUnload),
 	pair<const char*, const void*>("AquaEngine.Resource::_GetInstance", (const void*)_managed_internal_ResourceGetInstance),
+	pair<const char*, const void*>("AquaEngine.Resource::_Exists", (const void*)_managed_internal_ResourceExists),
 	pair<const char*, const void*>("AquaEngine.SpriteRenderer::_GetSprite", (const void*)_managed_internal_SpriteRendererGetSprite),
 	pair<const char*, const void*>("AquaEngine.SpriteRenderer::_SetSprite", (const void*)_managed_internal_SpriteRendererSetSprite),
 	pair<const char*, const void*>("AquaEngine.SpriteRenderer::_GetShader", (const void*)_managed_internal_SpriteRendererGetShader),

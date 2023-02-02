@@ -9,9 +9,10 @@ namespace AquaEngine
 		private static Dictionary<uint, ResourceBase> s_Instances = new Dictionary<uint, ResourceBase>();
 
 		public static uint GetID(string path) => _GetID(path);
-		public static Type GetResourceType(uint id) => _GetType(id);
 		public static string GetPath(uint resourceID) => _GetPath(resourceID);
 		public static uint Duplicate(uint resourceID, string newPath) => _Duplicate(resourceID, newPath);
+
+		public static bool Exists(uint resourceID) => _Exists(resourceID);
 
 		public static T Load<T>(string path, params object[] args) where T : ResourceBase, new()
 		{
@@ -44,10 +45,27 @@ namespace AquaEngine
 			_Unload(resourceID);
 		}
 
+		public static T Get<T>(uint resourceID) where T : ResourceBase, new()
+		{
+			// Check for valid ID
+			if (resourceID == uint.MaxValue || !Exists(resourceID))
+				return null;
+
+			// Check for cached instance
+			if (s_Instances.ContainsKey(resourceID))
+				return (T)s_Instances[resourceID];
+
+			// Create new instance
+			T instance = new T();
+			instance.Load(resourceID, _GetInstance(resourceID));
+			s_Instances.Add(resourceID, instance);
+			return instance;
+		}
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetID(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(uint resourceID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern Type _GetType(uint resourceID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(uint resourceID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _Duplicate(uint resourceID, string newPath);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(uint resourceID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetInstance(uint resourceID);

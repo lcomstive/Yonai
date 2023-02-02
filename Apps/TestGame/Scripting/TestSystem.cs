@@ -1,5 +1,6 @@
 ﻿using System;
 using AquaEngine;
+using AquaEngine.Graphics;
 
 namespace TestGame
 {
@@ -12,6 +13,8 @@ namespace TestGame
 			Colour.Green,
 			Colour.Blue
 		};
+
+		private Texture m_Texture1, m_Texture2;
 
 		protected override void Start()
 		{
@@ -37,38 +40,10 @@ namespace TestGame
 			string vfsPath = "assets://Textures/texture_09.png";
 			Log.Info($"Checking for '{vfsPath}': " + (VFS.Exists(vfsPath) ? "Exists" : "Not found"));
 
-			AquaEngine.Graphics.Texture texture = Resource.Load<AquaEngine.Graphics.Texture>("Texture/Test", vfsPath);
+			m_Texture1 = Resource.Load<Texture>("Texture/Test", vfsPath);
+			m_Texture2 = Resource.Load<Texture>("Texture/Test2", vfsPath);
 
-			foreach (string resourcePath in new string[] {
-				"Texture/Test",
-				"Shaders/Sprite",
-				"Should/Not/Exist",
-			})
-			{
-				uint resourceID = Resource.GetID(resourcePath);
-				Log.Info($"ID for resource at '{resourcePath}' is " + (resourceID == uint.MaxValue ? "invalid" : resourceID.ToString()));
-
-				if(resourceID == uint.MaxValue)
-				{
-					Log.Warning($"Resource at path '{resourcePath}' was not found");
-					continue;
-				}
-
-				if(Resource.GetPath(resourceID) != resourcePath)
-				{
-					Log.Warning("Getting path did not match original resource path?");
-					continue;
-				}
-
-				Type resourceType = Resource.GetResourceType(resourceID);
-				if(resourceType == null)
-				{
-					Log.Warning($"Could not get type for '{resourcePath}'");
-					continue;
-				}
-
-				Log.Info($"Resource '{resourcePath}' [{resourceID}] " + resourceType.FullName);
-			}
+			Log.Debug($"Loaded textures [{(uint)m_Texture1}] and [{(uint)m_Texture2}]");
 		}
 
 		protected override void Update()
@@ -83,7 +58,7 @@ namespace TestGame
 			for (int i = 0; i < transform.Length; i++)
 				renderers[i].Colour = Colour.Lerp(
 					testComponents[i].Value,
-					Colour.Black,
+					new Colour(1, 1, 1, 0.2f),
 					t * testComponents[i].ValueChangeSpeed
 				);
 
@@ -92,6 +67,10 @@ namespace TestGame
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
 				Application.Exit();
+
+			if (Input.IsKeyPressed(Key.T))
+				foreach (SpriteRenderer renderer in renderers)
+					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
 		}
 	}
 }

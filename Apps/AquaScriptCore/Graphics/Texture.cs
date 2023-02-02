@@ -27,6 +27,8 @@ namespace AquaEngine.Graphics
 			return true;
 		}
 
+		public void Bind(uint index = 0) => _Bind(Handle, index);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out uint resourceID, out IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string filePath, bool hdr, out uint resourceID, out IntPtr handle);

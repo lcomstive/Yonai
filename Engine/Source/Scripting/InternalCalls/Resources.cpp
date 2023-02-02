@@ -6,14 +6,6 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 
-ADD_MANAGED_METHOD(Resource, GetType, MonoType*, (unsigned int resourceID))
-{
-	if (!Resource::IsValidResourceID(resourceID))
-		return nullptr;
-	type_index type = Resource::GetType(resourceID);
-	return Assembly::GetTypeFromHash(type.hash_code());
-}
-
 ADD_MANAGED_METHOD(Resource, Duplicate, unsigned int, (unsigned int originalID, MonoString* newPath))
 {
 	return Resource::IsValidResourceID(originalID) ?
@@ -34,3 +26,6 @@ ADD_MANAGED_METHOD(Resource, Unload, void, (unsigned int resourceID))
 
 ADD_MANAGED_METHOD(Resource, GetInstance, void*, (unsigned int resourceID))
 { return Resource::IsValidResourceID(resourceID) ? Resource::Get(resourceID) : nullptr; }
+
+ADD_MANAGED_METHOD(Resource, Exists, bool, (unsigned int resourceID))
+{ return Resource::IsValidResourceID(resourceID); }
