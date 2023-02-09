@@ -19,15 +19,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 # Add dependency to the C# binding project
 add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
-if(WIN32)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		OUTPUT_NAME "Aqua Editor"
-		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
-		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-	)
-elseif(APPLE)
+if(APPLE)
 	# Configure Mac OS app bundle
 	set_target_properties(
 		${PROJECT_NAME} PROPERTIES
@@ -70,10 +62,6 @@ if(APPLE)
 		COMMAND ${CMAKE_COMMAND} -E copy
 			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/native/libmonosgen-2.0.1.dylib
 			${AQUA_RESOURCES_DIR}
-
-		# Add @rpath to executable
-		COMMAND echo Adding rpath to executable
-		COMMAND install_name_tool -add_rpath @executable_path/../Resources/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/MacOS/Aqua\ Editor
 		)
 
 	if(NOT AQUA_ENGINE_BUILD_STATIC)
@@ -87,3 +75,5 @@ if(APPLE)
 		)
 	endif()
 endif()
+
+AddPlatformSpecifics()

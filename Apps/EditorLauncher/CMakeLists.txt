@@ -16,16 +16,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_SOURCE_DIR}/Engine/Include
 )
 
-if(WIN32)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		OUTPUT_NAME "Aqua Editor Launcher"
-		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
-		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-	)
-endif()
-
 # Group source files inside IDE
 source_group("Resources" FILES ${AQUA_EXECUTABLE_RESOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source" FILES ${SOURCE_FILES})
@@ -39,3 +29,5 @@ if(APPLE)
 endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/Install.cmake)
+
+AddPlatformSpecifics()

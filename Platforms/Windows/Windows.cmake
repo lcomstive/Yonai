@@ -1,0 +1,13 @@
+function (SetWin32Properties)
+	if(NOT WIN32)
+		return()
+	endif()
+
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		OUTPUT_NAME "Aqua Editor"
+		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
+		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
+		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
+		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
+	)
+endfunction()

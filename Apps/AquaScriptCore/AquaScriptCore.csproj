@@ -65,6 +65,9 @@
     <Compile Include="Core\System.cs" />
     <Compile Include="Systems\SceneManager.cs" />
     <Compile Include="Core\VFS.cs" />
+    <Compile Include="Graphics\Texture.cs" />
+    <Compile Include="Core\ResourceBase.cs" />
+    <Compile Include="Core\Resources.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -219,7 +219,15 @@ void ScriptEngine::Reload(bool force)
 	// Load all previously loaded assemblies, in same order
 	for (AssemblyPath& assemblyPath : assemblyPaths)
 	{
-		spdlog::debug("Reloading assembly {} {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
+		if(!VFS::Exists(assemblyPath.Path))
+		{
+			spdlog::warn("Assembly '{}' no longer exists in filesystem", assemblyPath.Path);
+			// TODO: Check if continue watching assembly that has been removed causes issues.
+			// File may be restored later, it is desirable to be notified if it does.
+			continue;
+		}
+
+		spdlog::debug("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
 		if (assemblyPath.WatchForChanges)
 			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);

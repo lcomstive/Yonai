@@ -24,6 +24,8 @@ set_target_properties(
 	VERSION ${VERSION_STRING}
 )
 
+AddPlatformSpecifics()
+
 # Group source files inside IDE
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source"  FILES ${SOURCE_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${HEADER_FILES})
