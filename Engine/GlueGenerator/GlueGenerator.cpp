@@ -11,18 +11,20 @@ using namespace std;
 namespace fs = std::filesystem;
 
 string ReadFile(fs::path path);
+void ReplaceText(string& content, const string& from, const string& to);
 
 struct FunctionInfo
 {
 	string ClassName, FunctionName, ReturnType, Parameters, NamespaceName;
 };
 
-string BaseContent = string("#pragma once\n") +
-					"#include <vector>\n" +
-					"#include <string>\n" +
-					"#include <glm/glm.hpp>\n" +
+string BaseContent = string("#pragma once\n")		+
+					"#include <vector>\n"			+
+					"#include <string>\n"			+
+					"#include <glm/glm.hpp>\n"		+
 					"#include <mono/jit/jit.h>\n\n" +
-					"using namespace std; \n\n";
+					"using namespace std; \n\n"		+
+					"typedef pair<const char*, const void*> MethodType; \n\n";
 
 int main(int argc, char** argv)
 {
@@ -47,7 +49,7 @@ int main(int argc, char** argv)
 
 	// Find all internal methods in C++ source files
 	smatch matches;
-	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*]+)(,\\s*\\(([\\w\\* _,:]+)\\)(,\\s*([\\w\\._]+))?)?)?");
+	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*]+)(,\\s*\\(([\\w\\*\\s_,:]+)\\)(,\\s*([\\w\\._]+))?)?)?");
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{
 		fs::path path = it->path();
@@ -65,7 +67,15 @@ int main(int argc, char** argv)
 			info.NamespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
 
 			if (matches[6].matched)
+			{
 				info.Parameters = matches[6];
+
+				// Remove newlines and tabs.
+				// Somewhat improves readability of output file for debugging issues
+				ReplaceText(info.Parameters, "\n", "");
+				ReplaceText(info.Parameters, "\r", "");
+				ReplaceText(info.Parameters, "\t", " ");
+			}
 				
 			internalMethods.push_back(info);
 
@@ -90,7 +100,7 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < internalMethods.size(); i++)
 	{
 		FunctionInfo info = internalMethods[i];
-		contents += "\tpair<const char*, const void*>(\"" + info.NamespaceName + "." + info.ClassName + "::_" + info.FunctionName + "\", ";
+		contents += "\tMethodType(\"" + info.NamespaceName + "." + info.ClassName + "::_" + info.FunctionName + "\", ";
 		contents += "(const void*)_managed_internal_" + info.ClassName + info.FunctionName + ")";
 
 		if (i < internalMethods.size() - 1)
@@ -124,4 +134,17 @@ string ReadFile(fs::path path)
 	filestream.read(contents.data(), size);
 
 	return contents;
+}
+
+void ReplaceText(string& content, const string& from, const string& to)
+{
+	if (from.empty())
+		return;
+
+	size_t startPos = 0;
+	while ((startPos = content.find(from, startPos)) != string::npos)
+	{
+		content.replace(startPos, from.length(), to);
+		startPos += to.length();
+	}
 }

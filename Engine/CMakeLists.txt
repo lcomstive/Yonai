@@ -56,8 +56,7 @@ endif()
 
 # Glue generator
 add_subdirectory(./GlueGenerator)
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
 	DEPENDS GlueGenerator
 )

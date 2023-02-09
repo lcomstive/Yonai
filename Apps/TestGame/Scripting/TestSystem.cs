@@ -14,6 +14,7 @@ namespace TestGame
 			Colour.Blue
 		};
 
+		private Shader m_SpriteShader;
 		private Texture m_Texture1, m_Texture2;
 
 		protected override void Start()
@@ -37,6 +38,7 @@ namespace TestGame
 			Log.Info($"Test components: {testComponents.Length}");
 			*/
 
+			// Load test texture
 			string vfsPath = "assets://Textures/texture_09.png";
 			Log.Info($"Checking for '{vfsPath}': " + (VFS.Exists(vfsPath) ? "Exists" : "Not found"));
 
@@ -44,6 +46,24 @@ namespace TestGame
 			m_Texture2 = Resource.Load<Texture>("Texture/Test2", vfsPath);
 
 			Log.Debug($"Loaded textures [{(uint)m_Texture1}] and [{(uint)m_Texture2}]");
+
+			// Load test sprite shader
+			ShaderStages shaderStages = new ShaderStages()
+			{
+				VertexPath = "assets://Shaders/Sprite.vert",
+				FragmentPath = "assets://Shaders/NewSprite.frag",
+			};
+			m_SpriteShader = Resource.Load<Shader>("Shaders/NewSpriteShader", shaderStages);
+
+			SpriteRenderer[] renderers = World.GetComponents<SpriteRenderer>();
+			for(int i = 0; i < renderers.Length; i++)
+			{
+				renderers[i].Shader = m_SpriteShader;
+
+				// Only do half of the renderers
+				if (i >= renderers.Length / 2)
+					break;
+			}
 		}
 
 		protected override void Update()
@@ -54,6 +74,7 @@ namespace TestGame
 			 TestComponent[] testComponents)
 			 = World.GetComponents<Transform, SpriteRenderer, TestComponent>();
 
+			/*
 			float t = (float)Math.Sin(Time.TimeSinceLaunch) + 0.1f;
 			for (int i = 0; i < transform.Length; i++)
 				renderers[i].Colour = Colour.Lerp(
@@ -61,6 +82,9 @@ namespace TestGame
 					new Colour(1, 1, 1, 0.2f),
 					t * testComponents[i].ValueChangeSpeed
 				);
+			*/
+
+			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
 			if (Input.IsKeyPressed(Key.F11))
 				Window.CycleFullscreen();

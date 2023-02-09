@@ -19,13 +19,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 # Add dependency to the C# binding project
 add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
+
 if(APPLE)
 	# Configure Mac OS app bundle
 	set_target_properties(
 		${PROJECT_NAME} PROPERTIES
 		BUNDLE TRUE
 		MACOSX_BUNDLE TRUE
-		OUTPUT_NAME "Aqua Editor"
 		MACOSX_BUNDLE_GUI_IDENTIFIER com.madissia.${PROJECT_NAME}
 		MACOSX_BUNDLE_BUNDLE_NAME "Aqua Editor"
 		MACOSX_BUNDLE_COPYRIGHT "© 2023 Madissia Technologies"
