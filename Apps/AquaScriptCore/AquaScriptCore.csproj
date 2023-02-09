@@ -68,6 +68,7 @@
     <Compile Include="Graphics\Texture.cs" />
     <Compile Include="Core\ResourceBase.cs" />
     <Compile Include="Core\Resources.cs" />
+    <Compile Include="Graphics\Shader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

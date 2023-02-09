@@ -18,11 +18,11 @@ namespace TestGame
 		private Shader m_SpriteShader;
 		private Texture m_Texture1, m_Texture2;
 
+		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
+		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
+
 		protected override void Start()
 		{
-			Log.Debug("Adding camera control system...");
-			AquaSystem.Add<CameraControlSystem>();
-
 			/*
 			Log.Debug("Colours:");
 			foreach(var colour in ColourValues)
@@ -70,7 +70,9 @@ namespace TestGame
 			}
 
 			Entity e = World.CreateEntity();
-			e.AddComponent<Transform>().Scale = new Vector3(3, 3, 3);
+			Transform transform = e.AddComponent<Transform>();
+			transform.Scale = new Vector3(3, 3, 3);
+			transform.Position = new Vector3(0, 0, 1);
 
 			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
 			renderer.Shader = m_SpriteShader;

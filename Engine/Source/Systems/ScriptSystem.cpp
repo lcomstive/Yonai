@@ -14,20 +14,24 @@ extern EmptyMethodFn SystemMethodDestroyed;
 extern SystemMethodEnabledFn SystemMethodEnabled;
 extern SystemMethodInitialiseFn SystemMethodInitialise;
 
+#define TRACE_SYSTEM(msg) \
+	World* world = GetWorld(); \
+	spdlog::trace(msg " system '{}' [{}]", GetTypeName(ManagedData.Type), (world ? ("World #" + std::to_string(world->ID())) : "Global"));
+
 unsigned int ScriptSystem::GetWorldID()
 {
 	World* world = GetWorld();
 	return world ? world->ID() : InvalidEntityID;
 }
 
-void ScriptSystem::Init()
-{
-	spdlog::debug("ScriptSystem::Init");
-}
+char* GetTypeName(MonoType* type) { return mono_type_get_name_full(type, MonoTypeNameFormat::MONO_TYPE_NAME_FORMAT_REFLECTION); }
+
+void ScriptSystem::Init() { TRACE_SYSTEM("Initialising") }
 
 void ScriptSystem::Destroy()
 {
-	spdlog::debug("ScriptSystem::Destroy");
+	TRACE_SYSTEM("Destroying")
+
 	if (!ManagedData.IsValid())
 		return;
 
@@ -37,7 +41,8 @@ void ScriptSystem::Destroy()
 
 void ScriptSystem::OnEnabled()
 {
-	spdlog::debug("ScriptSystem::OnEnabled ({})", ManagedData.GCHandle);
+	TRACE_SYSTEM("Enabling")
+
 	if (!ManagedData.IsValid())
 		return;
 
@@ -47,7 +52,8 @@ void ScriptSystem::OnEnabled()
 
 void ScriptSystem::OnDisabled()
 {
-	spdlog::debug("ScriptSystem::OnDisabled ({})", ManagedData.GCHandle);
+	TRACE_SYSTEM("Disabling")
+
 	if (!ManagedData.IsValid())
 		return;
 
@@ -82,7 +88,8 @@ void ScriptSystem::OnScriptingReloaded()
 		spdlog::critical("Managed data is invalid on ScriptSystem?");
 		return;
 	}
-	spdlog::debug("ScriptSystem::OnScriptingReloaded");
+
+	TRACE_SYSTEM("Reloading")
 
 	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;

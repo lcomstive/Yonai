@@ -26,7 +26,5 @@ if(APPLE)
 	)
 endif()
 
-AddPlatformSpecifics()
-
 include(GoogleTest)
 gtest_discover_tests(AquaEngineTest)

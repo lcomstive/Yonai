@@ -196,6 +196,7 @@ void ScriptEngine::Reload(bool force)
 		world->GetSystemManager()->InvalidateAllManagedInstances();
 		world->GetComponentManager()->InvalidateAllManagedInstances();
 	}
+	SystemManager::Global()->InvalidateAllManagedInstances();
 
 	// Release resources
 	mono_domain_set(mono_get_root_domain(), true);
@@ -235,6 +236,7 @@ void ScriptEngine::Reload(bool force)
 
 	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
+	SystemManager::Global()->CreateAllManagedInstances();
 	for (World* world : worlds)
 	{
 		world->GetSystemManager()->CreateAllManagedInstances();
