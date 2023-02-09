@@ -1,8 +1,9 @@
 function (SetWin32Properties)
-	if(NOT WIN32)
+	get_target_property(targetType ${PROJECT_NAME} TYPE)
+	if(NOT WIN32 OR NOT (targetType STREQUAL "EXECUTABLE"))
 		return()
 	endif()
-
+	
 	# Link flags
 	#	/ignore:4099 - Ignores warning when no pdb (debug info) is found with linking target (sucha as the mono library)
 	set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -159,7 +159,7 @@ void Assembly::CacheTypes(bool isCore)
 	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
 	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
 
-	spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
+	// spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
 	{
 		// Get metadata
@@ -257,13 +257,9 @@ void Assembly::LoadScriptCoreTypes()
 
 // Add internal calls to mono. Binding C++ to C#
 #include <AquaEngine/Glue.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
 
 void Assembly::AddInternalCalls()
 {
 	for (auto pair : _InternalMethods)
 		mono_add_internal_call(pair.first, pair.second);
-
-	size_t managedHash = 0;
-	AddInternalManagedType(typeid(Graphics::Texture).hash_code(), "AquaEngine.Graphics", "Texture", &managedHash);
 }
