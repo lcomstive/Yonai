@@ -65,6 +65,12 @@ namespace AquaEngine
 		FullscreenMode m_FullscreenMode;
 
 		/// <summary>
+		/// Content scaling amount, retrieved from the system.
+		/// This could be DPI, or Window's monitor scaling for instance
+		/// </summary>
+		glm::vec2 m_Scaling = { 1.0f, 1.0f };
+
+		/// <summary>
 		/// Global singleton instance
 		/// </summary>
 		static Window* s_Instance;
@@ -77,6 +83,7 @@ namespace AquaEngine
 		static void GLFWKeyCallback(GLFWwindow*, int, int, int, int);
 		static void GLFWErrorCallback(int error, const char* description);
 		static void GLFWCursorPositionCallback(GLFWwindow*, double, double);
+		static void GLFWWindowScaleCallback(GLFWwindow*, float xScale, float yScale);
 		static void GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height);
 #endif
 
@@ -130,6 +137,14 @@ namespace AquaEngine
 
 		AquaAPI static bool GetVSync();
 		AquaAPI static void SetVSync(bool enable);
+
+		/// <summary>
+		/// Content scaling amount, retrieved from the system.
+		/// This could be DPI, or Window's monitor scaling for instance.
+		/// 
+		/// Returns (1.0, 1.0) on non-desktop platforms
+		/// </summary>
+		AquaAPI static glm::vec2 GetContentScaling();
 
 		AquaAPI static WINDOW_HANDLE_TYPE GetNativeHandle();
 	};

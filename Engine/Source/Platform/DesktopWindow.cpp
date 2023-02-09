@@ -86,6 +86,7 @@ Window::Window() :
 	glfwSetScrollCallback(m_Handle,			 GLFWScrollCallback);
 	glfwSetWindowCloseCallback(m_Handle,	 GLFWWindowCloseCallback);
 	glfwSetCursorPosCallback(m_Handle,		 GLFWCursorPositionCallback);
+	glfwSetWindowContentScaleCallback(m_Handle, GLFWWindowScaleCallback);
 	glfwSetFramebufferSizeCallback(m_Handle, GLFWFramebufferResizeCallback);
 
 	// Finalise OpenGL creation
@@ -132,6 +133,13 @@ Window::Window() :
 			Input::s_ConnectedGamepads[i] = Input::JoystickType::Disconnected;
 	}
 
+	// Get content scaling of monitor/OS
+	float xScaling, yScaling;
+	glfwGetWindowContentScale(m_Handle, &xScaling, &yScaling);
+	// Update values
+	GLFWWindowScaleCallback(m_Handle, xScaling, yScaling);
+
+	// Bind default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -203,6 +211,8 @@ ivec2 Window::GetFramebufferResolution(bool useImGui)
 	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
 	return resolution;
 }
+
+vec2 Window::GetContentScaling() { return s_Instance ? s_Instance->m_Scaling : vec2(); }
 
 void Window::SetResolution(glm::ivec2 resolution)
 {
@@ -320,6 +330,21 @@ void Window::GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int acti
 	default: break;
 	case GLFW_PRESS:	Input::s_KeyStates[(Key)key] = Input::KeyState::Pressed; break;
 	case GLFW_RELEASE:	Input::s_KeyStates[(Key)key] = Input::KeyState::Released; break;
+	}
+}
+
+void Window::GLFWWindowScaleCallback(GLFWwindow* _, float xScale, float yScale)
+{
+	if(s_Instance)
+		s_Instance->m_Scaling = { xScale, yScale };
+
+	spdlog::trace("Window content scaling set to ({}, {})", xScale, yScale);
+
+	if (ImGui::GetCurrentContext())
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplayFramebufferScale = { xScale, yScale };
+		io.FontGlobalScale = xScale;
 	}
 }
 

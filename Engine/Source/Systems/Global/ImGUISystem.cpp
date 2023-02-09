@@ -16,8 +16,16 @@ ImGUISystem::ImGUISystem()
 	m_Context = ImGui::CreateContext();
 
 	m_IO = &ImGui::GetIO();
+
+	// Activate docking & viewport features
 	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 
+	// Scale with system
+	vec2 scaling = Window::GetContentScaling();
+	m_IO->DisplayFramebufferScale = { scaling.x, scaling.y };
+	m_IO->FontGlobalScale = scaling.x;
+
+	// Set colours to dark theme
 	ImGui::StyleColorsDark();
 }
 
