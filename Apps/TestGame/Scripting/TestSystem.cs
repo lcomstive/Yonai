@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using AquaEngine;
 using AquaEngine.Graphics;
 
@@ -19,6 +20,9 @@ namespace TestGame
 
 		protected override void Start()
 		{
+			Log.Debug("Adding camera control system...");
+			AquaSystem.Add<CameraControlSystem>();
+
 			/*
 			Log.Debug("Colours:");
 			foreach(var colour in ColourValues)
@@ -64,6 +68,13 @@ namespace TestGame
 				if (i >= renderers.Length / 2)
 					break;
 			}
+
+			Entity e = World.CreateEntity();
+			e.AddComponent<Transform>().Scale = new Vector3(3, 3, 3);
+
+			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
+			renderer.Shader = m_SpriteShader;
+			renderer.Sprite = m_Texture2;
 		}
 
 		protected override void Update()

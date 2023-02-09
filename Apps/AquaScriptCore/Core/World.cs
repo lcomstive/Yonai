@@ -48,6 +48,17 @@ namespace AquaEngine
 		/// <returns>Instance of entity matching ID, or null if does not exist in this world</returns>
 		public Entity GetEntity(uint entityID) => HasEntity(entityID) ? m_Entities[entityID] : null;
 
+		/// <summary>
+		/// Creates a new entity in this world
+		/// </summary>
+		public Entity CreateEntity()
+		{
+			uint entityID = _CreateEntity(ID);
+			Entity e = new Entity(this, entityID);
+			m_Entities.Add(entityID, e);
+			return e;
+		}
+
 		/// <returns>True if entity with matching ID exists in this world</returns>
 		public bool HasEntity(uint entityID)
 		{

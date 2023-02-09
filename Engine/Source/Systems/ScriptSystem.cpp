@@ -37,7 +37,7 @@ void ScriptSystem::Destroy()
 
 void ScriptSystem::OnEnabled()
 {
-	spdlog::debug("ScriptSystem::OnEnabled");
+	spdlog::debug("ScriptSystem::OnEnabled ({})", ManagedData.GCHandle);
 	if (!ManagedData.IsValid())
 		return;
 
@@ -47,7 +47,7 @@ void ScriptSystem::OnEnabled()
 
 void ScriptSystem::OnDisabled()
 {
-	spdlog::debug("ScriptSystem::OnDisabled");
+	spdlog::debug("ScriptSystem::OnDisabled ({})", ManagedData.GCHandle);
 	if (!ManagedData.IsValid())
 		return;
 
