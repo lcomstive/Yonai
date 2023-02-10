@@ -75,6 +75,10 @@ void _managed_internal_TransformGetUp(unsigned int worldID, unsigned int entityI
 void _managed_internal_TransformGetForward(unsigned int worldID, unsigned int entityID, glm::vec3* outValue);
 void _managed_internal_TransformGetRight(unsigned int worldID, unsigned int entityID, glm::vec3* outValue);
 bool _managed_internal_SystemExists(unsigned int worldID, MonoReflectionType* componentType);
+void _managed_internal_QuaternionToEuler(glm::quat* input, glm::vec3* output);
+void _managed_internal_QuaternionFromEuler(glm::vec3* input, glm::quat* output);
+void _managed_internal_QuaternionMultiply(glm::quat* a, glm::quat* b, glm::quat* output);
+void _managed_internal_QuaternionMultiplyVector3(glm::quat* a, glm::vec3* b, glm::quat* output);
 bool _managed_internal_WorldGet(unsigned int worldID, MonoString** outName);
 bool _managed_internal_WorldExists(unsigned int worldID);
 bool _managed_internal_WorldDestroy(unsigned int worldID);
@@ -211,6 +215,10 @@ const vector<pair<const char*, const void*>> _InternalMethods = {
 	MethodType("AquaEngine.Transform::_GetForward", (const void*)_managed_internal_TransformGetForward),
 	MethodType("AquaEngine.Transform::_GetRight", (const void*)_managed_internal_TransformGetRight),
 	MethodType("AquaEngine.System::_Exists", (const void*)_managed_internal_SystemExists),
+	MethodType("AquaEngine.Quaternion::_ToEuler", (const void*)_managed_internal_QuaternionToEuler),
+	MethodType("AquaEngine.Quaternion::_FromEuler", (const void*)_managed_internal_QuaternionFromEuler),
+	MethodType("AquaEngine.Quaternion::_Multiply", (const void*)_managed_internal_QuaternionMultiply),
+	MethodType("AquaEngine.Quaternion::_MultiplyVector3", (const void*)_managed_internal_QuaternionMultiplyVector3),
 	MethodType("AquaEngine.World::_Get", (const void*)_managed_internal_WorldGet),
 	MethodType("AquaEngine.World::_Exists", (const void*)_managed_internal_WorldExists),
 	MethodType("AquaEngine.World::_Destroy", (const void*)_managed_internal_WorldDestroy),

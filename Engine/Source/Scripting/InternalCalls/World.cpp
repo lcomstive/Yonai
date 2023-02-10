@@ -149,7 +149,7 @@ ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (unsigned int worldID, uns
 	// Get unmanaged->managed data
 	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 	if (!managedData.AddFn)
-		return world->GetComponentManager()->Add(entityID, managedType)->ManagedData.GetInstance();
+		return world->AddComponent(entityID, managedType)->ManagedData.GetInstance();
 	return managedData.AddFn(world, entityID)->ManagedData.GetInstance();
 }
 

@@ -40,18 +40,8 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 
 ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
 {
-	ScriptComponent* component = new ScriptComponent();
 	size_t typeHash = Scripting::Assembly::GetTypeHash(managedType);
-
-	// TODO: Check if component already exists on entity, and return existing component
-
-	if (m_ComponentArrays.find(typeHash) == m_ComponentArrays.end())
-		m_ComponentArrays.emplace(typeHash, ComponentData{ this, typeHash });
-	m_ComponentArrays[typeHash].Add(component, id);
-
-	if (m_EntityComponents.find(id) == m_EntityComponents.end())
-		m_EntityComponents.emplace(id, std::vector<size_t>());
-	m_EntityComponents[id].push_back(typeHash);
+	ScriptComponent* component = Add<ScriptComponent>(id, typeHash);
 
 	// Set managed type in component
 	component->Type = managedType;
@@ -148,7 +138,8 @@ vector<EntityID> ComponentManager::GetEntities(vector<size_t> types)
 	// Store all possible entity IDs in output
 	output.reserve(m_EntityComponents.size());
 	for (auto pair : m_EntityComponents)
-		output.push_back(pair.first);
+		output.emplace_back(pair.first);
+	sort(output.begin(), output.end());
 
 	// Check for intersection of each type against 'output' entity IDs.
 	// This removes any IDs where that entity does not have any of the types
@@ -204,7 +195,6 @@ AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_
 	// Call constructor
 	mono_runtime_object_init(instance);
 
-	auto componentData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
 	return {
 		managedData.AddFn == nullptr,
 		mono_gchandle_new(instance, false),

@@ -124,6 +124,7 @@ void EditorApp::LoadScene()
 	Assembly* assembly = assemblies[1];
 	MonoType* monoType = assembly->GetTypeFromClassName("TestGame", "TestComponent");
 
+	/*
 	const unsigned int spriteRows = 15;
 	const unsigned int spriteColumns = 15;
 	for (unsigned int x = 0; x < spriteRows; x++)
@@ -144,8 +145,9 @@ void EditorApp::LoadScene()
 				entity.AddComponent(monoType);
 		}
 	}
+	*/
 
-	// Camera control system, implemented in C#
+	// Implemented in C#
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
 	if(testSystem)
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
@@ -188,7 +190,10 @@ void EditorApp::InitialiseScripting()
 		Exit();
 		return;
 	}
-	ScriptEngine::Init(AquaScriptCorePath, false);
+
+	ScriptEngine::Init(AquaScriptCorePath,
+		// Allow debugging in debug builds
+		true);
 }
 
 void EditorApp::DrawUI()

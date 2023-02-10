@@ -333,8 +333,18 @@ void Window::GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int acti
 	}
 }
 
-void Window::GLFWWindowScaleCallback(GLFWwindow* _, float xScale, float yScale)
+void Window::GLFWWindowScaleCallback(GLFWwindow* window, float xScale, float yScale)
 {
+	GLFWmonitor* monitor = glfwGetWindowMonitor(window);
+	if(!monitor)
+		monitor = glfwGetPrimaryMonitor();
+
+	float monitorXScaling, monitorYScaling;
+	glfwGetMonitorContentScale(monitor, &monitorXScaling, &monitorYScaling);
+
+	xScale /= monitorXScaling;
+	yScale /= monitorYScaling;
+
 	if(s_Instance)
 		s_Instance->m_Scaling = { xScale, yScale };
 

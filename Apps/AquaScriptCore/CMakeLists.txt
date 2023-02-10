@@ -12,8 +12,8 @@ else()
     # this target will copy the expected output to the binary directory
     add_custom_target(
         AquaScriptCore
-        COMMENT "Copying AquaScriptCore.dll to output directory"
+        COMMENT "Copying AquaScriptCore to output directory"
         COMMAND mkdir -p ${AQUA_RESOURCES_DIR}
-        COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/AquaScriptCore.dll ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll
+        COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/AquaScriptCore.* ${AQUA_RESOURCES_DIR}
     )
 endif()

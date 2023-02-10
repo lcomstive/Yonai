@@ -48,9 +48,9 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	// Setup debugging session
 	if (allowDebugging)
 	{
-		static const char* options[] = {
-		  "--soft-breakpoints",
-		  "--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:55555,suspend=n,loglevel=3,logfile=MonoDebugger.log"
+		const char* options[] = {
+			"--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:5555,suspend=n,loglevel=3,logfile=MonoDebugger.log",
+			"--soft-breakpoints"
 		};
 		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
@@ -109,7 +109,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 		return nullptr;
 	}
 
-	if (!isCoreAssembly && shouldWatch)
+	if (/* !isCoreAssembly && */ shouldWatch)
 	{
 		s_AssemblyPaths.push_back({ path, shouldWatch });
 
@@ -138,11 +138,12 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	{
 		// Try and load .pdb file next to .dll file
 		std::filesystem::path pdbPath(path);
-		pdbPath.replace_extension(".mdb");
+		pdbPath.replace_extension(".pdb");
 		if (VFS::Exists(pdbPath.string()))
 		{
 			auto pdbContents = VFS::Read(pdbPath.string());
 			mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
+			spdlog::trace("Added debug symbols found at '{}'", pdbPath.string().c_str());
 		}
 	}
 

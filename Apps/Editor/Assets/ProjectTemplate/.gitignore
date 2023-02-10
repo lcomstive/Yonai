@@ -2,6 +2,9 @@
 .vs/
 .vscode/
 
+# JetBrains IDE
+.idea/
+
 # Mac OS meta files
 .DS_Store
 *.DS_Store

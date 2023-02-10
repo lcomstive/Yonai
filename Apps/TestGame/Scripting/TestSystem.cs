@@ -68,15 +68,6 @@ namespace TestGame
 				if (i >= renderers.Length / 2)
 					break;
 			}
-
-			Entity e = World.CreateEntity();
-			Transform transform = e.AddComponent<Transform>();
-			transform.Scale = new Vector3(3, 3, 3);
-			transform.Position = new Vector3(0, 0, 1);
-
-			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
-			renderer.Shader = m_SpriteShader;
-			renderer.Sprite = m_Texture2;
 		}
 
 		protected override void Update()
@@ -86,16 +77,6 @@ namespace TestGame
 			 SpriteRenderer[] renderers,
 			 TestComponent[] testComponents)
 			 = World.GetComponents<Transform, SpriteRenderer, TestComponent>();
-
-			/*
-			float t = (float)Math.Sin(Time.TimeSinceLaunch) + 0.1f;
-			for (int i = 0; i < transform.Length; i++)
-				renderers[i].Colour = Colour.Lerp(
-					testComponents[i].Value,
-					new Colour(1, 1, 1, 0.2f),
-					t * testComponents[i].ValueChangeSpeed
-				);
-			*/
 
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
@@ -108,6 +89,27 @@ namespace TestGame
 			if (Input.IsKeyPressed(Key.T))
 				foreach (SpriteRenderer renderer in renderers)
 					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
+
+			if (Input.IsKeyPressed(Key.Space))
+				CreateProjectile();
+		}
+
+		private void CreateProjectile()
+		{
+			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
+			Entity e = World.CreateEntity();
+			Transform transform = e.AddComponent<Transform>();
+			transform.Position = cameraTransform.Position + cameraTransform.Forward;
+			transform.Scale = new Vector3(0.1f);
+			transform.Rotation = cameraTransform.Rotation;
+
+			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
+			renderer.Shader = m_SpriteShader;
+			renderer.Sprite = m_Texture2;
+
+			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * 5.0f);
+
+			e.AddComponent<DestroyAfterSeconds>().StartCountdown(5.0f);
 		}
 	}
 }
