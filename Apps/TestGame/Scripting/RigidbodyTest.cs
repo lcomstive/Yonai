@@ -17,7 +17,7 @@ namespace TestGame
 			m_Force += Vector3.Down * Gravity * Time.DeltaTime;
 			m_Transform.Position += m_Force * Time.DeltaTime * Time.DeltaTime;
 
-			m_Rotation += Time.DeltaTime;
+			m_Rotation += Time.DeltaTime * 50.0f;
 			m_Transform.Rotation = Quaternion.FromEuler(Vector3.Up * m_Rotation);
 		}
 

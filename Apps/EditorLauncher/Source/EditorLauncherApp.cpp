@@ -101,10 +101,10 @@ void EditorLauncherApp::OnDraw()
 		ImGui::TableNextRow(ImGuiTableRowFlags_None);
 		ImGui::TableNextColumn();
 
-		ImGui::Text(info.Name.c_str());
+		ImGui::Text("%s", info.Name.c_str());
 
 		ImColor subtextColor = { 1.0f, 1.0f, 1.0f, 0.5f };
-		ImGui::TextColored(subtextColor, info.Path.c_str());
+		ImGui::TextColored(subtextColor, "%s", info.Path.c_str());
 
 		ImGui::TableNextColumn();
 

@@ -1,7 +1,7 @@
 cmake_policy(SET CMP0072 NEW) # Prefer newer OpenGL libraries over legacy ones
 
 set(AQUA_ENGINE_DEPENDENCY_LIBS)
-set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "")
+set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 
 # Unix requires pthread
 if(UNIX)
@@ -25,25 +25,28 @@ find_package(OpenGL REQUIRED)
 
 # GLFW
 if(AQUA_DESKTOP_PLATFORM)
-	find_package(glfw3)
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw)
 	include_directories(${GLFW_INCLUDE_DIRS})
 	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glfw)
 endif()
 
 # GLM
-find_package(glm)
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glm)
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm)
 
 # SPDLog
-find_package(spdlog)
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS spdlog::spdlog)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/spdlog)
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS spdlog)
 
 # STB
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glm::glm)
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/stb)
+
+# RapidJSON
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/rapidjson/include)
 
 # Assimp
-find_package(assimp)
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp::assimp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp)
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp)
 
 # Glad
 if(AQUA_DESKTOP_PLATFORM)
@@ -58,8 +61,25 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glad)
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include")
 
 # ImGUI
-find_package(imgui)
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui::imgui)
+project(imgui)
+
+add_library(imgui STATIC
+	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_rectpack.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_textedit.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_truetype.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_internal.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_tables.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_widgets.cpp
+)
+target_include_directories(imgui PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui>
+    $<INSTALL_INTERFACE:include>)
+
+list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui)
 
 # X11 on Linux
 if(LINUX)
@@ -85,3 +105,6 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Ven
 
 # Portable File Dialogs
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/portable-file-dialogs")
+
+# Google Test framework
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest)

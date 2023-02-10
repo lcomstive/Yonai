@@ -90,11 +90,41 @@ namespace TestGame
 				foreach (SpriteRenderer renderer in renderers)
 					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
 
-			if (Input.IsKeyPressed(Key.Space))
-				CreateProjectile();
+			if (Input.IsKeyDown(Key.Space))
+				CreateProjectileShot();
+
+			if (Input.IsKeyDown(Key.O))
+				ProjectileSpread -= Time.DeltaTime;
+			if (Input.IsKeyDown(Key.P))
+				ProjectileSpread += Time.DeltaTime;
 		}
 
-		private void CreateProjectile()
+		private float ProjectileForce = 20.0f;
+		private float ProjectileSpread = 1.0f;
+		private static readonly Vector2 ProjectileShotSize = new Vector2(5, 5);
+		
+		private void CreateProjectileShot()
+		{
+			for (float x = 0; x < ProjectileShotSize.x; x++)
+			{
+				for (float y = 0; y < ProjectileShotSize.y; y++)
+				{
+					Entity e = CreateProjectile();
+					Vector3 force = new Vector3(
+						x - ProjectileShotSize.x / 2.0f,
+						y - ProjectileShotSize.y / 2.0f,
+						1.0f
+						);
+					
+					force *= ProjectileSpread;
+					force *= ProjectileForce / 4.0f;
+					e.GetComponent<RigidbodyTest>().AddForce(force);
+					e.GetComponent<RigidbodyTest>().Gravity = 0.0f;
+				}
+			}
+		}
+
+		private Entity CreateProjectile()
 		{
 			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
 			Entity e = World.CreateEntity();
@@ -107,9 +137,10 @@ namespace TestGame
 			renderer.Shader = m_SpriteShader;
 			renderer.Sprite = m_Texture2;
 
-			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * 5.0f);
+			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * ProjectileForce);
+			e.AddComponent<DestroyAfterSeconds>().StartCountdown(10.0f);
 
-			e.AddComponent<DestroyAfterSeconds>().StartCountdown(5.0f);
+			return e;
 		}
 	}
 }

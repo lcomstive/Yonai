@@ -28,6 +28,9 @@ namespace AquaEngine
 
 		public static Quaternion FromEuler(Vector3 values)
 		{
+			if(values == Vector3.Zero)
+				return Quaternion.Identity;
+
 			_FromEuler(ref values, out Quaternion output);
 			return output;
 		}

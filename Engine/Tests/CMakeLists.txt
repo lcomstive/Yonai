@@ -1,9 +1,6 @@
 enable_testing()
 project(AquaEngineTest)
 
-# Get Google Test framework
-find_package(GTest)
-
 # Add tests
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
@@ -11,6 +8,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main AquaEngine ${AQUA_ENGINE_DEPENDENCY_LIBS})
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/../Include
+	${CMAKE_CURRENT_SOURCE_DIR}/../Vendor/googletest/googletest/include
 	${AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS}
 )
 
@@ -24,6 +22,8 @@ if(APPLE)
 			${CMAKE_CURRENT_SOURCE_DIR}/../Vendor/mono/native/libmonosgen-2.0.1.dylib
 			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libmonosgen-2.0.1.dylib
 	)
+
+	SetRPath()
 endif()
 
 include(GoogleTest)
