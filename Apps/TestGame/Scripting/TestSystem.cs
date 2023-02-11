@@ -15,6 +15,7 @@ namespace TestGame
 			Colour.Blue
 		};
 
+		private Mesh m_QuadMesh;
 		private Shader m_SpriteShader;
 		private Texture m_Texture1, m_Texture2;
 
@@ -58,6 +59,9 @@ namespace TestGame
 				FragmentPath = "assets://Shaders/NewSprite.frag",
 			};
 			m_SpriteShader = Resource.Load<Shader>("Shaders/NewSpriteShader", shaderStages);
+			Log.Debug($"Loaded shader 'Shaders/NewSpriteShader' [{m_SpriteShader.ResourceID}]");
+
+			m_QuadMesh = Resource.Load<Mesh>("Meshes/Primitive/Quad");
 
 			SpriteRenderer[] renderers = World.GetComponents<SpriteRenderer>();
 			for(int i = 0; i < renderers.Length; i++)
@@ -72,11 +76,18 @@ namespace TestGame
 
 		protected override void Update()
 		{
+			/*
 			// Get all entities that have Transform & SpriteRenderer components
 			(Transform[] transform,
 			 SpriteRenderer[] renderers,
 			 TestComponent[] testComponents)
 			 = World.GetComponents<Transform, SpriteRenderer, TestComponent>();
+			 
+			if (Input.IsKeyPressed(Key.T))
+				foreach (SpriteRenderer renderer in renderers)
+					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
+
+			 */
 
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
@@ -86,22 +97,46 @@ namespace TestGame
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
 				Application.Exit();
 
-			if (Input.IsKeyPressed(Key.T))
-				foreach (SpriteRenderer renderer in renderers)
-					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
-
-			if (Input.IsKeyDown(Key.Space))
-				CreateProjectileShot();
+			if (Input.IsKeyPressed(Key.Space))
+				// CreateProjectileShot();
+				CreateQuad();
 
 			if (Input.IsKeyDown(Key.O))
 				ProjectileSpread -= Time.DeltaTime;
 			if (Input.IsKeyDown(Key.P))
 				ProjectileSpread += Time.DeltaTime;
+
+			if (Input.IsKeyDown(Key.M))
+			{
+				Mesh.Vertex[] vertices = m_QuadMesh.Vertices;
+				vertices[0].Position += Vector3.Up * Time.DeltaTime * 10.0f;
+				m_QuadMesh.UpdateVertices();
+			}
+			if (Input.IsKeyDown(Key.N))
+			{
+				Mesh.Vertex[] vertices = m_QuadMesh.Vertices;
+				vertices[0].Position += Vector3.Down * Time.DeltaTime * 20.0f;
+				m_QuadMesh.UpdateVertices();
+			}
 		}
 
 		private float ProjectileForce = 20.0f;
 		private float ProjectileSpread = 1.0f;
 		private static readonly Vector2 ProjectileShotSize = new Vector2(5, 5);
+
+		private void CreateQuad()
+		{
+			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
+			
+			Entity e = World.CreateEntity();
+			Transform transform = e.AddComponent<Transform>();
+			transform.Position = cameraTransform.Position + cameraTransform.Forward * 0.75f;
+			transform.Scale = new Vector3(0.25f);
+
+			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
+			renderer.Shader = m_SpriteShader;
+			renderer.Sprite = m_Texture2;
+		}
 		
 		private void CreateProjectileShot()
 		{

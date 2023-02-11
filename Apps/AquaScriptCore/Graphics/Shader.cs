@@ -11,7 +11,7 @@ namespace AquaEngine.Graphics
 		public string GeomtryPath;
 	}
 
-	public class Shader : ResourceBase
+	public class Shader : NativeResourceBase
 	{
 		internal override bool Load(string path, params object[] args)
 		{
@@ -20,21 +20,17 @@ namespace AquaEngine.Graphics
 
 			if (args.Length >= 1)
 			{
-				if (!(args[0] is ShaderStages))
-					throw new ArgumentException("Shader requires argument of type AquaEngine.Graphics.ShaderStages");
+				if(!(args[0] is ShaderStages))
+				{
+					Log.Error("Shader requires argument of type AquaEngine.Graphics.ShaderStages");
+					return false;
+				}
 				ShaderStages stages = (ShaderStages)args[0];
 				_Load1(path, stages.VertexPath, stages.FragmentPath, stages.ComputePath, stages.GeomtryPath, out resourceID, out handle);
 			}
 			else
 				_Load0(path, out resourceID, out handle);
 
-			ResourceID = resourceID;
-			Handle = handle;
-			return true;
-		}
-
-		internal override bool Load(uint resourceID, IntPtr handle)
-		{
 			ResourceID = resourceID;
 			Handle = handle;
 			return true;

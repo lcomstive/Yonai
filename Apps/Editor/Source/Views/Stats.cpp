@@ -26,7 +26,7 @@ void StatsView::Draw()
 
 	if(currentWorlds.size() > 1)
 	{
-		ImGui::Text("Worlds: [%i]", currentWorlds.size());
+		ImGui::Text("Worlds: [%lu]", currentWorlds.size());
 		ImGui::Indent();
 		for(World* world : currentWorlds)
 			ImGui::Text("World: %s [%i] [%i entities]", world->Name().c_str(), world->ID(), world->EntityCount());

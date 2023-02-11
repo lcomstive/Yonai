@@ -14,6 +14,9 @@ namespace TestGame
 
 		protected override void Update()
 		{
+			if (!m_Target)
+				return;
+			
 			float scrollDelta = Input.ScrollDelta;
 			m_Target.FOV -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 			m_Target.OrthographicSize -= scrollDelta * Time.DeltaTime * ScrollSpeed;

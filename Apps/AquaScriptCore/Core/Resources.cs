@@ -24,13 +24,19 @@ namespace AquaEngine
 			T instance = new T();
 
 			// Check if instance exists
-			if (resourceID == uint.MaxValue)
+			if(resourceID == uint.MaxValue)
+			{
+				// New resource, create from args
+				instance.ResourceID = resourceID;
 				instance.Load(path, args);
+				instance.OnLoad();
+
+				s_Instances.Add(instance.ResourceID, instance);
+			}
 			else
 				// Add existing instance, cache in s_Instances
-				instance.Load(resourceID, _GetInstance(resourceID));
+				LoadExistingResource<T>(instance, resourceID);
 
-			s_Instances.Add(instance.ResourceID, instance);
 			return instance;
 		}
 
@@ -57,9 +63,23 @@ namespace AquaEngine
 
 			// Create new instance
 			T instance = new T();
-			instance.Load(resourceID, _GetInstance(resourceID));
-			s_Instances.Add(resourceID, instance);
+			LoadExistingResource<T>(instance, resourceID);
+
 			return instance;
+		}
+
+		private static void LoadExistingResource<T>(T instance, uint resourceID) where T : ResourceBase, new()
+		{
+			instance.ResourceID = resourceID;
+
+			// Check if resource is a native (C++) interop resource
+			NativeResourceBase nativeResource = instance as NativeResourceBase;
+			if(nativeResource != null)
+				nativeResource?.LoadFromHandle(_GetInstance(resourceID));
+
+			s_Instances.Add(resourceID, instance);
+
+			instance.OnLoad();
 		}
 
 		#region Internal Calls

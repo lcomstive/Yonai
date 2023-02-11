@@ -40,7 +40,7 @@ namespace AquaEngine
 				MathUtils.Lerp(a.z, b.z, time)
 				);
 
-		public override string ToString() => $"({x}, {y}, {z})";
+		public override string ToString() => "(" + x + ", " + y + ", " + z + ")";
 
 		public static implicit operator string(Vector3 v) => v.ToString();
 

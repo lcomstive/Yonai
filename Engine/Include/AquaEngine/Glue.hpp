@@ -119,6 +119,12 @@ float _managed_internal_TimeTimeSinceLaunch();
 void _managed_internal_ApplicationExit();
 MonoString* _managed_internal_ApplicationGetArg(MonoString* name, MonoString* defaultValue);
 bool _managed_internal_ApplicationHasArg(MonoString* name);
+void _managed_internal_MeshLoad0(MonoString* path, unsigned int* outID, void** outHandle);
+void _managed_internal_MeshLoad1(MonoString* path, MonoArray* inVertices, MonoArray* inIndices,  unsigned char drawMode, unsigned int* outID, void** outHandle);
+void _managed_internal_MeshGetVertices(void* handle, MonoArray** outPositions, MonoArray** outNormals, MonoArray** outTexCoords);
+void _managed_internal_MeshSetVertices(void* handle, MonoArray* inPositions, MonoArray* inNormals, MonoArray* inTexCoords);
+void _managed_internal_MeshGetIndices(void* handle, MonoArray** outIndices);
+void _managed_internal_MeshSetIndices(void* handle, MonoArray* inIndices);
 void _managed_internal_TextureLoad0(MonoString* path, unsigned int* outResourceID, void** outHandle);
 void _managed_internal_TextureLoad1(MonoString* path, MonoString* filePath, bool hdr, unsigned int* outResourceID, void** outHandle);
 void _managed_internal_TextureBind(void* instance, unsigned int index);
@@ -259,6 +265,12 @@ const vector<pair<const char*, const void*>> _InternalMethods = {
 	MethodType("AquaEngine.Application::_Exit", (const void*)_managed_internal_ApplicationExit),
 	MethodType("AquaEngine.Application::_GetArg", (const void*)_managed_internal_ApplicationGetArg),
 	MethodType("AquaEngine.Application::_HasArg", (const void*)_managed_internal_ApplicationHasArg),
+	MethodType("AquaEngine.Graphics.Mesh::_Load0", (const void*)_managed_internal_MeshLoad0),
+	MethodType("AquaEngine.Graphics.Mesh::_Load1", (const void*)_managed_internal_MeshLoad1),
+	MethodType("AquaEngine.Graphics.Mesh::_GetVertices", (const void*)_managed_internal_MeshGetVertices),
+	MethodType("AquaEngine.Graphics.Mesh::_SetVertices", (const void*)_managed_internal_MeshSetVertices),
+	MethodType("AquaEngine.Graphics.Mesh::_GetIndices", (const void*)_managed_internal_MeshGetIndices),
+	MethodType("AquaEngine.Graphics.Mesh::_SetIndices", (const void*)_managed_internal_MeshSetIndices),
 	MethodType("AquaEngine.Graphics.Texture::_Load0", (const void*)_managed_internal_TextureLoad0),
 	MethodType("AquaEngine.Graphics.Texture::_Load1", (const void*)_managed_internal_TextureLoad1),
 	MethodType("AquaEngine.Graphics.Texture::_Bind", (const void*)_managed_internal_TextureBind),

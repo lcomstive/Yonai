@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class Texture : ResourceBase
+	public class Texture : NativeResourceBase
 	{
 		internal override bool Load(string path, params object[] args)
 		{
@@ -15,13 +15,6 @@ namespace AquaEngine.Graphics
 			else
 				_Load0(path, out resourceID, out handle);
 
-			ResourceID = resourceID;
-			Handle = handle;
-			return true;
-		}
-
-		internal override bool Load(uint resourceID, IntPtr handle)
-		{
 			ResourceID = resourceID;
 			Handle = handle;
 			return true;

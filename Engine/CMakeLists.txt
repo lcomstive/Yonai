@@ -46,7 +46,7 @@ if(NOT WIN32)
 	)
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(UNIX)
 	target_compile_options(${PROJECT_NAME} PUBLIC -Wno-delete-incomplete)
 endif()
 
