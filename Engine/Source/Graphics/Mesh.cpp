@@ -285,10 +285,10 @@ ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositi
 
 ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPositions, MonoArray* inNormals, MonoArray* inTexCoords), AquaEngine.Graphics)
 {
-	unsigned int vertexCount = mono_array_length(inPositions);
+	size_t vertexCount = mono_array_length(inPositions);
 	vector<Mesh::Vertex> vertices;
 	vertices.resize(vertexCount);
-	for(unsigned int i = 0; i < vertexCount; i++)
+	for(size_t i = 0; i < vertexCount; i++)
 	{
 		vertices[i].Position = mono_array_get(inPositions, glm::vec3, i);
 		vertices[i].Normal = mono_array_get(inNormals, glm::vec3, i);
@@ -309,10 +309,10 @@ ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices
 
 ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices), AquaEngine.Graphics)
 {
-	unsigned int indexCount = mono_array_length(inIndices);
+	size_t indexCount = mono_array_length(inIndices);
 	vector<unsigned int> indices;
 	indices.resize(indexCount);
-	for(unsigned int i = 0; i < indexCount; i++)
+	for(size_t i = 0; i < indexCount; i++)
 		indices[i] = mono_array_get(inIndices, unsigned int, i);
 	
 	Mesh* mesh = (Mesh*)handle;

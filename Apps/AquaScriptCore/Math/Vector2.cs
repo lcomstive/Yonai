@@ -8,8 +8,8 @@ namespace AquaEngine
 
 		public float Magnitude => _Magnitude(ref this);
 
-		public static Vector3 Zero => new Vector3(0, 0, 0);
-		public static Vector3 One => new Vector3(1, 1, 1);
+		public static Vector2 Zero => new Vector2(0, 0);
+		public static Vector2 One  => new Vector2(1, 1);
 
 		public Vector2(float x = 0, float y = 0)
 		{

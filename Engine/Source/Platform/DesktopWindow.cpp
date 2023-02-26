@@ -28,11 +28,16 @@ void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severit
 Window::Window() :
 	m_Handle(nullptr),
 	m_Title("Aqua Engine"),
-	m_Resolution({ 800, 600 }),
 	m_FullscreenMode(FullscreenMode::None)
 {
 	if (s_Instance)
-		spdlog::error("A window is already created. This is currently untested and may not work as intended.");
+	{
+		spdlog::error("Tried creating a second window, this is not supported");
+		return;
+	}
+
+	// Set instance to this
+	s_Instance = this;
 
 	if (glfwInit() == GLFW_FALSE)
 	{
@@ -40,7 +45,7 @@ Window::Window() :
 		return;
 	}
 
-	// Ensure input resolution is at least 800x600
+	// Set initial resolution
 	m_Resolution.x = std::max(m_Resolution.x, 800);
 	m_Resolution.x = std::max(m_Resolution.y, 600);
 
@@ -109,9 +114,6 @@ Window::Window() :
 	spdlog::debug("OpenGL v{}.{}", GLAD_VERSION_MAJOR(glVersion), GLAD_VERSION_MINOR(glVersion));
 	spdlog::debug("\tDevice: {} (driver {})", (const char*)glGetString(GL_RENDERER), (const char*)glGetString(GL_VERSION));
 
-	// Set instance to this
-	s_Instance = this;
-
 	// Set VSync enabled by default
 	SetVSync(true);
 
@@ -138,6 +140,9 @@ Window::Window() :
 	glfwGetWindowContentScale(m_Handle, &xScaling, &yScaling);
 	// Update values
 	GLFWWindowScaleCallback(m_Handle, xScaling, yScaling);
+
+	// Set initial video mode
+	m_VideoMode = GetCurrentVideoMode();
 
 	// Bind default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -195,6 +200,8 @@ string Window::GetTitle() { return s_Instance ? s_Instance->m_Title : ""; }
 
 ivec2 Window::GetResolution() { return s_Instance ? s_Instance->m_Resolution : glm::ivec2(0, 0); }
 
+float Window::GetRefreshRate() { return s_Instance ? s_Instance->m_VideoMode.RefreshRate : -1; }
+
 ivec2 Window::GetFramebufferResolution(bool useImGui)
 {
 	ivec2 resolution(0, 0);
@@ -213,6 +220,21 @@ ivec2 Window::GetFramebufferResolution(bool useImGui)
 }
 
 vec2 Window::GetContentScaling() { return s_Instance ? s_Instance->m_Scaling : vec2(); }
+
+void Window::CenterOnDisplay()
+{
+	if(!s_Instance || s_Instance->m_FullscreenMode == FullscreenMode::Fullscreen)
+		return;
+
+	// Get display resolution
+	VideoMode videomode = GetCurrentVideoMode();
+
+	// Calculate center, offset by half the window resolution
+	ivec2 center = videomode.Resolution / 2 - s_Instance->m_Resolution / 2;
+
+	// Set position
+	glfwSetWindowPos(s_Instance->m_Handle, center.x, center.y);
+}
 
 void Window::SetResolution(glm::ivec2 resolution)
 {
@@ -255,12 +277,18 @@ void Window::SetFullscreen(FullscreenMode mode)
 	glfwSetWindowMonitor(
 		/* GLFW window	*/ s_Instance->m_Handle,
 		/* Monitor		*/ fullscreen ? monitor : nullptr,
-		/* X Position	*/ fullscreen ? 0 : int(videomode->width  / 2.0f - s_Instance->m_Resolution.x / 2.0f),
-		/* Y Position	*/ fullscreen ? 0 : int(videomode->height / 2.0f - s_Instance->m_Resolution.y / 2.0f),
+		/* X Position	*/ 0,
+		/* Y Position	*/ 0,
 		/* Resolution X	*/ s_Instance->m_Resolution.x,
 		/* Resolution Y */ s_Instance->m_Resolution.y,
 		/* Refresh rate */ s_Instance->m_VSync ? videomode->refreshRate : GLFW_DONT_CARE
 	);
+
+	// If coming out of fullscreen, center window on monitor.
+	// Done after glfw call so video mode is display's native resolution
+	videomode = glfwGetVideoMode(monitor);
+	if (!fullscreen)
+		CenterOnDisplay();
 
 	glViewport(0, 0, s_Instance->m_Resolution.x, s_Instance->m_Resolution.y);
 }
@@ -292,6 +320,68 @@ void Window::PollEvents()
 	
 	Input::UpdateKeyStates();
 	glfwPollEvents();
+}
+
+vector<VideoMode> Window::GetVideoModes()
+{
+	vector<VideoMode> output;
+
+	if(!s_Instance)
+		return output;
+	
+	GLFWmonitor* monitor = glfwGetWindowMonitor(s_Instance->m_Handle);
+	if(!monitor)
+		monitor = glfwGetPrimaryMonitor();
+
+	int videoModeCount = 0;
+	const GLFWvidmode* videomodes = glfwGetVideoModes(monitor, &videoModeCount);
+
+	for (int i = 0; i < videoModeCount; i++)
+		output.emplace_back(VideoMode
+		{
+			ivec2(videomodes[i].width, videomodes[i].height),
+			(float)videomodes[i].refreshRate
+		});
+
+	return output;
+}
+
+VideoMode Window::GetCurrentVideoMode()
+{
+	if (!s_Instance)
+		return {};
+
+	GLFWmonitor* monitor = glfwGetWindowMonitor(s_Instance->m_Handle);
+	if(!monitor)
+		monitor = glfwGetPrimaryMonitor();
+
+	const GLFWvidmode* videomode = glfwGetVideoMode(monitor);
+	s_Instance->m_VideoMode =
+	{
+		ivec2(videomode->width, videomode->height),
+		(float)videomode->refreshRate
+	};
+
+	return s_Instance->m_VideoMode;
+}
+
+void Window::SetVideoMode(const VideoMode mode)
+{
+	if(!s_Instance || s_Instance->m_FullscreenMode != FullscreenMode::Fullscreen)
+		return;
+	
+	GLFWmonitor* monitor = glfwGetWindowMonitor(s_Instance->m_Handle);
+
+	glfwSetWindowMonitor(
+		s_Instance->m_Handle, monitor,
+		0, 0,
+		mode.Resolution.x, mode.Resolution.y,
+		mode.RefreshRate
+	);
+
+	s_Instance->m_VideoMode = mode;
+	s_Instance->m_Resolution = mode.Resolution;
+	glViewport(0, 0, mode.Resolution.x, mode.Resolution.y);
 }
 
 #pragma region GLFW Callbacks

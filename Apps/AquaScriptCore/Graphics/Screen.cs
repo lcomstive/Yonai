@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace AquaEngine
 {
@@ -22,43 +21,58 @@ namespace AquaEngine
 	};
 
 	public struct VideoMode
-	{
-		/// <summary>
-		/// Colour depth of the current screen
-		/// </summary>
-		public int Bits { get; internal set; }
-		
+	{		
 		/// <summary>
 		/// Resolution of the screen
 		/// </summary>
-		public Vector2 Resolution { get; internal set; }
+		public IVector2 Resolution { get; internal set; }
 
 		/// <summary>
 		/// Maximum frames per second visibly shown to the screen
 		/// </summary>
-		public int RefreshRate { get; internal set; }
+		public float RefreshRate { get; internal set; }
 	}
 
 	public static class Screen
 	{
+		public static VideoMode VideoMode
+		{
+			get
+			{
+				_GetVideoMode(out IVector2 resolution, out float refreshRate);
+				return new VideoMode
+				{
+					Resolution = resolution,
+					RefreshRate = refreshRate
+				};
+			}
+			set
+			{
+				IVector2 resolution = value.Resolution;
+				_SetVideoMode(ref resolution, value.RefreshRate);
+			}
+		}
+
 		public static VideoMode[] VideoModes
 		{
 			get
 			{
-				int modesCount = _GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
+				uint modesCount = _GetVideoModes(out int[] widths, out int[] heights, out float[] refreshRates);
 				VideoMode[] modes = new VideoMode[modesCount];
 				for(int i = 0; i < modesCount; i++)
 				{
-					modes[i].Bits = bits[i];
 					modes[i].RefreshRate = refreshRates[i];
-					modes[i].Resolution = new Vector2(widths[i], heights[i]);
+					modes[i].Resolution = new IVector2(widths[i], heights[i]);
 				}
 				return modes;
 			}
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetVideoModes(out int[] bits, out int[] widths, out int[] heights, out int[] refreshRates);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetVideoMode(out IVector2 resolution, out float refreshRate);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetVideoModes(out int[] widths, out int[] heights, out float[] refreshRates);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVideoMode(ref IVector2 resolution, float refreshRate);
 		#endregion
 	}
 }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 #include <AquaEngine/API.hpp>
 
@@ -30,6 +31,17 @@ namespace AquaEngine
 		Fullscreen
 	};
 
+	struct VideoMode
+	{
+		glm::ivec2 Resolution;
+		float RefreshRate;
+	};
+
+	struct Monitor
+	{
+		std::vector<VideoMode> VideoModes;
+	};
+
 	class Window
 	{
 		/// <summary>
@@ -45,10 +57,15 @@ namespace AquaEngine
 		std::string m_Title = "Aqua Application";
 
 		/// <summary>
-		/// Current window resolution
+		/// Current video mode of the display
+		/// </summary>
+		VideoMode m_VideoMode = { { 1280, 720 }, 0 };
+
+		/// <summary>
+		/// Current resolution of the framebuffer
 		/// </summary>
 		glm::ivec2 m_Resolution = { 1280, 720 };
-
+		
 		/// <summary>
 		/// Resolution when in windowed mode
 		/// </summary>
@@ -122,6 +139,9 @@ namespace AquaEngine
 		AquaAPI static void SetTitle(std::string title);
 		AquaAPI static void SetTitle(const char* title);
 
+		/// <returns>Current refresh rate of the display, or -1 if no window instance</returns>
+		AquaAPI static float GetRefreshRate();
+
 		/// <returns>Size of the window, in pixels</returns>
 		AquaAPI static glm::ivec2 GetResolution();
 
@@ -132,7 +152,23 @@ namespace AquaEngine
 		/// <returns>Size of the window's framebuffer to draw to, in pixels</returns>
 		AquaAPI static glm::ivec2 GetFramebufferResolution(bool useImGui = false);
 
+		/// <returns>Current fullscreen mode</returns>
 		AquaAPI static FullscreenMode GetFullscreen();
+
+		/// <returns>Current video mode for the display the window is currently on</returns>
+		AquaAPI static VideoMode GetCurrentVideoMode();
+
+		/// <returns>All available video modes for the display the window is currently on</returns>
+		AquaAPI static std::vector<VideoMode> GetVideoModes();
+
+		/// <summary>
+		/// Sets the display's video mode. Only works in exclusive fullscreen mode on desktop platforms.
+		/// </summary>
+		AquaAPI static void SetVideoMode(const VideoMode videoMode);
+
+		/// <summary>
+		/// Sets the fullscreen mode
+		/// </summary>
 		AquaAPI static void SetFullscreen(FullscreenMode mode);
 
 		AquaAPI static bool GetVSync();
@@ -145,6 +181,11 @@ namespace AquaEngine
 		/// Returns (1.0, 1.0) on non-desktop platforms
 		/// </summary>
 		AquaAPI static glm::vec2 GetContentScaling();
+
+		/// <summary>
+		/// Places a window in the center of the display
+		/// </summary>
+		AquaAPI static void CenterOnDisplay();
 
 		AquaAPI static WINDOW_HANDLE_TYPE GetNativeHandle();
 	};

@@ -45,6 +45,11 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vend
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/rapidjson/include)
 
 # Assimp
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "")
+if(WIN32)
+	set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "")
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp)
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp)
 
@@ -107,4 +112,8 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Ven
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/portable-file-dialogs")
 
 # Google Test framework
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest)
+if(AQUA_ENGINE_BUILD_TESTS)
+	set(BUILD_GMOCK OFF CACHE BOOL "")
+	set(gtest_force_shared_crt ON CACHE BOOL "")
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest)
+endif()

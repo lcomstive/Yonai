@@ -5,7 +5,7 @@ function (SetWin32Properties)
 	endif()
 	
 	# Link flags
-	#	/ignore:4099 - Ignores warning when no pdb (debug info) is found with linking target (sucha as the mono library)
+	#	/ignore:4099 - Ignores warning when no pdb (debug info) is found with linking target (such as the mono library)
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		LINK_FLAGS "/ignore:4099"
 		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"

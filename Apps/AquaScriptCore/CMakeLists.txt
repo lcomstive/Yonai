@@ -6,6 +6,8 @@ if(MSVC)
 
     add_library(${PROJECT_NAME} SHARED ${CS_FILES})
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2")
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
 else()
     # Generator is not Visual Studio.
     # AquaScriptCore will have to be compiled manually,

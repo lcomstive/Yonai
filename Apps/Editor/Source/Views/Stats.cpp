@@ -41,5 +41,11 @@ void StatsView::Draw()
 	ImGui::Checkbox("VSync", &vsync);
 	Window::SetVSync(vsync);
 
+	glm::ivec2 resolution = Window::GetResolution();
+	ImGui::Text("Resolution: %ix%i", resolution.x, resolution.y);
+
+	VideoMode videomode = Window::GetCurrentVideoMode();
+	ImGui::Text("Monitor: %ix%i@%.0fHz", videomode.Resolution.x, videomode.Resolution.y, videomode.RefreshRate);
+
 	ImGui::End();		
 }

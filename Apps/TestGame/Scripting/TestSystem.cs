@@ -19,6 +19,10 @@ namespace TestGame
 		private Shader m_SpriteShader;
 		private Texture m_Texture1, m_Texture2;
 
+		private VideoMode m_VideoMode;
+		private VideoMode[] m_VideoModes;
+		private int m_VideoModeIndex = 0;
+
 		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 
@@ -64,7 +68,7 @@ namespace TestGame
 			m_QuadMesh = Resource.Load<Mesh>("Meshes/Primitive/Quad");
 
 			SpriteRenderer[] renderers = World.GetComponents<SpriteRenderer>();
-			for(int i = 0; i < renderers.Length; i++)
+			for (int i = 0; i < renderers.Length; i++)
 			{
 				renderers[i].Shader = m_SpriteShader;
 
@@ -72,6 +76,10 @@ namespace TestGame
 				if (i >= renderers.Length / 2)
 					break;
 			}
+
+			m_VideoMode = Screen.VideoMode;
+			m_VideoModes = Screen.VideoModes;
+			m_VideoModeIndex = m_VideoModes.Length - 1;
 		}
 
 		protected override void Update()
@@ -92,12 +100,16 @@ namespace TestGame
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
 			if (Input.IsKeyPressed(Key.F11))
-				Window.CycleFullscreen();
+				ToggleFullscreen();
+			if (Input.IsKeyPressed(Key.F8))
+				PreviousVideoMode();
+			if (Input.IsKeyPressed(Key.F9))
+				NextVideoMode();
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
 				Application.Exit();
 
-			if (Input.IsKeyPressed(Key.Space))
+			if (Input.IsKeyDown(Key.Space))
 				// CreateProjectileShot();
 				CreateQuad();
 
@@ -127,7 +139,7 @@ namespace TestGame
 		private void CreateQuad()
 		{
 			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
-			
+
 			Entity e = World.CreateEntity();
 			Transform transform = e.AddComponent<Transform>();
 			transform.Position = cameraTransform.Position + cameraTransform.Forward * 0.75f;
@@ -137,7 +149,7 @@ namespace TestGame
 			renderer.Shader = m_SpriteShader;
 			renderer.Sprite = m_Texture2;
 		}
-		
+
 		private void CreateProjectileShot()
 		{
 			for (float x = 0; x < ProjectileShotSize.x; x++)
@@ -150,7 +162,7 @@ namespace TestGame
 						y - ProjectileShotSize.y / 2.0f,
 						1.0f
 						);
-					
+
 					force *= ProjectileSpread;
 					force *= ProjectileForce / 4.0f;
 					e.GetComponent<RigidbodyTest>().AddForce(force);
@@ -176,6 +188,37 @@ namespace TestGame
 			e.AddComponent<DestroyAfterSeconds>().StartCountdown(10.0f);
 
 			return e;
+		}
+
+		private IVector2 m_WindowedResolution = IVector2.Zero;
+		private void ToggleFullscreen()
+		{
+			VideoMode[] modes = Screen.VideoModes;
+
+			// If windowed, set resolution to match monitor prior to going fullscreen
+			if (Window.Fullscreen == FullscreenMode.Windowed)
+			{
+				m_WindowedResolution = Window.Resolution;
+				Window.Resolution = modes[modes.Length - 1].Resolution;
+			}
+
+			Window.CycleFullscreen();
+
+			if (Window.Fullscreen == FullscreenMode.Windowed)
+				Window.Resolution = m_WindowedResolution;
+			Window.CenterOnDisplay();
+		}
+
+		private void NextVideoMode()
+		{
+			if (m_VideoModeIndex < m_VideoModes.Length - 1)
+				Screen.VideoMode = (m_VideoMode = m_VideoModes[++m_VideoModeIndex]);
+		}
+
+		private void PreviousVideoMode()
+		{
+			if (m_VideoModeIndex > 0)
+				Screen.VideoMode = (m_VideoMode = m_VideoModes[--m_VideoModeIndex]);
 		}
 	}
 }

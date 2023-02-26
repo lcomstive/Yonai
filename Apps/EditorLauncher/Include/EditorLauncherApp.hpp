@@ -1,4 +1,6 @@
 #pragma once
+#undef max // Removes max macro if included by Windows' minwindef.h
+
 #include <string>
 #include <typeinfo>
 #include <typeindex>
