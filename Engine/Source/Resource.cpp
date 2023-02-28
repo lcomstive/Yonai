@@ -136,6 +136,10 @@ ResourceID Resource::Duplicate(ResourceID original, string newPath)
 		return InvalidResourceID;
 
 	ResourceInstance resourceInstance;
+	resourceInstance.Type = originalInstance->Type;
+	resourceInstance.Data = malloc(sizeof(originalInstance->Data));
+	memcpy(resourceInstance.Data, originalInstance->Data, sizeof(originalInstance->Data));
+	
 	s_Instances.emplace_back(resourceInstance);
 
 	ResourceID id = AllocateID((unsigned int)s_Instances.size() - 1);

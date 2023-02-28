@@ -1,16 +1,17 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Camera : Component
+	public class Camera : NativeComponent
 	{
 		/// <summary>
 		/// Field of view
 		/// </summary>
 		public float FOV
 		{
-			get => _GetFOV(World.ID, Entity.ID);
-			set => _SetFOV(World.ID, Entity.ID, value);
+			get => _GetFieldOfView(Handle);
+			set => _SetFieldOfView(Handle, value);
 		}
 		
 		/// <summary>
@@ -18,8 +19,8 @@ namespace AquaEngine
 		/// </summary>
 		public float Near
 		{
-			get => _GetNear(World.ID, Entity.ID);
-			set => _SetNear(World.ID, Entity.ID, value);
+			get => _GetNear(Handle);
+			set => _SetNear(Handle, value);
 		}
 
 		/// <summary>
@@ -27,8 +28,8 @@ namespace AquaEngine
 		/// </summary>
 		public float Far
 		{
-			get => _GetFar(World.ID, Entity.ID);
-			set => _SetFar(World.ID, Entity.ID, value);
+			get => _GetFar(Handle);
+			set => _SetFar(Handle, value);
 		}
 
 		/// <summary>
@@ -36,8 +37,8 @@ namespace AquaEngine
 		/// </summary>
 		public bool Orthographic
 		{
-			get => _GetOrtho(World.ID, Entity.ID);
-			set => _SetOrtho(World.ID, Entity.ID, value);
+			get => _GetOrthographic(Handle);
+			set => _SetOrthographic(Handle, value);
 		}
 
 		/// <summary>
@@ -45,8 +46,8 @@ namespace AquaEngine
 		/// </summary>
 		public float OrthographicSize
 		{
-			get => _GetOrthoSize(World.ID, Entity.ID);
-			set => _SetOrthoSize(World.ID, Entity.ID, value);
+			get => _GetOrthographicSize(Handle);
+			set => _SetOrthographicSize(Handle, value);
 		}
 
 		public static Camera Main
@@ -60,25 +61,25 @@ namespace AquaEngine
 			}
 		}
 
-		public void SetMain() => _SetMainCamera(World.ID, Entity.ID);
+		public void SetMain() => _SetMainCamera(Handle);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFOV(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFOV(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetNear(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetNear(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetNear(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetNear(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFar(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFar(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFar(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFar(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetOrtho(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrtho(uint worldID, uint entityID, bool value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetOrthographic(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographic(IntPtr handle, bool value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthoSize(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthoSize(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMainCamera(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMainCamera(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMainCamera(out uint worldID, out uint entityID);
 		#endregion
 	}

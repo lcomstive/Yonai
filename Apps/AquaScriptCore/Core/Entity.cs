@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
+	[System.Diagnostics.DebuggerDisplay("[{World.ID}:{ID}]")]
 	public class Entity
 	{
 		/// <summary>
@@ -78,7 +79,7 @@ namespace AquaEngine
 			return _RemoveComponent(World.ID, ID, type);
 		}
 
-		public override string ToString() => $"{ID}#{World.ID}";
+		public override string ToString() => $"[{World.ID}:{ID}]";
 
 		public static implicit operator string(Entity v) => v.ToString();
 

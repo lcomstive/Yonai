@@ -45,7 +45,7 @@ void Texture::GenerateImage(bool hdr)
 	void* data = nullptr;
 
 	// Flip loaded textures, so OpenGL loads them right way up
-	stbi_set_flip_vertically_on_load(true);
+	// stbi_set_flip_vertically_on_load(true);
 	
 	if (VFS::Exists(m_Path))
 	{
@@ -114,7 +114,7 @@ void Texture::GenerateImage(bool hdr)
 
 #ifndef NDEBUG
 	profileTimer.Stop();
-	spdlog::debug("Loaded texture '{}' in {}ms", m_Path, profileTimer.ElapsedTime().count());
+	spdlog::debug("Loaded texture '{}' in {}ms {}", m_Path, profileTimer.ElapsedTime().count(), hdr ? "[HDR]" : "");
 #endif
 }
 

@@ -272,6 +272,9 @@ ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositi
 	MonoClass* v2Class = GET_CLASS(Vector2);
 
 	vector<Mesh::Vertex> vertices = ((Mesh*)handle)->GetVertices();
+	if(vertices.empty())
+		return;
+	
 	*outPositions = mono_array_new(mono_domain_get(), v3Class, vertices.size());
 	*outNormals = mono_array_new(mono_domain_get(), v3Class, vertices.size());
 	*outTexCoords = mono_array_new(mono_domain_get(), v2Class, vertices.size());

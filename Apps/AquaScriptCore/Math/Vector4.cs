@@ -2,6 +2,7 @@
 
 namespace AquaEngine
 {
+	[System.Diagnostics.DebuggerDisplay("({x}, {y}, {z}, {w})")]
 	public struct Vector4
 	{
 		public float x, y, z, w;

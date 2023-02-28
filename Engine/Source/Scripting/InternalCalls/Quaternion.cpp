@@ -18,3 +18,9 @@ ADD_MANAGED_METHOD(Quaternion, Multiply, void, (glm::quat* a, glm::quat* b, glm:
 
 ADD_MANAGED_METHOD(Quaternion, MultiplyVector3, void, (glm::quat* a, glm::vec3* b, glm::quat* output))
 { *output = (*a) * (*b); }
+
+ADD_MANAGED_METHOD(Quaternion, Inverse, void, (glm::quat* input, glm::quat* output))
+{ *output = inverse(*input); }
+
+ADD_MANAGED_METHOD(Quaternion, InverseInline, void, (glm::quat* input))
+{ *input = inverse(*input); }

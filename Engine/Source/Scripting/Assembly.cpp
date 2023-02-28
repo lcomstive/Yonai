@@ -6,6 +6,7 @@
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Components/MeshRenderer.hpp>
 #include <AquaEngine/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
@@ -150,6 +151,12 @@ void Assembly::ClearCachedTypes()
 	s_ReverseTypeHashes.clear();
 }
 
+size_t Assembly::GetUnmanagedHash(size_t managedHash)
+{
+	return s_InternalManagedComponentTypes.find(managedHash) == s_InternalManagedComponentTypes.end() ?
+		managedHash : s_InternalManagedComponentTypes[managedHash].Type;
+}
+
 void Assembly::CacheTypes(bool isCore)
 {
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
@@ -214,6 +221,7 @@ void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
+	AddInternalManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
 	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 
 	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");

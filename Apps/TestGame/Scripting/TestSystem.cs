@@ -1,10 +1,16 @@
 ﻿using System;
-using System.Diagnostics;
 using AquaEngine;
+using System.Diagnostics;
 using AquaEngine.Graphics;
 
 namespace TestGame
 {
+	struct ModelData
+	{
+		public Model Model;
+		public float Scale;
+	}
+	
 	public class TestSystem : AquaSystem
 	{
 		private Colour[] ColourValues =
@@ -15,8 +21,11 @@ namespace TestGame
 			Colour.Blue
 		};
 
+		private ModelData m_Model;
 		private Mesh m_QuadMesh;
-		private Shader m_SpriteShader;
+		private Mesh m_DupeMesh;
+		private Material m_Material;
+		private Shader m_SpriteShader, m_ModelShader;
 		private Texture m_Texture1, m_Texture2;
 
 		private VideoMode m_VideoMode;
@@ -25,7 +34,7 @@ namespace TestGame
 
 		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
-
+		
 		protected override void Start()
 		{
 			/*
@@ -65,8 +74,25 @@ namespace TestGame
 			m_SpriteShader = Resource.Load<Shader>("Shaders/NewSpriteShader", shaderStages);
 			Log.Debug($"Loaded shader 'Shaders/NewSpriteShader' [{m_SpriteShader.ResourceID}]");
 
-			m_QuadMesh = Resource.Load<Mesh>("Meshes/Primitive/Quad");
+			m_ModelShader = Resource.Load<Shader>("Shaders/ModelShader", new ShaderStages()
+			{
+				VertexPath = "assets://Shaders/Unlit.vert",
+				FragmentPath = "assets://Shaders/Unlit.frag"
+			});
+			Log.Debug($"Loaded shader 'Shaders/ModelShader' [{m_ModelShader.ResourceID}]");
 
+			m_QuadMesh = Resource.Load<Mesh>("Meshes/Primitive/Quad");
+			m_DupeMesh = Resource.Duplicate<Mesh>(m_QuadMesh, "Meshes/DupeQuad");
+
+			// Load 3D models
+			string modelPath = "assets://Models/Backpack/Survival_BackPack_2.fbx";
+			m_Model = new ModelData()
+			{
+				Model = Resource.Load<Model>("Models/Backpack", modelPath),
+				Scale = 1.0f
+			};
+			Log.Debug($"Loaded model \"{modelPath}\"");
+			
 			SpriteRenderer[] renderers = World.GetComponents<SpriteRenderer>();
 			for (int i = 0; i < renderers.Length; i++)
 			{
@@ -80,22 +106,19 @@ namespace TestGame
 			m_VideoMode = Screen.VideoMode;
 			m_VideoModes = Screen.VideoModes;
 			m_VideoModeIndex = m_VideoModes.Length - 1;
+
+			Vector3 v = new Vector3(1, 2, 5);
+			Log.Debug(v);
 		}
 
 		protected override void Update()
 		{
-			/*
-			// Get all entities that have Transform & SpriteRenderer components
-			(Transform[] transform,
-			 SpriteRenderer[] renderers,
-			 TestComponent[] testComponents)
-			 = World.GetComponents<Transform, SpriteRenderer, TestComponent>();
+			// Get all renderers in scene
+			SpriteRenderer[] renderers = World.GetComponents<SpriteRenderer>();
 			 
 			if (Input.IsKeyPressed(Key.T))
 				foreach (SpriteRenderer renderer in renderers)
 					renderer.Sprite = (renderer.Sprite == m_Texture1 ? m_Texture2 : m_Texture1);
-
-			 */
 
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
@@ -112,24 +135,14 @@ namespace TestGame
 			if (Input.IsKeyDown(Key.Space))
 				// CreateProjectileShot();
 				CreateQuad();
+			if(Input.IsKeyPressed(Key.N))
+				CreateModel(m_Model);
 
 			if (Input.IsKeyDown(Key.O))
 				ProjectileSpread -= Time.DeltaTime;
 			if (Input.IsKeyDown(Key.P))
 				ProjectileSpread += Time.DeltaTime;
 
-			if (Input.IsKeyDown(Key.M))
-			{
-				Mesh.Vertex[] vertices = m_QuadMesh.Vertices;
-				vertices[0].Position += Vector3.Up * Time.DeltaTime * 10.0f;
-				m_QuadMesh.UpdateVertices();
-			}
-			if (Input.IsKeyDown(Key.N))
-			{
-				Mesh.Vertex[] vertices = m_QuadMesh.Vertices;
-				vertices[0].Position += Vector3.Down * Time.DeltaTime * 20.0f;
-				m_QuadMesh.UpdateVertices();
-			}
 		}
 
 		private float ProjectileForce = 20.0f;
@@ -142,15 +155,44 @@ namespace TestGame
 
 			Entity e = World.CreateEntity();
 			Transform transform = e.AddComponent<Transform>();
-			transform.Position = cameraTransform.Position + cameraTransform.Forward * 0.75f;
-			transform.Scale = new Vector3(0.25f);
+			
+			transform.Position = cameraTransform.Position + cameraTransform.Forward * 2.5f;
+			// transform.Scale = new Vector3(0.25f);
+			transform.Rotation = Quaternion.FromEuler(-cameraTransform.Rotation.Euler);
+
+			Log.Debug($"Camera rotation: {cameraTransform.Rotation} | Transform rotation: {transform.Rotation}");
 
 			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
 			renderer.Shader = m_SpriteShader;
 			renderer.Sprite = m_Texture2;
+
+			LerpTest lerpTest = e.AddComponent<LerpTest>();
+			lerpTest.A = transform.Position - transform.Right * 2;
+			lerpTest.B = transform.Position + transform.Right * 2;
+			lerpTest.Speed = 3;
 		}
 
-		private void CreateProjectileShot()
+		private void CreateModel(ModelData model)
+		{
+			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
+
+			foreach(Model.MeshData meshData in model.Model.Meshes)
+			{
+				Entity e = World.CreateEntity();
+				Transform transform = e.AddComponent<Transform>();
+				transform.Position = cameraTransform.Position + cameraTransform.Forward * 2.5f;
+				transform.Scale = new Vector3(model.Scale);
+				transform.Rotation = Quaternion.Identity * Vector3.Down;
+
+				MeshRenderer renderer = e.AddComponent<MeshRenderer>();
+				renderer.Mesh = meshData.Mesh;
+				
+				meshData.Material.Shader = m_ModelShader;
+				renderer.Material = meshData.Material;
+			}
+		}
+
+ 		private void CreateProjectileShot()
 		{
 			for (float x = 0; x < ProjectileShotSize.x; x++)
 			{

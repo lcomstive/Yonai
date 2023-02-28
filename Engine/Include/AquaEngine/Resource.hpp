@@ -8,6 +8,7 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/ResourceID.hpp>
+#include <AquaEngine/Scripting/Assembly.hpp>
 
 namespace AquaEngine
 {

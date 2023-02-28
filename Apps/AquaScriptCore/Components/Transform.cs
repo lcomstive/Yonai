@@ -1,44 +1,45 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Transform : Component
+	public class Transform : NativeComponent
 	{
 		public Vector3 Position
 		{
 			get
 			{
-				_GetPosition(World.ID, Entity.ID, out Vector3 position);
+				_GetPosition(Handle, out Vector3 position);
 				return position;
 			}
-			set => _SetPosition(World.ID, Entity.ID, ref value);
+			set => _SetPosition(Handle, ref value);
 		}
 
 		public Quaternion Rotation
 		{
 			get
 			{
-				_GetRotation(World.ID, Entity.ID, out Quaternion rotation);
+				_GetRotation(Handle, out Quaternion rotation);
 				return rotation;
 			}
-			set => _SetRotation(World.ID, Entity.ID, ref value);
+			set => _SetRotation(Handle, ref value);
 		}
 
 		public Vector3 Scale
 		{
 			get
 			{
-				_GetScale(World.ID, Entity.ID, out Vector3 scale);
+				_GetScale(Handle, out Vector3 scale);
 				return scale;
 			}
-			set => _SetScale(World.ID, Entity.ID, ref value);
+			set => _SetScale(Handle, ref value);
 		}
 
 		public Vector3 Right
 		{
 			get
 			{
-				_GetRight(World.ID, Entity.ID, out Vector3 value);
+				_GetRight(Handle, out Vector3 value);
 				return value;
 			}
 		}
@@ -47,7 +48,7 @@ namespace AquaEngine
 		{
 			get
 			{
-				_GetUp(World.ID, Entity.ID, out Vector3 value);
+				_GetUp(Handle, out Vector3 value);
 				return value;
 			}
 		}
@@ -56,22 +57,24 @@ namespace AquaEngine
 		{
 			get
 			{
-				_GetForward(World.ID, Entity.ID, out Vector3 value);
+				_GetForward(Handle, out Vector3 value);
 				return value;
 			}
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetPosition(uint worldID, uint entityID, ref Vector3 position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetPosition(uint worldID, uint entityID, out Vector3 position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRotation(uint worldID, uint entityID, ref Quaternion rotation);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRotation(uint worldID, uint entityID, out Quaternion rotation);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetScale(uint worldID, uint entityID, ref Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetScale(uint worldID, uint entityID, out Vector3 scale);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetPosition(IntPtr handle, ref Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetPosition(IntPtr handle, out Vector3 value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetUp(uint worldID, uint entityID, out Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetForward(uint worldID, uint entityID, out Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRight(uint worldID, uint entityID, out Vector3 scale);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRotation(IntPtr handle, ref Quaternion value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRotation(IntPtr handle, out Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetScale(IntPtr handle, ref Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetScale(IntPtr handle, out Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetUp(IntPtr handle, out Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRight(IntPtr handle, out Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetForward(IntPtr handle, out Vector3 value);
 		#endregion
 	}
 }

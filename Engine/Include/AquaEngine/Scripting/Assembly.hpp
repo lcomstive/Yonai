@@ -75,8 +75,10 @@ namespace AquaEngine::Scripting
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
 		AquaAPI static size_t GetTypeHash(MonoClass* monoClass);
 		AquaAPI static size_t GetTypeHash(std::type_index& type);
+		AquaAPI static size_t GetUnmanagedHash(size_t managedHash);
 		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
+
 	
 	private:
 		static std::unordered_map<MonoType*, size_t> s_TypeHashes;

@@ -1,8 +1,10 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Resource.hpp>
+#include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Shader.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Graphics/Material.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -51,3 +53,39 @@ Shader* Material::PrepareShader()
 
 	return shader;
 }
+
+#pragma region Internal Calls
+// _Load(string path, out uint resourceID, out IntPtr handle);
+ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, unsigned int* resourceID, void** outHandle), AquaEngine.Graphics)
+{
+	*resourceID = Resource::Load<Material>(mono_string_to_utf8(path));
+	*outHandle = Resource::Get<Material>(*resourceID);
+}
+
+ADD_MANAGED_GET_SET(Material, Shader, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AlbedoMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AlphaClipping, bool, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AlphaClipThreshold, float, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, Roughness, float, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, RoughnessMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, Metalness, float, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, MetalnessMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, NormalMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AmbientOcclusionMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, Transparent, bool, AquaEngine.Graphics)
+
+ADD_MANAGED_METHOD(Material, GetAlbedo, void, (void* handle, glm::vec4* value), AquaEngine.Graphics)
+{ *value = ((Material*)handle)->Albedo; }
+ADD_MANAGED_METHOD(Material, SetAlbedo, void, (void* handle, glm::vec4* value), AquaEngine.Graphics)
+{ ((Material*)handle)->Albedo = *value; }
+
+ADD_MANAGED_METHOD(Material, GetTextureCoordinateScale, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+{ *value = ((Material*)handle)->TextureCoordinateScale; }
+ADD_MANAGED_METHOD(Material, SetTextureCoordinateScale, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+{ ((Material*)handle)->TextureCoordinateScale = *value; }
+
+ADD_MANAGED_METHOD(Material, GetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+{ *value = ((Material*)handle)->TextureCoordinateOffset; }
+ADD_MANAGED_METHOD(Material, SetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+{ ((Material*)handle)->TextureCoordinateOffset = *value; }
+#pragma endregion
