@@ -1,7 +1,17 @@
 #include <EditorApp.hpp>
+#include <SpashScreen.hpp>
 
 int main(int argc, char** argv)
 {
+	AquaEditor::SplashScreenApp splashScreen;
+	splashScreen.ProcessArgs(argc, argv);
+	splashScreen.Run();
+
+	// Check if error occurred, or user requested closing
+	if(splashScreen.LaunchDisrupted())
+		return -1;
+	
+	// Launch editor
 	AquaEditor::EditorApp app;
 	app.ProcessArgs(argc, argv);
 	

@@ -28,7 +28,13 @@ void EditorLauncherApp::Setup()
 {
 	WindowedApplication::Setup();
 
-	FIX_DLL_BOUNDARIES();
+	// FIX_DLL_BOUNDARIES();
+	ImGui::SetCurrentContext(SystemManager::Global()->Get<Systems::ImGUISystem>()->GetContext());
+	
+	glfwMakeContextCurrent(Window::GetNativeHandle());
+	int result = gladLoadGL(glfwGetProcAddress);
+
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	Window::SetTitle("Aqua Editor");

@@ -45,7 +45,7 @@ void Texture::GenerateImage(bool hdr)
 	void* data = nullptr;
 
 	// Flip loaded textures, so OpenGL loads them right way up
-	// stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(true);
 	
 	if (VFS::Exists(m_Path))
 	{

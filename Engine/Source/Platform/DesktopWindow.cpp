@@ -49,6 +49,9 @@ Window::Window() :
 	m_Resolution.x = std::max(m_Resolution.x, 800);
 	m_Resolution.x = std::max(m_Resolution.y, 600);
 
+	// Reset window hints
+	glfwDefaultWindowHints();
+
 	// Window creation options //
 	// Set as resizable
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
