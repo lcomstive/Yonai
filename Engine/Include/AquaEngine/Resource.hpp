@@ -85,12 +85,12 @@ namespace AquaEngine
 		/// <summary>
 		/// Duplicates a resource at the new given path
 		/// </summary>
-		static ResourceID Duplicate(ResourceID original, std::string newPath);
+		AquaAPI static ResourceID Duplicate(ResourceID original, std::string newPath);
 
 		/// <summary>
 		/// Gets the C++ type related to a resource, or type of void if not found
 		/// </summary>
-		static std::type_index GetType(ResourceID id);
+		AquaAPI static std::type_index GetType(ResourceID id);
 
 		/// <summary>
 		/// Generic getter for resources whose types have a parameterless constructor
@@ -111,31 +111,31 @@ namespace AquaEngine
 			return (T*)(instance && instance->Type == typeid(T) ? instance->Data : nullptr);
 		}
 
-		static void* Get(ResourceID id);
-		static void* Get(std::string path);
+		AquaAPI static void* Get(ResourceID id);
+		AquaAPI static void* Get(std::string path);
 
 		/// <summary>
 		/// Gets the ID of resource at path, or InvalidResourceID if not found
 		/// </summary>
-		static ResourceID GetID(const std::string& path);
+		AquaAPI static ResourceID GetID(const std::string& path);
 
 		/// <summary>
 		/// Gets the path of a resource, or empty if not valid
 		/// </summary>
-		static std::string GetPath(ResourceID id);
+		AquaAPI static std::string GetPath(ResourceID id);
 
 		/// <summary>
 		/// Releases resources associated with ResourceID
 		/// </summary>
-		static void Unload(ResourceID resource);
+		AquaAPI static void Unload(ResourceID resource);
 
 		/// <summary>
 		/// Releases all associated resources
 		/// </summary>
-		static void UnloadAll();
+		AquaAPI static void UnloadAll();
 
-		static bool Exists(std::string path);
-		static bool IsValidResourceID(ResourceID id);
+		AquaAPI static bool Exists(std::string path);
+		AquaAPI static bool IsValidResourceID(ResourceID id);
 
 		template<typename T>
 		static bool IsValidType(ResourceID id)
@@ -146,7 +146,7 @@ namespace AquaEngine
 			return instance && instance->Type == typeid(T);
 		}
 
-		static void PrintResourceTypes();
+		AquaAPI static void PrintResourceTypes();
 
 		template<typename T>
 		static void PrintResourceTypes()

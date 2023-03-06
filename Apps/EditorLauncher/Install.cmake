@@ -1,4 +1,6 @@
 # Installation using CPack
+set(CPACK_COMPONENTS_ALL "")
+set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 set(CPACK_PACKAGE_NAME "Aqua Editor")
 set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set(CPACK_PACKAGE_VENDOR "Madissia Technologies")

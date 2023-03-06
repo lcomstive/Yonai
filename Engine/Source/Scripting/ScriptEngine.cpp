@@ -5,6 +5,7 @@
 #include <mono/metadata/threads.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
+#include <AquaEngine/Application.hpp>
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
@@ -29,6 +30,24 @@ vector<Assembly*> ScriptEngine::s_Assemblies = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
+const char* MonoDebugLogPath = "data://MonoDebugger.log";
+
+vector<const char*> GenerateJITParseOptions()
+{
+	Application* app = Application::Current();
+	vector<const char*> output = {};
+
+	output.emplace_back("--soft-breakpoints");
+
+	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
+	debugging += "address=0.0.0.0:" + app->GetArg("DebugPort", "5555");
+	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
+	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
+	output.emplace_back(debugging.c_str());
+
+	return output;
+}
+
 void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 {
 	s_CoreDLLPath = coreDllPath;
@@ -48,11 +67,8 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	// Setup debugging session
 	if (allowDebugging)
 	{
-		const char* options[] = {
-			"--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:5555,suspend=n,loglevel=3,logfile=MonoDebugger.log",
-			"--soft-breakpoints"
-		};
-		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+		vector<const char*> jitOptions = GenerateJITParseOptions();
+		mono_jit_parse_options(jitOptions.size(), (char**)jitOptions.data());
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
 		spdlog::debug("C# debugging is enabled");

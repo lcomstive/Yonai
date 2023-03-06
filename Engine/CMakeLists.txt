@@ -1,5 +1,4 @@
-set(AQUA_ENGINE_BUILD_STATIC ON CACHE BOOL "")
-set(AQUA_ENGINE_BUILD_TESTS  ON CACHE BOOL "")
+set(AQUA_BUILD_TESTS ON CACHE BOOL "")
 
 include(./Dependencies.cmake)
 
@@ -10,7 +9,7 @@ file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
 
 list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
 
-if(AQUA_ENGINE_BUILD_STATIC)
+if(NOT BUILD_SHARED_LIBS)
 	add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
 	add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
@@ -50,7 +49,7 @@ if(UNIX)
 	target_compile_options(${PROJECT_NAME} PUBLIC -Wno-delete-incomplete)
 endif()
 
-if(AQUA_ENGINE_BUILD_TESTS)
+if(AQUA_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
 

@@ -54,7 +54,7 @@ if(WIN32)
 	set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "")
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp EXCLUDE_FROM_ALL)
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS assimp)
 
 # Glad
@@ -116,9 +116,9 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Ven
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/portable-file-dialogs")
 
 # Google Test framework
-if(AQUA_ENGINE_BUILD_TESTS)
+if(AQUA_BUILD_TESTS)
 	set(INSTALL_GTEST OFF CACHE BOOL "")
 	set(BUILD_GMOCK OFF CACHE BOOL "")
 	set(gtest_force_shared_crt ON CACHE BOOL "")
-	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest)
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest EXCLUDE_FROM_ALL)
 endif()

@@ -31,7 +31,12 @@ void SplashScreenApp::Setup()
 	glfwMakeContextCurrent(m_Window);
 
 	// Initialise OpenGL
-	gladLoadGL(glfwGetProcAddress);
+	int glVersion = gladLoadGL(glfwGetProcAddress);
+	if (glVersion == 0)
+	{
+		spdlog::critical("Failed to initialise OpenGL context");
+		return;
+	}
 
 	// Hide titlebar of window
 	glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GLFW_FALSE);
@@ -96,7 +101,7 @@ void SplashScreenApp::OnUpdate()
 
 #pragma region Debugging
 	// Check if time is up
-	const float SplashTime = 10; // seconds
+	const float SplashTime = 5; // seconds
 	if (Time::SinceLaunch() > SplashTime)
 		Exit();
 #pragma endregion
