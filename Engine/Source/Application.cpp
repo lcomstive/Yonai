@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <AquaEngine/Time.hpp>
+#include <AquaEngine/Utils.hpp>
 #include <AquaEngine/Application.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 
@@ -180,8 +181,6 @@ void Application::Run()
 
 void Application::Exit() { m_Running = false; }
 Application* Application::Current() { return s_Instance; }
-
-void ToLower(std::string& input) { transform(input.begin(), input.end(), input.begin(), ::tolower); }
 
 void Application::ProcessArgs(int argc, char** argv)
 {

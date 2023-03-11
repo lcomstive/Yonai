@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Timer.hpp>
 #include <AquaEngine/World.hpp>
+#include <AquaEngine/Utils.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/threads.h>
 #include <mono/metadata/assembly.h>
@@ -32,7 +33,7 @@ vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
 const char* MonoDebugLogPath = "data://MonoDebugger.log";
 
-vector<const char*> GenerateJITParseOptions()
+vector<const char*> GenerateJITParseOptions(unsigned int debugPort)
 {
 	Application* app = Application::Current();
 	vector<const char*> output = {};
@@ -40,7 +41,7 @@ vector<const char*> GenerateJITParseOptions()
 	output.emplace_back("--soft-breakpoints");
 
 	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
-	debugging += "address=0.0.0.0:" + app->GetArg("DebugPort", "5555");
+	debugging += "address=0.0.0.0:" + debugPort;
 	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
 	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
 	output.emplace_back(debugging.c_str());
@@ -67,11 +68,15 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	// Setup debugging session
 	if (allowDebugging)
 	{
-		vector<const char*> jitOptions = GenerateJITParseOptions();
+		unsigned int debugPort = 5555;
+		try { debugPort = std::stoul(Application::Current()->GetArg("DebugPort", "5555")); }
+		catch(std::exception& _) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
+
+		vector<const char*> jitOptions = GenerateJITParseOptions(debugPort);
 		mono_jit_parse_options(jitOptions.size(), (char**)jitOptions.data());
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
-		spdlog::debug("C# debugging is enabled");
+		spdlog::debug("C# debugging is enabled on port {}", debugPort);
 	}
 
 	s_RootDomain = mono_jit_init("AquaEngineRuntime");

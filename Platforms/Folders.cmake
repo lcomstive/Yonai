@@ -47,9 +47,10 @@ endif()
 if(AQUA_BUILD_TESTS)
 	list(APPEND DEPENDENCY_PROJECTS
 		# Google Tests
-		# gtest
-		# gtest_main
+		gtest
+		gtest_main
 	)
+	set_target_properties(AquaEngineTest PROPERTIES FOLDER "Apps")
 endif()
 
 if(WIN32)
