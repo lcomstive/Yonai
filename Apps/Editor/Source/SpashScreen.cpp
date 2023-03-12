@@ -26,6 +26,17 @@ void SplashScreenApp::Setup()
 	glfwDefaultWindowHints();
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 
+	// Set preferred OpenGL version 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+#if !defined(AQUA_PLATFORM_APPLE)
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+#else
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
+
 	// Create window
 	m_Window = glfwCreateWindow(SplashResolution.x, SplashResolution.y, "", nullptr, nullptr);
 	glfwMakeContextCurrent(m_Window);
