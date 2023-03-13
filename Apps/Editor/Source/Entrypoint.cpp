@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-#if !defined(BUILD_SHARED_LIBS) // Splashscreen currently does not work across .dll boundaries
+#if 0 // !defined(BUILD_SHARED_LIBS) // Splashscreen currently does not work across .dll boundaries
 	AquaEditor::SplashScreenApp splashScreen;
 	splashScreen.ProcessArgs(argc, argv);
 	splashScreen.Run();

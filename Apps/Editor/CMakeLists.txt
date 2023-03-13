@@ -65,13 +65,13 @@ if(APPLE)
 			${AQUA_RESOURCES_DIR}
 		)
 
-	if(NOT AQUA_ENGINE_BUILD_STATIC)
+	if(BUILD_SHARED_LIBS)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 			# Copy AquaEngine library to output
 			COMMAND echo Copying AquaEngine dynamic lib to output
 
 			COMMAND ${CMAKE_COMMAND} -E copy
-				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libAquaEngine.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.dylib
+				$<TARGET_FILE:AquaEditor>
 				${AQUA_RESOURCES_DIR}
 		)
 	endif()
