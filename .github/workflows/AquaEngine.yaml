@@ -87,7 +87,7 @@ jobs:
 
     # Create installation package
     - name: Package
-      run: cd ${{ github.workspace }}/build; cpack
+      run: cd ${{ github.workspace }}/build; cpack -C ${{ env.CMAKE_CONFIG }}
 
     # Upload generated artifact
     - uses: actions/upload-artifact@v3
