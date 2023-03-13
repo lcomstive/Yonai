@@ -1,25 +1,4 @@
 # Installation using CPack
-install(TARGETS AquaEditor AquaEditorLauncher DESTINATION .)
-
-install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
-install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
-
-if(AQUA_BUILD_BASE_GAME)
-	install(TARGETS BaseGame DESTINATION .)
-endif()
-
-if(BUILD_SHARED_LIBS)
-	if(WIN32)
-		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
-	else()
-		install(FILES
-			$<TARGET_SONAME_FILE:glfw>
-			$<TARGET_SONAME_FILE:assimp>
-			$<TARGET_SONAME_FILE:spdlog>
-			DESTINATION .)
-	endif()
-endif()
-
 set(CPACK_COMPONENTS_ALL "")
 
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
@@ -55,6 +34,19 @@ if(APPLE)
 	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 elseif(WIN32)
+	install(TARGETS AquaEditor AquaEditorLauncher DESTINATION .)
+
+	install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
+	install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
+
+	if(AQUA_BUILD_BASE_GAME)
+		install(TARGETS BaseGame DESTINATION .)
+	endif()
+
+	if(BUILD_SHARED_LIBS)
+		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
+	endif()
+
 	if(DEFINED ENV{CMAKE_CONFIG})
 		set(AQUA_CPACK_CONFIG $ENV{CMAKE_CONFIG})
 	else()

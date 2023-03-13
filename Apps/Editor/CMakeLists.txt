@@ -73,7 +73,12 @@ if(APPLE)
 			COMMAND echo Copying AquaEngine dynamic lib to output
 
 			COMMAND ${CMAKE_COMMAND} -E copy
-				$<TARGET_FILE:AquaEditor>
+				$<TARGET_FILE:AquaEngine>
+				${AQUA_RESOURCES_DIR}
+
+			COMMAND echo Copying dependency dynamic libs to output
+			COMMAND ${CMAKE_COMMAND} -E copy
+				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib
 				${AQUA_RESOURCES_DIR}
 		)
 	endif()
