@@ -19,7 +19,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 # Add dependency to the C# binding project
 add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
+if(WIN32 OR APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
+endif()
 
 if(APPLE)
 	# Configure Mac OS app bundle

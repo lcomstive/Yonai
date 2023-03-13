@@ -1,5 +1,27 @@
 # Installation using CPack
+install(TARGETS AquaEditor AquaEditorLauncher DESTINATION .)
+
+install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
+install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
+
+if(AQUA_BUILD_BASE_GAME)
+	install(TARGETS BaseGame DESTINATION .)
+endif()
+
+if(BUILD_SHARED_LIBS)
+	if(WIN32)
+		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
+	else()
+		install(FILES
+			$<TARGET_SONAME_FILE:glfw>
+			$<TARGET_SONAME_FILE:assimp>
+			$<TARGET_SONAME_FILE:spdlog>
+			DESTINATION .)
+	endif()
+endif()
+
 set(CPACK_COMPONENTS_ALL "")
+
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 set(CPACK_PACKAGE_NAME "Aqua Editor")
 set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
@@ -39,8 +61,6 @@ elseif(WIN32)
 		set(AQUA_CPACK_CONFIG "Release")
 	endif()
 
-	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${AQUA_CPACK_CONFIG}/ DESTINATION .)
-
 	# Add start menu shortcut(s)
 	set(CPACK_NSIS_CREATE_ICONS_EXTRA
 		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Aqua Editor.lnk' '$INSTDIR\\\\Aqua Editor Launcher.exe'"
@@ -56,8 +76,6 @@ elseif(WIN32)
 	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
 else()
 	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION .)
-
-	set(CPACK_MONOLITHIC_INSTALL 1)
 	set(CPACK_GENERATOR "TGZ")
 endif()
 

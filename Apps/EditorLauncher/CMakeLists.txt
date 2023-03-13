@@ -21,7 +21,9 @@ source_group("Resources" FILES ${AQUA_EXECUTABLE_RESOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source" FILES ${SOURCE_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES ${INCLUDE_FILES})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor Launcher")
+if(WIN32 OR APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor Launcher")
+endif()
 
 if(APPLE)
 	set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Aqua\ Editor.app/Contents/MacOS/)

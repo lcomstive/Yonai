@@ -41,7 +41,7 @@ vector<const char*> GenerateJITParseOptions(unsigned int debugPort)
 	output.emplace_back("--soft-breakpoints");
 
 	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
-	debugging += "address=0.0.0.0:" + debugPort;
+	debugging += "address=0.0.0.0:" + to_string(debugPort);
 	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
 	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
 	output.emplace_back(debugging.c_str());
