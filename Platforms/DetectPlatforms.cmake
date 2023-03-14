@@ -28,6 +28,7 @@ else()
 endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Mac/Apple.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Unix/Unix.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Windows/Windows.cmake)
 
 function (AddPlatformSpecifics)
