@@ -85,7 +85,7 @@ namespace AquaEngine
 			}
 		};
 
-		AquaAPI unsigned int m_WorldID;
+		unsigned int m_WorldID;
 
 		bool m_WorldIsActive = false;
 		std::unordered_map<size_t, ComponentData> m_ComponentArrays;

@@ -34,14 +34,34 @@ void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 	transform->Rotation = eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z });
 }
 
-std::vector<ResourceID> Model::GetMeshes() { return m_MeshIDs; }
+vector<ResourceID> Model::GetMeshes() { return m_MeshIDs; }
+
+void Model::CreateMeshMaterialPair(const MeshData& data, vector<pair<ResourceID, ResourceID>>& output)
+{
+	size_t count = std::min(data.MeshIDs.size(), data.MaterialIDs.size());
+	output.reserve(count);
+	for(size_t i = 0; i < count; i++)
+		output.emplace_back(make_pair(m_MeshIDs[data.MeshIDs[i]], data.MaterialIDs[i]));
+
+	for(const MeshData& child : data.Children)
+		CreateMeshMaterialPair(child, output);
+}
+
+vector<pair<ResourceID, ResourceID>> Model::GetMeshesAndMaterials()
+{
+	vector<pair<ResourceID, ResourceID>> output;
+
+	CreateMeshMaterialPair(m_Root, output);
+
+	return output;
+} 
 
 void Model::Load()
 {
 	Importer importer;
 
 	const aiScene* scene = nullptr;
-	unsigned int postProcessing = aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs;
+	unsigned int postProcessing = aiProcess_Triangulate | aiProcess_FlipUVs;
 
 	// Read in model file
 	vector<unsigned char> modelData = VFS::Read(m_Path);
@@ -175,3 +195,29 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		m_Path + "_MESH_" + mesh->mName.C_Str(),
 		vertices, indices);
 }
+
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+{
+	*outID = Resource::Load<Model>(mono_string_to_utf8(path), mono_string_to_utf8(filepath));
+	*outHandle = Resource::Get<Model>(*outID);
+}
+
+ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
+{
+	vector<pair<ResourceID, ResourceID>> meshes = ((Model*)handle)->GetMeshesAndMaterials();
+	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
+	*outMaterialIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
+	for(size_t i = 0; i < meshes.size(); i++)
+	{
+		mono_array_set(*outMeshIDs, unsigned int, i, meshes[i].first);
+		mono_array_set(*outMaterialIDs, unsigned int, i, meshes[i].second);
+	}
+}
+
+#pragma endregion

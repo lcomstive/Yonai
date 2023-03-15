@@ -296,3 +296,126 @@ ShaderUniform Shader::GetUniformInfo(std::string locationName) const
 			return uniform;
 	return { -1 };
 }
+
+#pragma region Managed Binding
+#include <AquaEngine/Resource.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(Shader, Load0, void, (MonoString* path, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+{
+	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path));
+	*outHandle = Resource::Get<Shader>(*outResourceID);
+}
+
+ADD_MANAGED_METHOD(Shader, Load1, void,
+	(MonoString* path, MonoString* vertexPath, MonoString* fragmentPath,
+		MonoString* computePath, MonoString* geometryPath,
+		unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+{
+	ShaderStageInfo stageInfo =
+	{
+		vertexPath ? mono_string_to_utf8(vertexPath) : "",
+		fragmentPath ? mono_string_to_utf8(fragmentPath) : "",
+		computePath ? mono_string_to_utf8(computePath) : "",
+		geometryPath ? mono_string_to_utf8(geometryPath) : ""
+	};
+	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path), stageInfo);
+	*outHandle = Resource::Get<Shader>(*outResourceID);
+}
+
+ADD_MANAGED_METHOD(Shader, Bind, void, (void* instance), AquaEngine.Graphics)
+{ ((Shader*)instance)->Bind(); }
+
+ADD_MANAGED_METHOD(Shader, Unbind, void, (void* instance), AquaEngine.Graphics)
+{ ((Shader*)instance)->Unbind(); }
+
+ADD_MANAGED_METHOD(Shader, UpdateStages, void,
+	(void* instance, MonoString* vertexPath, MonoString* fragmentPath,
+		MonoString* computePath, MonoString* geometryPath), AquaEngine.Graphics)
+{
+	ShaderStageInfo stageInfo =
+	{
+		vertexPath ? mono_string_to_utf8(vertexPath) : "",
+		fragmentPath ? mono_string_to_utf8(fragmentPath) : "",
+		computePath ? mono_string_to_utf8(computePath) : "",
+		geometryPath ? mono_string_to_utf8(geometryPath) : ""
+	};
+	((Shader*)instance)->UpdateStages(stageInfo);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_int, void, (void* instance, int location, int value), AquaEngine.Graphics)
+{ ((Shader*)instance)->Set(location, value); }
+ADD_MANAGED_METHOD(Shader, SetStr_int, void, (void* instance, MonoString* location, int value), AquaEngine.Graphics)
+{ ((Shader*)instance)->Set(mono_string_to_utf8(location), value); }
+
+ADD_MANAGED_METHOD(Shader, Set_bool, void, (void* instance, int location, bool value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_bool, void, (void* instance, MonoString* location, bool value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_float, void, (void* instance, int location, float value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_float, void, (void* instance, MonoString* location, float value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_double, void, (void* instance, int location, double value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_double, void, (void* instance, MonoString* location, double value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_vec2, void, (void* instance, int location, glm::vec2* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_vec2, void, (void* instance, MonoString* location, glm::vec2* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_vec3, void, (void* instance, int location, glm::vec3* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_vec3, void, (void* instance, MonoString* location, glm::vec3* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_vec4, void, (void* instance, int location, glm::vec4* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_vec4, void, (void* instance, MonoString* location, glm::vec4* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_mat3, void, (void* instance, int location, glm::mat3* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_mat3, void, (void* instance, MonoString* location, glm::mat3* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
+}
+
+ADD_MANAGED_METHOD(Shader, Set_mat4, void, (void* instance, int location, glm::mat4* value), AquaEngine.Graphics)
+{
+	((Shader*)instance)->Set(location, value);
+}
+ADD_MANAGED_METHOD(Shader, SetStr_mat4, void, (void* instance, MonoString* location, glm::mat4* value), AquaEngine.Graphics)
+{ ((Shader*)instance)->Set(mono_string_to_utf8(location), value); }
+
+#pragma endregion

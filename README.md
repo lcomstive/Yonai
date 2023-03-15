@@ -2,7 +2,7 @@
 Author - [@lcomstive](https://lewiscomstive.com) | [GitHub](https://www.github.com/lcomstive)
 
 [![Version](https://img.shields.io/badge/Version-v0.0.1-4287f5?style=flat-square)](https://github.com/lcomstive/AquaEngine/releases)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lcomstive/AquaEngine/Aqua%20Engine?logo=GitHub&style=flat-square)](https://github.com/lcomstive/AquaEngine/actions/workflows/AquaEngine.yaml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/lcomstive/AquaEngine/AquaEngine.yaml?logo=GitHub&style=flat-square)](https://github.com/lcomstive/AquaEngine/actions/workflows/AquaEngine.yaml)
 
 Table of Contents
 ====================

@@ -231,3 +231,94 @@ ResourceID Mesh::Sphere()
 	SphereID = Resource::Load<Mesh>(SphereMeshName, vertices, indices, DrawMode::TriangleStrip);
 	return SphereID;
 }
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+{
+	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path));
+	*outHandle = Resource::Get<Mesh>(*outID);
+}
+
+ADD_MANAGED_METHOD(Mesh, Load1, void,
+	(MonoString* path, MonoArray* inVertices, MonoArray* inIndices,
+		unsigned char drawMode, unsigned int* outID, void** outHandle),
+	AquaEngine.Graphics)
+{
+	vector<Mesh::Vertex> vertices;
+	vector<unsigned int> indices;
+
+	vertices.resize(mono_array_length(inVertices));
+	indices.reserve(mono_array_length(inIndices));
+
+	for(size_t i = 0; i < vertices.size(); i++)
+		vertices[i] = mono_array_get(inVertices, Mesh::Vertex, i);
+
+	for(size_t i = 0; i < indices.size(); i++)
+		indices[i] = mono_array_get(inIndices, unsigned int, i);
+
+	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path), vertices, indices, (Mesh::DrawMode)drawMode);
+	*outHandle = Resource::Get<Mesh>(*outID);
+}
+
+#define GET_CLASS(name) Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", #name)
+
+ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositions, MonoArray** outNormals, MonoArray** outTexCoords), AquaEngine.Graphics)
+{
+	MonoClass* v3Class = GET_CLASS(Vector3);
+	MonoClass* v2Class = GET_CLASS(Vector2);
+
+	vector<Mesh::Vertex> vertices = ((Mesh*)handle)->GetVertices();
+	if(vertices.empty())
+		return;
+	
+	*outPositions = mono_array_new(mono_domain_get(), v3Class, vertices.size());
+	*outNormals = mono_array_new(mono_domain_get(), v3Class, vertices.size());
+	*outTexCoords = mono_array_new(mono_domain_get(), v2Class, vertices.size());
+	for(size_t i = 0; i < vertices.size(); i++)
+	{
+		mono_array_set(*outPositions, glm::vec3, i, vertices[i].Position);
+		mono_array_set(*outNormals, glm::vec3, i, vertices[i].Normal);
+		mono_array_set(*outTexCoords, glm::vec2, i, vertices[i].TexCoords);
+	}
+}
+
+ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPositions, MonoArray* inNormals, MonoArray* inTexCoords), AquaEngine.Graphics)
+{
+	size_t vertexCount = mono_array_length(inPositions);
+	vector<Mesh::Vertex> vertices;
+	vertices.resize(vertexCount);
+	for(size_t i = 0; i < vertexCount; i++)
+	{
+		vertices[i].Position = mono_array_get(inPositions, glm::vec3, i);
+		vertices[i].Normal = mono_array_get(inNormals, glm::vec3, i);
+		vertices[i].TexCoords = mono_array_get(inTexCoords, glm::vec2, i);
+	}
+	
+	Mesh* mesh = (Mesh*)handle;
+	mesh->SetData(vertices, mesh->GetIndices());
+}
+
+ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices), AquaEngine.Graphics)
+{
+	vector<unsigned int> indices = ((Mesh*)handle)->GetIndices();
+	*outIndices = mono_array_new(mono_domain_get(), mono_get_uint32_class(), indices.size());
+	for(size_t i = 0; i < indices.size(); i++)
+		mono_array_set(*outIndices, unsigned int, i, indices[i]);
+}
+
+ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices), AquaEngine.Graphics)
+{
+	size_t indexCount = mono_array_length(inIndices);
+	vector<unsigned int> indices;
+	indices.resize(indexCount);
+	for(size_t i = 0; i < indexCount; i++)
+		indices[i] = mono_array_get(inIndices, unsigned int, i);
+	
+	Mesh* mesh = (Mesh*)handle;
+	mesh->SetData(mesh->GetVertices(), indices);
+}
+#pragma endregion

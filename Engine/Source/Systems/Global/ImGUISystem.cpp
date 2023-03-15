@@ -13,11 +13,19 @@ using namespace AquaEngine::Systems;
 ImGUISystem::ImGUISystem()
 {
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	m_Context = ImGui::CreateContext();
 
 	m_IO = &ImGui::GetIO();
+
+	// Activate docking & viewport features
 	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 
+	// Scale with system
+	vec2 scaling = Window::GetContentScaling();
+	m_IO->DisplayFramebufferScale = { scaling.x, scaling.y };
+	m_IO->FontGlobalScale = scaling.x;
+
+	// Set colours to dark theme
 	ImGui::StyleColorsDark();
 }
 
@@ -63,3 +71,4 @@ void ImGUISystem::EndFrame()
 }
 
 ImGuiIO* ImGUISystem::GetIO() { return m_IO; }
+ImGuiContext* ImGUISystem::GetContext() { return m_Context; }

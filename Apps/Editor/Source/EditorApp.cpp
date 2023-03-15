@@ -7,6 +7,7 @@
 #include <AquaEngine/Graphics/Shader.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/FPSCamera.hpp>
+#include <AquaEngine/Platform/FixDLLBoundaries.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
@@ -31,12 +32,14 @@ using namespace AquaEngine::Components;
 
 namespace fs = std::filesystem;
 
+string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
 
 void EditorApp::Setup()
 {
 	WindowedApplication::Setup();
+	FIX_DLL_BOUNDARIES();
 
 	Window::SetTitle("Aqua Editor");
 
@@ -52,14 +55,16 @@ void EditorApp::Setup()
 		spdlog::warn("Empty project path!");
 	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
 
-	string projectDir = m_ProjectPath.parent_path().string();
+	string projectDir = m_ProjectPath.string();
 	VFS::Mount("project://", projectDir);
 	VFS::Mount("assets://", "app://Assets"); // Default assets
 	VFS::Mount("assets://", "project://Assets");
 	VFS::Mount("editor://", "project://.aqua");
 
-	ImGuiIO io = ImGui::GetIO();
-	io.IniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini").c_str();
+	// Set ImGUI layout file
+	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini");
+	io.IniFilename = ImGuiIniFilename.c_str();
 
 	InitialiseScripting();
 
@@ -106,7 +111,7 @@ void EditorApp::LoadScene()
 
 	// 2D Sprite Test
 	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "assets://Textures/Test.png");
-	ResourceID spriteShader = Resource::Load<Shader>("assets://Shaders/Sprite", ShaderStageInfo
+	ResourceID spriteShader = Resource::Load<Shader>("Shaders/Sprite", ShaderStageInfo
 		{
 			"assets://Shaders/Sprite.vert",
 			"assets://Shaders/Sprite.frag"
@@ -119,6 +124,7 @@ void EditorApp::LoadScene()
 	Assembly* assembly = assemblies[1];
 	MonoType* monoType = assembly->GetTypeFromClassName("TestGame", "TestComponent");
 
+	/*
 	const unsigned int spriteRows = 15;
 	const unsigned int spriteColumns = 15;
 	for (unsigned int x = 0; x < spriteRows; x++)
@@ -139,8 +145,9 @@ void EditorApp::LoadScene()
 				entity.AddComponent(monoType);
 		}
 	}
+	*/
 
-	// Camera control system, implemented in C#
+	// Implemented in C#
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
 	if(testSystem)
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
@@ -152,7 +159,10 @@ void EditorApp::LoadScene()
 
 void EditorApp::LoadProject()
 {
-	m_ProjectInfo = ReadProject("file://" + m_ProjectPath.string());
+	string projectPath = fmt::format("file://{}/project.json", m_ProjectPath.string());
+	replace(projectPath.begin(), projectPath.end(), '\\', '/');
+
+	m_ProjectInfo = ReadProject(projectPath);
 
 	if(m_ProjectInfo.Name.empty())
 	{
@@ -180,7 +190,10 @@ void EditorApp::InitialiseScripting()
 		Exit();
 		return;
 	}
-	ScriptEngine::Init(AquaScriptCorePath, false);
+
+	ScriptEngine::Init(AquaScriptCorePath,
+		// Allow debugging in debug builds
+		true);
 }
 
 void EditorApp::DrawUI()

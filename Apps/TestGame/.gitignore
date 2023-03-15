@@ -1,0 +1,20 @@
+# Visual Studio and VS Code
+.vs/
+.vscode/
+
+# Mac OS meta files
+.DS_Store
+*.DS_Store
+
+# Generated files & artifacts
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+
+# Aqua Engine cache files
+.aqua/
+
+# Aqua C# projects should be created locally
+*.sln
+*.vcproj
+*.csproj

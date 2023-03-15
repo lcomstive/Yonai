@@ -1,10 +1,12 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Timer.hpp>
 #include <AquaEngine/World.hpp>
+#include <AquaEngine/Utils.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/threads.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
+#include <AquaEngine/Application.hpp>
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
@@ -29,6 +31,24 @@ vector<Assembly*> ScriptEngine::s_Assemblies = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
+const char* MonoDebugLogPath = "data://MonoDebugger.log";
+
+vector<const char*> GenerateJITParseOptions(unsigned int debugPort)
+{
+	Application* app = Application::Current();
+	vector<const char*> output = {};
+
+	output.emplace_back("--soft-breakpoints");
+
+	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
+	debugging += "address=0.0.0.0:" + to_string(debugPort);
+	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
+	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
+	output.emplace_back(debugging.c_str());
+
+	return output;
+}
+
 void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 {
 	s_CoreDLLPath = coreDllPath;
@@ -48,14 +68,15 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	// Setup debugging session
 	if (allowDebugging)
 	{
-		static const char* options[] = {
-		  "--soft-breakpoints",
-		  "--debugger-agent=transport=dt_socket,server=y,address=0.0.0.0:55555,suspend=n,loglevel=3,logfile=MonoDebugger.log"
-		};
-		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+		unsigned int debugPort = 5555;
+		try { debugPort = std::stoul(Application::Current()->GetArg("DebugPort", "5555")); }
+		catch(std::exception& _) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
+
+		vector<const char*> jitOptions = GenerateJITParseOptions(debugPort);
+		mono_jit_parse_options(jitOptions.size(), (char**)jitOptions.data());
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
-		spdlog::debug("C# debugging is enabled");
+		spdlog::debug("C# debugging is enabled on port {}", debugPort);
 	}
 
 	s_RootDomain = mono_jit_init("AquaEngineRuntime");
@@ -109,7 +130,7 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 		return nullptr;
 	}
 
-	if (!isCoreAssembly && shouldWatch)
+	if (/* !isCoreAssembly && */ shouldWatch)
 	{
 		s_AssemblyPaths.push_back({ path, shouldWatch });
 
@@ -138,11 +159,12 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	{
 		// Try and load .pdb file next to .dll file
 		std::filesystem::path pdbPath(path);
-		pdbPath.replace_extension(".mdb");
+		pdbPath.replace_extension(".pdb");
 		if (VFS::Exists(pdbPath.string()))
 		{
 			auto pdbContents = VFS::Read(pdbPath.string());
 			mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
+			spdlog::trace("Added debug symbols found at '{}'", pdbPath.string().c_str());
 		}
 	}
 
@@ -196,6 +218,7 @@ void ScriptEngine::Reload(bool force)
 		world->GetSystemManager()->InvalidateAllManagedInstances();
 		world->GetComponentManager()->InvalidateAllManagedInstances();
 	}
+	SystemManager::Global()->InvalidateAllManagedInstances();
 
 	// Release resources
 	mono_domain_set(mono_get_root_domain(), true);
@@ -219,7 +242,15 @@ void ScriptEngine::Reload(bool force)
 	// Load all previously loaded assemblies, in same order
 	for (AssemblyPath& assemblyPath : assemblyPaths)
 	{
-		spdlog::debug("Reloading assembly {} {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
+		if(!VFS::Exists(assemblyPath.Path))
+		{
+			spdlog::warn("Assembly '{}' no longer exists in filesystem", assemblyPath.Path);
+			// TODO: Check if continue watching assembly that has been removed causes issues.
+			// File may be restored later, it is desirable to be notified if it does.
+			continue;
+		}
+
+		spdlog::debug("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
 		if (assemblyPath.WatchForChanges)
 			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
@@ -227,6 +258,7 @@ void ScriptEngine::Reload(bool force)
 
 	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
+	SystemManager::Global()->CreateAllManagedInstances();
 	for (World* world : worlds)
 	{
 		world->GetSystemManager()->CreateAllManagedInstances();

@@ -7,6 +7,7 @@ namespace AquaEngine::Systems
 	struct ImGUISystem : public System
 	{
 		ImGuiIO* m_IO = nullptr;
+		ImGuiContext* m_Context = nullptr;
 
 		void StartFrame();
 		void EndFrame();
@@ -20,5 +21,6 @@ namespace AquaEngine::Systems
 		AquaAPI void Draw() override;
 
 		AquaAPI ImGuiIO* GetIO();
+		AquaAPI ImGuiContext* GetContext();
 	};
 }

@@ -31,10 +31,14 @@ namespace AquaEngine::Graphics
 		void CreateEntity(MeshData& mesh, Entity* parent);
 		ResourceID ProcessMesh(aiMesh* mesh, const aiScene* scene);
 		void ProcessNode(aiNode* node, MeshData* parent, const aiScene* scene);
+		void CreateMeshMaterialPair(const MeshData& data, std::vector<std::pair<ResourceID, ResourceID>>& output);
 
 	public:
 		Model(std::string path);
 
 		std::vector<ResourceID> GetMeshes();
+
+		/// <returns>Meshes and their generated materials</returns>
+		std::vector<std::pair<ResourceID, ResourceID>> GetMeshesAndMaterials();
 	};
 }

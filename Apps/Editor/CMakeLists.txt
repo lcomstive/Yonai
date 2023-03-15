@@ -19,21 +19,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 # Add dependency to the C# binding project
 add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
-if(WIN32)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		OUTPUT_NAME "Aqua Editor"
-		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
-		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-	)
-elseif(APPLE)
+if(WIN32 OR APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
+endif()
+
+if(APPLE)
 	# Configure Mac OS app bundle
 	set_target_properties(
 		${PROJECT_NAME} PROPERTIES
 		BUNDLE TRUE
 		MACOSX_BUNDLE TRUE
-		OUTPUT_NAME "Aqua Editor"
 		MACOSX_BUNDLE_GUI_IDENTIFIER com.madissia.${PROJECT_NAME}
 		MACOSX_BUNDLE_BUNDLE_NAME "Aqua Editor"
 		MACOSX_BUNDLE_COPYRIGHT "© 2023 Madissia Technologies"
@@ -70,9 +65,23 @@ if(APPLE)
 		COMMAND ${CMAKE_COMMAND} -E copy
 			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/native/libmonosgen-2.0.1.dylib
 			${AQUA_RESOURCES_DIR}
-
-		# Add @rpath to executable
-		COMMAND echo Adding rpath to executable
-		COMMAND install_name_tool -add_rpath @executable_path/../Resources/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/MacOS/Aqua\ Editor
 		)
+
+	if(BUILD_SHARED_LIBS)
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+			# Copy AquaEngine library to output
+			COMMAND echo Copying AquaEngine dynamic lib to output
+
+			COMMAND ${CMAKE_COMMAND} -E copy
+				$<TARGET_FILE:AquaEngine>
+				${AQUA_RESOURCES_DIR}
+
+			COMMAND echo Copying dependency dynamic libs to output
+			COMMAND ${CMAKE_COMMAND} -E copy
+				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib
+				${AQUA_RESOURCES_DIR}
+		)
+	endif()
 endif()
+
+AddPlatformSpecifics()

@@ -6,6 +6,10 @@
 .vs/
 .vscode/
 
+# JetBrains
+.idea/
+*.DotSettings.*
+
 # Generated Documentation
 Docs/Dist/
 
@@ -25,10 +29,14 @@ vcpkg_installed
 # C# projects
 *.vcproj
 *.sln
+*.csproj
 
-# Except AquaScriptCore, for Unix platforms
+# Except AquaScriptCore, used on Unix platforms
 !Apps/AquaScriptCore/AquaScriptCore.sln
 !Apps/AquaScriptCore/AquaScriptCore.csproj
 
 # Keep template scripting output
 !Apps/Editor/Assets/ProjectTemplate/Scripting/bin/AquaProject.dll
+
+# Don't upload the generated glue file
+Engine/Include/AquaEngine/Glue.hpp

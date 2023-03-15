@@ -1,3 +1,5 @@
+set(AQUA_BUILD_TESTS ON CACHE BOOL "")
+
 include(./Dependencies.cmake)
 
 # Aqua Engine Core
@@ -5,10 +7,9 @@ project(AquaEngine)
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
 
-set(AQUA_ENGINE_BUILD_STATIC ON CACHE BOOL "")
-set(AQUA_ENGINE_BUILD_TESTS  ON CACHE BOOL "")
+list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
 
-if(AQUA_ENGINE_BUILD_STATIC)
+if(NOT BUILD_SHARED_LIBS)
 	add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
 	add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
@@ -21,6 +22,8 @@ set_target_properties(
 	${PROJECT_NAME} PROPERTIES
 	VERSION ${VERSION_STRING}
 )
+
+AddPlatformSpecifics()
 
 # Group source files inside IDE
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source"  FILES ${SOURCE_FILES})
@@ -42,10 +45,19 @@ if(NOT WIN32)
 	)
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(UNIX)
 	target_compile_options(${PROJECT_NAME} PUBLIC -Wno-delete-incomplete)
 endif()
 
-if(AQUA_ENGINE_BUILD_TESTS)
+if(AQUA_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
+
+# Glue generator
+add_subdirectory(./GlueGenerator)
+add_custom_command(
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
+	DEPENDS GlueGenerator
+)
+

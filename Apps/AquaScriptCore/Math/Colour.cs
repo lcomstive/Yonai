@@ -2,6 +2,7 @@
 
 namespace AquaEngine
 {
+	[System.Diagnostics.DebuggerDisplay("({r}, {g}, {b}, {a})")]
 	public struct Colour
 	{
 		public float r, g, b, a;

@@ -56,6 +56,7 @@
     <Compile Include="Graphics\Window.cs" />
     <Compile Include="Math\MathUtils.cs" />
     <Compile Include="Math\Quaternion.cs" />
+    <Compile Include="Math\IVector2.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Colour.cs" />
     <Compile Include="Math\Vector4.cs" />
@@ -64,6 +65,17 @@
     <Compile Include="Core\World.cs" />
     <Compile Include="Core\System.cs" />
     <Compile Include="Systems\SceneManager.cs" />
+    <Compile Include="Core\VFS.cs" />
+    <Compile Include="Graphics\Texture.cs" />
+    <Compile Include="Core\ResourceBase.cs" />
+    <Compile Include="Core\Resources.cs" />
+    <Compile Include="Graphics\Shader.cs" />
+    <Compile Include="Graphics\Mesh.cs" />
+    <Compile Include="Graphics\GraphicsCore.cs" />
+    <Compile Include="Graphics\Model.cs" />
+    <Compile Include="Components\MeshRenderer.cs" />
+    <Compile Include="Components\NativeComponent.cs" />
+    <Compile Include="Graphics\Material.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

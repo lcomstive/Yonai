@@ -1,9 +1,31 @@
 [submodule "Docs/doxygen-awesome-css"]
 	path = Docs/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
-[submodule "Engine/Vendor/vcpkg"]
-	path = Engine/Vendor/vcpkg
-	url = https://github.com/microsoft/vcpkg
 [submodule "Engine/Vendor/portable-file-dialogs"]
 	path = Engine/Vendor/portable-file-dialogs
 	url = https://github.com/samhocevar/portable-file-dialogs.git
+[submodule "Engine/Vendor/glfw"]
+	path = Engine/Vendor/glfw
+	url = https://github.com/glfw/glfw
+[submodule "Engine/Vendor/assimp"]
+	path = Engine/Vendor/assimp
+	url = https://github.com/assimp/assimp
+[submodule "Engine/Vendor/glm"]
+	path = Engine/Vendor/glm
+	url = https://github.com/g-truc/glm
+[submodule "Engine/Vendor/googletest"]
+	path = Engine/Vendor/googletest
+	url = https://github.com/google/googletest
+[submodule "Engine/Vendor/stb"]
+	path = Engine/Vendor/stb
+	url = https://github.com/nothings/stb
+[submodule "Engine/Vendor/spdlog"]
+	path = Engine/Vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "Engine/Vendor/imgui"]
+	path = Engine/Vendor/imgui
+	url = https://github.com/ocornut/imgui
+	branch = docking
+[submodule "Engine/Vendor/rapidjson"]
+	path = Engine/Vendor/rapidjson
+	url = https://github.com/tencent/rapidjson
