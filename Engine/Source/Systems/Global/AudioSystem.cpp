@@ -3,7 +3,7 @@
 using namespace AquaEngine::Systems;
 
 #if AQUA_ENABLE_AUDIO
-#if AQUA_PLATFORM_APPLE
+#ifdef AQUA_PLATFORM_APPLE
 #define MA_NO_RUNTIME_LINKING
 #endif
 
@@ -12,28 +12,86 @@ using namespace AquaEngine::Systems;
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 
 using namespace std;
 using namespace AquaEngine::IO;
+using namespace AquaEngine::Scripting;
+
+ma_device AudioSystem::m_Device;
+ma_engine AudioSystem::m_Engine;
+ma_context AudioSystem::m_Context;
+bool AudioSystem::m_EngineActive = false;
+ma_uint32 AudioSystem::m_CurrentDevice = 0;
+bool AudioSystem::m_EngineInitialised = false;
+Class* AudioSystem::m_ScriptClass = nullptr;
+ma_uint32 AudioSystem::m_DefaultDeviceIndex = 0;
+ma_uint32 AudioSystem::m_PlaybackDeviceCount = 0;
+ma_device_info* AudioSystem::m_PlaybackDeviceInfos = nullptr;
 
 void AudioSystem::Init()
 {
 	spdlog::debug("Audio engine initialising");
 
-	// Enumerate audio devices
 	if (ma_context_init(nullptr, 0, nullptr, &m_Context) != MA_SUCCESS)
 	{
 		spdlog::error("Failed to initialise audio - Could not initialise context");
 		return;
 	}
 
-	if(ma_context_get_devices(
+	m_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Audio"), nullptr);
+
+	RefreshDevices();
+
+	// Initialise engine using default device
+	SetOutputDevice(m_DefaultDeviceIndex);
+}
+
+void AudioSystem::OnEnabled() { m_EngineActive = true; }
+void AudioSystem::OnDisabled() { m_EngineActive = false; }
+
+/*
+ma_sound sound, sound2;
+void AudioSystem::OnEnabled()
+{
+	// Test Sound //
+	string audioPath = VFS::GetAbsolutePath("assets://Audio/Lifelike.mp3");
+	string audioPath2 = VFS::GetAbsolutePath("assets://Audio/Bell.mp3");
+
+	if (ma_sound_init_from_file(&m_Engine, audioPath.c_str(), MA_SOUND_FLAG_STREAM, nullptr, nullptr, &sound) != MA_SUCCESS)
+		spdlog::error("Failed to load file '{}'", audioPath.c_str());
+	if(ma_sound_init_from_file(&m_Engine, audioPath2.c_str(), 0, nullptr, nullptr, &sound2) != MA_SUCCESS)
+		spdlog::error("Failed to load file '{}'", audioPath2.c_str());
+
+	ma_sound_start(&sound);
+}
+*/
+
+void AudioSystem::Destroy()
+{
+	if (!m_EngineInitialised)
+		return;
+	m_EngineInitialised = false;
+
+	spdlog::debug("Audio engine shutting down");
+
+	ma_device_uninit(&m_Device);
+	ma_context_uninit(&m_Context);
+	ma_engine_uninit(&m_Engine);
+
+	delete m_ScriptClass;
+}
+
+void AudioSystem::RefreshDevices()
+{
+	// Enumerate audio devices
+	if (ma_context_get_devices(
 		&m_Context,
 		&m_PlaybackDeviceInfos,
 		&m_PlaybackDeviceCount,
 		nullptr, nullptr) != MA_SUCCESS)
 	{
-		spdlog::error("Failed to initialise audio - Could not get device info");
+		spdlog::error("Failed to enumerate device info");
 		return;
 	}
 
@@ -48,49 +106,8 @@ void AudioSystem::Init()
 			m_PlaybackDeviceInfos[i].isDefault ? "[Default]" : "");
 	}
 
-	// Initialise engine using default device
-	SetOutputDevice(m_DefaultDeviceIndex);
-}
-
-ma_sound sound, sound2;
-void AudioSystem::OnEnabled()
-{
-	// Test Sound //
-	ma_fence fence;
-	string audioPath = VFS::GetAbsolutePath("assets://Audio/Lifelike.mp3");
-	string audioPath2 = VFS::GetAbsolutePath("assets://Audio/Bell.mp3");
-
-	if (ma_sound_init_from_file(&m_Engine, audioPath.c_str(), MA_SOUND_FLAG_STREAM, nullptr, nullptr, &sound) != MA_SUCCESS)
-		spdlog::error("Failed to load file '{}'", audioPath.c_str());
-	if(ma_sound_init_from_file(&m_Engine, audioPath2.c_str(), 0, nullptr, nullptr, &sound2) != MA_SUCCESS)
-		spdlog::error("Failed to load file '{}'", audioPath2.c_str());
-
-	ma_sound_start(&sound);
-}
-
-#include <AquaEngine/Time.hpp>
-void AudioSystem::Update()
-{
-	static float time = 0;
-	time += Time::DeltaTime();
-
-	if (time >= 1.0f)
-	{
-		ma_sound_start(&sound2);
-		time -= 1.0f;
-	}
-}
-
-void AudioSystem::Destroy()
-{
-	if (!m_EngineInitialised)
-		return;
-
-	spdlog::debug("Audio engine shutting down");
-
-	ma_device_uninit(&m_Device);
-	ma_context_uninit(&m_Context);
-	ma_engine_uninit(&m_Engine);
+	// Inform scripting side of changes
+	m_ScriptClass->Invoke("_RefreshDevices");
 }
 
 void AudioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
@@ -106,12 +123,22 @@ void AudioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
 	ma_engine_read_pcm_frames((ma_engine*)pDevice->pUserData, pOutput, frameCount, NULL);
 }
 
+void AudioDeviceCallback(const ma_device_notification* notification)
+{
+	spdlog::debug("Audio device callback: {}", (int)notification->type);
+}
+
 void AudioSystem::SetOutputDevice(unsigned int deviceIndex)
 {
-	if(m_EngineInitialised)
-		ma_engine_uninit(&m_Engine);
-
 	deviceIndex = (std::min)(deviceIndex, m_PlaybackDeviceCount);
+	if (deviceIndex == m_CurrentDevice)
+		return; // No change
+
+	if (m_EngineInitialised)
+	{
+		ma_device_uninit(&m_Device);
+		ma_engine_uninit(&m_Engine);
+	}
 	
 	// Get device info
 	ma_device_info deviceInfo = m_PlaybackDeviceInfos[deviceIndex];
@@ -134,6 +161,7 @@ void AudioSystem::SetOutputDevice(unsigned int deviceIndex)
 	ma_engine_config engineConfig = ma_engine_config_init();
 	engineConfig.pPlaybackDeviceID = &deviceInfo.id;
 	engineConfig.pDevice = &m_Device;
+	engineConfig.notificationCallback = AudioDeviceCallback;
 
 	if (ma_engine_init(&engineConfig, &m_Engine) != MA_SUCCESS)
 	{
@@ -143,8 +171,13 @@ void AudioSystem::SetOutputDevice(unsigned int deviceIndex)
 	}
 
 	m_EngineInitialised = true;
+	m_CurrentDevice = deviceIndex;
+
+	// Notify scripting of change
+	m_ScriptClass->Invoke("_OutputDeviceChanged");
 }
 
+unsigned int AudioSystem::GetOutputDevice() { return m_CurrentDevice; }
 unsigned int AudioSystem::GetDeviceCount() { return m_PlaybackDeviceCount; }
 unsigned int AudioSystem::GetDefaultDevice() { return m_DefaultDeviceIndex; }
 const char* AudioSystem::GetDeviceName(unsigned int index)
@@ -155,10 +188,19 @@ const char* AudioSystem::GetDeviceName(unsigned int index)
 	return m_PlaybackDeviceInfos[index].name;
 }
 
+void AudioSystem::PlayOnce(string& path) { PlayOnce(path.c_str()); }
+void AudioSystem::PlayOnce(const char* path)
+{
+	if (m_EngineActive && m_EngineInitialised)
+		ma_engine_play_sound(&m_Engine, path, nullptr);
+}
+
 #else // Audio disabled
 void AudioSystem::Init() { this->Enable(false); }
 void AudioSystem::Update() {}
 void AudioSystem::Destroy() {}
+void AudioSystem::OnEnabled() {}
+void AudioSystem::OnDisabled() {}
 
 void AudioSystem::SetOutputDevice(unsigned int) { }
 unsigned int AudioSystem::GetDeviceCount() { return 0; }

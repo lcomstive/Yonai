@@ -32,6 +32,8 @@ namespace TestGame
 		private VideoMode[] m_VideoModes;
 		private int m_VideoModeIndex = 0;
 
+		private uint m_AudioDeviceIndex = 0;
+
 		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 		
@@ -109,6 +111,8 @@ namespace TestGame
 
 			Vector3 v = new Vector3(1, 2, 5);
 			Log.Debug(v);
+
+			m_AudioDeviceIndex = Audio.OutputDevice.Index;
 		}
 
 		protected override void Update()
@@ -143,6 +147,13 @@ namespace TestGame
 			if (Input.IsKeyDown(Key.P))
 				ProjectileSpread += Time.DeltaTime;
 
+			if (Input.IsKeyPressed(Key.KP_9))
+				SetNextAudioDevice();
+			if (Input.IsKeyPressed(Key.KP_8))
+				SetPreviousAudioDevice();
+
+			if(Input.IsKeyDown(Key.KP_5))
+				Audio.PlayOnce("assets://Audio/Bell.mp3");
 		}
 
 		private float ProjectileForce = 20.0f;
@@ -261,6 +272,23 @@ namespace TestGame
 		{
 			if (m_VideoModeIndex > 0)
 				Screen.VideoMode = (m_VideoMode = m_VideoModes[--m_VideoModeIndex]);
+		}
+
+		private void SetNextAudioDevice()
+		{
+			m_AudioDeviceIndex++;
+			if (m_AudioDeviceIndex >= Audio.Devices.Length)
+				m_AudioDeviceIndex = 0;
+			Audio.OutputDevice = Audio.Devices[m_AudioDeviceIndex];
+		}
+
+		private void SetPreviousAudioDevice()
+		{
+			if (m_AudioDeviceIndex > 0)
+				m_AudioDeviceIndex--;
+			else
+				m_AudioDeviceIndex = (uint)Audio.Devices.Length - 1;
+			Audio.OutputDevice = Audio.Devices[m_AudioDeviceIndex];
 		}
 	}
 }

@@ -8,7 +8,10 @@
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/FPSCamera.hpp>
 #include <AquaEngine/Platform/FixDLLBoundaries.hpp>
+
+// Systems //
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
 // Views //
@@ -74,6 +77,8 @@ void EditorApp::Setup()
 	// Instead store pointer to render system and call manually
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
 	m_RenderSystem->Enable(false);
+
+	SystemManager::Global()->Add<AudioSystem>();
 
 	Add<ViewportView>();
 
