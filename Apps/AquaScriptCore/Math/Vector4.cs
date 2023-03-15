@@ -2,11 +2,12 @@
 
 namespace AquaEngine
 {
+	[System.Diagnostics.DebuggerDisplay("({x}, {y}, {z}, {w})")]
 	public struct Vector4
 	{
 		public float x, y, z, w;
 
-		public float Magnitude => _aqua_internal_Magnitude(ref this);
+		public float Magnitude => _Magnitude(ref this);
 
 		public static Vector4 Zero		=> new Vector4(0, 0, 0, 0);
 		public static Vector4 One		=> new Vector4(1, 1, 1, 1);
@@ -42,7 +43,7 @@ namespace AquaEngine
 		public static Vector4 operator /(Vector4 a, float b) => new Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Magnitude(ref Vector4 input);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector4 input);
 		#endregion
 	}
 }

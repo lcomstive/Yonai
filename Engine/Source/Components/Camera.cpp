@@ -45,3 +45,13 @@ void Camera::FillShader(Shader* shader, ivec2 resolution)
 
 void Camera::SetMainCamera() { s_MainCamera = this; }
 Camera* Camera::GetMainCamera() { return s_MainCamera; }
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_GET_SET(Camera, Far, float)
+ADD_MANAGED_GET_SET(Camera, Near, float)
+ADD_MANAGED_GET_SET(Camera, FieldOfView, float)
+ADD_MANAGED_GET_SET(Camera, Orthographic, bool)
+ADD_MANAGED_GET_SET(Camera, OrthographicSize, float)
+#pragma endregion

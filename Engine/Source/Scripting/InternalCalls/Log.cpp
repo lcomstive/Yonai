@@ -1,6 +1,7 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 
 /// <summary>
 /// Levels:
@@ -12,7 +13,7 @@
 /// </summary>
 /// <param name="msg"></param>
 /// <param name="level"></param>
-void NativeLog(MonoString* rawMsg, int level)
+ADD_MANAGED_METHOD(Log, NativeLog, void, (MonoString* rawMsg, int level))
 {
 	char* msg = mono_string_to_utf8(rawMsg);
 	switch (level)
@@ -24,9 +25,4 @@ void NativeLog(MonoString* rawMsg, int level)
 	case 4: spdlog::critical(msg);	break;
 	}
 	mono_free(msg);
-}
-
-void AquaEngine::Scripting::Assembly::AddLogInternalCalls()
-{
-	mono_add_internal_call("AquaEngine.Log::_aqua_internal_NativeLog", (const void*)NativeLog);
 }

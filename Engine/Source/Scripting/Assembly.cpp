@@ -6,6 +6,7 @@
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Components/MeshRenderer.hpp>
 #include <AquaEngine/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
@@ -99,6 +100,7 @@ size_t Assembly::GetTypeHash(MonoType* type)
 	return it->second;
 }
 
+size_t Assembly::GetTypeHash(std::type_index& type) { return type.hash_code(); }
 size_t Assembly::GetTypeHash(MonoClass* monoClass) { return GetTypeHash(mono_class_get_type(monoClass)); }
 
 Assembly::ManagedComponentData Assembly::GetManagedComponentData(size_t unmanagedType)
@@ -149,6 +151,12 @@ void Assembly::ClearCachedTypes()
 	s_ReverseTypeHashes.clear();
 }
 
+size_t Assembly::GetUnmanagedHash(size_t managedHash)
+{
+	return s_InternalManagedComponentTypes.find(managedHash) == s_InternalManagedComponentTypes.end() ?
+		managedHash : s_InternalManagedComponentTypes[managedHash].Type;
+}
+
 void Assembly::CacheTypes(bool isCore)
 {
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
@@ -158,7 +166,7 @@ void Assembly::CacheTypes(bool isCore)
 	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
 	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
 
-	spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
+	// spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
 	{
 		// Get metadata
@@ -201,21 +209,6 @@ void Assembly::CacheTypes(bool isCore)
 	}
 }
 
-void Assembly::AddInternalCalls()
-{
-	AddLogInternalCalls();
-	AddTimeInternalCalls();
-	AddWorldInternalCalls();
-	AddInputInternalCalls();
-	AddVectorInternalCalls();
-	AddCameraInternalCalls();
-	AddWindowInternalCalls();
-	AddSystemInternalCalls();
-	AddTransformInternalCalls();
-	AddApplicationInternalCalls();
-	AddSpriteRendererInternalCalls();
-}
-
 #define AddComponentMethod(name) \
 	method = mono_class_get_method_from_name(component, #name, 0); \
 	ComponentMethod##name = method ? (EmptyMethodFn)mono_method_get_unmanaged_thunk(method) : nullptr;
@@ -228,6 +221,7 @@ void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
+	AddInternalManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
 	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 
 	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
@@ -267,4 +261,13 @@ void Assembly::LoadScriptCoreTypes()
 	AddSystemMethod(Update)
 	AddSystemMethod(Destroyed)
 #pragma endregion
+}
+
+// Add internal calls to mono. Binding C++ to C#
+#include <AquaEngine/Glue.hpp>
+
+void Assembly::AddInternalCalls()
+{
+	for (auto pair : _InternalMethods)
+		mono_add_internal_call(pair.first, pair.second);
 }

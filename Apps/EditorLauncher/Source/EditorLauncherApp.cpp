@@ -28,7 +28,13 @@ void EditorLauncherApp::Setup()
 {
 	WindowedApplication::Setup();
 
-	FIX_DLL_BOUNDARIES();
+	// FIX_DLL_BOUNDARIES();
+	ImGui::SetCurrentContext(SystemManager::Global()->Get<Systems::ImGUISystem>()->GetContext());
+	
+	glfwMakeContextCurrent(Window::GetNativeHandle());
+	int result = gladLoadGL(glfwGetProcAddress);
+
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	Window::SetTitle("Aqua Editor");
@@ -101,10 +107,10 @@ void EditorLauncherApp::OnDraw()
 		ImGui::TableNextRow(ImGuiTableRowFlags_None);
 		ImGui::TableNextColumn();
 
-		ImGui::Text(info.Name.c_str());
+		ImGui::Text("%s", info.Name.c_str());
 
 		ImColor subtextColor = { 1.0f, 1.0f, 1.0f, 0.5f };
-		ImGui::TextColored(subtextColor, info.Path.c_str());
+		ImGui::TextColored(subtextColor, "%s", info.Path.c_str());
 
 		ImGui::TableNextColumn();
 

@@ -10,15 +10,6 @@ add_executable(${PROJECT_NAME}
 	${EXECUTABLE_RESOURCES}
 )
 
-if(WIN32)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		LINK_FLAGS_DEBUG   			"/SUBSYSTEM:CONSOLE"
-		LINK_FLAGS_RELEASE 			"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_MINSIZEREL 		"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-		LINK_FLAGS_RELWITHDEBINFO 	"/SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup"
-	)
-endif()
-
 # Group source files inside IDE
 source_group("Resources" FILES ${EXECUTABLE_RESOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source"  PREFIX "Source"  FILES ${SOURCE_FILES})
@@ -44,5 +35,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets/
+		${AQUA_RESOURCES_DIR}/Assets/
 )
+
+AddPlatformSpecifics()

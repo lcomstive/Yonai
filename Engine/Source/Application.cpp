@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <AquaEngine/Time.hpp>
+#include <AquaEngine/Utils.hpp>
 #include <AquaEngine/Application.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 
@@ -181,8 +182,6 @@ void Application::Run()
 void Application::Exit() { m_Running = false; }
 Application* Application::Current() { return s_Instance; }
 
-void ToLower(std::string& input) { transform(input.begin(), input.end(), input.begin(), ::tolower); }
-
 void Application::ProcessArgs(int argc, char** argv)
 {
 	size_t previousArgCount = m_Args.size();
@@ -312,24 +311,16 @@ void WindowedApplication::Run()
 #pragma endregion
 
 #pragma region Managed Glue
-#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+ADD_MANAGED_METHOD(Application, Exit)
+{ Application::Current()->Exit(); }
 
-void Exit() { Application::Current()->Exit(); }
-
-MonoString* GetArg(MonoString* name, MonoString* defaultValue)
+ADD_MANAGED_METHOD(Application, GetArg, MonoString*, (MonoString* name, MonoString* defaultValue))
 {
 	string value = Application::Current()->GetArg(mono_string_to_utf8(name), mono_string_to_utf8(defaultValue));
 	return mono_string_new(mono_domain_get(), value.c_str());
 }
 
-bool HasArg(MonoString* name) { return Application::Current()->HasArg(mono_string_to_utf8(name)); }
-
-#define ADD_APP_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Application::_aqua_internal_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddApplicationInternalCalls()
-{
-	ADD_APP_INTERNAL_CALL(Exit)
-	ADD_APP_INTERNAL_CALL(GetArg)
-	ADD_APP_INTERNAL_CALL(HasArg)
-}
+ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
+{ return Application::Current()->HasArg(mono_string_to_utf8(name)); }
 #pragma endregion

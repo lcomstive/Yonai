@@ -1,95 +1,22 @@
 #include <glm/glm.hpp>
 #include <mono/jit/jit.h>
 #include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
 using namespace AquaEngine;
 using namespace AquaEngine::Components;
 
-Transform* GetTransform(unsigned int worldID, unsigned int entityID)
-{
-	World* world = World::GetWorld(worldID);
-	if (!world) return nullptr;
-	return world->GetEntity(entityID).GetComponent<Transform>();
-}
+ADD_MANAGED_METHOD(Transform, GetPosition, void, (void* handle, glm::vec3* output)) { *output = ((Transform*)handle)->Position; }
+ADD_MANAGED_METHOD(Transform, SetPosition, void, (void* handle, glm::vec3* input)) { ((Transform*)handle)->Position = *input; }
 
-void SetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* value)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		transform->Position = *value;
-}
+ADD_MANAGED_METHOD(Transform, GetRotation, void, (void* handle, glm::quat* output)) { *output = ((Transform*)handle)->Rotation; }
+ADD_MANAGED_METHOD(Transform, SetRotation, void, (void* handle, glm::quat* input)) { ((Transform*)handle)->Rotation = *input; }
 
-void GetPosition(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Position;
-}
+ADD_MANAGED_METHOD(Transform, GetScale, void, (void* handle, glm::vec3* output)) { *output = ((Transform*)handle)->Scale; }
+ADD_MANAGED_METHOD(Transform, SetScale, void, (void* handle, glm::vec3* input)) { ((Transform*)handle)->Scale = *input; }
 
-void SetRotation(unsigned int worldID, unsigned int entityID, glm::quat* value)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		transform->Rotation = *value;
-}
-
-void GetRotation(unsigned int worldID, unsigned int entityID, glm::quat* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Rotation;
-}
-
-void SetScale(unsigned int worldID, unsigned int entityID, glm::vec3* value)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		transform->Scale = *value;
-}
-
-void GetScale(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Scale;
-}
-
-void GetUp(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Up();
-}
-
-void GetForward(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Forward();
-}
-
-void GetRight(unsigned int worldID, unsigned int entityID, glm::vec3* outValue)
-{
-	Transform* transform = GetTransform(worldID, entityID);
-	if (transform)
-		*outValue = transform->Right();
-}
-
-#define ADD_TRANSFORM_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Transform::_aqua_internal_Transform_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddTransformInternalCalls()
-{
-	ADD_TRANSFORM_INTERNAL_CALL(SetScale);
-	ADD_TRANSFORM_INTERNAL_CALL(GetScale);
-	ADD_TRANSFORM_INTERNAL_CALL(SetPosition);
-	ADD_TRANSFORM_INTERNAL_CALL(GetPosition);
-	ADD_TRANSFORM_INTERNAL_CALL(SetRotation);
-	ADD_TRANSFORM_INTERNAL_CALL(GetRotation);
-	
-	ADD_TRANSFORM_INTERNAL_CALL(GetUp);
-	ADD_TRANSFORM_INTERNAL_CALL(GetForward);
-	ADD_TRANSFORM_INTERNAL_CALL(GetRight);
-}
+ADD_MANAGED_METHOD(Transform, GetUp, void, (void* handle, glm::vec3* value)) { *value = ((Transform*)handle)->Up(); }
+ADD_MANAGED_METHOD(Transform, GetRight, void, (void* handle, glm::vec3* value)) { *value = ((Transform*)handle)->Right(); }
+ADD_MANAGED_METHOD(Transform, GetForward, void, (void* handle, glm::vec3* value)) { *value = ((Transform*)handle)->Forward(); }

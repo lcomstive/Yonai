@@ -57,6 +57,7 @@ mat4 Transform::GetModelMatrix()
 {
 	// Generate model matrix
 	quat globalRot = GetGlobalRotation();
+
 	mat4 translationMatrix = translate(mat4(1.0f), GetGlobalPosition());
 	mat4 scaleMatrix = scale(mat4(1.0f), GetGlobalScale());
 	mat4 rotationMatrix = toMat4(globalRot);

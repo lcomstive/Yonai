@@ -1,16 +1,17 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Camera : Component
+	public class Camera : NativeComponent
 	{
 		/// <summary>
 		/// Field of view
 		/// </summary>
 		public float FOV
 		{
-			get => _aqua_internal_Camera_GetFOV(World.ID, Entity.ID);
-			set => _aqua_internal_Camera_SetFOV(World.ID, Entity.ID, value);
+			get => _GetFieldOfView(Handle);
+			set => _SetFieldOfView(Handle, value);
 		}
 		
 		/// <summary>
@@ -18,8 +19,8 @@ namespace AquaEngine
 		/// </summary>
 		public float Near
 		{
-			get => _aqua_internal_Camera_GetNear(World.ID, Entity.ID);
-			set => _aqua_internal_Camera_SetNear(World.ID, Entity.ID, value);
+			get => _GetNear(Handle);
+			set => _SetNear(Handle, value);
 		}
 
 		/// <summary>
@@ -27,8 +28,8 @@ namespace AquaEngine
 		/// </summary>
 		public float Far
 		{
-			get => _aqua_internal_Camera_GetFar(World.ID, Entity.ID);
-			set => _aqua_internal_Camera_SetFar(World.ID, Entity.ID, value);
+			get => _GetFar(Handle);
+			set => _SetFar(Handle, value);
 		}
 
 		/// <summary>
@@ -36,8 +37,8 @@ namespace AquaEngine
 		/// </summary>
 		public bool Orthographic
 		{
-			get => _aqua_internal_Camera_GetOrtho(World.ID, Entity.ID);
-			set => _aqua_internal_Camera_SetOrtho(World.ID, Entity.ID, value);
+			get => _GetOrthographic(Handle);
+			set => _SetOrthographic(Handle, value);
 		}
 
 		/// <summary>
@@ -45,41 +46,41 @@ namespace AquaEngine
 		/// </summary>
 		public float OrthographicSize
 		{
-			get => _aqua_internal_Camera_GetOrthoSize(World.ID, Entity.ID);
-			set => _aqua_internal_Camera_SetOrthoSize(World.ID, Entity.ID, value);
+			get => _GetOrthographicSize(Handle);
+			set => _SetOrthographicSize(Handle, value);
 		}
 
 		public static Camera Main
 		{
 			get
 			{
-				_aqua_internal_Camera_GetMainCamera(out uint worldID, out uint entityID);
+				_GetMainCamera(out uint worldID, out uint entityID);
 				if (worldID == Entity.InvalidEntityID || entityID == Entity.InvalidEntityID)
 					return null;
 				return World.Get(worldID).GetEntity(entityID).GetComponent<Camera>();
 			}
 		}
 
-		public void SetMain() => _aqua_internal_Camera_SetMainCamera(World.ID, Entity.ID);
+		public void SetMain() => _SetMainCamera(Handle);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Camera_GetFOV(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetFOV(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Camera_GetNear(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetNear(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetNear(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetNear(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Camera_GetFar(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetFar(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFar(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFar(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_Camera_GetOrtho(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetOrtho(uint worldID, uint entityID, bool value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetOrthographic(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographic(IntPtr handle, bool value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _aqua_internal_Camera_GetOrthoSize(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetOrthoSize(uint worldID, uint entityID, float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_SetMainCamera(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Camera_GetMainCamera(out uint worldID, out uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMainCamera(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMainCamera(out uint worldID, out uint entityID);
 		#endregion
 	}
 }

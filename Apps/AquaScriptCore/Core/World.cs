@@ -41,17 +41,28 @@ namespace AquaEngine
 				Current = null;
 			if (s_Instances.ContainsKey(ID))
 				s_Instances.Remove(ID);
-			return _aqua_internal_World_Destroy(ID);
+			return _Destroy(ID);
 		}
 
 		#region Entities
 		/// <returns>Instance of entity matching ID, or null if does not exist in this world</returns>
 		public Entity GetEntity(uint entityID) => HasEntity(entityID) ? m_Entities[entityID] : null;
 
+		/// <summary>
+		/// Creates a new entity in this world
+		/// </summary>
+		public Entity CreateEntity()
+		{
+			uint entityID = _CreateEntity(ID);
+			Entity e = new Entity(this, entityID);
+			m_Entities.Add(entityID, e);
+			return e;
+		}
+
 		/// <returns>True if entity with matching ID exists in this world</returns>
 		public bool HasEntity(uint entityID)
 		{
-			bool hasEntity = _aqua_internal_World_HasEntity(ID, entityID);
+			bool hasEntity = _HasEntity(ID, entityID);
 			bool dictionaryHasEntity = m_Entities.ContainsKey(entityID);
 			if (!hasEntity && dictionaryHasEntity)
 				m_Entities.Remove(entityID);
@@ -62,14 +73,14 @@ namespace AquaEngine
 
 		public void DestroyEntity(uint entityID)
 		{
-			_aqua_internal_World_DestroyEntity(ID, entityID);
+			_DestroyEntity(ID, entityID);
 			if (m_Entities.ContainsKey(entityID))
 				m_Entities.Remove(entityID);
 		}
 
 		public Entity[] GetEntities()
 		{
-			uint[] entityIDs = _aqua_internal_World_GetEntities(ID);
+			uint[] entityIDs = _GetEntities(ID);
 			if(entityIDs == null)
 				return null;
 
@@ -88,7 +99,7 @@ namespace AquaEngine
 
 		public T[] GetComponents<T>() where T : Component
 		{
-			uint[] entityIDs = _aqua_internal_World_GetComponents(ID, typeof(T));
+			uint[] entityIDs = _GetComponents(ID, typeof(T));
 			if (entityIDs == null)
 				return new T[0];
 
@@ -105,7 +116,7 @@ namespace AquaEngine
 		
 		public (T1[], T2[]) GetComponents<T1, T2>() where T1 : Component where T2 : Component
 		{
-			uint[] entityIDs = _aqua_internal_World_GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) });
+			uint[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) });
 			if (entityIDs == null)
 				return (new T1[0], new T2[0]);
 
@@ -124,7 +135,7 @@ namespace AquaEngine
 		
 		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>() where T1 : Component where T2 : Component where T3 : Component
 		{
-			uint[] entityIDs = _aqua_internal_World_GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) });
+			uint[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) });
 			if (entityIDs == null)
 				return (new T1[0], new T2[0], new T3[0]);
 
@@ -145,13 +156,13 @@ namespace AquaEngine
 		#endregion
 
 		#region Systems
-		public bool HasSystem<T>() => _aqua_internal_World_HasSystem(ID, typeof(T));
+		public bool HasSystem<T>() => _HasSystem(ID, typeof(T));
 
-		public T AddSystem<T>() => (T)_aqua_internal_World_AddSystem(ID, typeof(T));
+		public T AddSystem<T>() => (T)_AddSystem(ID, typeof(T));
 
-		public T GetSystem<T>() => (T)_aqua_internal_World_GetSystem(ID, typeof(T));
+		public T GetSystem<T>() => (T)_GetSystem(ID, typeof(T));
 
-		public bool RemoveSystem<T>() => _aqua_internal_World_RemoveSystem(ID, typeof(T));
+		public bool RemoveSystem<T>() => _RemoveSystem(ID, typeof(T));
 		#endregion
 
 		#region Static getters
@@ -162,7 +173,7 @@ namespace AquaEngine
 		{
 			if (s_Instances.ContainsKey(id))
 				return s_Instances[id];
-			if (!_aqua_internal_World_Get(id, out string name))
+			if (!_Get(id, out string name))
 				return null;
 			return new World(id, name);
 		}
@@ -174,34 +185,34 @@ namespace AquaEngine
 		/// <returns>Instance of generated world</returns>
 		public static World Create(string name)
 		{
-			uint worldID = _aqua_internal_World_Create(name);
+			uint worldID = _Create(name);
 			return new World(worldID, name);
 		}
 
 		/// <returns>True if world exists with matching ID</returns>
-		public static bool Exists(uint id) => _aqua_internal_World_Exists(id);
+		public static bool Exists(uint id) => _Exists(id);
 		#endregion
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_Destroy(uint id);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _aqua_internal_World_Create(string name);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_Exists(uint worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_Get(uint worldID, out string name);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Destroy(uint id);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _Create(string name);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(uint worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Get(uint worldID, out string name);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetEntities(uint worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetComponents(uint worldID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _aqua_internal_World_GetComponentsMultiple(uint worldID, Type[] types);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetEntities(uint worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetComponents(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetComponentsMultiple(uint worldID, Type[] types);
 
 		// Entities
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _aqua_internal_World_HasEntity(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _aqua_internal_World_CreateEntity(uint worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_World_DestroyEntity(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasEntity(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _CreateEntity(uint worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyEntity(uint worldID, uint entityID);
 
 		// Systems
-		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool _aqua_internal_World_HasSystem(uint worldID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _aqua_internal_World_GetSystem(uint worldID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _aqua_internal_World_AddSystem(uint worldID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool _aqua_internal_World_RemoveSystem(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _HasSystem(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _GetSystem(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _AddSystem(uint worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _RemoveSystem(uint worldID, Type type);
 		#endregion
 	}
 }

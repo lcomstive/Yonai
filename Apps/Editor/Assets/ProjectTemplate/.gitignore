@@ -2,6 +2,9 @@
 .vs/
 .vscode/
 
+# JetBrains IDE
+.idea/
+
 # Mac OS meta files
 .DS_Store
 *.DS_Store
@@ -15,5 +18,6 @@
 .aqua/
 
 # Aqua C# projects should be created locally
-*.vcproj
 *.sln
+*.vcproj
+*.csproj

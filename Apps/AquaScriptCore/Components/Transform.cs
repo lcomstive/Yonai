@@ -1,44 +1,45 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Transform : Component
+	public class Transform : NativeComponent
 	{
 		public Vector3 Position
 		{
 			get
 			{
-				_aqua_internal_Transform_GetPosition(World.ID, Entity.ID, out Vector3 position);
+				_GetPosition(Handle, out Vector3 position);
 				return position;
 			}
-			set => _aqua_internal_Transform_SetPosition(World.ID, Entity.ID, ref value);
+			set => _SetPosition(Handle, ref value);
 		}
 
 		public Quaternion Rotation
 		{
 			get
 			{
-				_aqua_internal_Transform_GetRotation(World.ID, Entity.ID, out Quaternion rotation);
+				_GetRotation(Handle, out Quaternion rotation);
 				return rotation;
 			}
-			set => _aqua_internal_Transform_SetRotation(World.ID, Entity.ID, ref value);
+			set => _SetRotation(Handle, ref value);
 		}
 
 		public Vector3 Scale
 		{
 			get
 			{
-				_aqua_internal_Transform_GetScale(World.ID, Entity.ID, out Vector3 scale);
+				_GetScale(Handle, out Vector3 scale);
 				return scale;
 			}
-			set => _aqua_internal_Transform_SetScale(World.ID, Entity.ID, ref value);
+			set => _SetScale(Handle, ref value);
 		}
 
 		public Vector3 Right
 		{
 			get
 			{
-				_aqua_internal_Transform_GetRight(World.ID, Entity.ID, out Vector3 value);
+				_GetRight(Handle, out Vector3 value);
 				return value;
 			}
 		}
@@ -47,7 +48,7 @@ namespace AquaEngine
 		{
 			get
 			{
-				_aqua_internal_Transform_GetUp(World.ID, Entity.ID, out Vector3 value);
+				_GetUp(Handle, out Vector3 value);
 				return value;
 			}
 		}
@@ -56,22 +57,24 @@ namespace AquaEngine
 		{
 			get
 			{
-				_aqua_internal_Transform_GetForward(World.ID, Entity.ID, out Vector3 value);
+				_GetForward(Handle, out Vector3 value);
 				return value;
 			}
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_SetPosition(uint worldID, uint entityID, ref Vector3 position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetPosition(uint worldID, uint entityID, out Vector3 position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_SetRotation(uint worldID, uint entityID, ref Quaternion rotation);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetRotation(uint worldID, uint entityID, out Quaternion rotation);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_SetScale(uint worldID, uint entityID, ref Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetScale(uint worldID, uint entityID, out Vector3 scale);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetPosition(IntPtr handle, ref Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetPosition(IntPtr handle, out Vector3 value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetUp(uint worldID, uint entityID, out Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetForward(uint worldID, uint entityID, out Vector3 scale);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _aqua_internal_Transform_GetRight(uint worldID, uint entityID, out Vector3 scale);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRotation(IntPtr handle, ref Quaternion value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRotation(IntPtr handle, out Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetScale(IntPtr handle, ref Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetScale(IntPtr handle, out Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetUp(IntPtr handle, out Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRight(IntPtr handle, out Vector3 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetForward(IntPtr handle, out Vector3 value);
 		#endregion
 	}
 }

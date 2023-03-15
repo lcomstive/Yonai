@@ -12,18 +12,15 @@ jobs:
         config:
         - {
             name: "Windows",
-            os: windows-latest,
-            triplet: 'x64-windows-static'
+            os: windows-latest
           }
         - {
             name: "Linux",
-            os: ubuntu-latest,
-            triplet: 'x64-linux'
+            os: ubuntu-latest
           }
         - {
             name: "MacOS",
-            os: [ macOS, arm64, self-hosted ],
-            triplet: 'arm64-osx'
+            os: macOS-latest
           }
 
     # Get source
@@ -38,13 +35,6 @@ jobs:
 
     - if: matrix.config.os == 'ubuntu-latest'
       run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev
-
-    - name: VCPKG
-      uses: lukka/run-vcpkg@v10
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/Engine/Vendor/vcpkg'
-      env:
-        VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
@@ -66,9 +56,15 @@ jobs:
     - if: matrix.config.name != 'Windows'
       run: echo "BINARY_DIR=${{ github.workspace }}/build/bin/" >> $GITHUB_ENV
 
+    # Restore CMake build cache
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.name }}-${{ env.CMAKE_CONFIG }}
+
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DAQUA_ENGINE_BUILD_STATIC=OFF
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore
@@ -91,19 +87,19 @@ jobs:
 
     # Create installation package
     - name: Package
-      run: cd ${{ github.workspace }}/build; cpack
+      run: cd ${{ github.workspace }}/build; cpack -C ${{ env.CMAKE_CONFIG }}
 
     # Upload generated artifact
     - uses: actions/upload-artifact@v3
       if: matrix.config.name != 'Windows'
       with:
         if-no-files-found: error
-        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}-${{ github.ref_name }}
         path: ${{ github.workspace }}/build/Aqua\ Editor\ v*
 
     - uses: actions/upload-artifact@v3
       if: matrix.config.name == 'Windows'
       with:
         if-no-files-found: error
-        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}
+        name: AquaEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}-${{ github.ref_name }}
         path: ${{ github.workspace }}\build\Aqua Editor v*

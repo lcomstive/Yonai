@@ -15,5 +15,6 @@
 .aqua/
 
 # Aqua C# projects should be created locally
-*.vcproj
 *.sln
+*.vcproj
+*.csproj

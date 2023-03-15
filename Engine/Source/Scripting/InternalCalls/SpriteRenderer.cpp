@@ -1,5 +1,5 @@
 #include <mono/jit/jit.h>
-#include <AquaEngine/Scripting/Assembly.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Components/SpriteRenderer.hpp>
 
 using namespace AquaEngine;
@@ -11,53 +11,41 @@ SpriteRenderer* GetRenderer(unsigned int worldID, unsigned int entityID)
 	return world ? world->GetEntity(entityID).GetComponent<SpriteRenderer>() : nullptr;
 }
 
-unsigned int GetSprite(unsigned int worldID, unsigned int entityID)
+ADD_MANAGED_METHOD(SpriteRenderer, GetSprite, unsigned int, (unsigned int worldID, unsigned int entityID))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	return renderer ? renderer->Sprite : InvalidResourceID;
 }
 
-void SetSprite(unsigned int worldID, unsigned int entityID, ResourceID sprite)
+ADD_MANAGED_METHOD(SpriteRenderer, SetSprite, void, (unsigned int worldID, unsigned int entityID, unsigned int sprite))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	if (renderer)
 		renderer->Sprite = sprite;
 }
 
-unsigned int GetShader(unsigned int worldID, unsigned int entityID)
+ADD_MANAGED_METHOD(SpriteRenderer, GetShader, unsigned int, (unsigned int worldID, unsigned int entityID))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	return renderer ? renderer->Shader : InvalidResourceID;
 }
 
-void SetShader(unsigned int worldID, unsigned int entityID, ResourceID shader)
+ADD_MANAGED_METHOD(SpriteRenderer, SetShader, void, (unsigned int worldID, unsigned int entityID, unsigned int shader))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	if (renderer)
 		renderer->Shader = shader;
 }
 
-void GetColour(unsigned int worldID, unsigned int entityID, glm::vec4* colour)
+ADD_MANAGED_METHOD(SpriteRenderer, GetColour, void, (unsigned int worldID, unsigned int entityID, glm::vec4* colour))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	*colour = renderer ? renderer->Colour : glm::vec4();
 }
 
-void SetColour(unsigned int worldID, unsigned int entityID, glm::vec4* colour)
+ADD_MANAGED_METHOD(SpriteRenderer, SetColour, void, (unsigned int worldID, unsigned int entityID, glm::vec4* colour))
 {
 	SpriteRenderer* renderer = GetRenderer(worldID, entityID);
 	if (renderer)
 		renderer->Colour = *colour;
-}
-
-#define ADD_SPRITE_RENDERER_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.SpriteRenderer::_aqua_internal_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddSpriteRendererInternalCalls()
-{
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(GetSprite)
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(SetSprite)
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(GetShader)
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(SetShader)
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(SetColour)
-	ADD_SPRITE_RENDERER_INTERNAL_CALL(GetColour)
 }

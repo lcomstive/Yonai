@@ -114,7 +114,7 @@ void Texture::GenerateImage(bool hdr)
 
 #ifndef NDEBUG
 	profileTimer.Stop();
-	spdlog::debug("Loaded texture '{}' in {}ms", m_Path, profileTimer.ElapsedTime().count());
+	spdlog::debug("Loaded texture '{}' in {}ms {}", m_Path, profileTimer.ElapsedTime().count(), hdr ? "[HDR]" : "");
 #endif
 }
 
@@ -128,3 +128,24 @@ void Texture::Bind(unsigned int index)
 	glActiveTexture(GL_TEXTURE0 + index);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 }
+
+#pragma region Managed Binding
+#include <AquaEngine/Resource.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(Texture, Load0, void, (MonoString* path, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+{
+	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path));
+	*outHandle = Resource::Get<Texture>(*outResourceID);
+}
+
+ADD_MANAGED_METHOD(Texture, Load1, void, (MonoString* path, MonoString* filePath, bool hdr, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+{
+	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path), mono_string_to_utf8(filePath), hdr);
+	*outHandle = Resource::Get<Texture>(*outResourceID);
+}
+
+ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)
+{ ((Texture*)instance)->Bind(index); }
+
+#pragma endregion

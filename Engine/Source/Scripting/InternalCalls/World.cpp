@@ -5,6 +5,7 @@
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Systems/ScriptSystem.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 #include <AquaEngine/Components/ScriptComponent.hpp>
 
@@ -21,18 +22,11 @@ extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 extern EmptyMethodFn SystemMethodDestroyed;
 extern SystemMethodEnabledFn SystemMethodEnabled;
 
-size_t GetComponentType(MonoReflectionType* componentType)
-{
-	MonoClass* klass = mono_type_get_class(mono_reflection_type_get_type(componentType));
-	size_t managedType = Assembly::GetTypeHash(mono_class_get_type(klass));
-
-	size_t type = Assembly::GetTypeHash(mono_class_get_type(klass));
-
-	return Assembly::GetManagedComponentData(managedType).Type;
-}
+size_t _GetComponentType(MonoReflectionType* componentType)
+{ return Assembly::GetTypeHash(mono_reflection_type_get_type(componentType)); }
 
 #pragma region World
-bool World_Get(unsigned int worldID, MonoString** outName)
+ADD_MANAGED_METHOD(World, Get, bool, (unsigned int worldID, MonoString** outName))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -46,12 +40,10 @@ bool World_Get(unsigned int worldID, MonoString** outName)
 	return true;
 }
 
-bool World_Exists(unsigned int worldID)
-{
-	return World::GetWorld(worldID) != nullptr;
-}
+ADD_MANAGED_METHOD(World, Exists, bool, (unsigned int worldID))
+{ return World::GetWorld(worldID) != nullptr; }
 
-bool World_Destroy(unsigned int worldID)
+ADD_MANAGED_METHOD(World, Destroy, bool, (unsigned int worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -61,32 +53,32 @@ bool World_Destroy(unsigned int worldID)
 	return true;
 }
 
-unsigned int World_Create(MonoString* name)
+ADD_MANAGED_METHOD(World, Create, bool, (MonoString* name))
 {
 	World* world = new World(mono_string_to_utf8(name));
 	return world->ID();
 }
 
-unsigned int World_CreateEntity(unsigned int worldID)
+ADD_MANAGED_METHOD(World, CreateEntity, unsigned int, (unsigned int worldID))
 {
 	World* world = World::GetWorld(worldID);
 	return world ? world->CreateEntity().ID() : InvalidEntityID;
 }
 
-void World_DestroyEntity(unsigned int worldID, unsigned int entityID)
+ADD_MANAGED_METHOD(World, DestroyEntity, void, (unsigned int worldID, unsigned int entityID))
 {
 	World* world = World::GetWorld(worldID);
 	if (world)
 		world->DestroyEntity(entityID);
 }
 
-bool World_HasEntity(unsigned int worldID, unsigned int entityID)
+ADD_MANAGED_METHOD(World, HasEntity, bool, (unsigned int worldID, unsigned int entityID))
 {
 	World* world = World::GetWorld(worldID);
 	return world ? world->HasEntity(entityID) : false;
 }
 
-MonoArray* World_GetEntities(unsigned int worldID)
+ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (unsigned int worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -98,19 +90,19 @@ MonoArray* World_GetEntities(unsigned int worldID)
 	return entityIDs;
 }
 
-MonoArray* World_GetComponents(unsigned int worldID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (unsigned int worldID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
-	vector<EntityID> entities = world->GetComponentManager()->GetEntities(GetComponentType(componentType));
+	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType));
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
 		mono_array_set(output, unsigned int, i, entities[i]);
 	return output;
 }
 
-MonoArray* World_GetComponentsMultiple(unsigned int worldID, MonoArray* inputTypes)
+ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (unsigned int worldID, MonoArray* inputTypes))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -119,7 +111,7 @@ MonoArray* World_GetComponentsMultiple(unsigned int worldID, MonoArray* inputTyp
 	size_t inputTypesLength = mono_array_length(inputTypes);
 	componentTypes.reserve(inputTypesLength);
 	for (size_t i = 0; i < inputTypesLength; i++)
-		componentTypes.emplace_back(GetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
+		componentTypes.emplace_back(_GetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
 
 	vector<EntityID> entities = world->GetComponentManager()->GetEntities(componentTypes);
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
@@ -130,18 +122,18 @@ MonoArray* World_GetComponentsMultiple(unsigned int worldID, MonoArray* inputTyp
 #pragma endregion
 
 #pragma region Entity
-bool Entity_HasComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(Entity, HasComponent, bool, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
-	return world->GetComponentManager()->Has(entityID, GetComponentType(componentType));
+	return world->GetComponentManager()->Has(entityID, _GetComponentType(componentType));
 }
 
-MonoObject* Entity_GetComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType);
+ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType));
 
-MonoObject* Entity_AddComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -157,17 +149,17 @@ MonoObject* Entity_AddComponent(unsigned int worldID, unsigned int entityID, Mon
 	// Get unmanaged->managed data
 	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 	if (!managedData.AddFn)
-		return world->GetComponentManager()->Add(entityID, managedType)->ManagedData.GetInstance();
+		return world->AddComponent(entityID, managedType)->ManagedData.GetInstance();
 	return managedData.AddFn(world, entityID)->ManagedData.GetInstance();
 }
 
-bool Entity_RemoveComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
-	size_t type = GetComponentType(componentType);
+	size_t type = _GetComponentType(componentType);
 	Components::Component* component = (Components::Component*)world->GetComponentManager()->Get(entityID, type);
 	if (component && component->ManagedData.IsValid())
 	{
@@ -181,7 +173,7 @@ bool Entity_RemoveComponent(unsigned int worldID, unsigned int entityID, MonoRef
 	return world->GetComponentManager()->Remove(entityID, type);
 }
 
-MonoObject* Entity_GetComponent(unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType)
+ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -215,7 +207,7 @@ SystemManager* GetSystemManager(unsigned int worldID)
 	return world ? world->GetSystemManager() : nullptr;
 }
 
-bool World_HasSystem(unsigned int worldID, MonoReflectionType* systemType)
+ADD_MANAGED_METHOD(World, HasSystem, bool, (unsigned int worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -223,7 +215,7 @@ bool World_HasSystem(unsigned int worldID, MonoReflectionType* systemType)
 	return systemManager->Has(GetSystemType(systemType));
 }
 
-MonoObject* World_GetSystem(unsigned int worldID, MonoReflectionType* systemType)
+ADD_MANAGED_METHOD(World, GetSystem, MonoObject*, (unsigned int worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -237,7 +229,7 @@ MonoObject* World_GetSystem(unsigned int worldID, MonoReflectionType* systemType
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
 }
 
-MonoObject* World_AddSystem(unsigned int worldID, MonoReflectionType* systemType)
+ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (unsigned int worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -257,7 +249,7 @@ MonoObject* World_AddSystem(unsigned int worldID, MonoReflectionType* systemType
 	return systemData.AddFn(systemManager)->ManagedData.GetInstance();
 }
 
-bool World_RemoveSystem(unsigned int worldID, MonoReflectionType* systemType)
+ADD_MANAGED_METHOD(World, RemoveSystem, bool, (unsigned int worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -278,31 +270,3 @@ bool World_RemoveSystem(unsigned int worldID, MonoReflectionType* systemType)
 }
 
 #pragma endregion
-
-#define ADD_WORLD_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.World::_aqua_internal_"#name, (const void*)name);
-#define ADD_ENTITY_INTERNAL_CALL(name) mono_add_internal_call("AquaEngine.Entity::_aqua_internal_"#name, (const void*)name);
-
-void AquaEngine::Scripting::Assembly::AddWorldInternalCalls()
-{
-	ADD_WORLD_INTERNAL_CALL(World_Get)
-	ADD_WORLD_INTERNAL_CALL(World_Exists)
-	ADD_WORLD_INTERNAL_CALL(World_Create)
-	ADD_WORLD_INTERNAL_CALL(World_Destroy)
-	ADD_WORLD_INTERNAL_CALL(World_HasEntity)
-	ADD_WORLD_INTERNAL_CALL(World_CreateEntity)
-	ADD_WORLD_INTERNAL_CALL(World_DestroyEntity)
-
-	ADD_WORLD_INTERNAL_CALL(World_HasSystem)
-	ADD_WORLD_INTERNAL_CALL(World_GetSystem)
-	ADD_WORLD_INTERNAL_CALL(World_AddSystem)
-	ADD_WORLD_INTERNAL_CALL(World_RemoveSystem)
-
-	ADD_WORLD_INTERNAL_CALL(World_GetEntities)
-	ADD_WORLD_INTERNAL_CALL(World_GetComponents)
-	ADD_WORLD_INTERNAL_CALL(World_GetComponentsMultiple)
-
-	ADD_ENTITY_INTERNAL_CALL(Entity_HasComponent)
-	ADD_ENTITY_INTERNAL_CALL(Entity_GetComponent)
-	ADD_ENTITY_INTERNAL_CALL(Entity_AddComponent)
-	ADD_ENTITY_INTERNAL_CALL(Entity_RemoveComponent)
-}

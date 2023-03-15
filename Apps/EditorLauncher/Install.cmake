@@ -1,5 +1,8 @@
 # Installation using CPack
+set(CPACK_COMPONENTS_ALL "")
+
 set(CPACK_PACKAGE_NAME "Aqua Editor")
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set(CPACK_PACKAGE_VENDOR "Madissia Technologies")
 set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
@@ -31,13 +34,24 @@ if(APPLE)
 	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 elseif(WIN32)
+	install(TARGETS AquaEditor AquaEditorLauncher DESTINATION .)
+
+	install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
+	install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
+
+	if(AQUA_BUILD_BASE_GAME)
+		install(TARGETS BaseGame DESTINATION .)
+	endif()
+
+	if(BUILD_SHARED_LIBS)
+		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
+	endif()
+
 	if(DEFINED ENV{CMAKE_CONFIG})
 		set(AQUA_CPACK_CONFIG $ENV{CMAKE_CONFIG})
 	else()
 		set(AQUA_CPACK_CONFIG "Release")
 	endif()
-
-	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${AQUA_CPACK_CONFIG}/ DESTINATION .)
 
 	# Add start menu shortcut(s)
 	set(CPACK_NSIS_CREATE_ICONS_EXTRA
@@ -53,9 +67,22 @@ elseif(WIN32)
 	set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
 	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/AquaIcon.ico)
 else()
-	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION .)
-
-	set(CPACK_MONOLITHIC_INSTALL 1)
+	install(FILES
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditor
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditorLauncher
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaScriptCore.dll
+		DESTINATION .)
+	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets DESTINATION .)
+	
+	if(BUILD_SHARED_LIBS)
+		install(FILES
+			$<TARGET_FILE:AquaEngine>
+			$<TARGET_FILE:assimp>
+			$<TARGET_FILE:glfw>
+			$<TARGET_FILE:spdlog>
+			DESTINATION .)
+	endif()
+	
 	set(CPACK_GENERATOR "TGZ")
 endif()
 

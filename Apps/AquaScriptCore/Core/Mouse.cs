@@ -7,7 +7,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Amount the scroll wheel has changed since the previous frame
 		/// </summary>
-		public static float ScrollDelta => Input._aqua_internal_ScrollDelta();
+		public static float ScrollDelta => Input._ScrollDelta();
 
 		/// <summary>
 		/// Current position of the mouse, in screen pixels relative to the top-left corner of the window
@@ -16,10 +16,10 @@ namespace AquaEngine
 		{
 			get
 			{
-				Input._aqua_internal_GetMousePosition(out Vector2 value);
+				Input._GetMousePosition(out Vector2 value);
 				return value;
 			}
-			set => Input._aqua_internal_SetMousePosition(value);
+			set => Input._SetMousePosition(value);
 		}
 
 		/// <summary>
@@ -29,7 +29,7 @@ namespace AquaEngine
 		{
 			get
 			{
-				Input._aqua_internal_GetMouseDelta(out Vector2 value);
+				Input._GetMouseDelta(out Vector2 value);
 				return value;
 			}
 		}
@@ -39,25 +39,25 @@ namespace AquaEngine
 		/// </summary>
 		public static MouseState State
 		{
-			get => (MouseState)Input._aqua_internal_GetMouseState();
-			set => Input._aqua_internal_SetMouseState((int)value);
+			get => (MouseState)Input._GetMouseState();
+			set => Input._SetMouseState((int)value);
 		}
 
 		/// <summary>
 		/// Checks if the mouse is showing. This can be changed using <see cref="MouseState"/>
 		/// </summary>
-		public static bool Showing => Input._aqua_internal_IsMouseShowing();
+		public static bool Showing => Input._IsMouseShowing();
 
 		/// <returns>True if the button is not pressed down</returns>
-		public static bool IsButtonUp(MouseButton button) => Input._aqua_internal_IsMouseUp((int)button);
+		public static bool IsButtonUp(MouseButton button) => Input._IsMouseUp((int)button);
 
 		/// <returns>True if the button is currently pressed down</returns>
-		public static bool IsButtonDown(MouseButton button) => Input._aqua_internal_IsMouseDown((int)button);
+		public static bool IsButtonDown(MouseButton button) => Input._IsMouseDown((int)button);
 
 		/// <returns>True if the button is was pressed down this frame</returns>
-		public static bool IsButtonPressed(MouseButton button) => Input._aqua_internal_IsMousePressed((int)button);
+		public static bool IsButtonPressed(MouseButton button) => Input._IsMousePressed((int)button);
 
 		/// <returns>True if the button is was released this frame</returns>
-		public static bool IsButtonReleased(MouseButton button) => Input._aqua_internal_IsMouseReleased((int)button);
+		public static bool IsButtonReleased(MouseButton button) => Input._IsMouseReleased((int)button);
 	}
 }
