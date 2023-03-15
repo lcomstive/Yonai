@@ -70,10 +70,10 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	{
 		unsigned int debugPort = 5555;
 		try { debugPort = std::stoul(Application::Current()->GetArg("DebugPort", "5555")); }
-		catch(std::exception& _) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
+		catch(std::exception&) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
 
 		vector<const char*> jitOptions = GenerateJITParseOptions(debugPort);
-		mono_jit_parse_options(jitOptions.size(), (char**)jitOptions.data());
+		mono_jit_parse_options((int)jitOptions.size(), (char**)jitOptions.data());
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
 		spdlog::debug("C# debugging is enabled on port {}", debugPort);

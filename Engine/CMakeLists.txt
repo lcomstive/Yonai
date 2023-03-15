@@ -1,4 +1,5 @@
-set(AQUA_BUILD_TESTS ON CACHE BOOL "")
+set(AQUA_BUILD_TESTS ON CACHE BOOL "Build the test suite")
+set(AQUA_BUILD_AUDIO ON CACHE BOOL "Enable audio playback")
 
 include(./Dependencies.cmake)
 
@@ -16,6 +17,10 @@ else()
 
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  BUILD_SHARED_LIBS)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE AQUA_ENGINE_EXPORT_DLL)
+endif()
+
+if(AQUA_BUILD_AUDIO)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC AQUA_ENABLE_AUDIO)
 endif()
 
 set_target_properties(
