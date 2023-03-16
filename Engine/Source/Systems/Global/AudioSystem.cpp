@@ -3,15 +3,11 @@
 using namespace AquaEngine::Systems;
 
 #if AQUA_ENABLE_AUDIO
-#ifdef AQUA_PLATFORM_APPLE
-#define MA_NO_RUNTIME_LINKING
-#endif
-
-#include <AquaEngine/IO/VFS.hpp> // TEMP //
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
+#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 
 using namespace std;

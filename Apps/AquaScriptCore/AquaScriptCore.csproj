@@ -51,6 +51,7 @@
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\Keys.cs" />
     <Compile Include="Core\Log.cs" />
+    <Compile Include="Core\Audio.cs" />
     <Compile Include="Core\Mouse.cs" />
     <Compile Include="Graphics\Screen.cs" />
     <Compile Include="Graphics\Window.cs" />

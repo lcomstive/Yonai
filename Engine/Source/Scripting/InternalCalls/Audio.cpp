@@ -10,8 +10,8 @@ using namespace AquaEngine::Systems;
 
 ADD_MANAGED_METHOD(Audio, PlayOnce, void, (MonoString* monoPath))
 {
-	const char* filepath = mono_string_to_utf8(monoPath);
-	AudioSystem::PlayOnce(VFS::GetAbsolutePath(filepath));
+	string filepath = VFS::GetAbsolutePath(mono_string_to_utf8(monoPath));
+	AudioSystem::PlayOnce(filepath.c_str());
 }
 
 ADD_MANAGED_METHOD(Audio, GetDeviceCount, unsigned int)
