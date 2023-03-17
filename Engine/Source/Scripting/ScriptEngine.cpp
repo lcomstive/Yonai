@@ -28,6 +28,7 @@ MonoDomain* ScriptEngine::s_AppDomain = nullptr;
 Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
 vector<Assembly*> ScriptEngine::s_Assemblies = {};
+vector<function<void()>> ScriptEngine::s_ReloadCallbacks = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
@@ -267,6 +268,9 @@ void ScriptEngine::Reload(bool force)
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
+
+	for(const function<void()>& callback : s_ReloadCallbacks)
+		callback();
 }
 
 /// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
@@ -280,3 +284,6 @@ MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
 	}
 	return type;
 }
+
+void ScriptEngine::AddReloadCallback(function<void()> callback)
+{ s_ReloadCallbacks.emplace_back(callback); }

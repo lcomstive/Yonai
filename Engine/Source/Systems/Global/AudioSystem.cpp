@@ -35,7 +35,8 @@ void AudioSystem::Init()
 		return;
 	}
 
-	m_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Audio"), nullptr);
+	GetScriptClass();
+	ScriptEngine::AddReloadCallback(GetScriptClass);
 
 	RefreshDevices();
 
@@ -170,6 +171,17 @@ void AudioSystem::SetOutputDevice(unsigned int deviceIndex)
 	m_CurrentDevice = deviceIndex;
 
 	// Notify scripting of change
+	m_ScriptClass->Invoke("_OutputDeviceChanged");
+}
+
+void AudioSystem::GetScriptClass()
+{
+	if(m_ScriptClass)
+		delete m_ScriptClass;
+		
+	m_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Audio"), nullptr);
+
+	m_ScriptClass->Invoke("_RefreshDevices");
 	m_ScriptClass->Invoke("_OutputDeviceChanged");
 }
 

@@ -30,6 +30,7 @@ namespace AquaEngine::Systems
 		static Scripting::Class* m_ScriptClass;
 
 		static void RefreshDevices();
+		static void GetScriptClass();
 #endif
 
 	public:
