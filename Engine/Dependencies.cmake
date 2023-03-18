@@ -131,10 +131,8 @@ if(AQUA_BUILD_TESTS)
 endif()
 
 # MiniAudio
-if(AQUA_BUILD_AUDIO)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/miniaudio")
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/miniaudio")
 
-	if(APPLE)
-		list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS "-framework CoreFoundation -framework AudioUnit")
-	endif()
+if(APPLE)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS "-framework AudioUnit")
 endif()

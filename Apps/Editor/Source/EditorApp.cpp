@@ -23,6 +23,9 @@
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/ScriptComponent.hpp>
 
+#include <AquaEngine/Audio/Sound.hpp>
+#include <AquaEngine/Components/SoundSource.hpp>
+
 using namespace std;
 using namespace glm;
 using namespace AquaEditor;
@@ -38,6 +41,8 @@ namespace fs = std::filesystem;
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
+
+SoundSource* soundSource = nullptr;
 
 void EditorApp::Setup()
 {
@@ -90,6 +95,7 @@ void EditorApp::OnDraw()
 	DrawUI();
 }
 
+#include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
 	// Iterate over & update views
@@ -98,6 +104,14 @@ void EditorApp::OnUpdate()
 
 	if(ScriptEngine::AwaitingReload())
 		ScriptEngine::Reload();
+
+	if (Input::IsKeyPressed(Key::Num5))
+		soundSource->Play();
+	if (Input::IsKeyPressed(Key::Num6))
+		soundSource->Stop();
+
+	if (soundSource->IsPlaying())
+		spdlog::debug("Sound: {0:.2f}s / {0:.2f}s", soundSource->GetPlayTime(), soundSource->GetLength());
 }
 
 void EditorApp::LoadScene()
@@ -156,6 +170,14 @@ void EditorApp::LoadScene()
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
 	if(testSystem)
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
+
+	/// TEMP ///
+	ResourceID soundID = Resource::Load<Sound>("Sounds/Test", "assets://Audio/Bell.mp3");
+	Sound* sound = Resource::Get<Sound>(soundID);
+
+	Entity soundEntity = m_CurrentScene->CreateEntity();
+	soundSource = soundEntity.AddComponent<SoundSource>();
+	soundSource->SoundClip = soundID;
 
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();

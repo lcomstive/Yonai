@@ -19,8 +19,6 @@ namespace AquaEngine
 			set => _SetOutputDevice(value.Index);
 		}
 
-		public static void PlayOnce(string filepath) => _PlayOnce(filepath);
-
 		// Called from native code
 		private static void _RefreshDevices()
 		{
@@ -56,8 +54,6 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetOutputDevice();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetDeviceName(uint index);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOutputDevice(uint index);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _PlayOnce(string filepath);
 		#endregion
 	}
 }

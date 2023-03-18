@@ -1,5 +1,4 @@
 set(AQUA_BUILD_TESTS ON CACHE BOOL "Build the test suite")
-set(AQUA_BUILD_AUDIO ON CACHE BOOL "Enable audio playback")
 
 include(./Dependencies.cmake)
 

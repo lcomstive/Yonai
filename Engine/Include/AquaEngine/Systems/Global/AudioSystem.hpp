@@ -1,40 +1,55 @@
 #pragma once
-#include <AquaEngine/Systems/System.hpp>
+#define MA_NO_ENGINE
 
-#if AQUA_ENABLE_AUDIO
 #include <miniaudio.h>
-namespace AquaEngine::Scripting { struct Class; } // Forward declaration
-#endif
+#include <AquaEngine/Systems/System.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
+// Forward declarations
+namespace AquaEngine
+{
+	struct Sound;
+	namespace Scripting { struct Class; }
+	namespace Components { struct SoundSource; }
+}
 
 namespace AquaEngine::Systems
 {
 	class AudioSystem : public System
 	{
-#if AQUA_ENABLE_AUDIO
-		static bool m_EngineInitialised;
-
 		/// <summary>
 		/// Matches state of AudioSystem::IsEnabled()
 		/// </summary>
-		static bool m_EngineActive;
+		static bool s_EngineActive;
 
-		static ma_device m_Device;
-		static ma_engine m_Engine;
-		static ma_context m_Context;
-		static ma_uint32 m_CurrentDevice;
-		static ma_uint32 m_PlaybackDeviceCount;
-		static ma_uint32 m_DefaultDeviceIndex;
-		static ma_device_info* m_PlaybackDeviceInfos;
+		// Devices //
+		static ma_device s_Device;
+		static ma_context s_Context;
+		static ma_uint32 s_CurrentDevice;
+		static ma_uint32 s_PlaybackDeviceCount;
+		static ma_uint32 s_DefaultDeviceIndex;
+		static ma_device_info* s_PlaybackDeviceInfos;
 
-		static Scripting::Class* m_ScriptClass;
+		// Node Graph //
+		static ma_node_graph s_NodeGraph;
+
+		// Scripting //
+		static Scripting::Class* s_ScriptClass;
 
 		static void RefreshDevices();
 		static void GetScriptClass();
-#endif
+		static void SetupNodeGraph();
+		static void SetupResourceManager();
+		static void ReleaseResourceManager();
+
+		static void AudioDataCallback(ma_device*, void*, const void*, ma_uint32);
+
+		friend struct AquaEngine::Sound;
+		friend struct AquaEngine::Components::SoundSource;
 
 	public:
 		AquaAPI void Init() override;
+		AquaAPI void Update() override;
 		AquaAPI void Destroy() override;
 		AquaAPI void OnEnabled() override;
 		AquaAPI void OnDisabled() override;
@@ -64,14 +79,7 @@ namespace AquaEngine::Systems
 		/// </summary>
 		AquaAPI static void SetOutputDevice(unsigned int index);
 
-		/// <summary>
-		/// Plays a sound once, loaded from path
-		/// </summary>
-		AquaAPI static void PlayOnce(std::string& path);
-
-		/// <summary>
-		/// Plays a sound once, loaded from path
-		/// </summary>
-		AquaAPI static void PlayOnce(const char* path);
+		/// <returns>Sample rate for the current output device</returns>
+		AquaAPI static unsigned int GetSampleRate();
 	};
 }
