@@ -42,7 +42,7 @@ string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
 
-SoundSource* soundSource = nullptr;
+vector<SoundSource*> soundSources = {};
 
 void EditorApp::Setup()
 {
@@ -104,14 +104,6 @@ void EditorApp::OnUpdate()
 
 	if(ScriptEngine::AwaitingReload())
 		ScriptEngine::Reload();
-
-	if (Input::IsKeyPressed(Key::Num5))
-		soundSource->Play();
-	if (Input::IsKeyPressed(Key::Num6))
-		soundSource->Stop();
-
-	if (soundSource->IsPlaying())
-		spdlog::debug("Sound: {0:.2f}s / {0:.2f}s", soundSource->GetPlayTime(), soundSource->GetLength());
 }
 
 void EditorApp::LoadScene()
@@ -172,12 +164,22 @@ void EditorApp::LoadScene()
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
 
 	/// TEMP ///
-	ResourceID soundID = Resource::Load<Sound>("Sounds/Test", "assets://Audio/Bell.mp3");
-	Sound* sound = Resource::Get<Sound>(soundID);
+	ResourceID bellSoundID = Resource::Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
+	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3", true);
 
-	Entity soundEntity = m_CurrentScene->CreateEntity();
-	soundSource = soundEntity.AddComponent<SoundSource>();
-	soundSource->SoundClip = soundID;
+	Entity musicEntity = m_CurrentScene->CreateEntity();
+	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
+	musicSource->SoundClip = musicSoundID;
+	soundSources.push_back(musicSource);
+
+	for (int i = 0; i < 2; i++)
+	{
+		Entity soundEntity = m_CurrentScene->CreateEntity();
+		SoundSource* source = soundEntity.AddComponent<SoundSource>();
+		source->SoundClip = bellSoundID;
+
+		soundSources.push_back(source);
+	}
 
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();
@@ -305,6 +307,49 @@ void EditorApp::DrawUI()
 	// Iterate over & draw views
 	for (auto& viewPair : m_Views)
 		viewPair.second->Draw();
+
+	int soundIndex = 0;
+	for (SoundSource* soundSource : soundSources)
+	{
+		string id = "SoundSource [" + to_string(soundSource->Entity.ID()) + "]##" + to_string(soundIndex++);
+		ImGui::Begin(id.c_str());
+
+		string resourcePath = Resource::GetPath(soundSource->SoundClip);
+		ImGui::Text("'%s'", resourcePath.c_str());
+
+		// Play
+		if (soundSource->IsPlaying())
+		{
+			if (ImGui::Button("||")) soundSource->Pause();
+		}
+		else if (ImGui::Button(">"))
+			soundSource->Play();
+
+		// Stop
+		ImGui::SameLine();
+		if (ImGui::Button("[]")) soundSource->Stop();
+
+		// Seek bar
+		ImGui::SameLine();
+		float soundValue = soundSource->GetPlayTime();
+		float soundMaxValue = soundSource->GetLength();
+		if (ImGui::SliderFloat("##seek", &soundValue, 0, soundMaxValue, ""))
+			soundSource->Seek(soundValue);
+
+		ImGui::SameLine();
+
+		unsigned int valueMinutes = (unsigned int)std::floor(soundValue > 60 ? std::floor(soundValue / 60.0f) : 0.0f);
+		unsigned int valueSeconds = (unsigned int)std::floor(soundValue > 60 ? (soundValue - valueMinutes * 60.0f) : soundValue);
+		unsigned int maxValueMinutes = (unsigned int)std::floor(soundMaxValue > 60 ? std::floor(soundMaxValue / 60.0f) : 0.0f);
+		unsigned int maxValueSeconds = (unsigned int)std::floor(soundMaxValue > 60 ? (soundMaxValue - maxValueMinutes * 60.0f) : soundMaxValue);
+		ImGui::Text("%02i:%02i / %02i:%02i", valueMinutes, valueSeconds, maxValueMinutes, maxValueSeconds);
+
+		int volumePercent = (int)std::floor(soundSource->GetVolume() * 100.0f);
+		if (ImGui::SliderInt("Volume", &volumePercent, 0, 100, "%i%"))
+			soundSource->SetVolume(volumePercent / 100.0f);
+
+		ImGui::End();
+	}
 
 	ImGui::End();
 }

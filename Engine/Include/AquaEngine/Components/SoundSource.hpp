@@ -36,9 +36,17 @@ namespace AquaEngine
 			/// <returns>Total length of the sound clip, in seconds</returns>
 			AquaAPI float GetLength();
 
+			AquaAPI void Seek(float seconds);
+
+			AquaAPI float GetVolume();
+			AquaAPI void SetVolume(float volume);
+
 		private:
 			// Sample rate of the sound source
 			float m_SampleRate = 0;
+
+			// Volume of output sound
+			float m_Volume = 1.0f;
 
 			// Total PCM frames
 			ma_uint64 m_TotalFrames = 0;

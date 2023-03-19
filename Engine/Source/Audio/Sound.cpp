@@ -12,7 +12,7 @@ Sound::Sound(const string& filepath, bool stream) : m_Source()
 	string assetPath = VFS::GetAbsolutePath(filepath);
 
 	// Set up flags for miniaudio
-	unsigned int flags = 0; // MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC;
+	unsigned int flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC;
 	if (stream) // Don't load entire file into memory, stream in instead
 		flags |= MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
 	else // Decode entire file into memory
