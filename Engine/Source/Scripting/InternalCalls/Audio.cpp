@@ -1,8 +1,6 @@
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
-
-#ifdef AQUA_ENABLE_AUDIO
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <AquaEngine/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine::IO;
@@ -22,4 +20,3 @@ ADD_MANAGED_METHOD(Audio, SetOutputDevice, void, (unsigned int index))
 
 ADD_MANAGED_METHOD(Audio, GetOutputDevice, unsigned int)
 { return AudioSystem::GetOutputDevice(); }
-#endif
