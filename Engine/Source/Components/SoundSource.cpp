@@ -82,11 +82,15 @@ void SoundSource::Stop()
 float SoundSource::GetVolume() { return m_Volume; }
 SoundState SoundSource::GetState() { return m_State; }
 bool SoundSource::IsPlaying() { return m_State == SoundState::Playing; }
-float SoundSource::GetLength() { return m_State == SoundState::Stopped ? 0.0f : m_TotalFrames / m_SampleRate; }
+float SoundSource::GetLength()
+{
+	return m_State == SoundState::Stopped || m_SampleRate == 0 ?
+		0.0f : m_TotalFrames / m_SampleRate;
+}
 
 float SoundSource::GetPlayTime()
 {
-	if (m_State == SoundState::Stopped)
+	if (m_State == SoundState::Stopped || m_SampleRate == 0)
 		return 0.0f;
 
 	ma_uint64 time = ma_node_get_time(&m_Node);

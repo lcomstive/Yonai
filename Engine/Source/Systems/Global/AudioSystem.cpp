@@ -25,10 +25,12 @@ Class* AudioSystem::s_ScriptClass = nullptr;
 // Devices //
 ma_device AudioSystem::s_Device;
 ma_context AudioSystem::s_Context;
-ma_uint32 AudioSystem::s_CurrentDevice = 0;
 ma_uint32 AudioSystem::s_DefaultDeviceIndex = 0;
 ma_uint32 AudioSystem::s_PlaybackDeviceCount = 0;
 ma_device_info* AudioSystem::s_PlaybackDeviceInfos = nullptr;
+
+// Set large value by default because we compare this in SetOutputDevice, if they're both '0' then no output device is set
+ma_uint32 AudioSystem::s_CurrentDevice = 99999;
 
 // Node Graph //
 ma_node_graph AudioSystem::s_NodeGraph;
