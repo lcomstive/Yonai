@@ -42,5 +42,10 @@ function (AddPlatformSpecifics)
         # Sets properties for executable
         # e.g. Show/hide console depending on debug/release build
         SetWin32Properties()
+
+        if(MSVC)
+            # Enable multi-processor compilation for faster builds
+            target_compile_options(${PROJECT_NAME} PRIVATE "/MP")
+        endif()
     endif()
 endfunction()

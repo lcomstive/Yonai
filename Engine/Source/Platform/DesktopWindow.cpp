@@ -379,7 +379,7 @@ void Window::SetVideoMode(const VideoMode mode)
 		s_Instance->m_Handle, monitor,
 		0, 0,
 		mode.Resolution.x, mode.Resolution.y,
-		mode.RefreshRate
+		(int)mode.RefreshRate
 	);
 
 	s_Instance->m_VideoMode = mode;
