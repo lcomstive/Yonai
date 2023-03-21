@@ -23,7 +23,7 @@ jobs:
         - {
             name: "MacOS",
             os: macOS-latest,
-            generator: "XCode"
+            generator: "Xcode"
           }
 
     # Get source
@@ -67,7 +67,7 @@ jobs:
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -G ${{ matrix.config.generator }} -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      run: cmake -B ${{ github.workspace }}/build -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore
