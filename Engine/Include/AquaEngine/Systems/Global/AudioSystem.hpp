@@ -56,6 +56,8 @@ namespace AquaEngine::Systems
 		AquaAPI void OnEnabled() override;
 		AquaAPI void OnDisabled() override;
 
+		AquaAPI static ma_engine* GetEngine();
+
 		/// <summary>
 		/// Gets the amount of playback devices available on the system
 		/// </summary>

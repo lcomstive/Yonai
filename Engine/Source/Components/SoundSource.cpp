@@ -139,10 +139,27 @@ void SoundSource::SetSound(ResourceID id)
 	ma_result result = ma_sound_init_copy(&AudioSystem::s_Engine, &sound->m_Sound, sound->c_Flags, nullptr, &m_Data);
 	if(result != MA_SUCCESS)
 		spdlog::error("Failed to initialise sound source [{}]", (int)result);
-	
-	// ma_sound_seek_to_pcm_frame(&m_Data, 0);
+
+	if(m_Mixer) // If mixer is not default output
+		SetMixer(m_Mixer);
 }
 
+SoundMixer* SoundSource::GetMixer() { return m_Mixer; }
+void SoundSource::SetMixer(SoundMixer* mixer)
+{
+	m_Mixer = mixer;
+
+	if(m_Sound == InvalidResourceID)
+		return; // No sound loaded
+
+	ma_node* output = nullptr;
+	if(!mixer) // Default is engine directly
+		output = ma_engine_get_endpoint(AudioSystem::GetEngine());
+	else
+		output = (ma_node*)mixer->GetHandle();
+
+	ma_node_attach_output_bus(&m_Data, 0, output, 0);
+}
 
 #pragma region Scripting Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>

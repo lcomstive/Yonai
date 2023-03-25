@@ -2,6 +2,7 @@
 #include <miniaudio.h>
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/ResourceID.hpp>
+#include <AquaEngine/Audio/SoundMixer.hpp>
 #include <AquaEngine/Components/Component.hpp>
 
 namespace AquaEngine
@@ -65,9 +66,20 @@ namespace AquaEngine
 			/// <summary>
 			AquaAPI void SetSpatialization(bool enable);
 
+			/// <summary>
+			/// Sets the output mixer, or nullptr for master output
+			/// <summary>
+			AquaAPI void SetMixer(SoundMixer* parent);
+
+			/// <summary>
+			/// Gets the output mixer, or nullptr if master output
+			/// <summary>
+			AquaAPI SoundMixer* GetMixer();
+
 		private:
 			ma_sound m_Data;
 			ResourceID m_Sound;
+			SoundMixer* m_Mixer = nullptr;
 
 			bool m_Looping = false;
 			float m_Panning = 0.0f;

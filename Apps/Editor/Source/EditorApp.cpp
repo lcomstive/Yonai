@@ -42,6 +42,7 @@ string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
 
+vector<SoundMixer*> soundMixers = {};
 vector<SoundSource*> soundSources = {};
 
 void EditorApp::Setup()
@@ -93,6 +94,13 @@ void EditorApp::Setup()
 void EditorApp::OnDraw()
 {
 	DrawUI();
+}
+
+void EditorApp::Cleanup()
+{
+	for(SoundMixer* mixer : soundMixers)
+		delete mixer;
+	soundMixers.clear();
 }
 
 #include <AquaEngine/Input.hpp>
@@ -164,11 +172,26 @@ void EditorApp::LoadScene()
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
 
 	/// TEMP ///
+	// Create sound mixers
+	if(soundMixers.empty())
+	{
+		SoundMixer* masterMixer = new SoundMixer("Master");
+		SoundMixer* musicMixer = new SoundMixer("Music", masterMixer);
+		SoundMixer* sfxMixer = new SoundMixer("SFX", masterMixer);
+
+		soundMixers.push_back(masterMixer);
+		soundMixers.push_back(musicMixer);
+		soundMixers.push_back(sfxMixer);
+	}
+
+	// Load sounds
 	ResourceID bellSoundID = Resource::Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
 	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3");
 
+	// Create sound sources
 	Entity musicEntity = m_CurrentScene->CreateEntity();
 	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
+	musicSource->SetMixer(soundMixers[1]);
 	musicSource->SetSound(musicSoundID);
 	soundSources.push_back(musicSource);
 
@@ -178,6 +201,7 @@ void EditorApp::LoadScene()
 		soundEntity.AddComponent<Transform>();
 		SoundSource* source = soundEntity.AddComponent<SoundSource>();
 		source->SetSound(bellSoundID);
+		source->SetMixer(soundMixers[2]);
 
 		soundSources.push_back(source);
 	}
@@ -346,14 +370,13 @@ void EditorApp::DrawUI()
 		ImGui::Text("%02i:%02i / %02i:%02i", valueMinutes, valueSeconds, maxValueMinutes, maxValueSeconds);
 
 		int volumePercent = (int)std::floor(soundSource->GetVolume() * 100.0f);
-		if (ImGui::SliderInt("Volume", &volumePercent, 0, 100, "%i%"))
+		if (ImGui::SliderInt("Volume", &volumePercent, 0, 100, "%i%%"))
 			soundSource->SetVolume(volumePercent / 100.0f);
 
 		Transform* transform = soundSource->Entity.GetComponent<Transform>();
 		if(transform)
 			ImGui::DragFloat3("Position", &transform->Position[0], 0.01f);
 
-		ImGui::SameLine();
 		bool looping = soundSource->IsLooping();
 		if(ImGui::Checkbox("Loop", &looping))
 			soundSource->SetLooping(looping);
@@ -365,6 +388,20 @@ void EditorApp::DrawUI()
 
 		ImGui::End();
 	}
+
+	// Sound Mixers //
+	ImGui::Begin("Sound Mixers");
+	for(SoundMixer* mixer : soundMixers)
+	{
+		ImGui::Text("%s", mixer->Name.c_str());
+		
+		ImGui::SameLine();
+
+		int volumePercent = (int)std::floor(mixer->GetVolume() * 100.0f);
+		if(ImGui::SliderInt(("Volume##" + mixer->Name).c_str(), &volumePercent, 0, 100, "%i%%"))
+			mixer->SetVolume(volumePercent / 100.0f);
+	}
+	ImGui::End();
 
 	ImGui::End();
 }

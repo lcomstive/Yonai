@@ -211,6 +211,7 @@ unsigned int AudioSystem::GetSampleRate() { return s_Device.sampleRate; }
 unsigned int AudioSystem::GetOutputDevice() { return s_CurrentDevice; }
 unsigned int AudioSystem::GetDeviceCount() { return s_PlaybackDeviceCount; }
 unsigned int AudioSystem::GetDefaultDevice() { return s_DefaultDeviceIndex; }
+ma_engine* AudioSystem::GetEngine() { return &s_Engine; }
 const char* AudioSystem::GetDeviceName(unsigned int index)
 {
 	if(s_PlaybackDeviceCount == 0)
