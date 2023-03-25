@@ -11,18 +11,16 @@ namespace AquaEngine
 	/// </summary>
 	struct Sound
 	{
-		AquaAPI Sound(const std::string& filepath, bool stream = false);
+		AquaAPI Sound(const std::string& filepath);
 		AquaAPI ~Sound();
 
 		/// <returns>Length of the clip, in seconds</returns>
 		AquaAPI float GetLength();
 
-		/// <returns>The sample rate of the loaded sound</returns>
-		AquaAPI float GetSampleRate();
-
 	private:
-		ma_decoder m_Source;
-		float m_SampleRate;
+		const unsigned int c_Flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE; // | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
+
+		ma_sound m_Sound;
 
 		friend struct AquaEngine::Components::SoundSource;
 	};

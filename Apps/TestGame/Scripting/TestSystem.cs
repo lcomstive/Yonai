@@ -38,10 +38,12 @@ namespace TestGame
 
 			m_AudioDeviceIndex = Audio.OutputDevice.Index;
 
+			/*
 			m_Sound = Resource.Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
 			Entity soundEntity = World.CreateEntity();
 			m_SoundSource = soundEntity.AddComponent<SoundSource>();
 			m_SoundSource.Sound = m_Sound;
+			*/
 		}
 
 		protected override void Update()

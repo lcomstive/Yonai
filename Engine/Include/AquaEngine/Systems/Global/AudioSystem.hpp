@@ -1,6 +1,4 @@
 #pragma once
-#define MA_NO_ENGINE
-#define MA_NO_RESOURCE_MANAGER
 
 #include <miniaudio.h>
 #include <AquaEngine/Systems/System.hpp>
@@ -31,15 +29,18 @@ namespace AquaEngine::Systems
 		static ma_uint32 s_DefaultDeviceIndex;
 		static ma_device_info* s_PlaybackDeviceInfos;
 
-		// Node Graph //
-		static ma_node_graph s_NodeGraph;
+		// Resource Manager //
+		static ma_resource_manager s_ResourceManager;
+
+		// Engine //
+		static ma_engine s_Engine;
 
 		// Scripting //
 		static Scripting::Class* s_ScriptClass;
 
+		static void SetupEngine();
 		static void RefreshDevices();
 		static void GetScriptClass();
-		static void SetupNodeGraph();
 		static void SetupResourceManager();
 		static void ReleaseResourceManager();
 

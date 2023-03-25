@@ -8,45 +8,17 @@ using namespace AquaEngine::Systems;
 using namespace AquaEngine::Components;
 
 void SoundSource::Play()
-{
-	// If already playing, stop and reset
-	if (IsPlaying())
-		Stop();
-
-	// Check if paused, resume if so
-	if (m_State == SoundState::Paused)
-	{
-		Resume();
+{	
+	if(IsPlaying() || 				  // Check if already playing
+		m_Sound == InvalidResourceID) // or sound not loaded
 		return;
-	}
+	
+	ma_sound_start(&m_Data);
 
-	// Ensure clip is valid
-	if (SoundClip == InvalidResourceID)
-	{
-		spdlog::warn("Tried playing sound source [{}.{}] but no sound was set", Entity.GetWorld()->ID(), Entity.ID());
-		return;
-	}
-
-	Sound* sound = Resource::Get<Sound>(SoundClip);
-	m_Data = sound->m_Source;
 	m_State = SoundState::Playing;
 
-	// Get sample rate from sound
-	m_SampleRate = sound->GetSampleRate();
-
-	// Reset frame counts
-	ma_decoder_get_length_in_pcm_frames(&m_Data, &m_TotalFrames);
-
-	// Seek to start
-	ma_decoder_seek_to_pcm_frame(&m_Data, 0);
-
-	// Setup node
-	ma_data_source_node_config nodeConfig = ma_data_source_node_config_init(&m_Data);
-	ma_data_source_node_init(&AudioSystem::s_NodeGraph, &nodeConfig, nullptr, &m_Node);
-	ma_node_attach_output_bus(&m_Node, 0, ma_node_graph_get_endpoint(&AudioSystem::s_NodeGraph), 0);
-
-	// Update node volume
-	SetVolume(m_Volume);
+	// Reset pause state
+	m_PausedFrames = 0;
 }
 
 void SoundSource::Pause()
@@ -55,7 +27,12 @@ void SoundSource::Pause()
 		return;
 
 	m_State = SoundState::Paused;
-	ma_node_set_state(&m_Node, ma_node_state_stopped);
+
+	// Store current cursor position
+	ma_sound_get_cursor_in_pcm_frames(&m_Data, &m_PausedFrames);
+
+	// Stop playing sound
+	ma_sound_stop(&m_Data);
 }
 
 void SoundSource::Resume()
@@ -64,19 +41,24 @@ void SoundSource::Resume()
 		return;
 
 	m_State = SoundState::Playing;
-	ma_node_set_state(&m_Node, ma_node_state_started);
+
+	// Start sound
+	ma_sound_start(&m_Data);
+
+	// Seek to previous position
+	ma_sound_seek_to_pcm_frame(&m_Data, m_PausedFrames);
 }
 
 void SoundSource::Stop()
 {
 	// Set state
 	m_State = SoundState::Stopped;
-	
-	// Reset frame counts
-	m_TotalFrames = 0;
 
-	// Cleanup node
-	ma_data_source_node_uninit(&m_Node, nullptr);
+	ma_sound_stop(&m_Data);
+	ma_sound_seek_to_pcm_frame(&m_Data, 0);
+
+	// Reset pause state
+	m_PausedFrames = 0;
 }
 
 float SoundSource::GetVolume() { return m_Volume; }
@@ -84,31 +66,34 @@ SoundState SoundSource::GetState() { return m_State; }
 bool SoundSource::IsPlaying() { return m_State == SoundState::Playing; }
 float SoundSource::GetLength()
 {
-	return m_State == SoundState::Stopped || m_SampleRate == 0 ?
-		0.0f : m_TotalFrames / m_SampleRate;
+	float length;
+	ma_sound_get_length_in_seconds(&m_Data, &length);
+	return length;
 }
 
 float SoundSource::GetPlayTime()
 {
-	if (m_State == SoundState::Stopped || m_SampleRate == 0)
+	if (m_State == SoundState::Stopped)
 		return 0.0f;
 
-	ma_uint64 time = ma_node_get_time(&m_Node);
-	return time / m_SampleRate;
+	float position;
+	ma_sound_get_cursor_in_seconds(&m_Data, &position);
+	return position;
 }
 
 void SoundSource::Seek(float seconds)
 {
-	if (m_State == SoundState::Stopped)
+	// Check if sound is initialised
+	if (m_Sound == InvalidResourceID)
 		return;
 
 	// Ensure value is within bounds
 	seconds = std::clamp(seconds, 0.0f, GetLength());
 
-	ma_uint64 pcmTime = (ma_uint64)std::floor(seconds * m_SampleRate);
+	// Time to seek to
+	ma_uint64 pcmTime = (ma_uint64)std::floor(seconds * AudioSystem::GetSampleRate());
 
-	ma_data_source_seek_to_pcm_frame(&m_Data, pcmTime);
-	ma_node_set_time(&m_Node, pcmTime);
+	ma_sound_seek_to_pcm_frame(&m_Data, pcmTime);
 }
 
 void SoundSource::SetVolume(float volume)
@@ -116,14 +101,48 @@ void SoundSource::SetVolume(float volume)
 	// Ensure volume is at least 0
 	m_Volume = (std::max)(volume, 0.0f);
 
-	if(m_State != SoundState::Stopped)
-		ma_node_set_output_bus_volume(&m_Node, 0, m_Volume);
+	if(m_Sound != InvalidResourceID)
+		ma_sound_set_volume(&m_Data, m_Volume);
 }
+
+ResourceID SoundSource::GetSound() { return m_Sound; }
+void SoundSource::SetSound(ResourceID id)
+{
+	// Check if clearing sound
+	if(id == InvalidResourceID)
+	{
+		// Uninitialise
+		m_Sound = InvalidResourceID;
+		ma_sound_uninit(&m_Data);
+		return;
+	}
+
+	if(id == m_Sound || // No change, same resource id
+		!Resource::IsValidType<Sound>(id)) // Not a valid sound
+		return; 
+
+	if(m_Sound != InvalidResourceID)
+		ma_sound_uninit(&m_Data); // Release previously loaded sound
+
+	m_Sound = id;
+	Sound* sound = Resource::Get<Sound>(m_Sound);
+
+	ma_result result = ma_sound_init_copy(&AudioSystem::s_Engine, &sound->m_Sound, sound->c_Flags, nullptr, &m_Data);
+	if(result != MA_SUCCESS)
+		spdlog::error("Failed to initialise sound source [{}]", (int)result);
+	
+	// ma_sound_seek_to_pcm_frame(&m_Data, 0);
+}
+
 
 #pragma region Scripting Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_GET_SET(SoundSource, SoundClip, unsigned int)
+ADD_MANAGED_METHOD(SoundSource, GetSound, unsigned int, (void* instance))
+{ return ((SoundSource*)instance)->GetSound(); }
+
+ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, unsigned int value))
+{ ((SoundSource*)instance)->SetSound(value); }
 
 ADD_MANAGED_METHOD(SoundSource, Play, void, (void* instance))
 { ((SoundSource*)instance)->Play(); }

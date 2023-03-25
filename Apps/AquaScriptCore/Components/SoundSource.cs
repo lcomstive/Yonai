@@ -12,15 +12,10 @@ namespace AquaEngine
 
 	public class SoundSource : NativeComponent
 	{
-		private uint m_Sound = uint.MaxValue;
 		public uint Sound
 		{
-			get => m_Sound;
-			set
-			{
-				if (m_Sound != value) // Check for change
-					_SetSoundClip(Handle, (m_Sound = value));
-			}
+			get => _GetSound(Handle);
+			set => _SetSound(Handle,value);
 		}
 
 		public bool IsPlaying => _IsPlaying(Handle);
@@ -32,8 +27,8 @@ namespace AquaEngine
 		public void Stop()	=> _Stop(Handle);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetSoundClip(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSoundClip(IntPtr handle, uint soundClip);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetSound(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSound(IntPtr handle, uint soundClip);
 	
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Play(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Pause(IntPtr handle);

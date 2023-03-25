@@ -165,18 +165,18 @@ void EditorApp::LoadScene()
 
 	/// TEMP ///
 	ResourceID bellSoundID = Resource::Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
-	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3", true);
+	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3");
 
 	Entity musicEntity = m_CurrentScene->CreateEntity();
 	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
-	musicSource->SoundClip = musicSoundID;
+	musicSource->SetSound(musicSoundID);
 	soundSources.push_back(musicSource);
 
 	for (int i = 0; i < 2; i++)
 	{
 		Entity soundEntity = m_CurrentScene->CreateEntity();
 		SoundSource* source = soundEntity.AddComponent<SoundSource>();
-		source->SoundClip = bellSoundID;
+		source->SetSound(bellSoundID);
 
 		soundSources.push_back(source);
 	}
@@ -314,7 +314,7 @@ void EditorApp::DrawUI()
 		string id = "SoundSource [" + to_string(soundSource->Entity.ID()) + "]##" + to_string(soundIndex++);
 		ImGui::Begin(id.c_str());
 
-		string resourcePath = Resource::GetPath(soundSource->SoundClip);
+		string resourcePath = Resource::GetPath(soundSource->GetSound());
 		ImGui::Text("'%s'", resourcePath.c_str());
 
 		// Play

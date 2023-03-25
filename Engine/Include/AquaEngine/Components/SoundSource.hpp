@@ -20,8 +20,6 @@ namespace AquaEngine
 
 		struct SoundSource : public Component
 		{
-			ResourceID SoundClip;
-
 			AquaAPI void Play();
 			AquaAPI void Stop();
 			AquaAPI void Pause();
@@ -41,19 +39,20 @@ namespace AquaEngine
 			AquaAPI float GetVolume();
 			AquaAPI void SetVolume(float volume);
 
+			AquaAPI ResourceID GetSound();
+			AquaAPI void SetSound(ResourceID id);
+
 		private:
-			// Sample rate of the sound source
-			float m_SampleRate = 0;
+			ma_sound m_Data;
+			ResourceID m_Sound;
 
 			// Volume of output sound
 			float m_Volume = 1.0f;
 
-			// Total PCM frames
-			ma_uint64 m_TotalFrames = 0;
+			// Where to seek when resuming
+			ma_uint64 m_PausedFrames = 0;
 
-			ma_data_source_node m_Node;
 			SoundState m_State = SoundState::Stopped;
-			ma_decoder m_Data;
 		};
 	}
 }

@@ -37,6 +37,10 @@ namespace AquaEngine
 		// Called from native code
 		private static void _OutputDeviceChanged()
 		{
+			uint output = _GetOutputDevice();
+			if(output > Devices.Length)
+				return; // Out of bounds
+
 			m_OutputDevice = Devices[_GetOutputDevice()];
 			OutputDeviceChanged?.Invoke();
 			Log.Debug($"Audio device changed to '{OutputDevice.Name}'");
