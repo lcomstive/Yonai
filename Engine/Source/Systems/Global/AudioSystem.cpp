@@ -6,6 +6,7 @@ using namespace AquaEngine::Systems;
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/IO/VFS.hpp>
+#include <AquaEngine/Components/Transform.hpp>
 #include <AquaEngine/Components/SoundSource.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 
@@ -90,6 +91,10 @@ void AudioSystem::Update()
 			if (source->IsPlaying() &&
 				source->GetPlayTime() >= source->GetLength())
 				source->Stop();
+
+			Transform* transform = source->Entity.GetComponent<Transform>();
+			if(transform)
+				ma_sound_set_position(&source->m_Data, transform->Position.x, transform->Position.y, transform->Position.z);
 		}
 	}
 }

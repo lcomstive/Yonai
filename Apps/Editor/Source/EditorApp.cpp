@@ -175,6 +175,7 @@ void EditorApp::LoadScene()
 	for (int i = 0; i < 2; i++)
 	{
 		Entity soundEntity = m_CurrentScene->CreateEntity();
+		soundEntity.AddComponent<Transform>();
 		SoundSource* source = soundEntity.AddComponent<SoundSource>();
 		source->SetSound(bellSoundID);
 
@@ -347,6 +348,20 @@ void EditorApp::DrawUI()
 		int volumePercent = (int)std::floor(soundSource->GetVolume() * 100.0f);
 		if (ImGui::SliderInt("Volume", &volumePercent, 0, 100, "%i%"))
 			soundSource->SetVolume(volumePercent / 100.0f);
+
+		Transform* transform = soundSource->Entity.GetComponent<Transform>();
+		if(transform)
+			ImGui::DragFloat3("Position", &transform->Position[0], 0.01f);
+
+		ImGui::SameLine();
+		bool looping = soundSource->IsLooping();
+		if(ImGui::Checkbox("Loop", &looping))
+			soundSource->SetLooping(looping);
+
+		ImGui::SameLine();
+		bool spatialise = soundSource->GetSpatialization();
+		if(ImGui::Checkbox("Spatial", &spatialise))
+			soundSource->SetSpatialization(spatialise);
 
 		ImGui::End();
 	}

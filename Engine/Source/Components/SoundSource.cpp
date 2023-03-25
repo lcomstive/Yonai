@@ -105,6 +105,15 @@ void SoundSource::SetVolume(float volume)
 		ma_sound_set_volume(&m_Data, m_Volume);
 }
 
+bool SoundSource::IsLooping() { return m_Looping; }
+void SoundSource::SetLooping(bool loop) { ma_sound_set_looping(&m_Data, m_Looping = loop); }
+
+float SoundSource::GetPanning() { return m_Panning; }
+void SoundSource::SetPanning(float pan) { ma_sound_set_pan(&m_Data, m_Panning = std::clamp(pan, -1.0f, 1.0f)); }
+
+bool SoundSource::GetSpatialization() { return m_Spatialization; }
+void SoundSource::SetSpatialization(bool enable) { ma_sound_set_spatialization_enabled(&m_Data, m_Spatialization = enable); }
+
 ResourceID SoundSource::GetSound() { return m_Sound; }
 void SoundSource::SetSound(ResourceID id)
 {
