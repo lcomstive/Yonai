@@ -2,6 +2,7 @@
 #include <string>
 #include <miniaudio.h>
 #include <AquaEngine/API.hpp>
+#include <AquaEngine/Resource.hpp>
 
 namespace AquaEngine
 {
@@ -14,7 +15,7 @@ namespace AquaEngine
 	public:
 		std::string Name;
 
-		AquaAPI SoundMixer(std::string name = "Mixer", SoundMixer* parent = nullptr);
+		AquaAPI SoundMixer(std::string name = "Mixer", ResourceID parent = InvalidResourceID);
 		AquaAPI ~SoundMixer();
 
 		AquaAPI ma_sound_group* GetHandle();
@@ -23,8 +24,8 @@ namespace AquaEngine
 		AquaAPI void SetVolume(float value);
 
 		/// <summary>
-		/// Sets the parent of this mixer, or nullptr for output to playback device
+		/// Sets the parent of this mixer, or InvalidResourceID for output to master
 		/// </summary>
-		AquaAPI void SetParent(SoundMixer* other);
+		AquaAPI void SetParent(ResourceID parent);
 	};
 }

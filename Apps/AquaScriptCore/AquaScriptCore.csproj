@@ -79,6 +79,7 @@
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\NativeComponent.cs" />
     <Compile Include="Graphics\Material.cs" />
+    <Compile Include="Audio\SoundMixer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

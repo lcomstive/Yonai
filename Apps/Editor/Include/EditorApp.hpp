@@ -39,7 +39,6 @@ namespace AquaEditor
 		void Setup() override;
 		void OnDraw() override;
 		void OnUpdate() override;
-		void Cleanup() override;
 
 	public:
 		template<typename T>

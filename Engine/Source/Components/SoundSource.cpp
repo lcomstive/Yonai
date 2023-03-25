@@ -144,8 +144,8 @@ void SoundSource::SetSound(ResourceID id)
 		SetMixer(m_Mixer);
 }
 
-SoundMixer* SoundSource::GetMixer() { return m_Mixer; }
-void SoundSource::SetMixer(SoundMixer* mixer)
+ResourceID SoundSource::GetMixer() { return m_Mixer; }
+void SoundSource::SetMixer(ResourceID mixer)
 {
 	m_Mixer = mixer;
 
@@ -153,10 +153,12 @@ void SoundSource::SetMixer(SoundMixer* mixer)
 		return; // No sound loaded
 
 	ma_node* output = nullptr;
-	if(!mixer) // Default is engine directly
+
+	// Check for valid mixer
+	if(mixer == InvalidResourceID || !Resource::IsValidType<SoundMixer>(mixer))
 		output = ma_engine_get_endpoint(AudioSystem::GetEngine());
 	else
-		output = (ma_node*)mixer->GetHandle();
+		output = (ma_node*)Resource::Get<SoundMixer>(mixer)->GetHandle();
 
 	ma_node_attach_output_bus(&m_Data, 0, output, 0);
 }

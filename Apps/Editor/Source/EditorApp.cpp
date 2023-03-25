@@ -96,13 +96,6 @@ void EditorApp::OnDraw()
 	DrawUI();
 }
 
-void EditorApp::Cleanup()
-{
-	for(SoundMixer* mixer : soundMixers)
-		delete mixer;
-	soundMixers.clear();
-}
-
 #include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
@@ -173,15 +166,22 @@ void EditorApp::LoadScene()
 
 	/// TEMP ///
 	// Create sound mixers
+	ResourceID masterMixerID = Resource::Load<SoundMixer>("Mixers/Master", "Master");
+	ResourceID musicMixerID = Resource::Load<SoundMixer>("Mixers/Music", "Music", masterMixerID);
+	ResourceID sfxMixerID = Resource::Load<SoundMixer>("Mixers/SFX", "SFX", masterMixerID);
+	ResourceID sfxMixerID2 = Resource::Load<SoundMixer>("Mixers/SFX2", "SFX Sub", sfxMixerID);
+
 	if(soundMixers.empty())
 	{
-		SoundMixer* masterMixer = new SoundMixer("Master");
-		SoundMixer* musicMixer = new SoundMixer("Music", masterMixer);
-		SoundMixer* sfxMixer = new SoundMixer("SFX", masterMixer);
+		SoundMixer* masterMixer = Resource::Get<SoundMixer>(masterMixerID);
+		SoundMixer* musicMixer = Resource::Get<SoundMixer>(musicMixerID);
+		SoundMixer* sfxMixer = Resource::Get<SoundMixer>(sfxMixerID);
+		SoundMixer* sfxMixer2 = Resource::Get<SoundMixer>(sfxMixerID2);
 
 		soundMixers.push_back(masterMixer);
 		soundMixers.push_back(musicMixer);
 		soundMixers.push_back(sfxMixer);
+		soundMixers.push_back(sfxMixer2);
 	}
 
 	// Load sounds
@@ -191,7 +191,7 @@ void EditorApp::LoadScene()
 	// Create sound sources
 	Entity musicEntity = m_CurrentScene->CreateEntity();
 	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
-	musicSource->SetMixer(soundMixers[1]);
+	musicSource->SetMixer(musicMixerID);
 	musicSource->SetSound(musicSoundID);
 	soundSources.push_back(musicSource);
 
@@ -201,7 +201,7 @@ void EditorApp::LoadScene()
 		soundEntity.AddComponent<Transform>();
 		SoundSource* source = soundEntity.AddComponent<SoundSource>();
 		source->SetSound(bellSoundID);
-		source->SetMixer(soundMixers[2]);
+		source->SetMixer(i % 2 == 0 ? sfxMixerID : sfxMixerID2);
 
 		soundSources.push_back(source);
 	}

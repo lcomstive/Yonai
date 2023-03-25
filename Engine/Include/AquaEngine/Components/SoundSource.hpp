@@ -69,17 +69,17 @@ namespace AquaEngine
 			/// <summary>
 			/// Sets the output mixer, or nullptr for master output
 			/// <summary>
-			AquaAPI void SetMixer(SoundMixer* parent);
+			AquaAPI void SetMixer(ResourceID parent);
 
 			/// <summary>
 			/// Gets the output mixer, or nullptr if master output
 			/// <summary>
-			AquaAPI SoundMixer* GetMixer();
+			AquaAPI ResourceID GetMixer();
 
 		private:
 			ma_sound m_Data;
 			ResourceID m_Sound;
-			SoundMixer* m_Mixer = nullptr;
+			ResourceID m_Mixer = InvalidResourceID;
 
 			bool m_Looping = false;
 			float m_Panning = 0.0f;
