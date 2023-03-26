@@ -40,6 +40,7 @@ void SystemManager::Destroy()
 			iterator.second->OnDisabled();
 		iterator.second->Destroy();
 		delete iterator.second;
+		m_Systems[iterator.first] = nullptr;
 	}
 	m_Systems.clear();
 
@@ -81,7 +82,7 @@ vector<System*> SystemManager::All()
 	return systems;
 }
 
-bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.end(); }
+bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.end() && m_Systems[hash]; }
 
 System* SystemManager::Get(size_t hash) { return Has(hash) ? m_Systems[hash] : nullptr; }
 
