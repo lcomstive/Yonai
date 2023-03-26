@@ -36,7 +36,7 @@ namespace AquaEngine::Scripting
 
 		// Loads AquaScriptCore from <see cref="s_CoreDLLPath"/>
 		static void LoadCoreAssembly();
-
+		
 		/// <summary>
 		/// Loads an assembly from disk
 		/// </summary>
@@ -50,6 +50,9 @@ namespace AquaEngine::Scripting
 		/// <param name="coreDllPath">The path to AquaScriptCore.dll</param>
 		/// <param name="allowDebugging">Should a debugger for managed code be setup?</param>
 		AquaAPI static void Init(std::string& coreDllPath, bool allowDebugging = false);
+
+		AquaAPI static void AddInternalCall(const char* name, const void* fn);
+		AquaAPI static void AddInternalCalls(const std::vector<std::pair<const char*, const void*>>& methods);
 
 		/// <summary>
 		/// Unloads scripting engine, releases resources &

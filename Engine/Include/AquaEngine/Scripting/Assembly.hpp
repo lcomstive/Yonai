@@ -90,7 +90,6 @@ namespace AquaEngine::Scripting
 		/// Stores classes deriving AquaEngine.Component in <see cref="m_ManagedComponentTypes" />
 		/// </summary>
 		void CacheTypes(bool isCore);
-		void AddInternalCalls();
 
 		// Clears s_TypeHashes & s_ReverseTypeHashes.
 		// Intended to be used when reloading assemblies

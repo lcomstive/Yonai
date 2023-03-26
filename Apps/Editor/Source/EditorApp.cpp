@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <EditorApp.hpp>
 #include <spdlog/spdlog.h>
+#include <AquaEditor/Glue.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Resource.hpp>
@@ -88,7 +89,9 @@ void EditorApp::Setup()
 
 	Add<ViewportView>();
 
-	LoadScene();
+	// LoadScene();
+
+	LaunchEditorService();
 }
 
 void EditorApp::OnDraw()
@@ -111,16 +114,6 @@ void EditorApp::LoadScene()
 {
 	m_CurrentScene = new World("Test World");
 
-	// Add a camera
-	/*
-	Entity cameraEntity = m_CurrentScene->CreateEntity();
-	Transform* cameraTransform = cameraEntity.AddComponent<Transform>();
-	cameraTransform->Position = { 0, 0, -10 };
-	m_EditorCamera = cameraEntity.AddComponent<Camera>();
-	m_EditorCamera->Orthographic = false;
-	cameraEntity.AddComponent<FPSCamera>();
-	*/
-
 	// 2D Sprite Test
 	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "assets://Textures/Test.png");
 	ResourceID spriteShader = Resource::Load<Shader>("Shaders/Sprite", ShaderStageInfo
@@ -136,73 +129,6 @@ void EditorApp::LoadScene()
 	Assembly* assembly = assemblies[1];
 	MonoType* monoType = assembly->GetTypeFromClassName("TestGame", "TestComponent");
 
-	/*
-	const unsigned int spriteRows = 15;
-	const unsigned int spriteColumns = 15;
-	for (unsigned int x = 0; x < spriteRows; x++)
-	{
-		for (unsigned int y = 0; y < spriteColumns; y++)
-		{
-			Entity entity = m_CurrentScene->CreateEntity();
-
-			Transform* transform = entity.AddComponent<Transform>();
-			transform->Position = { x - (spriteRows / 2.0f), y - (spriteColumns / 2.0f), 0 };
-			transform->Scale = { 0.15f, 0.15f, 0.15f };
-
-			SpriteRenderer* sprite = entity.AddComponent<SpriteRenderer>();
-			sprite->Sprite = textureID;
-			sprite->Shader = spriteShader;
-
-			if (x % 2 == 0 && y % 2 == 0)
-				entity.AddComponent(monoType);
-		}
-	}
-	*/
-
-	/// TEMP ///
-	// Create sound mixers
-	ResourceID masterMixerID = Resource::Load<SoundMixer>("Mixers/Master", "Master");
-	ResourceID musicMixerID = Resource::Load<SoundMixer>("Mixers/Music", "Music", masterMixerID);
-	ResourceID sfxMixerID = Resource::Load<SoundMixer>("Mixers/SFX", "SFX", masterMixerID);
-	ResourceID sfxMixerID2 = Resource::Load<SoundMixer>("Mixers/SFX2", "SFX Sub", sfxMixerID);
-
-	if(soundMixers.empty())
-	{
-		SoundMixer* masterMixer = Resource::Get<SoundMixer>(masterMixerID);
-		SoundMixer* musicMixer = Resource::Get<SoundMixer>(musicMixerID);
-		SoundMixer* sfxMixer = Resource::Get<SoundMixer>(sfxMixerID);
-		SoundMixer* sfxMixer2 = Resource::Get<SoundMixer>(sfxMixerID2);
-
-		soundMixers.push_back(masterMixer);
-		soundMixers.push_back(musicMixer);
-		soundMixers.push_back(sfxMixer);
-		soundMixers.push_back(sfxMixer2);
-	}
-
-	// Load sounds
-	ResourceID bellSoundID = Resource::Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
-	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3");
-
-	// Create sound sources
-	Entity musicEntity = m_CurrentScene->CreateEntity();
-	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
-	musicSource->SetMixer(musicMixerID);
-	musicSource->SetSound(musicSoundID);
-	soundSources.push_back(musicSource);
-
-	for (int i = 0; i < 2; i++)
-	{
-		Entity soundEntity = m_CurrentScene->CreateEntity();
-		soundEntity.AddComponent<Transform>();
-		SoundSource* source = soundEntity.AddComponent<SoundSource>();
-		source->SetSound(bellSoundID);
-		source->SetMixer(i % 2 == 0 ? sfxMixerID : sfxMixerID2);
-
-		soundSources.push_back(source);
-	}
-
-	/// END TEMP ///
-
 	// Implemented in C#
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
 	if (testSystem)
@@ -211,6 +137,14 @@ void EditorApp::LoadScene()
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();
 	SceneSystem::AddScene(m_CurrentScene);
+}
+
+void EditorApp::LaunchEditorService()
+{
+	// Test C# component
+	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll");
+	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
+	SystemManager::Global()->Add(editorService);
 }
 
 void EditorApp::LoadProject()
@@ -250,6 +184,9 @@ void EditorApp::InitialiseScripting()
 	ScriptEngine::Init(AquaScriptCorePath,
 		// Allow debugging in debug builds
 		true);
+
+	// Add AquaScriptEditor internal methods
+	ScriptEngine::AddInternalCalls(_InternalMethods);
 }
 
 void EditorApp::DrawUI()

@@ -2,6 +2,8 @@ project(AquaEditor)
 file(GLOB_RECURSE SOURCE_FILES "Source/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "Include/*.hpp")
 
+list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp")
+
 add_executable(
 	${PROJECT_NAME}
 	${SOURCE_FILES}
@@ -16,8 +18,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
 
-# Add dependency to the C# binding project
-add_dependencies(${PROJECT_NAME} AquaScriptCore)
+# Add dependency to the C# binding projects
+add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor)
+
+# Generate C# bindings from C#
+add_custom_command(
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
+	DEPENDS GlueGenerator
+)
 
 if(WIN32 OR APPLE)
 	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
@@ -55,6 +64,17 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
 		${AQUA_RESOURCES_DIR}/Assets/
 )
+
+if(WIN32 AND BUILD_SHARED_LIBS)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD	
+		# Copy mono .dll to output
+		COMMAND echo Copying Mono dynamic lib to output
+
+		COMMAND ${CMAKE_COMMAND} -E copy
+			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/bin/mono-2.0-sgen$<$<CONFIG:Debug>:-debug>.dll
+			${AQUA_RESOURCES_DIR}/mono-2.0-sgen.dll
+	)
+endif()
 
 if(APPLE)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

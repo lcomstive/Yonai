@@ -35,6 +35,11 @@ namespace AquaEditor
 		/// </summary>
 		void LoadProject();
 
+		/// <summary>
+		/// Loads editor script and loads the initial editor service
+		/// </summary>
+		void LaunchEditorService();
+
 	protected:
 		void Setup() override;
 		void OnDraw() override;

@@ -34,12 +34,26 @@ int main(int argc, char** argv)
 {
 	if (argc < 3)
 	{
-		cout << "Usage: " << argv[0] << " <Source Directory> <Output File>" << endl;
+		cout << "Usage: " << argv[0] << " [options] <Source Directory> <Output File>" << endl;
+		cout << "Options:" << endl;
+		cout << " -prefix=<string_prefix>\tSets the function name prefix when binding C# internal calls" << endl;
 		return -1;
 	}
 
-	string sourceDirectory = argv[1];
-	string outputFile = argv[2];
+	string sourceDirectory = argv[argc - 2];
+	string outputFile = argv[argc - 1];
+	string prefix = "";
+
+	for (int i = 0; i < argc; i++)
+	{
+		string arg(argv[i]);
+		if (arg.rfind("-prefix=", 0) == 0)
+			prefix = arg.substr(string("-prefix=").length());
+	}
+
+#if SHOW_DEBUG_OUTPUT // Debugging output
+	cout << "Prefix: " << prefix << endl;
+#endif
 
 	if (!fs::exists(sourceDirectory))
 	{
@@ -51,7 +65,7 @@ int main(int argc, char** argv)
 
 	// Find all internal methods in C++ source files
 	smatch matches;
-	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]+)\\)(,\\s*([\\w\\._]+))?)?)?");
+	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]*)\\)(,\\s*([\\w\\._]+))?)?)?");
 	regex propertyRegex("ADD_MANAGED_(GET|SET|GET_SET)\\((\\w+),\\s*(\\w+)(,\\s*(([_ A-Za-z\\*:0-9]+)(,\\s*([\\w\\._]+))?))?");
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{
@@ -138,7 +152,7 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < InternalMethods.size(); i++)
 	{
 		FunctionInfo info = InternalMethods[i];
-		contents += "\tMethodType(\"" + info.NamespaceName + "." + info.ClassName + "::_" + info.FunctionName + "\", ";
+		contents += "\tMethodType(\"" + info.NamespaceName + "." + info.ClassName + "::" + prefix + info.FunctionName + "\", ";
 		contents += "(const void*)_managed_internal_" + info.ClassName + info.FunctionName + ")";
 
 		if (i < InternalMethods.size() - 1)

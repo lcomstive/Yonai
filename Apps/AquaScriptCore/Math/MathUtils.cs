@@ -1,7 +1,11 @@
-﻿namespace AquaEngine
+﻿using System;
+
+namespace AquaEngine
 {
 	public static class MathUtils
 	{
+		public const float Pi = 3.1415926535897931f;
+
 		public static float Lerp(float a, float b, float t)
 		{
 			t = Clamp(t, 0.0f, 1.0f);
@@ -9,6 +13,9 @@
 		}
 
 		public static float Clamp(float a, float min, float max) => (a < min) ? min : ((a > max) ? max : a);
+
+		public static float Rad2Deg(float rads) => rads * (180.0f / Pi);
+		public static float Deg2Rad(float deg) => deg * (Pi / 180.0f);
 	}
 	
 	public static class Random

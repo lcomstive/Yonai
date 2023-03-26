@@ -61,7 +61,7 @@ endif()
 add_subdirectory(./GlueGenerator)
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
-	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
+	COMMAND GlueGenerator "-prefix=_" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
 	DEPENDS GlueGenerator
 )
 

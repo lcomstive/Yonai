@@ -38,10 +38,7 @@ SystemMethodEnabledFn SystemMethodEnabled = nullptr;
 SystemMethodInitialiseFn SystemMethodInitialise = nullptr;
 
 Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), Image(mono_assembly_get_image(handle))
-{
-	CacheTypes(isCoreAssembly);
-	AddInternalCalls();
-}
+{ CacheTypes(isCoreAssembly); }
 
 MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className)
 // { return mono_class_from_name(Image, namespaceName, className); }
@@ -263,13 +260,4 @@ void Assembly::LoadScriptCoreTypes()
 	AddSystemMethod(Update)
 	AddSystemMethod(Destroyed)
 #pragma endregion
-}
-
-// Add internal calls to mono. Binding C++ to C#
-#include <AquaEngine/Glue.hpp>
-
-void Assembly::AddInternalCalls()
-{
-	for (auto pair : _InternalMethods)
-		mono_add_internal_call(pair.first, pair.second);
 }

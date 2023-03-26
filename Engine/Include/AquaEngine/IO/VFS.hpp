@@ -81,7 +81,7 @@ namespace AquaEngine::IO
 			}
 
 			// Configure mountPath
-			mountPath = VFS::GetAbsolutePath(mountPath, true);
+			mountPath = VFS::GetAbsolutePath(mountPath, false, true);
 
 			// Replace all backslashes (Windows style) to forward slashes
 			replace(mountPath.begin(), mountPath.end(), '\\', '/');

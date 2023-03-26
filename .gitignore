@@ -38,5 +38,6 @@ vcpkg_installed
 # Keep template scripting output
 !Apps/Editor/Assets/ProjectTemplate/Scripting/bin/AquaProject.dll
 
-# Don't upload the generated glue file
+# Don't upload the generated glue files
 Engine/Include/AquaEngine/Glue.hpp
+Apps/Editor/Include/AquaEngine/Glue.hpp

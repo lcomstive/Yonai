@@ -12,6 +12,9 @@
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 
+// For adding internal calls to mono. Binding C++ to C#
+#include <AquaEngine/Glue.hpp>
+
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
@@ -96,6 +99,9 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	mono_domain_set(s_AppDomain, true);
 
 	LoadCoreAssembly();
+
+	// Add AquaScriptCore internal methods
+	AddInternalCalls(_InternalMethods);
 }
 
 void ScriptEngine::Destroy()
@@ -287,3 +293,12 @@ MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
 
 void ScriptEngine::AddReloadCallback(function<void()> callback)
 { s_ReloadCallbacks.emplace_back(callback); }
+
+void ScriptEngine::AddInternalCall(const char* name, const void* fn)
+{ mono_add_internal_call(name, fn); }
+
+void ScriptEngine::AddInternalCalls(const vector<pair<const char*, const void*>>& methods)
+{
+	for (auto pair : methods)
+		AddInternalCall(pair.first, pair.second);
+}

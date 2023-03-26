@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
+	[System.Diagnostics.DebuggerDisplay("({x}, {y})")]
 	public struct IVector2
 	{
 		public int x, y;
@@ -22,7 +23,7 @@ namespace AquaEngine
 				(int)Math.Round(MathUtils.Lerp(a.y, b.y, time), 0)
 				);
 
-		public override string ToString() => "(" + x + ", " + y + ")";
+		public override string ToString() => $"({x}, {y})";
 
 		public static implicit operator string(IVector2 v) => v.ToString();
 

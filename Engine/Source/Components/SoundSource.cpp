@@ -217,10 +217,10 @@ ADD_MANAGED_METHOD(SoundSource, GetState, unsigned int, (void* instance))
 { return (unsigned int)((SoundSource*)instance)->GetState(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetPlayTime, float, (void* instance))
-{ return (unsigned int)((SoundSource*)instance)->GetPlayTime(); }
+{ return ((SoundSource*)instance)->GetPlayTime(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetLength, float, (void* instance))
-{ return (unsigned int)((SoundSource*)instance)->GetLength(); }
+{ return ((SoundSource*)instance)->GetLength(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetLooping, bool, (void* instance))
 { return ((SoundSource*)instance)->IsLooping(); }

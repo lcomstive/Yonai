@@ -109,8 +109,15 @@ if(WIN32)
 		version.lib
 		Bcrypt.lib
 		winmm.lib
-		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmono-static-sgen.lib
 	)
+
+	if(BUILD_SHARED_LIBS)
+		# Shared mono lib
+		list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/mono-2.0-sgen$<$<CONFIG:Debug>:-debug>.lib)
+	else()
+		# Static mono lib
+		list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmono-static-sgen$<$<CONFIG:Debug>:-debug>.lib)
+	endif()
 elseif(APPLE)
 	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.1.dylib)
 elseif(UNIX)
