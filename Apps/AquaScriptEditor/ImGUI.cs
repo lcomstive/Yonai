@@ -6,7 +6,7 @@ namespace AquaEditor
 {
 	public static class ImGUI
 	{
-#region Window
+		#region Window
 		public static void Begin(string label) => _Begin(label);
 		public static bool Begin(string label, ref bool open) => _BeginClosable(label, ref open);
 
@@ -69,13 +69,17 @@ namespace AquaEditor
 		public static void Image(uint textureID, Vector2 size, Colour tint) => _Image(textureID, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(uint textureID, Vector2 size, Colour tint, Colour border) => _Image(textureID, ref size, ref tint, ref border);
 
-		public static void Image(Texture texture, Vector2 size) => _Image(texture.ResourceID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
-		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture.ResourceID, ref size, ref tint, ref s_ImageDefaultBorder);
-		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture.ResourceID, ref size, ref tint, ref border);
+		public static void Image(Texture texture, Vector2 size) => _Image(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref border);
 
 		public static bool ButtonImage(uint textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
+
+		public static bool ButtonImage(Texture texture, Vector2 size, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Image(uint textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
