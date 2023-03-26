@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <functional>
 #include <mono/jit/jit.h>
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/IO/VFS.hpp>
@@ -17,6 +18,9 @@ namespace AquaEngine::Scripting
 		static MonoDomain* s_RootDomain;
 		static Assembly* s_CoreAssembly;
 		static std::vector<Assembly*> s_Assemblies;
+
+		// Callbacks when script engine reloads all assemblies
+		static std::vector<std::function<void()>> s_ReloadCallbacks;
 
 		struct AssemblyPath
 		{
@@ -95,5 +99,10 @@ namespace AquaEngine::Scripting
 
 		/// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
+
+		/// <summary>
+		/// Submit a callback to be invoked whenever the script engine and assemblies are reloaded
+		/// </summary>
+		AquaAPI static void AddReloadCallback(std::function<void()> callback);
 	};
 }

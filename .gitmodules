@@ -29,3 +29,6 @@
 [submodule "Engine/Vendor/rapidjson"]
 	path = Engine/Vendor/rapidjson
 	url = https://github.com/tencent/rapidjson
+[submodule "Engine/Vendor/miniaudio"]
+	path = Engine/Vendor/miniaudio
+	url = https://github.com/mackron/miniaudio.git

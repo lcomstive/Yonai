@@ -12,15 +12,18 @@ jobs:
         config:
         - {
             name: "Windows",
-            os: windows-latest
+            os: windows-latest,
+            generator: "Visual Studio 17 2022"
           }
         - {
             name: "Linux",
-            os: ubuntu-latest
+            os: ubuntu-latest,
+            generator: "Ninja"
           }
         - {
             name: "MacOS",
-            os: macOS-latest
+            os: macOS-latest,
+            generator: "Unix Makefiles"
           }
 
     # Get source
@@ -34,7 +37,7 @@ jobs:
     - uses: lukka/get-cmake@latest
 
     - if: matrix.config.os == 'ubuntu-latest'
-      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev
+      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev zlib1g-dev ninja-build
 
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
@@ -60,11 +63,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ matrix.name }}-${{ env.CMAKE_CONFIG }}
+        key: ${{ matrix.config.name }}-${{ env.CMAKE_CONFIG }}
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      run: cmake -B ${{ github.workspace }}/build -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore

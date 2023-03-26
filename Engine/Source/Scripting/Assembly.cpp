@@ -6,6 +6,7 @@
 // Components to map, unmanaged -> managed
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Components/Transform.hpp>
+#include <AquaEngine/Components/SoundSource.hpp>
 #include <AquaEngine/Components/MeshRenderer.hpp>
 #include <AquaEngine/Components/SpriteRenderer.hpp>
 
@@ -221,6 +222,7 @@ void Assembly::LoadScriptCoreTypes()
 {
 	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
 	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
+	AddInternalManagedComponent<Components::SoundSource>("AquaEngine", "SoundSource");
 	AddInternalManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
 	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 

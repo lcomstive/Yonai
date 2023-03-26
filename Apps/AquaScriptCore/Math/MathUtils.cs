@@ -10,4 +10,15 @@
 
 		public static float Clamp(float a, float min, float max) => (a < min) ? min : ((a > max) ? max : a);
 	}
+	
+	public static class Random
+	{
+		public static float Range(float min, float max)
+		{
+			System.Random rand = new System.Random();
+			return (float)rand.NextDouble() * (max - min) + min;
+		}
+
+		public static float Range(float max) => Range(0, max);
+	}
 }

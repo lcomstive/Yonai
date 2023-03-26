@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0072 NEW) # Prefer newer OpenGL libraries over legacy ones
-
 set(AQUA_ENGINE_DEPENDENCY_LIBS)
 set(AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 
@@ -130,4 +128,11 @@ if(AQUA_BUILD_TESTS)
 	set(BUILD_GMOCK OFF CACHE BOOL "")
 	set(gtest_force_shared_crt ON CACHE BOOL "")
 	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/googletest EXCLUDE_FROM_ALL)
+endif()
+
+# MiniAudio
+list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/miniaudio")
+
+if(APPLE)
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS "-framework AudioUnit")
 endif()

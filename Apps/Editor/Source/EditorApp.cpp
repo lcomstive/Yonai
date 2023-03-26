@@ -8,7 +8,10 @@
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/FPSCamera.hpp>
 #include <AquaEngine/Platform/FixDLLBoundaries.hpp>
+
+// Systems //
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
 // Views //
@@ -19,6 +22,9 @@
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Components/ScriptComponent.hpp>
+
+#include <AquaEngine/Audio/Sound.hpp>
+#include <AquaEngine/Components/SoundSource.hpp>
 
 using namespace std;
 using namespace glm;
@@ -35,6 +41,9 @@ namespace fs = std::filesystem;
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
+
+vector<SoundMixer*> soundMixers = {};
+vector<SoundSource*> soundSources = {};
 
 void EditorApp::Setup()
 {
@@ -75,6 +84,8 @@ void EditorApp::Setup()
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
 	m_RenderSystem->Enable(false);
 
+	SystemManager::Global()->Add<AudioSystem>();
+
 	Add<ViewportView>();
 
 	LoadScene();
@@ -85,6 +96,7 @@ void EditorApp::OnDraw()
 	DrawUI();
 }
 
+#include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
 	// Iterate over & update views
@@ -147,9 +159,53 @@ void EditorApp::LoadScene()
 	}
 	*/
 
+	/// TEMP ///
+	// Create sound mixers
+	ResourceID masterMixerID = Resource::Load<SoundMixer>("Mixers/Master", "Master");
+	ResourceID musicMixerID = Resource::Load<SoundMixer>("Mixers/Music", "Music", masterMixerID);
+	ResourceID sfxMixerID = Resource::Load<SoundMixer>("Mixers/SFX", "SFX", masterMixerID);
+	ResourceID sfxMixerID2 = Resource::Load<SoundMixer>("Mixers/SFX2", "SFX Sub", sfxMixerID);
+
+	if(soundMixers.empty())
+	{
+		SoundMixer* masterMixer = Resource::Get<SoundMixer>(masterMixerID);
+		SoundMixer* musicMixer = Resource::Get<SoundMixer>(musicMixerID);
+		SoundMixer* sfxMixer = Resource::Get<SoundMixer>(sfxMixerID);
+		SoundMixer* sfxMixer2 = Resource::Get<SoundMixer>(sfxMixerID2);
+
+		soundMixers.push_back(masterMixer);
+		soundMixers.push_back(musicMixer);
+		soundMixers.push_back(sfxMixer);
+		soundMixers.push_back(sfxMixer2);
+	}
+
+	// Load sounds
+	ResourceID bellSoundID = Resource::Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
+	ResourceID musicSoundID = Resource::Load<Sound>("Sounds/Music", "assets://Audio/Lifelike.mp3");
+
+	// Create sound sources
+	Entity musicEntity = m_CurrentScene->CreateEntity();
+	SoundSource* musicSource = musicEntity.AddComponent<SoundSource>();
+	musicSource->SetMixer(musicMixerID);
+	musicSource->SetSound(musicSoundID);
+	soundSources.push_back(musicSource);
+
+	for (int i = 0; i < 2; i++)
+	{
+		Entity soundEntity = m_CurrentScene->CreateEntity();
+		soundEntity.AddComponent<Transform>();
+		SoundSource* source = soundEntity.AddComponent<SoundSource>();
+		source->SetSound(bellSoundID);
+		source->SetMixer(i % 2 == 0 ? sfxMixerID : sfxMixerID2);
+
+		soundSources.push_back(source);
+	}
+
+	/// END TEMP ///
+
 	// Implemented in C#
 	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
-	if(testSystem)
+	if (testSystem)
 		m_CurrentScene->GetSystemManager()->Add(testSystem);
 
 	// Add scene to active scenes
@@ -278,6 +334,76 @@ void EditorApp::DrawUI()
 	// Iterate over & draw views
 	for (auto& viewPair : m_Views)
 		viewPair.second->Draw();
+
+	int soundIndex = 0;
+	for (SoundSource* soundSource : soundSources)
+	{
+		string id = "SoundSource [" + to_string(soundSource->Entity.ID()) + "]##" + to_string(soundIndex++);
+		ImGui::Begin(id.c_str());
+
+		string resourcePath = Resource::GetPath(soundSource->GetSound());
+		ImGui::Text("'%s'", resourcePath.c_str());
+
+		// Play
+		if (soundSource->IsPlaying())
+		{
+			if (ImGui::Button("||")) soundSource->Pause();
+		}
+		else if (ImGui::Button(">"))
+			soundSource->Play();
+
+		// Stop
+		ImGui::SameLine();
+		if (ImGui::Button("[]")) soundSource->Stop();
+
+		// Seek bar
+		ImGui::SameLine();
+		float soundValue = soundSource->GetPlayTime();
+		float soundMaxValue = soundSource->GetLength();
+		if (ImGui::SliderFloat("##seek", &soundValue, 0, soundMaxValue, ""))
+			soundSource->Seek(soundValue);
+
+		ImGui::SameLine();
+
+		unsigned int valueMinutes = (unsigned int)std::floor(soundValue > 60 ? std::floor(soundValue / 60.0f) : 0.0f);
+		unsigned int valueSeconds = (unsigned int)std::floor(soundValue > 60 ? (soundValue - valueMinutes * 60.0f) : soundValue);
+		unsigned int maxValueMinutes = (unsigned int)std::floor(soundMaxValue > 60 ? std::floor(soundMaxValue / 60.0f) : 0.0f);
+		unsigned int maxValueSeconds = (unsigned int)std::floor(soundMaxValue > 60 ? (soundMaxValue - maxValueMinutes * 60.0f) : soundMaxValue);
+		ImGui::Text("%02i:%02i / %02i:%02i", valueMinutes, valueSeconds, maxValueMinutes, maxValueSeconds);
+
+		int volumePercent = (int)std::floor(soundSource->GetVolume() * 100.0f);
+		if (ImGui::SliderInt("Volume", &volumePercent, 0, 100, "%i%%"))
+			soundSource->SetVolume(volumePercent / 100.0f);
+
+		Transform* transform = soundSource->Entity.GetComponent<Transform>();
+		if(transform)
+			ImGui::DragFloat3("Position", &transform->Position[0], 0.01f);
+
+		bool looping = soundSource->IsLooping();
+		if(ImGui::Checkbox("Loop", &looping))
+			soundSource->SetLooping(looping);
+
+		ImGui::SameLine();
+		bool spatialise = soundSource->GetSpatialization();
+		if(ImGui::Checkbox("Spatial", &spatialise))
+			soundSource->SetSpatialization(spatialise);
+
+		ImGui::End();
+	}
+
+	// Sound Mixers //
+	ImGui::Begin("Sound Mixers");
+	for(SoundMixer* mixer : soundMixers)
+	{
+		ImGui::Text("%s", mixer->Name.c_str());
+		
+		ImGui::SameLine();
+
+		int volumePercent = (int)std::floor(mixer->GetVolume() * 100.0f);
+		if(ImGui::SliderInt(("Volume##" + mixer->Name).c_str(), &volumePercent, 0, 100, "%i%%"))
+			mixer->SetVolume(volumePercent / 100.0f);
+	}
+	ImGui::End();
 
 	ImGui::End();
 }

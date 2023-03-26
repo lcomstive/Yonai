@@ -1,0 +1,27 @@
+#pragma once
+#include <miniaudio.h>
+#include <AquaEngine/API.hpp>
+
+namespace AquaEngine
+{
+	namespace Components { struct SoundSource; }
+
+	/// <summary>
+	/// Resource for an audio clip
+	/// </summary>
+	struct Sound
+	{
+		AquaAPI Sound(const std::string& filepath);
+		AquaAPI ~Sound();
+
+		/// <returns>Length of the clip, in seconds</returns>
+		AquaAPI float GetLength();
+
+	private:
+		const unsigned int c_Flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE; // | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
+
+		ma_sound m_Sound;
+
+		friend struct AquaEngine::Components::SoundSource;
+	};
+}
