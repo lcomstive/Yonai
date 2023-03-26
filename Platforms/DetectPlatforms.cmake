@@ -11,6 +11,16 @@ if(APPLE)
     set(AQUA_EXECUTABLE_RESOURCES ${AQUA_ICON})
 
     set(AQUA_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Aqua\ Editor.app/Contents/Resources)
+
+    if(CMAKE_GENERATOR STREQUAL Xcode)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/bin)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/bin)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/lib)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/lib)
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/lib)
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/lib)
+    endif()
+
 elseif(WIN32)
     set(AQUA_ICON ${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Windows/AppIcon.ico)
     set(AQUA_EXECUTABLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Windows/AppIcon.rc)
@@ -38,6 +48,9 @@ function (AddPlatformSpecifics)
 
         # Sign executable
         CodeSign()
+
+        # Set XCode properties
+        SetXCodeProperties()
     elseif(WIN32) ## From Windows/Windows.cmake
         # Sets properties for executable
         # e.g. Show/hide console depending on debug/release build
