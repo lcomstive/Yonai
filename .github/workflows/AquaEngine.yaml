@@ -70,11 +70,11 @@ jobs:
       run: cmake -B ${{ github.workspace }}/build -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     # Build AquaScriptCore C# project manually on Unix systems
-    - name: Build AquaScriptCore
+    - name: Build C# Bindings
       if: matrix.config.name != 'Windows'
       run: |
-        msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
-        msbuild Apps/AquaScriptEditor/AquaScriptEditor.csproj -verbosity:diag -property:Configuration=Release
+        msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -property:Configuration=Release
+        msbuild Apps/AquaScriptEditor/AquaScriptEditor.csproj -property:Configuration=Release
 
     # Build
     - name: Build
