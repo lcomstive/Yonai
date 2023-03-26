@@ -9,12 +9,12 @@ using namespace AquaEngine::Systems;
 
 Sound::Sound(const string& filepath)
 {
-	string assetPath = VFS::GetAbsolutePath(filepath);
+	string assetPath = VFS::GetAbsolutePath(filepath, true);
 
 	ma_result result = ma_sound_init_from_file(&AudioSystem::s_Engine, assetPath.c_str(), c_Flags, nullptr, nullptr, &m_Sound);
 	if (result != MA_SUCCESS)
 	{
-		spdlog::warn("Failed to create sound for '{}'", filepath.c_str());
+		spdlog::warn("Failed to create sound for '{}' [{}]", filepath.c_str(), (int)result);
 		return;
 	}
 }

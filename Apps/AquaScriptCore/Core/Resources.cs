@@ -119,6 +119,12 @@ namespace AquaEngine
 			return instance;
 		}
 
+		public static T Get<T>(string path) where T : ResourceBase, new()
+		{
+			uint resourceID = GetID(path);
+			return resourceID == uint.MaxValue ? null : Get<T>(resourceID);
+		}
+
 		private static void LoadExistingResource<T>(T instance, uint resourceID) where T : ResourceBase, new()
 		{
 			instance.ResourceID = resourceID;

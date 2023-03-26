@@ -10,8 +10,9 @@ namespace TestGame
 		private Texture m_Texture;
 
 		private Sound m_Sound;
-		private SoundSource m_SoundSource;
+		private SoundMixer m_SoundMixer;
 		private uint m_AudioDeviceIndex = 0;
+		private float m_Pitch = 1.0f;
 
 		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
@@ -37,13 +38,8 @@ namespace TestGame
 			Log.Debug(v);
 
 			m_AudioDeviceIndex = Audio.OutputDevice.Index;
-
-			/*
-			m_Sound = Resource.Load<Sound>("Sounds/Bell", "assets://Audio/Bell.mp3");
-			Entity soundEntity = World.CreateEntity();
-			m_SoundSource = soundEntity.AddComponent<SoundSource>();
-			m_SoundSource.Sound = m_Sound;
-			*/
+			m_Sound = Resource.Load<Sound>("Sounds/Fall", "assets://Audio/Fall.mp3");
+			m_SoundMixer = Resource.Get<SoundMixer>("Mixers/SFX2");
 		}
 
 		protected override void Update()
@@ -67,10 +63,10 @@ namespace TestGame
 			if (Input.IsKeyPressed(Key.Num8))
 				SetPreviousAudioDevice();
 
-			/*
-			if (Input.IsKeyPressed(Key.Num5))
-				m_SoundSource.Play();
-			*/
+			if (Input.IsMousePressed(MouseButton.Left))
+				CreateProjectile();
+
+			m_SoundMixer.Volume += Input.ScrollDelta / 100.0f;
 		}
 
 		private float ProjectileForce = 20.0f;
@@ -133,7 +129,15 @@ namespace TestGame
 			renderer.Sprite = m_Texture;
 
 			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * ProjectileForce);
-			e.AddComponent<DestroyAfterSeconds>().StartCountdown(10.0f);
+			e.AddComponent<DestroyAfterSeconds>().StartCountdown(2.5f);
+
+			SoundSource source = e.AddComponent<SoundSource>();
+			source.Sound = m_Sound;
+			source.Spatialize = false;
+			source.Pitch += Random.Range(1.0f);
+			source.Mixer = m_SoundMixer;
+			source.Volume = Random.Range(0.5f, 1.0f);
+			source.Play();
 
 			return e;
 		}

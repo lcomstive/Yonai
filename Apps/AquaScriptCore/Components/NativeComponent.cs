@@ -16,7 +16,6 @@ namespace AquaEngine
 			}
 		}
 
-
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetHandle(uint worldID, uint entityID, Type type);
 
 	}

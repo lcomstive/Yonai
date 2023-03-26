@@ -159,11 +159,6 @@ void EditorApp::LoadScene()
 	}
 	*/
 
-	// Implemented in C#
-	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
-	if(testSystem)
-		m_CurrentScene->GetSystemManager()->Add(testSystem);
-
 	/// TEMP ///
 	// Create sound mixers
 	ResourceID masterMixerID = Resource::Load<SoundMixer>("Mixers/Master", "Master");
@@ -205,6 +200,13 @@ void EditorApp::LoadScene()
 
 		soundSources.push_back(source);
 	}
+
+	/// END TEMP ///
+
+	// Implemented in C#
+	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
+	if (testSystem)
+		m_CurrentScene->GetSystemManager()->Add(testSystem);
 
 	// Add scene to active scenes
 	SceneSystem::UnloadAllScenes();

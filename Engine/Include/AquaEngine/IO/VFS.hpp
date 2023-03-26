@@ -123,9 +123,11 @@ namespace AquaEngine::IO
 		AquaAPI static void Copy(const std::string& originalPath, const std::string& copyPath);
 
 		/// <summary>
-		/// Gets an absolute path from the first appropriate mount
+		/// Gets the absolute path of a filepath.
+		/// If <paramref name="requireFileExists"/> set to false, gets the first matching mount.
 		/// </summary>
-		AquaAPI static std::string GetAbsolutePath(std::string path, bool suppressWarning = false);
+		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
+		AquaAPI static std::string GetAbsolutePath(std::string path, bool requireFileExists = false, bool suppressWarning = false);
 
 		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
 		AquaAPI static VFSMapping* GetMapping(std::string path, bool needExistingFile = true, FilePermissions requiredPerms = FilePermissions::ReadWrite);

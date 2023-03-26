@@ -12,5 +12,8 @@ namespace AquaEngine::Components
 		AquaEngine::Entity Entity;
 
 		AquaEngine::Scripting::ManagedData ManagedData;
+
+		// Have virtual destructor for components to override
+		AquaAPI virtual ~Component() {}
 	};
 }

@@ -214,9 +214,9 @@ vector<VFSFile> VFS::GetFiles(string directory, bool recursive)
 	return files;
 }
 
-string VFS::GetAbsolutePath(string path, bool suppressWarning)
+string VFS::GetAbsolutePath(string path, bool needExistingFile, bool suppressWarning)
 {
-	VFSMapping* mapping = GetMapping(path, false);
+	VFSMapping* mapping = GetMapping(path, needExistingFile);
 	if (mapping)
 		return mapping->GetMountedPath(path);
 

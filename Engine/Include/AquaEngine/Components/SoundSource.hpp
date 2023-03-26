@@ -21,6 +21,8 @@ namespace AquaEngine
 
 		struct SoundSource : public Component
 		{
+			AquaAPI ~SoundSource() override;
+
 			AquaAPI void Play();
 			AquaAPI void Stop();
 			AquaAPI void Pause();
@@ -28,6 +30,9 @@ namespace AquaEngine
 
 			AquaAPI bool IsPlaying();
 			AquaAPI SoundState GetState();
+
+			/// <returns>Handle to miniaudio sound. This can be used directly with the miniaudio API for more functionality</returns>
+			AquaAPI ma_sound* GetHandle();
 
 			/// <returns>Amount of time the clip has been played for, in seconds</returns>
 			AquaAPI float GetPlayTime();
@@ -57,6 +62,16 @@ namespace AquaEngine
 			AquaAPI void SetPanning(float pan);
 
 			/// <summary>
+			/// Gets pitch of sound, higher value gives higher pitch, with a minimum value of 0.
+			/// </summary>
+			AquaAPI float GetPitch();
+
+			/// <summary>
+			/// Sets pitch of sound, higher value gives higher pitch, with a minimum value of 0.
+			/// </summary>
+			AquaAPI void SetPitch(float pan);
+
+			/// <summary>
 			/// When enabled, sounds are altered in volume based on position
 			/// <summary>
 			AquaAPI bool GetSpatialization();
@@ -77,12 +92,13 @@ namespace AquaEngine
 			AquaAPI ResourceID GetMixer();
 
 		private:
-			ma_sound m_Data;
-			ResourceID m_Sound;
+			ma_sound m_Data = {};
+			ResourceID m_Sound = InvalidResourceID;
 			ResourceID m_Mixer = InvalidResourceID;
 
 			bool m_Looping = false;
 			float m_Panning = 0.0f;
+			float m_Pitch = 1.0f;
 			bool m_Spatialization = true;
 
 			// Volume of output sound
