@@ -23,7 +23,7 @@ jobs:
         - {
             name: "MacOS",
             os: macOS-latest,
-            generator: "Xcode"
+            generator: "Unix Makefiles"
           }
 
     # Get source
