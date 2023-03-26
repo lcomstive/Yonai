@@ -1,6 +1,11 @@
 #include <imgui.h>
 #include <glm/glm.hpp>
+#include <AquaEngine/Resource.hpp>
+#include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
+
+using namespace AquaEngine;
+using namespace AquaEngine::Graphics;
 
 /// Window Begin / End ///
 ADD_MANAGED_METHOD(ImGUI, _Begin, void, (MonoString* nameRaw), AquaEditor)
@@ -33,11 +38,52 @@ ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor)
 	return ImGui::IsItemEdited();
 }
 
+ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
+{ return ImGui::BeginDisabled(); }
+
+ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
+{ return ImGui::EndDisabled(); }
+
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, Text, void, (MonoString* labelRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	ImGui::Text(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _Image, void, (unsigned int textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), AquaEditor)
+{
+	ImVec2 imSize(size->x, size->y);
+	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
+	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
+
+	Texture* texture = Resource::Get<Texture>(textureID);
+	ImGui::Image(
+		(ImTextureID)(texture ? texture->GetID() : 0),
+		imSize,
+		ImVec2(0, 1), // UV0
+		ImVec2(1, 0), // UV1
+		imTint,
+		imBorder
+	);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (unsigned int textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol), AquaEditor)
+{
+	ImVec2 imSize(size->x, size->y);
+	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
+	ImVec4 imBackground(bgCol->x, bgCol->g, bgCol->b, bgCol->a);
+
+	Texture* texture = Resource::Get<Texture>(textureID);
+	return ImGui::ImageButton(
+		(ImTextureID)(texture ? texture->GetID() : 0),
+		imSize,
+		ImVec2(0, 1), // UV0
+		ImVec2(1, 0), // UV1
+		framePadding,
+		imBackground,
+		imTint
+	);
 }
 
 // Drag 
@@ -62,21 +108,21 @@ ADD_MANAGED_METHOD(ImGUI, _DragFloat3, bool, (MonoString* labelRaw, glm::vec3* v
 	return ImGui::DragFloat3(label, &value->x, speed, min, max, format);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _DragInt, bool, (MonoString* labelRaw, int* value, int speed, int min, int max, MonoString* formatRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _DragInt, bool, (MonoString* labelRaw, int* value, float speed, int min, int max, MonoString* formatRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);
 	return ImGui::DragInt(label, value, speed, min, max, format);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _DragInt2, bool, (MonoString* labelRaw, glm::ivec2* value, int speed, int min, int max, MonoString* formatRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _DragInt2, bool, (MonoString* labelRaw, glm::ivec2* value, float speed, int min, int max, MonoString* formatRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);
 	return ImGui::DragInt2(label, &value->x, speed, min, max, format);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _DragInt3, bool, (MonoString* labelRaw, glm::ivec3* value, int speed, int min, int max, MonoString* formatRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _DragInt3, bool, (MonoString* labelRaw, glm::ivec3* value, float speed, int min, int max, MonoString* formatRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);

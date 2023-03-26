@@ -32,7 +32,6 @@ vcpkg_installed
 *.csproj
 
 # Except AquaScriptCore, used on Unix platforms
-!Apps/AquaScriptCore/AquaScriptCore.sln
 !Apps/AquaScriptCore/AquaScriptCore.csproj
 
 # Keep template scripting output
@@ -41,3 +40,6 @@ vcpkg_installed
 # Don't upload the generated glue files
 Engine/Include/AquaEngine/Glue.hpp
 Apps/Editor/Include/AquaEngine/Glue.hpp
+
+# Do include mono shared libs
+!Engine/Vendor/mono/bin/

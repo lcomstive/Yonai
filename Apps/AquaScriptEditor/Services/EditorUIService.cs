@@ -1,4 +1,5 @@
 using AquaEngine;
+using AquaEngine.Graphics;
 
 namespace AquaEditor
 {
@@ -13,9 +14,12 @@ namespace AquaEditor
 		private Colour m_ColourB = Colour.Green;
 		private float m_LerpAmount = 50.0f;
 
+		private float m_AngleRads = MathUtils.Deg2Rad(50);
 		private IVector2 m_TestIVec2 = new IVector2(420, 69);
 
-		private float m_AngleRads = MathUtils.Deg2Rad(50);
+		private uint m_TextureID = uint.MaxValue;
+
+		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
 		protected override void Draw()
 		{
@@ -44,8 +48,10 @@ namespace AquaEditor
 					"%.0f%%"	/* Format */
 					);
 
+				ImGUI.BeginDisabled();
 				Colour lerp = Colour.Lerp(m_ColourA, m_ColourB, m_LerpAmount / 100.0f);
 				ImGUI.ColourEdit4("Combined", ref lerp);
+				ImGUI.EndDisabled();
 
 				ImGUI.Space();
 
@@ -53,6 +59,12 @@ namespace AquaEditor
 				ImGUI.Slider("Slider IVec2", ref m_TestIVec2, 0, 1000, "%i");
 
 				ImGUI.SliderAngle("Slider Angle", ref m_AngleRads);
+
+				Texture texture = Resource.Get<Texture>(m_TextureID);
+				ImGUI.Image(texture, new Vector2(100, 100), lerp, m_ColourA);
+
+				if(ImGUI.ButtonImage(m_TextureID, new Vector2(100, 100)))
+					Log.Debug("Image button pressed");
 			}
 			ImGUI.End();
 		}

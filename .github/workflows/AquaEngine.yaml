@@ -72,7 +72,9 @@ jobs:
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build AquaScriptCore
       if: matrix.config.name != 'Windows'
-      run: msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
+      run: |
+        msbuild Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:diag -property:Configuration=Release
+        msbuild Apps/AquaScriptEditor/AquaScriptEditor.csproj -verbosity:diag -property:Configuration=Release
 
     # Build
     - name: Build

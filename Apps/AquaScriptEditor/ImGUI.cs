@@ -1,5 +1,5 @@
 using AquaEngine;
-using System;
+using AquaEngine.Graphics;
 using System.Runtime.CompilerServices;
 
 namespace AquaEditor
@@ -29,6 +29,12 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsItemEdited();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void BeginDisabled();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndDisabled();
 		#endregion
 
 		#region Controls
@@ -54,6 +60,30 @@ namespace AquaEditor
 		public static extern bool ColourEdit4(string label, ref Colour colour);
 		#endregion
 
+		#region Image
+		private static Colour s_ImageDefaultColour = Colour.White;
+		private static Colour s_ImageDefaultBorder = new Colour(0, 0, 0, 0);
+		private static Colour s_ButtonImageDefaultBackground = new Colour(0, 0, 0, 0);
+
+		public static void Image(uint textureID, Vector2 size) => _Image(textureID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
+		public static void Image(uint textureID, Vector2 size, Colour tint) => _Image(textureID, ref size, ref tint, ref s_ImageDefaultBorder);
+		public static void Image(uint textureID, Vector2 size, Colour tint, Colour border) => _Image(textureID, ref size, ref tint, ref border);
+
+		public static void Image(Texture texture, Vector2 size) => _Image(texture.ResourceID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture.ResourceID, ref size, ref tint, ref s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture.ResourceID, ref size, ref tint, ref border);
+
+		public static bool ButtonImage(uint textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _Image(uint textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _ImageButton(uint textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
+		#endregion
+
 		#region Drag
 		public static bool Drag(string label, ref float value, float speed = 1.0f, float min = 0.0f, float max = 0.0f, string format = "%.3f")
 			=> _DragFloat(label, ref value, speed, min, max, format);
@@ -64,13 +94,13 @@ namespace AquaEditor
 		public static bool Drag(string label, ref Vector3 value, float speed = 1.0f, float min = 0.0f, float max = 0.0f, string format = "%.3f")
 			=> _DragFloat3(label, ref value, speed, min, max, format);
 		
-		public static bool Drag(string label, ref int value, int speed = 1, int min = 0, int max = 0, string format = "%i")
+		public static bool Drag(string label, ref int value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt(label, ref value, speed, min, max, format);
 		
-		public static bool Drag(string label, ref IVector2 value, int speed = 1, int min = 0, int max = 0, string format = "%i")
+		public static bool Drag(string label, ref IVector2 value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt2(label, ref value, speed, min, max, format);
 		
-		public static bool Drag(string label, ref IVector3 value, int speed = 1, int min = 0, int max = 0, string format = "%i")
+		public static bool Drag(string label, ref IVector3 value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt3(label, ref value, speed, min, max, format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -107,7 +137,7 @@ namespace AquaEditor
 		private static extern bool _DragInt(
 			string label,
 			ref int value,
-			int speed,
+			float speed,
 			int min,
 			int max,
 			string format
@@ -117,7 +147,7 @@ namespace AquaEditor
 		private static extern bool _DragInt2(
 			string label,
 			ref IVector2 value,
-			int speed,
+			float speed,
 			int min,
 			int max,
 			string format
@@ -127,7 +157,7 @@ namespace AquaEditor
 		private static extern bool _DragInt3(
 			string label,
 			ref IVector3 value,
-			int speed,
+			float speed,
 			int min,
 			int max,
 			string format

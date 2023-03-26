@@ -14,13 +14,17 @@ void _managed_internal_ImGUIEnd();
 bool _managed_internal_ImGUIIsItemHovered();
 bool _managed_internal_ImGUIIsItemClicked();
 bool _managed_internal_ImGUIIsItemEdited();
+void _managed_internal_ImGUIBeginDisabled();
+void _managed_internal_ImGUIEndDisabled();
 void _managed_internal_ImGUIText(MonoString* labelRaw);
+void _managed_internal_ImGUI_Image(unsigned int textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol);
+bool _managed_internal_ImGUI_ImageButton(unsigned int textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol);
 bool _managed_internal_ImGUI_DragFloat(MonoString* labelRaw, float* value, float speed, float min, float max, MonoString* formatRaw);
 bool _managed_internal_ImGUI_DragFloat2(MonoString* labelRaw, glm::vec2* value, float speed, float min, float max, MonoString* formatRaw);
 bool _managed_internal_ImGUI_DragFloat3(MonoString* labelRaw, glm::vec3* value, float speed, float min, float max, MonoString* formatRaw);
-bool _managed_internal_ImGUI_DragInt(MonoString* labelRaw, int* value, int speed, int min, int max, MonoString* formatRaw);
-bool _managed_internal_ImGUI_DragInt2(MonoString* labelRaw, glm::ivec2* value, int speed, int min, int max, MonoString* formatRaw);
-bool _managed_internal_ImGUI_DragInt3(MonoString* labelRaw, glm::ivec3* value, int speed, int min, int max, MonoString* formatRaw);
+bool _managed_internal_ImGUI_DragInt(MonoString* labelRaw, int* value, float speed, int min, int max, MonoString* formatRaw);
+bool _managed_internal_ImGUI_DragInt2(MonoString* labelRaw, glm::ivec2* value, float speed, int min, int max, MonoString* formatRaw);
+bool _managed_internal_ImGUI_DragInt3(MonoString* labelRaw, glm::ivec3* value, float speed, int min, int max, MonoString* formatRaw);
 bool _managed_internal_ImGUISliderAngle(MonoString* labelRaw, float* value, float min, float max, MonoString* formatRaw);
 bool _managed_internal_ImGUI_SliderFloat(MonoString* labelRaw, float* value, float min, float max, MonoString* formatRaw);
 bool _managed_internal_ImGUI_SliderFloat2(MonoString* labelRaw, glm::vec2* value, float min, float max, MonoString* formatRaw);
@@ -43,7 +47,11 @@ const vector<pair<const char*, const void*>> _InternalMethods = {
 	MethodType("AquaEditor.ImGUI::IsItemHovered", (const void*)_managed_internal_ImGUIIsItemHovered),
 	MethodType("AquaEditor.ImGUI::IsItemClicked", (const void*)_managed_internal_ImGUIIsItemClicked),
 	MethodType("AquaEditor.ImGUI::IsItemEdited", (const void*)_managed_internal_ImGUIIsItemEdited),
+	MethodType("AquaEditor.ImGUI::BeginDisabled", (const void*)_managed_internal_ImGUIBeginDisabled),
+	MethodType("AquaEditor.ImGUI::EndDisabled", (const void*)_managed_internal_ImGUIEndDisabled),
 	MethodType("AquaEditor.ImGUI::Text", (const void*)_managed_internal_ImGUIText),
+	MethodType("AquaEditor.ImGUI::_Image", (const void*)_managed_internal_ImGUI_Image),
+	MethodType("AquaEditor.ImGUI::_ImageButton", (const void*)_managed_internal_ImGUI_ImageButton),
 	MethodType("AquaEditor.ImGUI::_DragFloat", (const void*)_managed_internal_ImGUI_DragFloat),
 	MethodType("AquaEditor.ImGUI::_DragFloat2", (const void*)_managed_internal_ImGUI_DragFloat2),
 	MethodType("AquaEditor.ImGUI::_DragFloat3", (const void*)_managed_internal_ImGUI_DragFloat3),
