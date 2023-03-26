@@ -152,6 +152,7 @@ ScriptSystem* SystemManager::Add(MonoType* managedType)
 		
 	System* rawSystem = (System*)system;
 	rawSystem->Init();
+	rawSystem->Enable();
 	rawSystem->OnScriptingReloaded();
 
 	return system;
