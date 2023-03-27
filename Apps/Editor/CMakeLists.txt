@@ -24,7 +24,7 @@ add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor)
 # Generate C# bindings from C#
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
-	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/Glue.hpp"
 	DEPENDS GlueGenerator
 )
 

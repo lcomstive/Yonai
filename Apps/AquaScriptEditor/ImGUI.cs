@@ -153,10 +153,10 @@ namespace AquaEditor
 		public static bool Input(string label, ref float value, float step = 0.0f, float stepFast = 0.0f, string format = "%.3f")
 			=> _InputFloat(label, ref value, step, stepFast, format);
 
-		public static bool Input(string label, ref Vector2 value) => _InputFloat2(label, ref value);
-		public static bool Input(string label, ref Vector3 value) => _InputFloat3(label, ref value);
-		public static bool Input(string label, ref Vector4 value) => _InputFloat4(label, ref value);
-		public static bool Input(string label, ref Quaternion value) => _InputQuat(label, ref value);
+		public static bool Input(string label, ref Vector2 value, string format = "%.3f") => _InputFloat2(label, ref value, format);
+		public static bool Input(string label, ref Vector3 value, string format = "%.3f") => _InputFloat3(label, ref value, format);
+		public static bool Input(string label, ref Vector4 value, string format = "%.3f") => _InputFloat4(label, ref value, format);
+		public static bool Input(string label, ref Quaternion value, string format = "%.3f") => _InputQuat(label, ref value, format);
 
 		public static bool Input(string label, ref int value, int step = 1, int stepFast = 100)
 			=> _InputInt(label, ref value, step, stepFast);
@@ -175,16 +175,16 @@ namespace AquaEditor
 		private static extern bool _InputFloat(string label, ref float value, float step, float stepFast, string format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _InputFloat2(string label, ref Vector2 value);
+		private static extern bool _InputFloat2(string label, ref Vector2 value, string format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _InputFloat3(string label, ref Vector3 value);
+		private static extern bool _InputFloat3(string label, ref Vector3 value, string format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _InputFloat4(string label, ref Vector4 value);
+		private static extern bool _InputFloat4(string label, ref Vector4 value, string format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _InputQuat(string label, ref Quaternion value);
+		private static extern bool _InputQuat(string label, ref Quaternion value, string format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _InputInt(string label, ref int value, int step, int stepFast);
@@ -382,6 +382,17 @@ namespace AquaEditor
 			int max,
 			string format
 		);
+		#endregion
+
+		#region Tooltip
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetTooltip(string label);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool BeginTooltip();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndTooltip();
 		#endregion
 	}
 }

@@ -1,7 +1,7 @@
 #include <imgui.h>
+#include <Glue.hpp>
 #include <EditorApp.hpp>
 #include <spdlog/spdlog.h>
-#include <AquaEditor/Glue.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Resource.hpp>

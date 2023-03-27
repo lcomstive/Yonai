@@ -422,3 +422,13 @@ ADD_MANAGED_METHOD(ImGUI, ColourEdit4, bool, (MonoString* labelRaw, float* colou
 	mono_free(label);
 	return output;
 }
+
+ADD_MANAGED_METHOD(ImGUI, SetTooltip, void, (MonoString* textRaw), AquaEditor)
+{
+	char* text = mono_string_to_utf8(textRaw);
+	ImGui::SetTooltip("%s", text);
+	mono_free(text);
+}
+
+ADD_MANAGED_METHOD(ImGUI, BeginTooltip, bool, (), AquaEditor) { return ImGui::BeginTooltip(); }
+ADD_MANAGED_METHOD(ImGUI, EndTooltip, void, (), AquaEditor) { ImGui::EndTooltip(); }
