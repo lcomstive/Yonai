@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace AquaEngine
 {
@@ -25,7 +25,17 @@ namespace AquaEngine
 			System.Random rand = new System.Random();
 			return (float)rand.NextDouble() * (max - min) + min;
 		}
+		
+		public static int Range(int min, int max)
+		{
+			System.Random rand = new System.Random();
+			return rand.Next(min, max);
+		}
 
+		public static int Range(int max) => Range(0, max);
 		public static float Range(float max) => Range(0, max);
+
+		public static T Range<T>(T[] values) => values[Range(values.Length)];
+		public static T Range<T>(List<T> values) => values[Range(values.Count)];
 	}
 }

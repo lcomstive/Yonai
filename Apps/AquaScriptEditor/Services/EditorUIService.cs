@@ -1,6 +1,8 @@
-using AquaEngine;
-using AquaEngine.Graphics;
 using System;
+using AquaEngine;
+using System.Linq;
+using AquaEngine.Graphics;
+using System.Collections.Generic;
 
 namespace AquaEditor
 {
@@ -27,6 +29,8 @@ namespace AquaEditor
 
 		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
+		protected override void Start() => GenerateConsoleLines();
+
 		protected override void Update()
 		{
 			if (Input.IsKeyPressed(Key.V))
@@ -48,6 +52,12 @@ namespace AquaEditor
 
 		private void DrawContents()
 		{
+			ImGUI.Input("Input String", ref m_Input);
+			ImGUI.InputPassword("Password", ref m_Password);
+			ImGUI.InputTextMultiline("Multiline", ref m_MultilineInput);
+
+			ImGUI.Input("Input Float", ref m_TestFloat);
+			ImGUI.Input("Input Vector3", ref m_TestVector3);
 			ImGUI.Drag("Test Float", ref m_TestFloat, 0.1f, 0, 100, "%.2f%%");
 			ImGUI.Drag("Test Vector2", ref m_TestVector2);
 			ImGUI.Drag("Test Vector3", ref m_TestVector3);
@@ -93,17 +103,6 @@ namespace AquaEditor
 
 			ImGUI.Space();
 
-			ImGUI.BeginChild("Test Child", new Vector2(0, 150), true);
-			{
-				ImGUI.Input("Input String", ref m_Input);
-				ImGUI.InputPassword("Password", ref m_Password);
-				ImGUI.InputTextMultiline("Multiline", ref m_MultilineInput);
-
-				ImGUI.Input("Input Float", ref m_TestFloat);
-				ImGUI.Input("Input Vector3", ref m_TestVector3);
-			}
-			ImGUI.EndChild();
-
 			ImGUI.Text("Hover me for tooltip!");
 			if (ImGUI.IsItemHovered())
 			{
@@ -116,6 +115,11 @@ namespace AquaEditor
 
 			UpdateFPSValues();
 			ImGUI.PlotLines("FPS", m_FPSValues, $"FPS: {Time.FPS}");
+			
+			ImGUI.BeginChild("Console", new Vector2(0, 150), true);
+			foreach ((string msg, Colour colour) in m_ConsoleLines)
+				ImGUI.Text(msg, colour);
+			ImGUI.EndChild();
 		}
 
 		// When reaches a threshold, adds an FPS value to m_FPSValues
@@ -133,6 +137,41 @@ namespace AquaEditor
 			for (int i = 0; i < m_FPSValues.Length - 1; i++)
 				m_FPSValues[i] = m_FPSValues[i + 1];
 			m_FPSValues[m_FPSValues.Length - 1] = Time.FPS;
+		}
+
+		private List<(string, Colour)> m_ConsoleLines = new List<(string, Colour)>();
+		private const int ConsoleLinesGenerated = 20;
+		private void GenerateConsoleLines()
+		{
+			string[] consoleLines =
+{
+				"Test",
+				"Another one",
+				"A line",
+				"Testing"
+			};
+			List<Colour> consoleColours = new List<Colour>()
+			{
+				Colour.Black,
+				Colour.White,
+				Colour.Grey,
+				Colour.Red,
+				Colour.Green,
+				Colour.Blue,
+				Colour.Yellow,
+				Colour.Magenta,
+				Colour.Purple,
+				Colour.Orange,
+				Colour.Turqoise
+			};
+
+			for (int i = 0; i < ConsoleLinesGenerated; i++)
+			{
+				m_ConsoleLines.Add((
+					AquaEngine.Random.Range(consoleLines),
+					AquaEngine.Random.Range(consoleColours)
+				));
+			}
 		}
 	}
 }

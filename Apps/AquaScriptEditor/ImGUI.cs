@@ -253,8 +253,14 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Space();
 
+		public static void Text(string label) => _Text(label);
+		public static void Text(string label, Colour colour) => _TextColoured(label, ref colour);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Text(string label);
+		private static extern void _Text(string label);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _TextColoured(string label, ref Colour colour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Button(string label);

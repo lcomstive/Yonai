@@ -49,6 +49,8 @@ vector<SoundSource*> soundSources = {};
 void EditorApp::Setup()
 {
 	WindowedApplication::Setup();
+	Window::SetResolution(1000, 1000);
+
 	FIX_DLL_BOUNDARIES();
 
 	Window::SetTitle("Aqua Editor");

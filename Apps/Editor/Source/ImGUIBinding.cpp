@@ -56,10 +56,18 @@ ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
 { return ImGui::EndDisabled(); }
 
 /// CONTROLS ///
-ADD_MANAGED_METHOD(ImGUI, Text, void, (MonoString* labelRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	ImGui::Text("%s", label);
+	mono_free(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _TextColoured, void, (MonoString* labelRaw, glm::vec4* colourRaw), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImVec4 colour(colourRaw->r, colourRaw->g, colourRaw->b, colourRaw->a);
+	ImGui::TextColored(colour, "%s", label);
 	mono_free(label);
 }
 

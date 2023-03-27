@@ -7,11 +7,17 @@ namespace AquaEngine
 	{
 		public float r, g, b, a;
 
-		public static readonly Colour Black	= new Colour(0, 0, 0);
-		public static readonly Colour White	= new Colour(1, 1, 1);
-		public static readonly Colour Red	= new Colour(1, 0, 0);
-		public static readonly Colour Green	= new Colour(0, 1, 0);
-		public static readonly Colour Blue	= new Colour(0, 0, 1);
+		public static readonly Colour Black		= new Colour(0, 0, 0);
+		public static readonly Colour White		= new Colour(1, 1, 1);
+		public static readonly Colour Grey		= new Colour(.5f, .5f, .5f);
+		public static readonly Colour Red		= new Colour(1, 0, 0);
+		public static readonly Colour Green		= new Colour(0, 1, 0);
+		public static readonly Colour Blue		= new Colour(0, 0, 1);
+		public static readonly Colour Yellow	= new Colour(1, 1, 0);
+		public static readonly Colour Magenta	= new Colour(1, 0, 1);
+		public static readonly Colour Purple	= new Colour(.5f, 0, 1);
+		public static readonly Colour Orange	= new Colour(1, .5f, 1);
+		public static readonly Colour Turqoise	= new Colour(0, 1, 1);
 
 		public Colour(float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f)
 		{
