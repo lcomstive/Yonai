@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Flags:
-#	c: Build type [debug, release, relwithdebinfo]
+#	c: Build type [Debug, Release]
 #	t: Run tests after building
 #	p: Package output
 
@@ -32,7 +32,10 @@ ROOT=${SCRIPT_DIR}/../..
 cmake -B ${ROOT}/build/ -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
 
 # Build AquaScriptCore C# project manually
-msbuild ${ROOT}/Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:minimal -property:Configuration=Release
+msbuild ${ROOT}/Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}
+
+# Build AquaScriptEditor C# project manually
+msbuild ${ROOT}/Apps/AquaScriptEditor/AquaScriptEditor.csproj -verbosity:minimal -property:Configuration=${CONFIG}
 
 # Build AquaEngine and apps
 cmake --build ${ROOT}/build --config ${CONFIG}
