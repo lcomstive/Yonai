@@ -42,5 +42,8 @@ namespace AquaEngine
 
 		public static Colour operator *(Colour a, float b) => new Colour(a.r * b, a.g * b, a.b * b, a.a * b);
 		public static Colour operator /(Colour a, float b) => new Colour(a.r / b, a.g / b, a.b / b, a.a / b);
+
+		public static implicit operator Vector4(Colour a) => new Vector4(a.r, a.g, a.b, a.a);
+		public static implicit operator Colour(Vector4 a) => new Colour(a.x, a.y, a.z, a.w);
 	}
 }

@@ -61,6 +61,7 @@
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\IVector2.cs" />
     <Compile Include="Math\IVector3.cs" />
+    <Compile Include="Math\IVector4.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Colour.cs" />
     <Compile Include="Math\Vector4.cs" />
