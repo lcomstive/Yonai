@@ -138,6 +138,15 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool ColourEdit4(string label, ref Colour colour);
+
+		public static void PlotLines(string label, float[] points, string overlayText = "")
+			=> PlotLines(label, points, overlayText, Vector2.Zero);
+
+		public static void PlotLines(string label, float[] points, string overlayText, Vector2 size)
+			=> _PlotLines(label, points, overlayText, ref size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PlotLines(string label, float[] points, string overlayText, ref Vector2 size);
 		#endregion
 
 		#region Input

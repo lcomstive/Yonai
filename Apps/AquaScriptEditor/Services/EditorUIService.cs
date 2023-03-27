@@ -1,5 +1,6 @@
 using AquaEngine;
 using AquaEngine.Graphics;
+using System;
 
 namespace AquaEditor
 {
@@ -21,6 +22,8 @@ namespace AquaEditor
 		private string m_Input = "String input field";
 		private string m_Password = "Password";
 		private string m_MultilineInput = "Multiline\nString\nField";
+
+		private float[] m_FPSValues = new float[100];
 
 		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
@@ -94,6 +97,26 @@ namespace AquaEditor
 					ImGUI.EndTooltip();
 				}
 			}
+
+			UpdateFPSValues();
+			ImGUI.PlotLines("FPS", m_FPSValues, $"FPS: {Time.FPS}");
+		}
+
+		// When reaches a threshold, adds an FPS value to m_FPSValues
+		private float m_UpdateCounter = 0.0f;
+		private const float UpdateCounterThreshold = .01f;
+		private void UpdateFPSValues()
+		{
+			m_UpdateCounter += Time.DeltaTime;
+			if (m_UpdateCounter >= UpdateCounterThreshold)
+				m_UpdateCounter -= m_UpdateCounter;
+			else
+				return;
+
+			// Shift all values down one
+			for (int i = 0; i < m_FPSValues.Length - 1; i++)
+				m_FPSValues[i] = m_FPSValues[i + 1];
+			m_FPSValues[m_FPSValues.Length - 1] = Time.FPS;
 		}
 	}
 }

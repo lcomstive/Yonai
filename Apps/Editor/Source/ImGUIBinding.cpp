@@ -432,3 +432,23 @@ ADD_MANAGED_METHOD(ImGUI, SetTooltip, void, (MonoString* textRaw), AquaEditor)
 
 ADD_MANAGED_METHOD(ImGUI, BeginTooltip, bool, (), AquaEditor) { return ImGui::BeginTooltip(); }
 ADD_MANAGED_METHOD(ImGUI, EndTooltip, void, (), AquaEditor) { ImGui::EndTooltip(); }
+
+ADD_MANAGED_METHOD(ImGUI, _PlotLines, void, (MonoString* labelRaw, MonoArray* pointsRaw, MonoString* overlayText, glm::vec2* graphSize), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	char* overlay = mono_string_to_utf8(overlayText);
+	ImVec2 size(graphSize->x, graphSize->y);
+
+	int pointsLength = mono_array_length(pointsRaw);
+	float* points = new float[pointsLength];
+
+	for (int i = 0; i < pointsLength; i++)
+		points[i] = mono_array_get(pointsRaw, float, i);
+
+	ImGui::PlotLines(label, (const float*)points, pointsLength, 0, overlay, .01f, 1000.0f, size);
+
+	// Free memory
+	delete[] points;
+	mono_free(label);
+	mono_free(overlay);
+}
