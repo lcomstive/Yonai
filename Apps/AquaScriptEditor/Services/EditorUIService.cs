@@ -27,9 +27,21 @@ namespace AquaEditor
 
 		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
+		protected override void Update()
+		{
+			if (Input.IsKeyPressed(Key.V))
+				m_IsOpen = true;
+			if (Input.IsKeyPressed(Key.B))
+				m_IsOpen = false;
+		}
+
+		private bool m_IsOpen = true;
 		protected override void Draw()
 		{
-			ImGUI.Begin("Editor Test");
+			if (!m_IsOpen)
+				return;
+
+			ImGUI.Begin("Editor Test", ref m_IsOpen);
 			DrawContents();
 			ImGUI.End();
 		}
@@ -81,12 +93,16 @@ namespace AquaEditor
 
 			ImGUI.Space();
 
-			ImGUI.Input("Input String", ref m_Input);
-			ImGUI.InputPassword("Password", ref m_Password);
-			ImGUI.InputTextMultiline("Multiline", ref m_MultilineInput);
+			ImGUI.BeginChild("Test Child", new Vector2(0, 150), true);
+			{
+				ImGUI.Input("Input String", ref m_Input);
+				ImGUI.InputPassword("Password", ref m_Password);
+				ImGUI.InputTextMultiline("Multiline", ref m_MultilineInput);
 
-			ImGUI.Input("Input Float", ref m_TestFloat);
-			ImGUI.Input("Input Vector3", ref m_TestVector3);
+				ImGUI.Input("Input Float", ref m_TestFloat);
+				ImGUI.Input("Input Vector3", ref m_TestVector3);
+			}
+			ImGUI.EndChild();
 
 			ImGUI.Text("Hover me for tooltip!");
 			if (ImGUI.IsItemHovered())

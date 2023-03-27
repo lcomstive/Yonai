@@ -8,22 +8,36 @@ using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 
 /// Window Begin / End ///
-ADD_MANAGED_METHOD(ImGUI, _Begin, void, (MonoString* nameRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _Begin, void, (MonoString* nameRaw, int flags), AquaEditor)
 {
 	char* name = mono_string_to_utf8(nameRaw);
-	ImGui::Begin(name);
+	ImGui::Begin(name, nullptr, flags);
 	mono_free(name);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _BeginClosable, bool, (MonoString* nameRaw, bool* open), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _BeginClosable, bool, (MonoString* nameRaw, bool* open, int flags), AquaEditor)
 {
 	char* name = mono_string_to_utf8(nameRaw);
-	bool value = ImGui::Begin(name, open);
+	bool value = ImGui::Begin(name, open, flags);
 	mono_free(name);
 	return value;
 }
 
 ADD_MANAGED_METHOD(ImGUI, End, void, (), AquaEditor) { ImGui::End(); }
+
+ADD_MANAGED_METHOD(ImGUI, _BeginChild, bool, (MonoString* idRaw, glm::vec2* sizeRaw, bool border, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	ImVec2 size(sizeRaw->x, sizeRaw->y);
+
+	bool value = ImGui::BeginChild(id, size, border, flags);
+
+	mono_free(id);
+	return value;
+}
+
+ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), AquaEditor)
+{ ImGui::EndChild(); }
 
 /// STATE ///
 ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
