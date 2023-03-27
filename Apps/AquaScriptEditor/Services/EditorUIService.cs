@@ -18,6 +18,9 @@ namespace AquaEditor
 		private IVector2 m_TestIVec2 = new IVector2(420, 69);
 
 		private uint m_TextureID = uint.MaxValue;
+		private string m_Input = "String input field";
+		private string m_Password = "Password";
+		private string m_MultilineInput = "Multiline\nString\nField";
 
 		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
@@ -63,8 +66,16 @@ namespace AquaEditor
 				Texture texture = Resource.Get<Texture>(m_TextureID);
 				ImGUI.Image(texture, new Vector2(100, 100), lerp, m_ColourA);
 
+				ImGUI.SameLine();
+
 				if(ImGUI.ButtonImage(m_TextureID, new Vector2(100, 100)))
 					Log.Debug("Image button pressed");
+
+				ImGUI.Space();
+
+				ImGUI.Input("String", ref m_Input);
+				ImGUI.InputPassword("Password", ref m_Password);
+				ImGUI.InputTextMultiline("Multiline", ref m_MultilineInput);
 			}
 			ImGUI.End();
 		}
