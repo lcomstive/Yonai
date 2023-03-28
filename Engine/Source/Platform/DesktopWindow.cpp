@@ -176,6 +176,7 @@ void Window::Destroy()
 		return;
 	s_Instance->Close();
 	delete s_Instance;
+	s_Instance = nullptr;
 }
 
 bool Window::RequestedToClose() { return s_Instance && s_Instance->m_Handle ? glfwWindowShouldClose(s_Instance->m_Handle) : true; }

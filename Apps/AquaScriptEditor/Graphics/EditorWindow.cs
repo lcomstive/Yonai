@@ -74,8 +74,8 @@ namespace AquaEditor
 	/// </summary>
 	public static class EditorWindow
 	{
-		internal static void CreationHint(WindowHint hint, int value) => CreationHintInt((int)hint, value);
-		internal static void CreationHint(WindowHint hint, bool value) => CreationHintBool((int)hint, value);
+		internal static void CreationHint(WindowHint hint, int value) => _CreationHintInt((int)hint, value);
+		internal static void CreationHint(WindowHint hint, bool value) => _CreationHintBool((int)hint, value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void InitContext();
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void DestroyContext();
@@ -84,7 +84,7 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Destroy();
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void ResetHints();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void CreationHintInt(int flag, int value);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void CreationHintBool(int flag, bool value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _CreationHintInt(int flag, int value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _CreationHintBool(int flag, bool value);
 	}
 }

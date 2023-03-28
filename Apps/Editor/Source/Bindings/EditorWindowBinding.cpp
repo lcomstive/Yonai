@@ -31,14 +31,20 @@ ADD_MANAGED_METHOD(EditorWindow, Destroy, void, (), AquaEditor)
 ADD_MANAGED_METHOD(EditorWindow, _CreationHintBool, void, (int hint, bool value), AquaEditor)
 {
 #ifdef AQUA_PLATFORM_DESKTOP
-	glfwWindowHint(hint, value);
+	if (!Window::GetNativeHandle())
+		glfwWindowHint(hint, value);
+	else
+		glfwSetWindowAttrib(Window::GetNativeHandle(), hint, value);
 #endif
 }
 
 ADD_MANAGED_METHOD(EditorWindow, _CreationHintInt, void, (int hint, int value), AquaEditor)
 {
 #ifdef AQUA_PLATFORM_DESKTOP
-	glfwWindowHint(hint, value);
+	if (!Window::GetNativeHandle())
+		glfwWindowHint(hint, value);
+	else
+		glfwSetWindowAttrib(Window::GetNativeHandle(), hint, value);
 #endif
 }
 

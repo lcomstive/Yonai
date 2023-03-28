@@ -9,7 +9,7 @@ namespace AquaEditor
 			Log.Debug("Launched editor service");
 
 			EditorWindow.InitContext();
-			EditorWindow.Create();
+			CreateWindow();
 
 			Add<EditorUIService>();
 		}
@@ -29,6 +29,14 @@ namespace AquaEditor
 
 			EditorWindow.Destroy();
 			EditorWindow.DestroyContext();
+		}
+
+		private void CreateWindow()
+		{
+			// EditorWindow.CreationHint(WindowHint.Maximised, true);
+
+			EditorWindow.Create();
+			Window.CenterOnDisplay();
 		}
 	}
 }
