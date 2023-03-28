@@ -215,6 +215,9 @@ void EditorApp::Draw()
 
 void EditorApp::DrawUI()
 {
+	// if (!SystemManager::Global()->Has<ImGUISystem>())
+		return;
+
 	// Note: Switch this to true to enable dockspace
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen_persistant = true;

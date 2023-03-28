@@ -244,7 +244,7 @@ ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (unsigned int worldID, MonoRef
 
 	// Get unmanaged->managed data
 	Assembly::ManagedSystemData systemData = Assembly::GetManagedSystemData(typeHash);
-	if (!systemData.AddFn)
+	if (systemData.AddFn == nullptr)
 		return systemManager->Add(managedType)->ManagedData.GetInstance();
 	return systemData.AddFn(systemManager)->ManagedData.GetInstance();
 }

@@ -6,6 +6,12 @@ namespace AquaEditor
 {
 	public static class ImGUI
 	{
+		public struct Viewport
+		{
+			public uint ID, ParentID;
+			public Vector2 Position, Size, WorkPosition, WorkSize;
+		}
+
 		[System.Flags]
 		public enum TextFlags : int
 		{
@@ -148,7 +154,7 @@ namespace AquaEditor
 			MenuBar = 1 << 10,
 
 			/// <summary>
-			/// Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
+			/// Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(Vector2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
 			/// </summary>
 			HorizontalScrollbar = 1 << 11,
 
@@ -202,6 +208,148 @@ namespace AquaEditor
 			NoInputs = NoMouseInputs | NoNavInputs | NoNavFocus
 		};
 
+		public enum StyleVar : int
+		{
+			/// <summary>
+			/// float
+			/// </summary>
+			Alpha,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			DisabledAlpha,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			WindowPadding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			WindowRounding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			WindowBorderSize,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			WindowMinSize,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			WindowTitleAlign,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			ChildRounding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			ChildBorderSize,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			PopupRounding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			PopupBorderSize,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			FramePadding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			FrameRounding,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			FrameBorderSize,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			ItemSpacing,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			ItemInnerSpacing,
+
+			/// <summary>
+			/// float 
+			/// </summary>
+			IndentSpacing,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			CellPadding,
+
+			/// <summary>
+			/// float     
+			/// </summary>
+			ScrollbarSize,
+
+			/// <summary>
+			/// float     
+			/// </summary>
+			ScrollbarRounding,
+
+			/// <summary>
+			/// float     
+			/// </summary>
+			GrabMinSize,
+
+			/// <summary>
+			/// float     
+			/// </summary>
+			GrabRounding,
+
+			/// <summary>
+			/// float     
+			/// </summary>
+			TabRounding,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			ButtonTextAlign,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			SelectableTextAlign,
+
+			/// <summary>
+			/// float
+			/// </summary>
+			SeparatorTextBorderSize,
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			SeparatorTextAlign,  
+
+			/// <summary>
+			/// Vector2
+			/// </summary>
+			SeparatorTextPadding,
+		};
 
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
@@ -227,6 +375,21 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndChild();
+
+		public static void SetNextWindowPos(Vector2 position)
+			=> _SetNextWindowPos(ref position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _SetNextWindowPos(ref Vector2 position);
+
+		public static void SetNextWindowSize(Vector2 position)
+			=> _SetNextWindowSize(ref position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _SetNextWindowSize(ref Vector2 position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetNextWindowViewport(uint viewportID);
 		#endregion
 
 		#region State
@@ -244,6 +407,12 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndDisabled();
+
+		public static void DockSpace(string id) => DockSpace(id, Vector2.Zero);
+		public static void DockSpace(string id, Vector2 size) => _DockSpace(id, ref size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _DockSpace(string id, ref Vector2 size);
 		#endregion
 
 		#region Controls
@@ -537,6 +706,78 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndTooltip();
+		#endregion
+
+		#region Viewport
+		public static Viewport GetViewport(uint ID)
+		{
+			Viewport viewport = new Viewport() { ID = ID };
+			_GetViewport(
+				viewport.ID,
+				out viewport.Position,
+				out viewport.Size,
+				out viewport.WorkPosition,
+				out viewport.WorkSize,
+				out viewport.ParentID
+			);
+			return viewport;
+		}
+
+		public static Viewport GetMainViewport()
+			=> GetViewport(GetMainViewportID());
+
+		public static Viewport GetWindowViewport()
+			=> GetViewport(GetWindowViewportID());
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetViewport(
+			uint ID,
+			out Vector2 position,
+			out Vector2 size,
+			out Vector2 workPosition,
+			out Vector2 workSize,
+			out uint parentID
+			);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern uint GetMainViewportID();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern uint GetWindowViewportID();
+		#endregion
+
+		#region Style
+		public static void PushStyleVar(StyleVar style, float value)
+			=> _PushStyleVar((int)style, value);
+
+		public static void PushStyleVar(StyleVar style, Vector2 value)
+			=> _PushStyleVarV((int)style, ref value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PushStyleVar(int flag, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PushStyleVarV(int flag, ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void PopStyleVar(int amount = 1);
+		#endregion
+
+		#region Menu
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool BeginMenuBar();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndMenuBar();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool BeginMenu(string label, bool enabled = true);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndMenu();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool MenuItem(string label, string shortcut = "", bool enabled = true);
 		#endregion
 	}
 }

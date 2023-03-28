@@ -20,6 +20,8 @@ namespace AquaEngine
 		World* m_Owner;
 
 		static SystemManager* s_Global;
+		
+		AquaAPI Scripting::ManagedData CreateManagedInstance(size_t typeHash);
 
 	public:
 		AquaAPI SystemManager(World* owner);
@@ -48,6 +50,7 @@ namespace AquaEngine
 				return system;
 			system = new T();
 			system->m_Owner = this;
+			((Systems::System*)system)->ManagedData = CreateManagedInstance(type);
 			((Systems::System*)system)->Init();
 			m_Systems.emplace(type, system);
 			return system;
@@ -84,8 +87,6 @@ namespace AquaEngine
 
 	private:
 		std::unordered_map<size_t, Systems::System*> m_Systems = {};
-
-		Scripting::ManagedData CreateManagedInstance(size_t typeHash);
 
 		void CreateAllManagedInstances();
 		void InvalidateAllManagedInstances();

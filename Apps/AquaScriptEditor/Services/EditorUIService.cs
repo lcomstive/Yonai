@@ -3,6 +3,7 @@ using AquaEngine;
 using System.Linq;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
+using AquaEngine.Systems;
 
 namespace AquaEditor
 {
@@ -31,26 +32,66 @@ namespace AquaEditor
 
 		protected override void Start() => GenerateConsoleLines();
 
-		protected override void Update()
-		{
-			if (Input.IsKeyPressed(Key.V))
-				m_IsOpen = true;
-			if (Input.IsKeyPressed(Key.B))
-				m_IsOpen = false;
-		}
-
-		private bool m_IsOpen = true;
 		protected override void Draw()
 		{
-			if (!m_IsOpen)
-				return;
+			BeginDockspace();
+			DrawMenuBar();
 
-			ImGUI.Begin("Editor Test", ref m_IsOpen);
-			DrawContents();
+			ImGUI.Begin("Demo");
+			DrawDemoContents();
 			ImGUI.End();
+
+			EndDockspace();
 		}
 
-		private void DrawContents()
+		private void BeginDockspace()
+		{
+			// Create dockspace
+			ImGUI.Viewport viewport = ImGUI.GetMainViewport();
+			ImGUI.SetNextWindowPos(viewport.Position);
+			ImGUI.SetNextWindowSize(viewport.Size);
+			ImGUI.SetNextWindowViewport(viewport.ID);
+			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowRounding, 0.0f);
+			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowBorderSize, 0.0f);
+
+			ImGUI.WindowFlags windowFlags = ImGUI.WindowFlags.MenuBar |
+											ImGUI.WindowFlags.NoDocking | // Don't dock the docking space
+											ImGUI.WindowFlags.NoTitleBar |
+											ImGUI.WindowFlags.NoCollapse |
+											ImGUI.WindowFlags.NoResize |
+											ImGUI.WindowFlags.NoMove |
+											ImGUI.WindowFlags.NoBringToFrontOnFocus |
+											ImGUI.WindowFlags.NoNavFocus;
+
+			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowPadding, Vector2.Zero);
+			ImGUI.Begin("DockSpaceWindow", windowFlags);
+			ImGUI.PopStyleVar(3);
+
+			ImGUI.DockSpace("DockSpace");
+		}
+
+		private void EndDockspace() => ImGUI.End();
+
+		private void DrawMenuBar()
+		{
+			if (!ImGUI.BeginMenuBar())
+				return;
+
+			if(ImGUI.BeginMenu("File"))
+			{
+				if (ImGUI.MenuItem("Exit"))
+					Application.Exit();
+
+				ImGUI.EndMenu();
+			}
+
+			if (ImGUI.MenuItem("Fullscreen"))
+				Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
+
+			ImGUI.EndMenuBar();
+		}
+
+		private void DrawDemoContents()
 		{
 			ImGUI.Input("Input String", ref m_Input);
 			ImGUI.InputPassword("Password", ref m_Password);
@@ -108,7 +149,7 @@ namespace AquaEditor
 			{
 				if (ImGUI.BeginTooltip())
 				{
-					DrawContents();
+					DrawDemoContents();
 					ImGUI.EndTooltip();
 				}
 			}

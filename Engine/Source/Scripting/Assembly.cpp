@@ -12,6 +12,7 @@
 
 // Systems to map, unmanaged -> managed
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -224,6 +225,7 @@ void Assembly::LoadScriptCoreTypes()
 	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 
 	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
+	AddInternalManagedSystem<Systems::ImGUISystem>("AquaEngine.Systems", "ImGUISystem");
 
 #pragma region Component Methods
 	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");

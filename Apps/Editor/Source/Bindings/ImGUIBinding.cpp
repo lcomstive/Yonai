@@ -37,23 +37,35 @@ ADD_MANAGED_METHOD(ImGUI, _BeginChild, bool, (MonoString* idRaw, glm::vec2* size
 }
 
 ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), AquaEditor)
-{ ImGui::EndChild(); }
+{
+	ImGui::EndChild();
+}
 
 /// STATE ///
 ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
-{ return ImGui::IsItemHovered(); }
+{
+	return ImGui::IsItemHovered();
+}
 
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor)
-{ return ImGui::IsItemClicked(); }
+{
+	return ImGui::IsItemClicked();
+}
 
 ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor)
-{ return ImGui::IsItemEdited(); }
+{
+	return ImGui::IsItemEdited();
+}
 
 ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
-{ return ImGui::BeginDisabled(); }
+{
+	return ImGui::BeginDisabled();
+}
 
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
-{ return ImGui::EndDisabled(); }
+{
+	return ImGui::EndDisabled();
+}
 
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
@@ -126,7 +138,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputText, bool, (MonoString* labelRaw, MonoString** 
 {
 	char* value = GetInput(*valueRaw, maxCharacters);
 	char* label = mono_string_to_utf8(labelRaw);
-	
+
 	bool change = ImGui::InputText(label, value, maxCharacters, flags);
 
 	// If text is edited, update valueRaw
@@ -142,7 +154,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputTextMultiline, bool, (MonoString* labelRaw, Mono
 {
 	char* value = GetInput(*valueRaw, maxCharacters);
 	char* label = mono_string_to_utf8(labelRaw);
-	
+
 	bool change = ImGui::InputTextMultiline(label, value, maxCharacters, ImVec2(0, 0), flags);
 
 	// If text is edited, update valueRaw
@@ -158,7 +170,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputFloat, bool, (MonoString* labelRaw, float* value
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);
-	
+
 	bool output = ImGui::InputFloat(label, value, step, stepFast, format);
 
 	mono_free(label);
@@ -170,7 +182,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputFloat2, bool, (MonoString* labelRaw, glm::vec2* 
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);
-	
+
 	bool output = ImGui::InputFloat2(label, &value->x, format);
 
 	mono_free(label);
@@ -182,7 +194,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputFloat3, bool, (MonoString* labelRaw, glm::vec3* 
 {
 	char* label = mono_string_to_utf8(labelRaw);
 	char* format = mono_string_to_utf8(formatRaw);
-	
+
 	bool output = ImGui::InputFloat3(label, &value->x, format);
 
 	mono_free(label);
@@ -408,10 +420,14 @@ ADD_MANAGED_METHOD(ImGUI, _SliderInt3, bool, (MonoString* labelRaw, glm::ivec3* 
 
 // Other 
 ADD_MANAGED_METHOD(ImGUI, SameLine, void, (), AquaEditor)
-{ return ImGui::SameLine(); }
+{
+	return ImGui::SameLine();
+}
 
 ADD_MANAGED_METHOD(ImGUI, Space, void, (), AquaEditor)
-{ return ImGui::Spacing(); }
+{
+	return ImGui::Spacing();
+}
 
 ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
 {
@@ -473,4 +489,83 @@ ADD_MANAGED_METHOD(ImGUI, _PlotLines, void, (MonoString* labelRaw, MonoArray* po
 	delete[] points;
 	mono_free(label);
 	mono_free(overlay);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _DockSpace, void, (MonoString* idRaw, glm::vec2* size), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	ImGui::DockSpace(ImGui::GetID(id), ImVec2(size->x, size->y));
+	mono_free(id);
+}
+
+// VIEWPORT //
+ADD_MANAGED_METHOD(ImGUI, _GetViewport, void,
+	(unsigned int ID,
+		glm::vec2* outPosition,
+		glm::vec2* outSize,
+		glm::vec2* outWorkPosition,
+		glm::vec2* outWorkSize,
+		int* outParentViewportID
+		), AquaEditor)
+{
+	ImGuiViewport* viewport = ImGui::FindViewportByID(ID);
+	if (!viewport)
+		return;
+	*outPosition = glm::vec2(viewport->Pos.x, viewport->Pos.y);
+	*outSize = glm::vec2(viewport->Size.x, viewport->Size.y);
+	*outWorkPosition = glm::vec2(viewport->WorkPos.x, viewport->WorkPos.y);
+	*outWorkSize = glm::vec2(viewport->WorkSize.x, viewport->WorkSize.y);
+	*outParentViewportID = viewport->ParentViewportId;
+}
+
+ADD_MANAGED_METHOD(ImGUI, GetMainViewportID, unsigned int, (), AquaEditor)
+{ return ImGui::GetMainViewport()->ID; }
+
+ADD_MANAGED_METHOD(ImGUI, GetWindowViewportID, unsigned int, (), AquaEditor)
+{ return ImGui::GetWindowViewport()->ID; }
+
+ADD_MANAGED_METHOD(ImGUI, _SetNextWindowPos, void, (glm::vec2* position), AquaEditor)
+{ ImGui::SetNextWindowPos(ImVec2(position->x, position->y)); }
+
+ADD_MANAGED_METHOD(ImGUI, _SetNextWindowSize, void, (glm::vec2* position), AquaEditor)
+{ ImGui::SetNextWindowSize(ImVec2(position->x, position->y)); }
+
+ADD_MANAGED_METHOD(ImGUI, SetNextWindowViewport, void, (unsigned int viewportID), AquaEditor)
+{ ImGui::SetNextWindowViewport(viewportID); }
+
+// STYLE //
+ADD_MANAGED_METHOD(ImGUI, _PushStyleVar, void, (int flag, float value), AquaEditor)
+{ ImGui::PushStyleVar(flag, value); }
+
+ADD_MANAGED_METHOD(ImGUI, _PushStyleVarV, void, (int flag, glm::vec2* value), AquaEditor)
+{ ImGui::PushStyleVar(flag, ImVec2(value->x, value->y)); }
+
+ADD_MANAGED_METHOD(ImGUI, PopStyleVar, void, (int amount), AquaEditor)
+{ ImGui::PopStyleVar(amount); }
+
+// MENU //
+ADD_MANAGED_METHOD(ImGUI, BeginMenuBar, bool, (), AquaEditor)
+{ return ImGui::BeginMenuBar(); }
+
+ADD_MANAGED_METHOD(ImGUI, EndMenuBar, void, (), AquaEditor)
+{ ImGui::EndMenuBar(); }
+
+ADD_MANAGED_METHOD(ImGUI, BeginMenu, bool, (MonoString* labelRaw, bool enabled), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	bool output = ImGui::BeginMenu(label, enabled);
+	mono_free(label);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, EndMenu, void, (), AquaEditor)
+{ ImGui::EndMenu(); }
+
+ADD_MANAGED_METHOD(ImGUI, MenuItem, bool, (MonoString* labelRaw, MonoString* shortcutRaw, bool enabled), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	char* shortcut = mono_string_to_utf8(shortcutRaw);
+	bool output = ImGui::MenuItem(label, shortcut, false, enabled);
+	mono_free(label);
+	return output;
 }

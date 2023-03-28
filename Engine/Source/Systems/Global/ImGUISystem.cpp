@@ -39,6 +39,8 @@ void ImGUISystem::OnEnabled()
 
 void ImGUISystem::OnDisabled()
 {
+	ImGui::Render();
+
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

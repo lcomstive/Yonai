@@ -2,7 +2,6 @@
 
 #pragma once
 #include <tuple>
-#include <utility> // for std::pair
 #include <glm/glm.hpp>
 #include <mono/jit/jit.h>
 
