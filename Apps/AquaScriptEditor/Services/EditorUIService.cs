@@ -1,36 +1,24 @@
 using System;
 using AquaEngine;
-using System.Linq;
+using AquaEditor.Views;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
-using AquaEngine.Systems;
 
 namespace AquaEditor
 {
 	public class EditorUIService : AquaSystem
 	{
-		private float m_TestFloat = 69.69f;
-		private Vector2 m_TestVector2 = new Vector2(6, 9);
-		private Vector3 m_TestVector3 = new Vector3(4, 2, 0);
-		private bool m_Checkbox = true;
-
-		private Colour m_ColourA = Colour.Blue;
-		private Colour m_ColourB = Colour.Green;
-		private float m_LerpAmount = 50.0f;
-
-		private float m_AngleRads = MathUtils.Deg2Rad(50);
-		private IVector2 m_TestIVec2 = new IVector2(420, 69);
-
-		private uint m_TextureID = uint.MaxValue;
-		private string m_Input = "String input field";
-		private string m_Password = "Password";
-		private string m_MultilineInput = "Multiline\nString\nField";
-
-		private float[] m_FPSValues = new float[100];
+		private Dictionary<Type, View> m_ActiveViews = new Dictionary<Type, View>();
 
 		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
 		protected override void Start() => GenerateConsoleLines();
+
+		protected override void Update()
+		{
+			foreach (var pair in m_ActiveViews)
+				pair.Value._Update();
+		}
 
 		protected override void Draw()
 		{
@@ -40,6 +28,9 @@ namespace AquaEditor
 			ImGUI.Begin("Demo");
 			DrawDemoContents();
 			ImGUI.End();
+
+			foreach (var pair in m_ActiveViews)
+				pair.Value._Draw();
 
 			EndDockspace();
 		}
@@ -88,8 +79,53 @@ namespace AquaEditor
 			if (ImGUI.MenuItem("Fullscreen"))
 				Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
 
+			if (ImGUI.BeginMenu("Window"))
+			{
+				if(ImGUI.MenuItem("Stats"))
+					Open<StatsView>();
+
+				ImGUI.EndMenu();
+			}
+
 			ImGUI.EndMenuBar();
 		}
+
+		public void Open<T>() where T : View, new()
+		{
+			Type type =	typeof(T);
+
+			// Check if window of type is already open
+			if (!m_ActiveViews.ContainsKey(type))
+				m_ActiveViews.Add(type, new T());
+		}
+		
+		public void Close<T>() where T : View
+		{
+			Type type = typeof(T);
+			// Check that window of type is already open
+			if (m_ActiveViews.ContainsKey(type))
+				m_ActiveViews.Remove(type);
+		}
+
+		#region Demo
+		private float m_TestFloat = 69.69f;
+		private Vector2 m_TestVector2 = new Vector2(6, 9);
+		private Vector3 m_TestVector3 = new Vector3(4, 2, 0);
+		private bool m_Checkbox = true;
+
+		private Colour m_ColourA = Colour.Blue;
+		private Colour m_ColourB = Colour.Green;
+		private float m_LerpAmount = 50.0f;
+
+		private float m_AngleRads = MathUtils.Deg2Rad(50);
+		private IVector2 m_TestIVec2 = new IVector2(420, 69);
+
+		private uint m_TextureID = uint.MaxValue;
+		private string m_Input = "String input field";
+		private string m_Password = "Password";
+		private string m_MultilineInput = "Multiline\nString\nField";
+
+		private float[] m_FPSValues = new float[100];
 
 		private void DrawDemoContents()
 		{
@@ -214,5 +250,6 @@ namespace AquaEditor
 				));
 			}
 		}
+	#endregion
 	}
 }
