@@ -45,11 +45,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImGUI.cs" />
+    <!-- Graphics -->
+    <Compile Include="Graphics/EditorWindow.cs" />
+    <Compile Include="Graphics/ImGUI.cs" />
+
+    <!-- Services -->
     <Compile Include="Services/EditorService.cs" />
     <Compile Include="Services/EditorUIService.cs" />
-    <Compile Include="Views/Scene.cs" />
+
+    <!-- Views -->
+    <Compile Include="Views/Game.cs" />
     <Compile Include="Views/Hierarchy.cs" />
+    <Compile Include="Views/Scene.cs" />
+    <Compile Include="Views/Stats.cs" />
+    <Compile Include="Views/View.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
