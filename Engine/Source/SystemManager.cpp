@@ -70,10 +70,9 @@ void SystemManager::Update()
 
 void SystemManager::Draw()
 {
-	if(Window::GetNativeHandle()) // Check that a valid window is open
-		for (auto& pair : m_Systems)
-			if (pair.second->IsEnabled())
-				pair.second->Draw();
+	for (auto& pair : m_Systems)
+		if (pair.second->IsEnabled())
+			pair.second->Draw();
 }
 
 vector<System*> SystemManager::All()
