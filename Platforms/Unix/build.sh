@@ -2,26 +2,28 @@
 
 # Flags:
 #	c: Build type [Debug, Release]
+#	g: Generator (Unix Makefiles, Ninja, etc.)
 #	t: Run tests after building
 #	p: Package output
 
 CONFIG=Release
 TESTING=false
 PACKAGE=false
+GENERATOR="Unix Makefiles"
 
 # Parse input args
-while getopts c:tp flag
+while getopts c:g:tp flag
 do
-	echo "Flag: ${flag}"
 	case "${flag}" in
 		c) 	CONFIG=${OPTARG};;
+		g)	GENERATOR=${OPTARG};;
 		t)	TESTING=true;;
 		p)	PACKAGE=true;;
 		*) ;;
 	esac
 done
 
-echo "Building AquaEngine in ${CONFIG} mode"
+echo "Building AquaEngine in ${CONFIG} mode with ${GENERATOR}"
 
 # Get script directory
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
@@ -29,7 +31,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 ROOT=${SCRIPT_DIR}/../..
 
 # Configure CMake
-cmake -B ${ROOT}/build/ -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
+cmake -B ${ROOT}/build/ -G ${GENERATOR} -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
 
 # Build AquaScriptCore C# project manually
 msbuild ${ROOT}/Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}
