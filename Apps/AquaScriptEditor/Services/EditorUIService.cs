@@ -72,6 +72,9 @@ namespace AquaEditor
 
 			if(ImGUI.BeginMenu("File"))
 			{
+				if (ImGUI.MenuItem("Reload Scripting"))
+					Scripting.Reload();
+
 				if (ImGUI.MenuItem("Exit"))
 					Application.Exit();
 
