@@ -49,3 +49,16 @@ ADD_MANAGED_METHOD(Screen, SetVideoMode, void, (glm::ivec2* resolution, float re
 
 ADD_MANAGED_METHOD(Window, CenterOnDisplay)
 { Window::CenterOnDisplay(); }
+
+ADD_MANAGED_METHOD(Window, GetTitle, MonoString*)
+{ return mono_string_new(mono_domain_get(), Window::GetTitle().c_str()); }
+
+ADD_MANAGED_METHOD(Window, SetTitle, void, (MonoString* titleRaw))
+{
+	char* title = mono_string_to_utf8(titleRaw);
+	Window::SetTitle(title);
+	mono_free(title);
+}
+
+ADD_MANAGED_METHOD(Window, RequestedToClose, bool)
+{ return Window::RequestedToClose(); }

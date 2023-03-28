@@ -307,6 +307,9 @@ void WindowedApplication::Run()
 	Window::Close();
 	Cleanup();
 	SystemManager::Global()->Destroy();
+
+	if(Window::ContextIsInitialised())
+		Window::DestroyContext();
 }
 #pragma endregion
 

@@ -11,6 +11,7 @@
 #include <AquaEngine/Platform/FixDLLBoundaries.hpp>
 
 // Systems //
+#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
@@ -48,12 +49,20 @@ vector<SoundSource*> soundSources = {};
 
 void EditorApp::Setup()
 {
-	WindowedApplication::Setup();
-	Window::SetResolution(1000, 1000);
+	Application::Setup();
+	
+	InitialiseScripting();
 
-	FIX_DLL_BOUNDARIES();
+	// Add global systems
+	SystemManager::Global()->Add<AudioSystem>();
 
-	Window::SetTitle("Aqua Editor");
+	ImGUISystem* guiSystem = SystemManager::Global()->Add<ImGUISystem>();
+	ImGui::SetCurrentContext(guiSystem->GetContext());
+
+	// Disable drawing to default framebuffer.
+	// Instead store pointer to render system and call manually
+	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+	m_RenderSystem->Enable(false);
 
 	if(!HasArg(ProjectPathArg))
 	{
@@ -78,16 +87,7 @@ void EditorApp::Setup()
 	ImGuiIniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini");
 	io.IniFilename = ImGuiIniFilename.c_str();
 
-	InitialiseScripting();
-
 	LoadProject();
-
-	// Disable drawing to default framebuffer.
-	// Instead store pointer to render system and call manually
-	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
-	m_RenderSystem->Enable(false);
-
-	SystemManager::Global()->Add<AudioSystem>();
 
 	Add<ViewportView>();
 
@@ -96,20 +96,30 @@ void EditorApp::Setup()
 	LaunchEditorService();
 }
 
-void EditorApp::OnDraw()
+void EditorApp::Cleanup()
 {
-	DrawUI();
+	Application::Cleanup();
+
+	SystemManager::Global()->Remove<ImGUISystem>();
+	SystemManager::Global()->Remove<AudioSystem>();
+	SystemManager::Global()->Remove<RenderSystem>();
+
+	m_RenderSystem = nullptr;
 }
 
 #include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
-	// Iterate over & update views
-	for (auto& viewPair : m_Views)
-		viewPair.second->Update();
+	// Check that a window is open
+	if(Window::GetNativeHandle())
+		// Iterate over & update views
+		for (auto& viewPair : m_Views)
+			viewPair.second->Update();
 
 	if(ScriptEngine::AwaitingReload())
 		ScriptEngine::Reload();
+
+	Draw();
 }
 
 void EditorApp::LoadScene()
@@ -189,6 +199,18 @@ void EditorApp::InitialiseScripting()
 
 	// Add AquaScriptEditor internal methods
 	ScriptEngine::AddInternalCalls(_InternalMethods);
+}
+
+void EditorApp::Draw()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DrawUI();
+
+	SystemManager::Global()->Draw();
+
+	Window::SwapBuffers();
+	Window::PollEvents();
 }
 
 void EditorApp::DrawUI()

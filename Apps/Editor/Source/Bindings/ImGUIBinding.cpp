@@ -116,7 +116,7 @@ char* GetInput(MonoString* valueRaw, int maxCharacters)
 	// Copy input into buffer
 	mono_unichar2* unichars = mono_string_chars(valueRaw);
 	for (int i = 0; i < std::min(mono_string_length(valueRaw), maxCharacters); i++)
-		value[i] = unichars[i];
+		value[i] = (char)unichars[i];
 
 	return value;
 }
@@ -214,7 +214,7 @@ ADD_MANAGED_METHOD(ImGUI, _InputQuat, bool, (MonoString* labelRaw, glm::vec4* va
 	return output;
 }
 
-ADD_MANAGED_METHOD(ImGUI, _InputInt, bool, (MonoString* labelRaw, int* value, float step, float stepFast), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _InputInt, bool, (MonoString* labelRaw, int* value, int step, int stepFast), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
 
@@ -461,7 +461,7 @@ ADD_MANAGED_METHOD(ImGUI, _PlotLines, void, (MonoString* labelRaw, MonoArray* po
 	char* overlay = mono_string_to_utf8(overlayText);
 	ImVec2 size(graphSize->x, graphSize->y);
 
-	int pointsLength = mono_array_length(pointsRaw);
+	int pointsLength = (int)mono_array_length(pointsRaw);
 	float* points = new float[pointsLength];
 
 	for (int i = 0; i < pointsLength; i++)

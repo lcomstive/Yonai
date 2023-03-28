@@ -1,5 +1,6 @@
 #include <iostream>
 #include <AquaEngine/World.hpp>
+#include <AquaEngine/Window.hpp>
 #include <AquaEngine/SystemManager.hpp>
 
 #include <AquaEngine/Scripting/Assembly.hpp>
@@ -69,9 +70,10 @@ void SystemManager::Update()
 
 void SystemManager::Draw()
 {
-	for (auto& pair : m_Systems)
-		if (pair.second->IsEnabled())
-			pair.second->Draw();
+	if(Window::GetNativeHandle()) // Check that a valid window is open
+		for (auto& pair : m_Systems)
+			if (pair.second->IsEnabled())
+				pair.second->Draw();
 }
 
 vector<System*> SystemManager::All()

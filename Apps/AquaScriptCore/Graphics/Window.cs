@@ -20,6 +20,14 @@ namespace AquaEngine
 			set => _SetFullscreenMode((int)value);
 		}
 
+		public static string Title
+		{
+			get => _GetTitle();
+			set => _SetTitle(value);
+		}
+
+		public static bool RequestedToClose => _RequestedToClose();
+
 		/// <summary>
 		/// Cycles between fullscreen modes
 		/// </summary>
@@ -55,6 +63,12 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFullscreenMode();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFullscreenMode(int value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _CenterOnDisplay();
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetTitle();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetTitle(string title);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _RequestedToClose();
+
 		#endregion
 	}
 }

@@ -21,9 +21,35 @@ using namespace AquaEngine;
 
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
+bool Window::s_ContextInitialised = false;
 
 void GLFWErrorCallback(int error, const char* message);
 void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
+
+bool Window::InitContext()
+{
+	// Check if already initialised
+	if (s_ContextInitialised)
+		return true;
+
+	if (glfwInit() == GLFW_FALSE)
+	{
+		spdlog::critical("Failed to initialise GLFW");
+		return false;
+	}
+
+	s_ContextInitialised = true;
+	return true;
+}
+
+void Window::DestroyContext()
+{
+	if (s_ContextInitialised)
+		glfwTerminate();
+	s_ContextInitialised = false;
+}
+
+bool Window::ContextIsInitialised() { return s_ContextInitialised; }
 
 Window::Window() :
 	m_Handle(nullptr),
@@ -39,23 +65,14 @@ Window::Window() :
 	// Set instance to this
 	s_Instance = this;
 
-	if (glfwInit() == GLFW_FALSE)
-	{
-		spdlog::critical("Failed to initialise GLFW");
-		return;
-	}
-
 	// Set initial resolution
 	m_Resolution.x = std::max(m_Resolution.x, 800);
 	m_Resolution.x = std::max(m_Resolution.y, 600);
 
-	// Reset window hints
-	glfwDefaultWindowHints();
+	if (!ContextIsInitialised())
+		InitContext();
 
 	// Window creation options //
-	// Set as resizable
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
 	// Set preferred OpenGL version 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 #if !defined(AQUA_PLATFORM_APPLE)
@@ -181,7 +198,6 @@ void Window::Close()
 
 	// Release GLFW resources
 	glfwDestroyWindow(s_Instance->m_Handle);
-	glfwTerminate();
 
 	// Clear pointers
 	s_Instance->m_Handle = nullptr;

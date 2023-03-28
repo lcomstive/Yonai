@@ -92,6 +92,11 @@ namespace AquaEngine
 		/// </summary>
 		static Window* s_Instance;
 
+		/// <summary>
+		/// Tracks if InitContext is called, and successful
+		/// </summary>
+		static bool s_ContextInitialised;
+
 #if defined(AQUA_PLATFORM_DESKTOP)
 		static void GLFWJoystickCallback(int jid, int event);
 		static void GLFWWindowCloseCallback(GLFWwindow* window);
@@ -107,6 +112,20 @@ namespace AquaEngine
 		Window();
 
 	public:
+		/// <summary>
+		/// Sets up the context for window creation
+		/// </summary>
+		/// <returns>Success state</returns>
+		AquaAPI static bool InitContext();
+
+		/// <summary>
+		/// Clears the context for window creation
+		/// </summary>
+		AquaAPI static void DestroyContext();
+
+		/// <returns>True if <see cref="InitContext"/> has been called successfully</returns>
+		AquaAPI static bool ContextIsInitialised();
+
 		AquaAPI static Window* Create();
 		AquaAPI static void Destroy();
 

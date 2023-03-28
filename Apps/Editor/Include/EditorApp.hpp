@@ -15,7 +15,7 @@
 
 namespace AquaEditor
 {
-	class EditorApp : public AquaEngine::WindowedApplication
+	class EditorApp : public AquaEngine::Application
 	{
 		ProjectInfo m_ProjectInfo = {};
 		std::filesystem::path m_ProjectPath;
@@ -25,7 +25,9 @@ namespace AquaEditor
 
 		std::unordered_map<std::type_index, View*> m_Views = {};
 
+		void Draw();
 		void DrawUI();
+
 		void LoadScene();
 		void InitialiseScripting();
 
@@ -42,8 +44,8 @@ namespace AquaEditor
 
 	protected:
 		void Setup() override;
-		void OnDraw() override;
 		void OnUpdate() override;
+		void Cleanup() override;
 
 	public:
 		template<typename T>
