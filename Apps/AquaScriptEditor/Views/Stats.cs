@@ -9,12 +9,12 @@ namespace AquaEditor.Views
 		/// <summary>
 		/// How many FPS values to hold
 		/// </summary>
-		private const int TotalValues = 100;
+		private const int TotalValues = 50;
 
 		/// <summary>
 		/// How often to add an FPS value to <see cref="m_FPSValues"/>, in seconds
 		/// </summary>
-		private const float UpdateRate = 0.1f;
+		private const float UpdateRate = 0.03f;
 
 		/// <summary>
 		/// Tracks <see cref="TotalValues"/> most recent FPS values.
@@ -41,22 +41,37 @@ namespace AquaEditor.Views
 			m_FPSValues[m_FPSValues.Length - 1] = Time.FPS;
 		}
 
+		private bool m_IsOpen = true;
 		protected override void Draw()
 		{
-			ImGUI.Begin("Stats");
+			if(!m_IsOpen) return;
 
-			ImGUI.Text($"FPS: {Time.FPS}");
-			ImGUI.Text($"Delta Time: {(int)Math.Round(Time.DeltaTime * 1000)}ms");
+			if (ImGUI.Begin("Stats", ref m_IsOpen))
+			{
+				ImGUI.Text($"FPS: {Time.FPS}");
+				ImGUI.Text($"Delta Time: {(Time.DeltaTime * 1000).ToString("F1")}ms");
 
-			IVector2 resolution = Window.Resolution;
-			ImGUI.Text($"Resolution: {resolution.x}x{resolution.y}");
+				IVector2 resolution = Window.Resolution;
+				ImGUI.Text($"Resolution: {resolution.x}x{resolution.y}");
 
-			VideoMode videomode = Screen.VideoMode;
-			ImGUI.Text($"Monitor: {videomode.Resolution.x}x{videomode.Resolution.y}@{videomode.RefreshRate.ToString("F0")}Hz");
+				VideoMode videomode = Screen.VideoMode;
+				ImGUI.Text($"Monitor: {videomode.Resolution.x}x{videomode.Resolution.y}@{videomode.RefreshRate.ToString("F0")}Hz");
 
-			ImGUI.PlotLines("", m_FPSValues, $"FPS: {Time.FPS}");
+				ImGUI.PlotLines("", m_FPSValues, $"FPS: {Time.FPS}");
 
+				ImGUI.Space();
+
+				bool vsync = Window.VSync;
+				if (ImGUI.Checkbox("VSync", ref vsync))
+					Window.VSync = vsync;
+			}
 			ImGUI.End();
+
+			// Check if window closed
+			if (!m_IsOpen)
+			{
+				AquaSystem.Get<EditorUIService>().Close<StatsView>();
+			}
 		}
 	}
 }

@@ -62,3 +62,9 @@ ADD_MANAGED_METHOD(Window, SetTitle, void, (MonoString* titleRaw))
 
 ADD_MANAGED_METHOD(Window, RequestedToClose, bool)
 { return Window::RequestedToClose(); }
+
+ADD_MANAGED_METHOD(Window, GetVSync, bool)
+{ return Window::GetVSync(); }
+
+ADD_MANAGED_METHOD(Window, SetVSync, void, (bool value))
+{ Window::SetVSync(value); }

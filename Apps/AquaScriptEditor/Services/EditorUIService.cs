@@ -3,6 +3,7 @@ using AquaEngine;
 using AquaEditor.Views;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AquaEditor
 {
@@ -29,8 +30,9 @@ namespace AquaEditor
 			DrawDemoContents();
 			ImGUI.End();
 
-			foreach (var pair in m_ActiveViews)
-				pair.Value._Draw();
+			View[] views = m_ActiveViews.Values.ToArray();
+			foreach (View view in views)
+				view._Draw();
 
 			EndDockspace();
 		}

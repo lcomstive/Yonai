@@ -26,6 +26,12 @@ namespace AquaEngine
 			set => _SetTitle(value);
 		}
 
+		public static bool VSync
+		{
+			get => _GetVSync();
+			set => _SetVSync(value);
+		}
+
 		public static bool RequestedToClose => _RequestedToClose();
 
 		/// <summary>
@@ -69,6 +75,8 @@ namespace AquaEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _RequestedToClose();
 
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetVSync();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVSync(bool value);
 		#endregion
 	}
 }
