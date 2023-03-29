@@ -46,8 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Attributes -->
-    <Compile Include="Core/MenuItemAttribute.cs" />
-    <Compile Include="Core/ShowInInspectorAttribute.cs" />
+    <Compile Include="Attributes/MenuItemAttribute.cs" />
+    <Compile Include="Attributes/ShowInInspectorAttribute.cs" />
 
     <!-- Core -->
     <Compile Include="Core/Scripting.cs" />
