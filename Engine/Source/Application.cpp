@@ -326,4 +326,12 @@ ADD_MANAGED_METHOD(Application, GetArg, MonoString*, (MonoString* name, MonoStri
 
 ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
 { return Application::Current()->HasArg(mono_string_to_utf8(name)); }
+
+ADD_MANAGED_METHOD(Application, GetBuildType, int)
+#ifndef NDEBUG // Debug mode
+{ return 0; }
+#else // Release mode
+{ return 1; }
+#endif
+
 #pragma endregion

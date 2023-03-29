@@ -2,8 +2,12 @@
 
 namespace AquaEngine
 {
+
 	public static class Application
 	{
+		public enum BuildType { Debug, Release }
+		public static BuildType Configuration => (BuildType)_GetBuildType();
+
 		public static void Exit() => _Exit();
 
 		/// <summary>
@@ -21,6 +25,7 @@ namespace AquaEngine
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Exit();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasArg(string name);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetBuildType();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetArg(string name, string defaultValue);
 		#endregion
 	}
