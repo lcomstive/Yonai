@@ -30,7 +30,7 @@ void EditorLauncherApp::Setup()
 
 	// FIX_DLL_BOUNDARIES();
 	ImGui::SetCurrentContext(SystemManager::Global()->Get<Systems::ImGUISystem>()->GetContext());
-	
+
 	glfwMakeContextCurrent(Window::GetNativeHandle());
 	int result = gladLoadGL(glfwGetProcAddress);
 
@@ -53,16 +53,16 @@ void EditorLauncherApp::Setup()
 void EditorLauncherApp::OnDraw()
 {
 	// Get ImGUI window to use the entire viewport
-	#ifdef IMGUI_HAS_VIEWPORT
+#ifdef IMGUI_HAS_VIEWPORT
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(viewport->WorkPos);
 	ImGui::SetNextWindowSize(viewport->WorkSize);
 	ImGui::SetNextWindowViewport(viewport->ID);
-	#else 
+#else 
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
 	ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-	#endif
-	
+#endif
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::Begin("AquaEditor Launcher", nullptr,
 		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
@@ -89,9 +89,9 @@ void EditorLauncherApp::OnDraw()
 
 	ImGui::BeginTable("m_Projects", 3, ImGuiTableFlags_RowBg);
 
-	ImGui::TableSetupColumn("Name", 	ImGuiTableColumnFlags_WidthStretch);
-	ImGui::TableSetupColumn("Open", 	ImGuiTableColumnFlags_WidthFixed);
-	ImGui::TableSetupColumn("Remove", 	ImGuiTableColumnFlags_WidthFixed);
+	ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+	ImGui::TableSetupColumn("Open", ImGuiTableColumnFlags_WidthFixed);
+	ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed);
 	ImGui::TableHeadersRow();
 
 	ImVec4 rowBg = { 1, 1, 1, 0.25f };
@@ -100,7 +100,7 @@ void EditorLauncherApp::OnDraw()
 	ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, rowBgAlt);
 
 	// Existing m_Projects
-	for(size_t i = 0; i < m_Projects.size(); i++)
+	for (size_t i = 0; i < m_Projects.size(); i++)
 	{
 		ProjectInfo info = m_Projects[i];
 
@@ -114,7 +114,7 @@ void EditorLauncherApp::OnDraw()
 
 		ImGui::TableNextColumn();
 
-		if(ImGui::Button(("->##" + info.Directory).c_str()))
+		if (ImGui::Button(("->##" + info.Directory).c_str()))
 			LaunchEditor(info);
 
 		ImGui::TableNextColumn();
@@ -146,15 +146,13 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 
 	spdlog::debug("Launching editor - '{} {}'", editorPath.string().c_str(), args.c_str());
 
-	if(!fs::exists(fmt::format("{}/Scripting/{}.csproj", project.Directory, project.Name)))
+	if (!fs::exists(fmt::format("{}/Scripting/{}.csproj", project.Directory, project.Name)))
 		CreateCSharpProject(project.Directory, project.Name);
 
 	// Create new process of AquaEditor
 #if defined(AQUA_PLATFORM_WINDOWS)
-	// TODO: TEST ON WINDOWS
-
 	// additional information
-	STARTUPINFO startupInfo;     
+	STARTUPINFO startupInfo;
 	PROCESS_INFORMATION processInfo;
 
 	// set the size of the structures
@@ -163,17 +161,17 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 	ZeroMemory(&processInfo, sizeof(processInfo));
 
 	// start the program up
-	if(!CreateProcess(
-		editorPath.string().c_str(),   // the path
-		(char*)args.c_str(),        // Command line
-		NULL,           // Process handle not inheritable
-		NULL,           // Thread handle not inheritable
-		FALSE,          // Set handle inheritance to FALSE
-		0,              // No creation flags
-		NULL,           // Use parent's environment block
-		NULL,           // Use parent's starting directory 
-		&startupInfo,   // Pointer to STARTUPINFO structure
-		&processInfo    // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
+	if (!CreateProcess(
+		editorPath.string().c_str(),	// Executable path
+		(char*)args.c_str(),			// Command line args
+		NULL,							// Process handle not inheritable
+		NULL,							// Thread handle not inheritable
+		FALSE,							// Set handle inheritance to FALSE
+		CREATE_NEW_CONSOLE,				// creation flags
+		NULL,							// Use parent's environment block
+		NULL,							// Use parent's starting directory 
+		&startupInfo,					// Pointer to STARTUPINFO structure
+		&processInfo					// Pointer to PROCESS_INFORMATION structure
 	))
 	{
 		LPSTR messageBuffer = nullptr;
@@ -195,13 +193,13 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 
 	spdlog::debug("Successfully launcher editor");
 #elif defined(AQUA_PLATFORM_MAC) || defined(AQUA_PLATFORM_LINUX)
-	if(!fs::exists(editorPath))
+	if (!fs::exists(editorPath))
 	{
 		spdlog::error("Failed to launch editor - could not find executable");
 		return false;
 	}
 
-	if(execl(editorPath.c_str(), editorPath.c_str(), args.c_str(), nullptr))
+	if (execl(editorPath.c_str(), editorPath.c_str(), args.c_str(), nullptr))
 	{
 		spdlog::error("[{}] Failed to launch editor", errno);
 		return false;
@@ -213,7 +211,7 @@ bool EditorLauncherApp::LaunchEditor(ProjectInfo& project)
 	// If editor is opening and setting enabled, close the launcher
 	if (m_Settings.CloseLaucherOnEditorOpen)
 		Exit();
-	
+
 	return true;
 }
 
@@ -221,7 +219,7 @@ void EditorLauncherApp::RemoveProject(ProjectInfo& project)
 {
 	spdlog::debug("Removing reference to project '{}'", project.Name.c_str());
 	spdlog::debug("Path: {}", project.Path.c_str());
-	
+
 	for (auto it = m_Projects.rbegin(); it != m_Projects.rend(); it++)
 	{
 		if (project.Path.compare(it->Path) != 0)
@@ -266,7 +264,7 @@ void EditorLauncherApp::ReadSettings()
 
 	// settings.closeLauncherOnEditorOpen
 	if (m_SettingsJSON["settings"].HasMember("closeLauncherOnEditorOpen"))
-			m_Settings.CloseLaucherOnEditorOpen = m_SettingsJSON["settings"]["closeLauncherOnEditorOpen"].GetBool();
+		m_Settings.CloseLaucherOnEditorOpen = m_SettingsJSON["settings"]["closeLauncherOnEditorOpen"].GetBool();
 	else
 		m_SettingsJSON["settings"]["closeLauncherOnEditorOpen"].SetBool(m_Settings.CloseLaucherOnEditorOpen);
 }
@@ -307,7 +305,7 @@ void EditorLauncherApp::WriteSettings()
 void EditorLauncherApp::AddProjectPrompt()
 {
 	string folderPathRaw = pfd::select_folder("Aqua Project Location").result();
-	if(folderPathRaw.empty())
+	if (folderPathRaw.empty())
 		return;
 
 	fs::path folderPath(folderPathRaw);
@@ -316,7 +314,7 @@ void EditorLauncherApp::AddProjectPrompt()
 	if (fs::exists(projectPath))
 		AddExistingProject(projectPath);
 	else
-		AddNewProject(folderPath);		
+		AddNewProject(folderPath);
 }
 
 void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
@@ -335,7 +333,7 @@ void EditorLauncherApp::AddExistingProject(fs::path projectInfoPath)
 		projectName = projectInfo["name"].GetString();
 
 	fs::path projectDir = projectInfoPath.parent_path();
-	if(!fs::exists(projectDir / ("Scripting/" + projectName + ".vcproj")))
+	if (!fs::exists(projectDir / ("Scripting/" + projectName + ".vcproj")))
 		CreateCSharpProject(projectDir, projectName);
 
 	m_Projects.emplace_back(ProjectInfo
