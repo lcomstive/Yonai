@@ -79,6 +79,7 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void InitContext();
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void DestroyContext();
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool ContextIsInitialised();
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Create();
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Destroy();

@@ -9,11 +9,6 @@ namespace AquaEditor
 
 		public string Shortcut { get; set; }
 
-		/// <summary>
-		/// Lower order is displayed first
-		/// </summary>
-		public uint Order { get; set; } = 99;
-
 		public MenuItemAttribute(string path) => Path = path;
 	}
 }

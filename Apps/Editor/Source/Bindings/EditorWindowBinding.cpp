@@ -15,6 +15,9 @@ ADD_MANAGED_METHOD(EditorWindow, InitContext, void, (), AquaEditor)
 ADD_MANAGED_METHOD(EditorWindow, DestroyContext, void, (), AquaEditor)
 { Window::DestroyContext(); }
 
+ADD_MANAGED_METHOD(EditorWindow, ContextIsInitialised, bool, (), AquaEditor)
+{ return Window::ContextIsInitialised(); }
+
 ADD_MANAGED_METHOD(EditorWindow, Create, void, (), AquaEditor)
 {
 	Window::Create();

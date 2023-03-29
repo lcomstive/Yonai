@@ -4,14 +4,30 @@ namespace AquaEditor
 {
 	public class EditorService : AquaSystem
 	{
+		protected override void Destroyed()
+		{
+			EditorWindow.Destroy();
+			EditorWindow.DestroyContext();
+		}
+
 		protected override void Enabled()
 		{
 			Log.Debug("Launched editor service");
 
-			EditorWindow.InitContext();
-			CreateWindow();
+			if (!EditorWindow.ContextIsInitialised())
+			{
+				EditorWindow.InitContext();
+				CreateWindow();
+			}
 
 			Add<EditorUIService>();
+		}
+
+		protected override void Disabled()
+		{
+			Log.Error("Disabled editor service");
+
+			Remove<EditorUIService>();
 		}
 
 		protected override void Update()
@@ -23,20 +39,11 @@ namespace AquaEditor
 			}
 		}
 
-		protected override void Disabled()
-		{
-			Remove<EditorUIService>();
-
-			EditorWindow.Destroy();
-			EditorWindow.DestroyContext();
-		}
-
 		private void CreateWindow()
 		{
 			// EditorWindow.CreationHint(WindowHint.Maximised, true);
 
 			EditorWindow.Create();
-			Window.CenterOnDisplay();
 		}
 	}
 }

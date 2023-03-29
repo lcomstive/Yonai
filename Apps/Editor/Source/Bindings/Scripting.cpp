@@ -4,7 +4,7 @@
 using namespace AquaEngine::Scripting;
 
 ADD_MANAGED_METHOD(Scripting, Reload, void, (), AquaEditor)
-{ ScriptEngine::Reload(true); }
+{ ScriptEngine::SetAwaitingReload(); }
 
 ADD_MANAGED_METHOD(Scripting, _DebuggingEnabled, bool, (), AquaEditor)
 { return ScriptEngine::DebuggingEnabled(); }

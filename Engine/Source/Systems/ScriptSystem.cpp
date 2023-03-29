@@ -26,7 +26,16 @@ unsigned int ScriptSystem::GetWorldID()
 
 char* GetTypeName(MonoType* type) { return mono_type_get_name_full(type, MonoTypeNameFormat::MONO_TYPE_NAME_FORMAT_REFLECTION); }
 
-void ScriptSystem::Init() { TRACE_SYSTEM("Initialising") }
+void ScriptSystem::Init()
+{
+	TRACE_SYSTEM("Initialising");
+
+	if (!ManagedData.IsValid())
+		return;
+
+	MonoException* exception = nullptr;
+	SystemMethodInitialise(ManagedData.GetInstance(), GetWorldID(), &exception);
+}
 
 void ScriptSystem::Destroy()
 {
@@ -46,8 +55,10 @@ void ScriptSystem::OnEnabled()
 	if (!ManagedData.IsValid())
 		return;
 
+	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
-	SystemMethodEnabled(ManagedData.GetInstance(), true, &exception);
+	SystemMethodEnabled(instance, true, &exception);
+	SystemMethodStart(instance, &exception);
 }
 
 void ScriptSystem::OnDisabled()
@@ -81,18 +92,26 @@ void ScriptSystem::Draw()
 	SystemMethodDraw(ManagedData.GetInstance(), &exception);
 }
 
-void ScriptSystem::OnScriptingReloaded()
+void ScriptSystem::OnScriptingReloadedBefore()
 {
-	if (!ManagedData.IsValid())
-	{
-		spdlog::critical("Managed data is invalid on ScriptSystem?");
-		return;
-	}
-
-	TRACE_SYSTEM("Reloading")
+	TRACE_SYSTEM("Reloading (before)")
 
 	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
-	SystemMethodInitialise(instance, GetWorldID(), &exception);
-	SystemMethodStart(instance, &exception);
+
+	// Disable
+	SystemMethodEnabled(instance, false, &exception);
+	// SystemMethodDestroyed(instance, &exception);
+}
+
+void ScriptSystem::OnScriptingReloadedAfter()
+{
+	TRACE_SYSTEM("Reloading (after)")
+
+	MonoObject* instance = ManagedData.GetInstance();
+	MonoException* exception = nullptr;
+
+	// Enable
+	SystemMethodEnabled(instance, true, &exception);
+	// SystemMethodStart(instance, &exception);
 }

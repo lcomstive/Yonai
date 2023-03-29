@@ -18,7 +18,7 @@ namespace AquaEditor
 		/// </summary>
 		private static Dictionary<Type, View> m_ActiveViews = new Dictionary<Type, View>();
 
-		protected override void Start()
+		protected override void Enabled()
 		{
 			CompileMenuItems();
 
@@ -27,10 +27,17 @@ namespace AquaEditor
 			World.Get(0).GetEntity(0).AddComponent<NameComponent>().Name = "Camera";
 
 			// Demo //
-			GenerateConsoleLines();
+			// GenerateConsoleLines();
 			CreateTestScene();
 
 			Open<HierarchyView>();
+		}
+
+		protected override void Disabled()
+		{
+			m_TestWorld?.Destroy();
+			foreach(var view in m_ActiveViews.Values)
+				view._Close();
 		}
 
 		protected override void Update()
@@ -166,13 +173,15 @@ namespace AquaEditor
 
 		private float[] m_FPSValues = new float[100];
 
+		private World m_TestWorld = null;
+
 		private void CreateTestScene()
 		{
-			World world = World.Create("Test World");
+			m_TestWorld = World.Create("Test World");
 
 			for(int i = 0; i < 15; i++)
 			{
-				Entity e = world.CreateEntity();
+				Entity e = m_TestWorld.CreateEntity();
 				e.AddComponent<NameComponent>().Name = "Entity";
 			}
 		}
@@ -244,8 +253,9 @@ namespace AquaEditor
 			ImGUI.PlotLines("FPS", m_FPSValues, $"FPS: {Time.FPS}");
 
 			ImGUI.BeginChild("Console", new Vector2(0, 150), true);
-			foreach ((string msg, Colour colour) in m_ConsoleLines)
-				ImGUI.Text(msg, colour);
+			if(m_ConsoleLines != null)
+				foreach ((string msg, Colour colour) in m_ConsoleLines)
+					ImGUI.Text(msg, colour);
 			ImGUI.EndChild();
 		}
 
@@ -266,12 +276,12 @@ namespace AquaEditor
 			m_FPSValues[m_FPSValues.Length - 1] = Time.FPS;
 		}
 
-		private List<(string, Colour)> m_ConsoleLines = new List<(string, Colour)>();
+		private List<(string, Colour)> m_ConsoleLines;
 		private const int ConsoleLinesGenerated = 20;
 		private void GenerateConsoleLines()
 		{
 			string[] consoleLines =
-{
+			{
 				"Test",
 				"Another one",
 				"A line",
@@ -292,6 +302,7 @@ namespace AquaEditor
 				Colour.Turqoise
 			};
 
+			m_ConsoleLines = new List<(string, Colour)>();
 			for (int i = 0; i < ConsoleLinesGenerated; i++)
 			{
 				m_ConsoleLines.Add((

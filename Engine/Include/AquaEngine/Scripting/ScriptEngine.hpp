@@ -100,6 +100,9 @@ namespace AquaEngine::Scripting
 		/// <returns>True if a loaded assembly file was modified on disk</returns>
 		AquaAPI static bool AwaitingReload();
 
+		/// <returns>Inform the engine to reload when next avaialable</returns>
+		AquaAPI static void SetAwaitingReload();
+
 		/// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
 		AquaAPI static MonoType* GetTypeFromHash(size_t hash);
 

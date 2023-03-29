@@ -45,15 +45,18 @@ namespace AquaEngine
 				return nullptr;
 			}
 
-			T* system = Get<T>();
-			if (system) // Check if system already added
-				return system;
-			system = new T();
-			system->m_Owner = this;
-			((Systems::System*)system)->ManagedData = CreateManagedInstance(type);
-			((Systems::System*)system)->Init();
-			m_Systems.emplace(type, system);
-			return system;
+			T* instance = Get<T>();
+			if (instance) // Check if system already added
+				return instance;
+			instance = new T();
+			instance->m_Owner = this;
+
+			System* system = (Systems::System*)instance;
+			system->ManagedData = CreateManagedInstance(type);
+			system->Init();
+
+			m_Systems.emplace(type, instance);
+			return instance;
 		}
 
 		template<typename T>

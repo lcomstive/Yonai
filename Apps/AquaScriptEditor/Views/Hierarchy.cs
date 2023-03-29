@@ -1,6 +1,4 @@
-using System;
 using AquaEngine;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace AquaEditor.Views
@@ -17,6 +15,7 @@ namespace AquaEditor.Views
 			// Get all current worlds
 			World[] worlds = World.GetAll();
 
+			m_Worlds.Clear();
 			foreach (World world in worlds)
 				m_Worlds.Add(world);
 
@@ -46,7 +45,7 @@ namespace AquaEditor.Views
 					Entity[] entities = world.GetEntities();
 
 					ImGUI.BeginChild($"{world.Name} [{world.ID}]",
-						new Vector2(0, entities.Length * (ImGUI.TextLineHeight + 5)));
+						new Vector2(0, entities.Length * (ImGUI.TextLineHeight + 7.5f)));
 
 					foreach (Entity entity in entities)
 					{
@@ -57,7 +56,10 @@ namespace AquaEditor.Views
 							continue;
 
 						ImGUI.SameLine();
-						ImGUI.Text(nameComponent.Name);
+						if(ImGUI.Button(nameComponent.Name))
+						{
+							Log.Debug($"Selected {nameComponent.Name}");
+						}
 					}
 
 					ImGUI.EndChild();

@@ -117,6 +117,7 @@ void SystemManager::InvalidateAllManagedInstances()
 {
 	for (auto pair : m_Systems)
 	{
+		pair.second->OnScriptingReloadedBefore();
 		if (!pair.second->ManagedData.IsValid())
 			continue;
 		mono_gchandle_free(pair.second->ManagedData.GCHandle);
@@ -129,7 +130,7 @@ void SystemManager::CreateAllManagedInstances()
 	for (auto pair : m_Systems)
 	{
 		pair.second->ManagedData = CreateManagedInstance(pair.first);
-		pair.second->OnScriptingReloaded();
+		pair.second->OnScriptingReloadedAfter();
 	}
 }
 
@@ -154,7 +155,6 @@ ScriptSystem* SystemManager::Add(MonoType* managedType)
 	System* rawSystem = (System*)system;
 	rawSystem->Init();
 	rawSystem->Enable();
-	rawSystem->OnScriptingReloaded();
 
 	return system;
 }

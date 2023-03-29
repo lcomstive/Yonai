@@ -1,6 +1,4 @@
-
 using AquaEngine;
-using System;
 
 namespace AquaEditor.Views
 {

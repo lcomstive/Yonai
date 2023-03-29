@@ -205,6 +205,7 @@ void ScriptEngine::OnAssemblyFileChanged(const std::string& path, IO::FileWatchS
 }
 
 bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
+void ScriptEngine::SetAwaitingReload() { s_AwaitingReload = true; }
 bool ScriptEngine::DebuggingEnabled() { return s_DebuggingEnabled; }
 
 void ScriptEngine::Reload(bool force)
@@ -219,6 +220,7 @@ void ScriptEngine::Reload(bool force)
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	vector<World*> worlds = World::GetWorlds();
+	vector<World*> activeScenes = sceneSystem->GetActiveScenes();
 	sceneSystem->UnloadAllScenes();
 	for (World* world : worlds)
 	{
@@ -266,11 +268,12 @@ void ScriptEngine::Reload(bool force)
 	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
 	SystemManager::Global()->CreateAllManagedInstances();
+	worlds = World::GetWorlds(); // Refresh worlds, as they can be created or destroyed with C# scripts
 	for (World* world : worlds)
-	{
 		world->GetSystemManager()->CreateAllManagedInstances();
-		sceneSystem->AddScene(world);
-	}
+
+	for(World* scene : activeScenes)
+		sceneSystem->AddScene(scene);
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());

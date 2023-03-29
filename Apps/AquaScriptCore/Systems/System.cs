@@ -17,7 +17,7 @@ namespace AquaEngine
 		protected virtual void Draw() { }
 
 		/// <summary>
-		/// Called when this script is created and attached to an <see cref="Entity"/> (after <see cref="OnEnabled"/>)
+		/// Called when this system is created (after <see cref="OnEnabled"/>)
 		/// </summary>
 		protected virtual void Start() { }
 
@@ -29,14 +29,13 @@ namespace AquaEngine
 		/// <summary>
 		/// Called when script has been enabled.
 		/// Can also be called when attached to an <see cref="Entity"/>,
-		/// this function is called before <see cref="Start"/> in this case
+		/// this function is called before <see cref="Start"/>.
 		/// </summary>
 		protected virtual void Enabled() { }
 
 		/// <summary>
 		/// Called when the script has been disabled.
-		/// Can also be called when attached <see cref="Entity"/> is being destroyed,
-		/// this function is called before <see cref="OnDestroyed"/> in this case
+		/// This function is called before <see cref="OnDestroyed"/>.
 		/// </summary>
 		protected virtual void Disabled() { }
 

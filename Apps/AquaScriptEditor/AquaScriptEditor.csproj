@@ -45,9 +45,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <!-- Attributes -->
+    <Compile Include="Core/MenuItemAttribute.cs" />
+    <Compile Include="Core/ShowInInspectorAttribute.cs" />
+
     <!-- Core -->
     <Compile Include="Core/Scripting.cs" />
-    <Compile Include="Core/MenuItemAttribute.cs" />
     
     <!-- Graphics -->
     <Compile Include="Graphics/EditorWindow.cs" />
@@ -62,6 +65,7 @@
     <!-- Views -->
     <Compile Include="Views/Game.cs" />
     <Compile Include="Views/Hierarchy.cs" />
+    <Compile Include="Views/Inspector.cs" />
     <Compile Include="Views/Scene.cs" />
     <Compile Include="Views/Stats.cs" />
     <Compile Include="Views/View.cs" />
