@@ -51,7 +51,7 @@ namespace AquaEngine
 			instance = new T();
 			instance->m_Owner = this;
 
-			System* system = (Systems::System*)instance;
+			Systems::System* system = (Systems::System*)instance;
 			system->ManagedData = CreateManagedInstance(type);
 			system->Init();
 
