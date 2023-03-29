@@ -40,6 +40,15 @@ ADD_MANAGED_METHOD(World, Get, bool, (unsigned int worldID, MonoString** outName
 	return true;
 }
 
+ADD_MANAGED_METHOD(World, GetAll, void, (MonoArray** outWorldIDs))
+{
+	vector<World*> worlds = World::GetWorlds();
+
+	*outWorldIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), worlds.size());
+	for (size_t i = 0; i < worlds.size(); i++)
+		mono_array_set(*outWorldIDs, unsigned int, i, worlds[i]->ID());
+}
+
 ADD_MANAGED_METHOD(World, Exists, bool, (unsigned int worldID))
 { return World::GetWorld(worldID) != nullptr; }
 

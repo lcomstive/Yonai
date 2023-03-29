@@ -43,28 +43,26 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), AquaEditor)
 
 /// STATE ///
 ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
-{
-	return ImGui::IsItemHovered();
-}
+{ return ImGui::IsItemHovered(); }
 
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor)
-{
-	return ImGui::IsItemClicked();
-}
+{ return ImGui::IsItemClicked(); }
 
 ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor)
-{
-	return ImGui::IsItemEdited();
-}
+{ return ImGui::IsItemEdited(); }
 
 ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
-{
-	return ImGui::BeginDisabled();
-}
+{ return ImGui::BeginDisabled(); }
 
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
+{ return ImGui::EndDisabled(); }
+
+ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw), AquaEditor)
 {
-	return ImGui::EndDisabled();
+	char* label = mono_string_to_utf8(labelRaw);
+	bool output = ImGui::CollapsingHeader(label);
+	mono_free(label);
+	return output;
 }
 
 /// CONTROLS ///

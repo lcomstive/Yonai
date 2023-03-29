@@ -38,6 +38,6 @@ namespace AquaEngine
 		/// <summary>
 		/// Called when a world is added or removed from the list of active scenes
 		/// </summary>
-		public static OnWorldChanged WorldChanged;
+		public static event OnWorldChanged WorldChanged;
 	}
 }

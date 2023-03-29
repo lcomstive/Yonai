@@ -413,6 +413,9 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _DockSpace(string id, ref Vector2 size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool Foldout(string label);
 		#endregion
 
 		#region Controls

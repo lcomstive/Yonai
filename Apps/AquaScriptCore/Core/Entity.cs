@@ -65,6 +65,14 @@ namespace AquaEngine
 				m_Components.Add(type, _GetComponent(World.ID, ID, typeof(T)));
 			return (T)m_Components[type];
 		}
+
+		/// <returns>True if component exists on entity, false otherwise</returns>
+		public bool TryGetComponent<T>(out T component) where T : Component
+		{
+			component = GetComponent<T>();
+			return component != null;
+		}
+
 		/// <summary>
 		/// Removes a <see cref="Component"/> from this entity
 		/// </summary>

@@ -24,6 +24,8 @@ namespace AquaEditor
 
 			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
+			World.Get(0).GetEntity(0).AddComponent<NameComponent>().Name = "Camera";
+
 			// Demo //
 			GenerateConsoleLines();
 		}
@@ -49,6 +51,32 @@ namespace AquaEditor
 
 			EndDockspace();
 		}
+
+		#region View Handling
+		public static void Open<T>() where T : View, new()
+		{
+			Type type = typeof(T);
+
+			// Check if window of type is already open
+			if (!m_ActiveViews.ContainsKey(type))
+			{
+				T instance = new T();
+				instance._Open(); // Inform of opening
+				m_ActiveViews.Add(type, instance);
+			}
+		}
+
+		public static void Close<T>() where T : View
+		{
+			Type type = typeof(T);
+			// Check that window of type is already open
+			if (m_ActiveViews.ContainsKey(type))
+			{
+				m_ActiveViews[type]._Close(); // Inform of closure
+				m_ActiveViews.Remove(type);
+			}
+		}
+		#endregion
 
 		private void BeginDockspace()
 		{
@@ -87,23 +115,6 @@ namespace AquaEditor
 				menuItem.Render();
 
 			ImGUI.EndMenuBar();
-		}
-
-		public static void Open<T>() where T : View, new()
-		{
-			Type type = typeof(T);
-
-			// Check if window of type is already open
-			if (!m_ActiveViews.ContainsKey(type))
-				m_ActiveViews.Add(type, new T());
-		}
-
-		public static void Close<T>() where T : View
-		{
-			Type type = typeof(T);
-			// Check that window of type is already open
-			if (m_ActiveViews.ContainsKey(type))
-				m_ActiveViews.Remove(type);
 		}
 
 		private void CompileMenuItems()

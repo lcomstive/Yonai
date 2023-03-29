@@ -178,6 +178,19 @@ namespace AquaEngine
 			return new World(id, name);
 		}
 
+		public static World[] GetAll()
+		{
+			// Get all world IDs
+			_GetAll(out uint[] worldIDs);
+
+			// Retrieve all worlds by ID
+			World[] worlds = new World[worldIDs.Length];
+			for (int i = 0; i < worldIDs.Length; i++)
+				worlds[i] = Get(worldIDs[i]);
+
+			return worlds;
+		}
+
 		/// <summary>
 		/// Generates a new <see cref="World"/>
 		/// </summary>
@@ -198,6 +211,7 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _Create(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(uint worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Get(uint worldID, out string name);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAll(out uint[] worldIDs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetEntities(uint worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetComponents(uint worldID, Type type);

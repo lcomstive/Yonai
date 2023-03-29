@@ -44,12 +44,10 @@ namespace AquaEditor.Views
 			m_FPSValues[m_FPSValues.Length - 1] = Time.FPS;
 		}
 
-		private bool m_IsOpen = true;
 		protected override void Draw()
 		{
-			if(!m_IsOpen) return;
-
-			if (ImGUI.Begin("Stats", ref m_IsOpen))
+			bool isOpen = true;
+			if (ImGUI.Begin("Stats", ref isOpen))
 			{
 				ImGUI.Text($"FPS: {Time.FPS}");
 				ImGUI.Text($"Delta Time: {(Time.DeltaTime * 1000).ToString("F1")}ms");
@@ -70,11 +68,9 @@ namespace AquaEditor.Views
 			}
 			ImGUI.End();
 
-			// Check if window closed
-			if (!m_IsOpen)
-			{
+			// Check if window requested to be closed
+			if (!isOpen)
 				EditorUIService.Close<StatsView>();
-			}
 		}
 	}
 }
