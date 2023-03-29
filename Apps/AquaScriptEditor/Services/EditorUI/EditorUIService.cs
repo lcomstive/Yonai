@@ -28,6 +28,9 @@ namespace AquaEditor
 
 			// Demo //
 			GenerateConsoleLines();
+			CreateTestScene();
+
+			Open<HierarchyView>();
 		}
 
 		protected override void Update()
@@ -162,6 +165,17 @@ namespace AquaEditor
 		private string m_MultilineInput = "Multiline\nString\nField";
 
 		private float[] m_FPSValues = new float[100];
+
+		private void CreateTestScene()
+		{
+			World world = World.Create("Test World");
+
+			for(int i = 0; i < 15; i++)
+			{
+				Entity e = world.CreateEntity();
+				e.AddComponent<NameComponent>().Name = "Entity";
+			}
+		}
 
 		private void DrawDemoContents()
 		{

@@ -57,10 +57,14 @@ ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
 { return ImGui::EndDisabled(); }
 
-ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw, bool openByDefault), AquaEditor)
 {
+	int flags = 0;
+	if (openByDefault)
+		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
 	char* label = mono_string_to_utf8(labelRaw);
-	bool output = ImGui::CollapsingHeader(label);
+	bool output = ImGui::CollapsingHeader(label, flags);
 	mono_free(label);
 	return output;
 }
@@ -418,14 +422,13 @@ ADD_MANAGED_METHOD(ImGUI, _SliderInt3, bool, (MonoString* labelRaw, glm::ivec3* 
 
 // Other 
 ADD_MANAGED_METHOD(ImGUI, SameLine, void, (), AquaEditor)
-{
-	return ImGui::SameLine();
-}
+{ return ImGui::SameLine(); }
 
 ADD_MANAGED_METHOD(ImGUI, Space, void, (), AquaEditor)
-{
-	return ImGui::Spacing();
-}
+{ return ImGui::Spacing(); }
+
+ADD_MANAGED_METHOD(ImGUI, _GetTextLineHeight, float, (), AquaEditor)
+{ return ImGui::GetTextLineHeight(); }
 
 ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
 {

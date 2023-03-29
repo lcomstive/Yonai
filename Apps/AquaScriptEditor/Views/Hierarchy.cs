@@ -41,11 +41,13 @@ namespace AquaEditor.Views
 			{
 				foreach (World world in m_Worlds)
 				{
-					if (!ImGUI.Foldout(world.Name))
+					if (!ImGUI.Foldout(world.Name, true))
 						continue;
-					ImGUI.BeginChild($"{world.Name} [{world.ID}]");
-
 					Entity[] entities = world.GetEntities();
+
+					ImGUI.BeginChild($"{world.Name} [{world.ID}]",
+						new Vector2(0, entities.Length * (ImGUI.TextLineHeight + 5)));
+
 					foreach (Entity entity in entities)
 					{
 						ImGUI.Text($"[{entity.ID}]", Colour.Grey);

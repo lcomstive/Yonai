@@ -415,7 +415,7 @@ namespace AquaEditor
 		private static extern void _DockSpace(string id, ref Vector2 size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool Foldout(string label);
+		public static extern bool Foldout(string label, bool openByDefault = false);
 		#endregion
 
 		#region Controls
@@ -764,6 +764,14 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void PopStyleVar(int amount = 1);
+
+		/// <summary>
+		/// Height of a line of text, in pixels
+		/// </summary>
+		public static float TextLineHeight => _GetTextLineHeight();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float _GetTextLineHeight();
 		#endregion
 
 		#region Menu
