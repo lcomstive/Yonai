@@ -1,19 +1,32 @@
 using System;
 using AquaEngine;
+using System.Linq;
 using AquaEditor.Views;
+using System.Reflection;
+using AquaEditor.EditorUI;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AquaEditor
 {
 	public class EditorUIService : AquaSystem
 	{
-		private Dictionary<Type, View> m_ActiveViews = new Dictionary<Type, View>();
+		private MenuItemData m_RootMenuItem = new MenuItemData("Root");
 
-		protected override void Enabled() => m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+		/// <summary>
+		/// All currently open views/windows
+		/// </summary>
+		private static Dictionary<Type, View> m_ActiveViews = new Dictionary<Type, View>();
 
-		protected override void Start() => GenerateConsoleLines();
+		protected override void Start()
+		{
+			CompileMenuItems();
+
+			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+
+			// Demo //
+			GenerateConsoleLines();
+		}
 
 		protected override void Update()
 		{
@@ -70,46 +83,53 @@ namespace AquaEditor
 			if (!ImGUI.BeginMenuBar())
 				return;
 
-			if(ImGUI.BeginMenu("File"))
-			{
-				if (ImGUI.MenuItem("Reload Scripting"))
-					Scripting.Reload();
-
-				if (ImGUI.MenuItem("Exit"))
-					Application.Exit();
-
-				ImGUI.EndMenu();
-			}
-
-			if (ImGUI.MenuItem("Fullscreen"))
-				Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
-
-			if (ImGUI.BeginMenu("Window"))
-			{
-				if(ImGUI.MenuItem("Stats"))
-					Open<StatsView>();
-
-				ImGUI.EndMenu();
-			}
+			foreach (MenuItemData menuItem in m_RootMenuItem.Children)
+				menuItem.Render();
 
 			ImGUI.EndMenuBar();
 		}
 
-		public void Open<T>() where T : View, new()
+		public static void Open<T>() where T : View, new()
 		{
-			Type type =	typeof(T);
+			Type type = typeof(T);
 
 			// Check if window of type is already open
 			if (!m_ActiveViews.ContainsKey(type))
 				m_ActiveViews.Add(type, new T());
 		}
-		
-		public void Close<T>() where T : View
+
+		public static void Close<T>() where T : View
 		{
 			Type type = typeof(T);
 			// Check that window of type is already open
 			if (m_ActiveViews.ContainsKey(type))
 				m_ActiveViews.Remove(type);
+		}
+
+		private void CompileMenuItems()
+		{
+			// Add default menu item directories
+			m_RootMenuItem.AddDirectory("File");
+			m_RootMenuItem.AddDirectory("Window");
+
+			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+			
+			// Get all methods with the MenuItem attribute, in all assemblies
+			var menuItems =
+				from assembly in AppDomain.CurrentDomain.GetAssemblies()
+				from type in assembly.GetTypes()
+				from method in type.GetMethods(bindingFlags)
+				let attribute = method.GetCustomAttribute<MenuItemAttribute>()
+				where attribute != null
+				select new
+				{
+					Method = method,
+					Attribute = attribute
+				};
+
+
+			foreach(var menuItem in menuItems)
+				m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);					
 		}
 
 		#region Demo
@@ -197,7 +217,7 @@ namespace AquaEditor
 
 			UpdateFPSValues();
 			ImGUI.PlotLines("FPS", m_FPSValues, $"FPS: {Time.FPS}");
-			
+
 			ImGUI.BeginChild("Console", new Vector2(0, 150), true);
 			foreach ((string msg, Colour colour) in m_ConsoleLines)
 				ImGUI.Text(msg, colour);
@@ -255,6 +275,6 @@ namespace AquaEditor
 				));
 			}
 		}
-	#endregion
+		#endregion
 	}
 }

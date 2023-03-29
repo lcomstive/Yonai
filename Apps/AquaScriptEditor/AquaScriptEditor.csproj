@@ -45,7 +45,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Scripting.cs" />
+    <!-- Core -->
+    <Compile Include="Core/Scripting.cs" />
+    <Compile Include="Core/MenuItemAttribute.cs" />
     
     <!-- Graphics -->
     <Compile Include="Graphics/EditorWindow.cs" />
@@ -53,7 +55,9 @@
 
     <!-- Services -->
     <Compile Include="Services/EditorService.cs" />
-    <Compile Include="Services/EditorUIService.cs" />
+    <Compile Include="Services/EditorUI/BasicMenuItems.cs" />
+    <Compile Include="Services/EditorUI/EditorUIService.cs" />
+    <Compile Include="Services/EditorUI/MenuItemData.cs" />
 
     <!-- Views -->
     <Compile Include="Views/Game.cs" />

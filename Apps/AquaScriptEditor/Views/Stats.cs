@@ -28,6 +28,9 @@ namespace AquaEditor.Views
 		/// </summary>
 		private float m_UpdateTimer = 0.0f;
 
+		[MenuItem("Window/Stats")]
+		private static void MenuCallback() => EditorUIService.Open<StatsView>();
+
 		protected override void Update()
 		{
 			m_UpdateTimer += Time.DeltaTime;
@@ -70,7 +73,7 @@ namespace AquaEditor.Views
 			// Check if window closed
 			if (!m_IsOpen)
 			{
-				AquaSystem.Get<EditorUIService>().Close<StatsView>();
+				EditorUIService.Close<StatsView>();
 			}
 		}
 	}
