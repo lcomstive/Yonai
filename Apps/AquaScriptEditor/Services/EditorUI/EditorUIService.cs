@@ -181,12 +181,22 @@ namespace AquaEditor
 
 		private void CreateTestScene()
 		{
-			m_TestWorld = World.Create("Test World");
+			m_TestWorld = World.Get(0);
 
 			for(int i = 0; i < 15; i++)
 			{
 				Entity e = m_TestWorld.CreateEntity();
 				e.AddComponent<NameComponent>().Name = "Entity";
+
+				SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
+				renderer.Sprite = Resource.Load<Texture>("Textures/Texture/Test_Texture09", "assets://Textures/texture_09.png");
+				renderer.Shader = Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderStages()
+				{
+					VertexPath	 = "assets://Shaders/Sprite.vert",
+					FragmentPath = "assets://Shaders/NewSprite.frag"
+				});
+
+				e.AddComponent<Transform>().Position = Vector3.Right * i * 2.5f;
 			}
 		}
 

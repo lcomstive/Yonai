@@ -207,6 +207,9 @@ void EditorApp::Draw()
 
 	SystemManager::Global()->Draw();
 
+	for (auto pair : m_Views)
+		pair.second->Draw();
+
 	Window::SwapBuffers();
 	Window::PollEvents();
 }

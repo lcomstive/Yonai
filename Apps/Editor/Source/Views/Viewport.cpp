@@ -14,6 +14,7 @@ ViewportView::ViewportView()
 	m_RenderSystem = SystemManager::Global()->Get<RenderSystem>();
 
 	m_EditorWorld = new World("Viewport");
+	SceneSystem::AddScene(m_EditorWorld);
 
 	Entity cameraEntity = m_EditorWorld->CreateEntity();
 	m_EditorCamera = cameraEntity.AddComponent<Camera>();
