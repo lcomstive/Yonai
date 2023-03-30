@@ -31,7 +31,7 @@ void CameraControlSystem::Update()
 		if(Input::IsKeyDown(Key::LeftShift))
 			totalMovement *= cameraPair.second->SprintMultiplier;
 		cameraPair.first->Position += inverse(cameraPair.first->Rotation) * totalMovement;
-		cameraPair.first->Rotation = rotation;
+		// cameraPair.first->Rotation = rotation;
 	}
 }
 
@@ -47,7 +47,7 @@ void CameraControlSystem::Update(Components::FPSCamera* fpsCamera)
 	if(Input::IsKeyDown(Key::LeftShift))
 		totalMovement *= fpsCamera->SprintMultiplier;
 	transform->Position += inverse(transform->Rotation) * totalMovement;
-	transform->Rotation = rotation;
+	// transform->Rotation = rotation;
 }
 
 vec3 GetPlayerMovement()

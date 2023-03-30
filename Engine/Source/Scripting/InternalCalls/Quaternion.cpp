@@ -8,10 +8,11 @@
 using namespace glm;
 
 ADD_MANAGED_METHOD(Quaternion, ToEuler, void, (glm::quat* input, glm::vec3* output))
-{ *output = eulerAngles(*input); }
+{ *output = degrees(eulerAngles(*input)); }
 
 ADD_MANAGED_METHOD(Quaternion, FromEuler, void, (glm::vec3* input, glm::quat* output))
-{ *output = toQuat(orientate3(*input)); }
+// { *output = toQuat(orientate3(radians(vec3(input->y, input->x, input->z)))); }
+{ *output = quat(radians(*input)); }
 
 ADD_MANAGED_METHOD(Quaternion, Multiply, void, (glm::quat* a, glm::quat* b, glm::quat* output))
 { *output = (*a) * (*b); }

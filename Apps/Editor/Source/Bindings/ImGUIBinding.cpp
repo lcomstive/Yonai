@@ -69,6 +69,12 @@ ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw, bool openByDefau
 	return output;
 }
 
+ADD_MANAGED_METHOD(ImGUI, Indent, void, (float width), AquaEditor)
+{ ImGui::Indent(); }
+
+ADD_MANAGED_METHOD(ImGUI, Unindent, void, (float width), AquaEditor)
+{ ImGui::Unindent(); }
+
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 {
@@ -293,6 +299,19 @@ ADD_MANAGED_METHOD(ImGUI, _DragFloat3, bool, (MonoString* labelRaw, glm::vec3* v
 	char* format = mono_string_to_utf8(formatRaw);
 
 	bool output = ImGui::DragFloat3(label, &value->x, speed, min, max, format);
+
+	mono_free(label);
+	mono_free(format);
+	return output;
+}
+
+
+ADD_MANAGED_METHOD(ImGUI, _DragFloat4, bool, (MonoString* labelRaw, glm::vec4* value, float speed, float min, float max, MonoString* formatRaw), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	char* format = mono_string_to_utf8(formatRaw);
+
+	bool output = ImGui::DragFloat4(label, &value->x, speed, min, max, format);
 
 	mono_free(label);
 	mono_free(format);

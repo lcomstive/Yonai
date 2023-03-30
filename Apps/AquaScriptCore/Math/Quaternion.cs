@@ -17,6 +17,7 @@ namespace AquaEngine
 				_ToEuler(ref input, out Vector3 output);
 				return output;
 			}
+			set => _FromEuler(ref value, out this);
 		}
 
 		public Quaternion(float x, float y, float z, float w)
@@ -30,7 +31,7 @@ namespace AquaEngine
 		public static Quaternion FromEuler(Vector3 values)
 		{
 			if(values == Vector3.Zero)
-				return Quaternion.Identity;
+				return Identity;
 
 			_FromEuler(ref values, out Quaternion output);
 			return output;

@@ -416,6 +416,12 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Foldout(string label, bool openByDefault = false);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Indent(float width = 0.0f);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Unindent(float width = 0.0f);
 		#endregion
 
 		#region Controls
@@ -553,6 +559,9 @@ namespace AquaEditor
 		public static bool Drag(string label, ref Vector3 value, float speed = 1.0f, float min = 0.0f, float max = 0.0f, string format = "%.3f")
 			=> _DragFloat3(label, ref value, speed, min, max, format);
 
+		public static bool Drag(string label, ref Vector4 value, float speed = 1.0f, float min = 0.0f, float max = 0.0f, string format = "%.3f")
+			=> _DragFloat4(label, ref value, speed, min, max, format);
+		
 		public static bool Drag(string label, ref int value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt(label, ref value, speed, min, max, format);
 
@@ -561,6 +570,21 @@ namespace AquaEditor
 
 		public static bool Drag(string label, ref IVector3 value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt3(label, ref value, speed, min, max, format);
+
+		/// <summary>
+		/// Shows drag prompt for Quaternion, in euler angles
+		/// </summary>
+		/// <returns>True if a value was changed this frame</returns>
+		public static bool Drag(string label, ref Quaternion value, float speed = 1, int min = 0, int max = 0)
+		{
+			Vector3 euler = value.Euler;
+			if(_DragFloat3(label, ref euler, speed, min, max, "%.2f"))
+			{
+				value.Euler = euler;
+				return true;
+			}
+			return false;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _DragFloat(
@@ -586,6 +610,16 @@ namespace AquaEditor
 		private static extern bool _DragFloat3(
 			string label,
 			ref Vector3 value,
+			float speed,
+			float min,
+			float max,
+			string format
+		);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _DragFloat4(
+			string label,
+			ref Vector4 value,
 			float speed,
 			float min,
 			float max,

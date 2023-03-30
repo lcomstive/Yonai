@@ -15,7 +15,7 @@ namespace AquaEngine::Components
 		std::vector<Transform*> Children = {};
 		
 		glm::vec3 Position = { 0, 0, 0 };
-		glm::quat Rotation = { 0, 0, 0, 1 };
+		glm::quat Rotation = glm::identity<glm::quat>();
 		glm::vec3 Scale = { 1, 1, 1 };
 
 #pragma region Getters
