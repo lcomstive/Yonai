@@ -1,6 +1,6 @@
 using System;
 
-namespace AquaEditor
+namespace AquaEngine
 {
 	/// <summary>
 	/// Reveals private fields and properties in the inspector

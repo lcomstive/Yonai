@@ -3,6 +3,7 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/World.hpp>
+#include <AquaEngine/ComponentManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Systems/ScriptSystem.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
@@ -193,6 +194,27 @@ ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, uns
 
 	Components::Component* instance = (Components::Component*)world->GetComponent(entityID, type);
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
+}
+
+ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+{
+	World* world = World::GetWorld(worldID);
+	if (!world)
+		return nullptr;
+
+	// Key: type hash
+	// Value: component instance
+	auto componentPairs = world->GetComponentManager()->Get(entityID);
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_object_class(), componentPairs.size());
+	for (int i = 0; i < componentPairs.size(); i++)
+	{
+		Components::Component* component = (Components::Component*)componentPairs[i].second;
+		MonoObject* instance = component->ManagedData.GetInstance();
+		mono_array_set(output, MonoObject*, i, instance);
+	}
+
+	return output;
 }
 #pragma endregion
 

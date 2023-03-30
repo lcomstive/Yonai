@@ -46,8 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Attributes -->
+    <Compile Include="Attributes/CustomInspectorAttribute.cs" />
     <Compile Include="Attributes/MenuItemAttribute.cs" />
-    <Compile Include="Attributes/ShowInInspectorAttribute.cs" />
 
     <!-- Core -->
     <Compile Include="Core/Scripting.cs" />
@@ -63,6 +63,8 @@
     <Compile Include="Services/EditorUI/MenuItemData.cs" />
 
     <!-- Views -->
+    <Compile Include="Views/Inspectors/CustomInspector.cs" />
+    <Compile Include="Views/Inspectors/EntityInspector.cs" />
     <Compile Include="Views/Game.cs" />
     <Compile Include="Views/Hierarchy.cs" />
     <Compile Include="Views/Inspector.cs" />

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-
-namespace AquaEngine
+﻿namespace AquaEngine
 {
 	public abstract class Component
 	{
@@ -9,11 +6,13 @@ namespace AquaEngine
 		/// The <see cref="World"/> this component exists within.
 		/// This matches the <see cref="World"/> of the attached <see cref="Entity"/>.
 		/// </summary>
+		[HideInInspector]
 		public World World => Entity.World;
 
 		/// <summary>
 		/// <see cref="Entity"/> this component is attached to.
 		/// </summary>
+		[HideInInspector]
 		public Entity Entity { get; private set; }
 
 		/// <summary>

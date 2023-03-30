@@ -21,6 +21,8 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
+namespace fs = std::filesystem;
+
 const char* AssembliesPath = "app://Assets/Mono/";
 const char* AppDomainName = "AquaEngineAppDomain";
 
@@ -37,20 +39,37 @@ vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
 const char* MonoDebugLogPath = "data://MonoDebugger.log";
 
-vector<const char*> GenerateJITParseOptions(unsigned int debugPort)
+void JITParseOptions(unsigned int debugPort)
 {
 	Application* app = Application::Current();
-	vector<const char*> output = {};
+	vector<const char*> options = {};
+	bool waitForDebugger = app->HasArg("WaitForDebug");
 
-	output.emplace_back("--soft-breakpoints");
+	options.push_back("--soft-breakpoints");
 
-	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
+	string debugging = "--debugger-agent=transport=dt_socket,server=y,";
+	debugging += "suspend=" + string(waitForDebugger ? "y" : "n") + ",";
 	debugging += "address=0.0.0.0:" + to_string(debugPort);
-	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
+	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "1");
 	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
-	output.emplace_back(debugging.c_str());
 
-	return output;
+	options.push_back(debugging.c_str());
+
+	if (waitForDebugger)
+		spdlog::info("Waiting for debugger to attach before proceeding...");
+
+	mono_jit_parse_options((int)options.size(), (char**)options.data());
+}
+
+bool TryLoadDebugSymbols(MonoImage* image, fs::path& path)
+{
+	if (!VFS::Exists(path.string()))
+		return false;
+
+	auto pdbContents = VFS::Read(path.string());
+	mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
+	spdlog::trace("Added debug symbols found at '{}'", path.string().c_str());
+	return true;
 }
 
 void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
@@ -76,8 +95,7 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 		try { debugPort = std::stoul(Application::Current()->GetArg("DebugPort", "5555")); }
 		catch(std::exception&) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
 
-		vector<const char*> jitOptions = GenerateJITParseOptions(debugPort);
-		mono_jit_parse_options((int)jitOptions.size(), (char**)jitOptions.data());
+		JITParseOptions(debugPort);
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
 		spdlog::debug("C# debugging is enabled on port {}", debugPort);
@@ -164,15 +182,16 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	// Load debugging info
 	if (DebuggingEnabled())
 	{
-		// Try and load .pdb file next to .dll file
+		// Try to load debug symbols for assembly
 		std::filesystem::path pdbPath(path);
-		pdbPath.replace_extension(".pdb");
-		if (VFS::Exists(pdbPath.string()))
-		{
-			auto pdbContents = VFS::Read(pdbPath.string());
-			mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
-			spdlog::trace("Added debug symbols found at '{}'", pdbPath.string().c_str());
-		}
+		
+		// Check for .pdb (must be compiled as 'portable')
+		// pdbPath.replace_extension(".pdb");
+		// TryLoadDebugSymbols(image, pdbPath);
+
+		// Try mono debug symbols if present
+		// pdbPath.replace_extension(".dll.mdb");
+		// TryLoadDebugSymbols(image, pdbPath);
 	}
 
 	MonoAssembly* assembly = mono_assembly_load_from_full(

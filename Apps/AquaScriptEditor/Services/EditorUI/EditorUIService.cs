@@ -21,16 +21,20 @@ namespace AquaEditor
 		protected override void Enabled()
 		{
 			CompileMenuItems();
+			InspectorView.GetCustomInspectors();
 
 			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
-			World.Get(0).GetEntity(0).AddComponent<NameComponent>().Name = "Camera";
+			World.Get(0).GetEntity(0).AddComponent<NameComponent>().Name = "Main Camera";
 
 			// Demo //
-			// GenerateConsoleLines();
+			GenerateConsoleLines();
 			CreateTestScene();
 
 			Open<HierarchyView>();
+			Open<InspectorView>();
+
+			InspectorView.Target = World.Get(0).GetEntity(0);
 		}
 
 		protected override void Disabled()

@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Attributes -->
+    <Compile Include="Attributes/HideInInspectorAttribute.cs" />
+    <Compile Include="Attributes/ShowInInspectorAttribute.cs" />
+ 
     <!-- Audio -->
     <Compile Include="Audio/Audio.cs" />
     <Compile Include="Audio/Sound.cs" />

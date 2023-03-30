@@ -24,7 +24,7 @@ namespace AquaEngine::Scripting
 		/// </summary>
 		MonoType* Type = nullptr;
 
-		MonoObject* GetInstance() { return mono_gchandle_get_target(GCHandle); }
+		MonoObject* GetInstance() { return GCHandle == 0 ? nullptr : mono_gchandle_get_target(GCHandle); }
 
 		bool IsValid() { return GCHandle != 0; }
 	};

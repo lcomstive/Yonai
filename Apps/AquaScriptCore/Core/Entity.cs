@@ -66,6 +66,25 @@ namespace AquaEngine
 			return (T)m_Components[type];
 		}
 
+		public Component[] GetComponents()
+		{
+			List<Component> list = new List<Component>();
+			object[] instances = _GetComponents(World.ID, ID);
+			for (int i = 0; i < instances.Length; i++)
+			{
+				if (instances[i] == null)
+					continue;
+
+				Component component = instances[i] as Component;
+				if (component)
+					list.Add(component);
+				else
+					Log.Warning($"Instance not found for '{instances[i].GetType().Name}'");
+			}
+
+			return list.ToArray();
+		}
+
 		/// <returns>True if component exists on entity, false otherwise</returns>
 		public bool TryGetComponent<T>(out T component) where T : Component
 		{
@@ -94,6 +113,7 @@ namespace AquaEngine
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool	  _HasComponent(uint worldID, uint entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _GetComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object[] _GetComponents(uint worldID, uint entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AddComponent(uint worldID, uint entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool   _RemoveComponent(uint worldID, uint entityID, Type type);
 		#endregion
