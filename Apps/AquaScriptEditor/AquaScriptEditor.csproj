@@ -49,6 +49,9 @@
     <Compile Include="Attributes/CustomInspectorAttribute.cs" />
     <Compile Include="Attributes/MenuItemAttribute.cs" />
 
+    <!-- Components -->
+    <Compile Include="Components/SceneViewCameraController.cs" />
+
     <!-- Core -->
     <Compile Include="Core/Scripting.cs" />
     

@@ -746,6 +746,22 @@ namespace AquaEditor
 		#endregion
 
 		#region Viewport
+		public static bool IsWindowFocused => _IsWindowFocused();
+		public static bool IsWindowHovered => _IsWindowHovered();
+		public static bool IsWindowCollapsed => _IsWindowCollapsed();
+
+		public static Vector2 WindowContentRegionMin
+		{ get { _GetWindowContentRegionMin(out Vector2 output); return output; } }
+
+		public static Vector2 WindowContentRegionMax
+		{ get { _GetWindowContentRegionMax(out Vector2 output); return output; } }
+
+		public static Vector2 ContentRegionAvailable
+		{ get { _GetContentRegionAvail(out Vector2 output); return output; } }
+
+		public static Vector2 WindowPosition
+		{ get { _GetWindowPosition(out Vector2 output); return output; } }
+
 		public static Viewport GetViewport(uint ID)
 		{
 			Viewport viewport = new Viewport() { ID = ID };
@@ -781,6 +797,29 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern uint GetWindowViewportID();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetWindowContentRegionMin(out Vector2 output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetWindowContentRegionMax(out Vector2 output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetContentRegionAvail(out Vector2 output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetWindowPosition(out Vector2 output);
+
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool _IsWindowFocused();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool _IsWindowHovered();
+
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _IsWindowCollapsed();
 		#endregion
 
 		#region Style

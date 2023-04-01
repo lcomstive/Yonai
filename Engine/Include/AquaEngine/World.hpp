@@ -309,6 +309,7 @@ namespace AquaEngine
 
 		static std::vector<World*> GetWorlds();
 		static World* GetWorld(unsigned int id);
+		static bool Exists(unsigned int id);
 #pragma endregion
 
 	private:

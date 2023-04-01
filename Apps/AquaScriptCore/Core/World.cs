@@ -204,6 +204,8 @@ namespace AquaEngine
 
 		/// <returns>True if world exists with matching ID</returns>
 		public static bool Exists(uint id) => _Exists(id);
+
+		public static implicit operator bool(World world) => world != null;
 		#endregion
 
 		#region Internal Calls

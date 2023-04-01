@@ -239,8 +239,13 @@ void ScriptEngine::Reload(bool force)
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	vector<World*> worlds = World::GetWorlds();
-	vector<World*> activeScenes = sceneSystem->GetActiveScenes();
+
+	// Cache active scenes
+	vector<unsigned int> activeSceneIDs;
+	for (World* scene : sceneSystem->GetActiveScenes())
+		activeSceneIDs.push_back(scene->ID());
 	sceneSystem->UnloadAllScenes();
+
 	for (World* world : worlds)
 	{
 		world->GetSystemManager()->InvalidateAllManagedInstances();
@@ -291,8 +296,13 @@ void ScriptEngine::Reload(bool force)
 	for (World* world : worlds)
 		world->GetSystemManager()->CreateAllManagedInstances();
 
-	for(World* scene : activeScenes)
-		sceneSystem->AddScene(scene);
+	// Re-activate worlds in scene system
+	for (unsigned int sceneID : activeSceneIDs)
+	{
+		World* scene = World::GetWorld(sceneID);
+		if(scene)
+			sceneSystem->AddScene(scene);
+	}
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());

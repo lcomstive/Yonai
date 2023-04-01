@@ -20,6 +20,25 @@ namespace AquaEngine
 			set => _FromEuler(ref value, out this);
 		}
 
+		public Quaternion Normalised
+		{
+			get
+			{
+				Quaternion copy = this;
+				copy.Normalise();
+				return copy;
+			}
+		}
+
+		public Quaternion Inverted
+		{
+			get
+			{
+				_Inverse(ref this, out Quaternion output);
+				return output;
+			}
+		}
+
 		public Quaternion(float x, float y, float z, float w)
 		{
 			this.x = x;
@@ -41,9 +60,11 @@ namespace AquaEngine
 
 		public void Inverse() => _InverseInline(ref this);
 
-		public static Quaternion Inverse(Quaternion input)
+		public void Normalise() => _Normalise(ref this);
+
+		public static Quaternion AngleAxis(float angle, Vector3 axis)
 		{
-			_Inverse(ref input, out Quaternion output);
+			_AngleAxis(angle, ref axis, out Quaternion output);
 			return output;
 		}
 
@@ -55,21 +76,25 @@ namespace AquaEngine
 			return output;
 		}
 
-		public static Quaternion operator *(Quaternion a, Vector3 b)
+		public static Vector3 operator *(Quaternion a, Vector3 b)
 		{
-			_MultiplyVector3(ref a, ref b, out Quaternion output);
+			_MultiplyVector3(ref a, ref b, out Vector3 output);
 			return output;
 		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Multiply(ref Quaternion a, ref Quaternion b, out Quaternion output);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _MultiplyVector3(ref Quaternion a, ref Vector3 b, out Quaternion output);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _MultiplyVector3(ref Quaternion a, ref Vector3 b, out Vector3 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _FromEuler(ref Vector3 input, out Quaternion output);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _ToEuler(ref Quaternion input, out Vector3 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Inverse(ref Quaternion input, out Quaternion output);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _InverseInline(ref Quaternion input);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Normalise(ref Quaternion instance);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AngleAxis(float angle, ref Vector3 axis, out Quaternion output);
 		#endregion
 
 	}

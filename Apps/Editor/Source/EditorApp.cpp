@@ -16,10 +16,6 @@
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
 
-// Views //
-#include <Views/Stats.hpp>
-#include <Views/Viewport.hpp>
-
 // Scripting //
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
@@ -89,8 +85,6 @@ void EditorApp::Setup()
 
 	LoadProject();
 
-	Add<ViewportView>();
-
 	// LoadScene();
 
 	LaunchEditorService();
@@ -110,12 +104,6 @@ void EditorApp::Cleanup()
 #include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
-	// Check that a window is open
-	if(Window::GetNativeHandle())
-		// Iterate over & update views
-		for (auto& viewPair : m_Views)
-			viewPair.second->Update();
-
 	if(ScriptEngine::AwaitingReload())
 		ScriptEngine::Reload();
 
@@ -206,9 +194,6 @@ void EditorApp::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SystemManager::Global()->Draw();
-
-	for (auto pair : m_Views)
-		pair.second->Draw();
 
 	Window::SwapBuffers();
 	Window::PollEvents();

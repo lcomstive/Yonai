@@ -17,7 +17,7 @@ ADD_MANAGED_METHOD(Quaternion, FromEuler, void, (glm::vec3* input, glm::quat* ou
 ADD_MANAGED_METHOD(Quaternion, Multiply, void, (glm::quat* a, glm::quat* b, glm::quat* output))
 { *output = (*a) * (*b); }
 
-ADD_MANAGED_METHOD(Quaternion, MultiplyVector3, void, (glm::quat* a, glm::vec3* b, glm::quat* output))
+ADD_MANAGED_METHOD(Quaternion, MultiplyVector3, void, (glm::quat* a, glm::vec3* b, glm::vec3* output))
 { *output = (*a) * (*b); }
 
 ADD_MANAGED_METHOD(Quaternion, Inverse, void, (glm::quat* input, glm::quat* output))
@@ -25,3 +25,9 @@ ADD_MANAGED_METHOD(Quaternion, Inverse, void, (glm::quat* input, glm::quat* outp
 
 ADD_MANAGED_METHOD(Quaternion, InverseInline, void, (glm::quat* input))
 { *input = inverse(*input); }
+
+ADD_MANAGED_METHOD(Quaternion, AngleAxis, void, (float angle, glm::vec3* axis, glm::quat* output))
+{ *output = glm::angleAxis(angle, *axis); }
+
+ADD_MANAGED_METHOD(Quaternion, Normalise, void, (glm::quat* value))
+{ glm::normalize(*value); }

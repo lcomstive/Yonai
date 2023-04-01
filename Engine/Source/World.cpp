@@ -117,6 +117,8 @@ void World::ClearComponents(EntityID entity) { m_ComponentManager->Clear(entity)
 World* World::GetWorld(unsigned int id)
 { return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
 
+bool World::Exists(unsigned int id) { return s_Worlds.find(id) != s_Worlds.end(); }
+
 vector<World*> World::GetWorlds()
 {
 	vector<World*> worlds = {};

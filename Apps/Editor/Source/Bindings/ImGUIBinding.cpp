@@ -553,6 +553,39 @@ ADD_MANAGED_METHOD(ImGUI, _SetNextWindowSize, void, (glm::vec2* position), AquaE
 ADD_MANAGED_METHOD(ImGUI, SetNextWindowViewport, void, (unsigned int viewportID), AquaEditor)
 { ImGui::SetNextWindowViewport(viewportID); }
 
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::vec2* outRegion), AquaEditor)
+{
+	ImVec2 region = ImGui::GetWindowContentRegionMin();
+	*outRegion = glm::vec2(region.x, region.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMax, void, (glm::vec2* outRegion), AquaEditor)
+{
+	ImVec2 region = ImGui::GetWindowContentRegionMax();
+	*outRegion = glm::vec2(region.x, region.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _GetContentRegionAvail, void, (glm::vec2* outRegion), AquaEditor)
+{
+	ImVec2 region = ImGui::GetContentRegionAvail();
+	*outRegion = glm::vec2(region.x, region.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _GetWindowPosition, void, (glm::vec2* outPos), AquaEditor)
+{
+	ImVec2 pos = ImGui::GetWindowPos();
+	*outPos= glm::vec2(pos.x, pos.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _IsWindowFocused, bool, (), AquaEditor)
+{ return ImGui::IsWindowFocused(); }
+
+ADD_MANAGED_METHOD(ImGUI, _IsWindowHovered, bool, (), AquaEditor)
+{ return ImGui::IsWindowHovered(); }
+
+ADD_MANAGED_METHOD(ImGUI, _IsWindowCollapsed, bool, (), AquaEditor)
+{ return ImGui::IsWindowCollapsed(); }
+
 // STYLE //
 ADD_MANAGED_METHOD(ImGUI, _PushStyleVar, void, (int flag, float value), AquaEditor)
 { ImGui::PushStyleVar(flag, value); }

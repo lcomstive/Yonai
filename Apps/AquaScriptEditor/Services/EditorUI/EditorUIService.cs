@@ -20,21 +20,24 @@ namespace AquaEditor
 
 		protected override void Enabled()
 		{
-			CompileMenuItems();
-			InspectorView.GetCustomInspectors();
+			try
+			{
+				CompileMenuItems();
+				InspectorView.GetCustomInspectors();
 
-			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+				m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
-			World.Get(0).GetEntity(0).AddComponent<NameComponent>().Name = "Main Camera";
+				// Demo //
+				GenerateConsoleLines();
+				CreateTestScene();
 
-			// Demo //
-			GenerateConsoleLines();
-			CreateTestScene();
+				Open<SceneView>();
+				Open<HierarchyView>();
+				Open<InspectorView>();
 
-			Open<HierarchyView>();
-			Open<InspectorView>();
-
-			InspectorView.Target = World.Get(0).GetEntity(0);
+				InspectorView.Target = World.Get(0).GetEntity(0);
+			}
+			catch (Exception e) { Log.Exception(e); }
 		}
 
 		protected override void Disabled()
@@ -75,7 +78,8 @@ namespace AquaEditor
 			if (!m_ActiveViews.ContainsKey(type))
 			{
 				T instance = new T();
-				instance._Open(); // Inform of opening
+				try { instance._Open(); } // Inform of opening
+				catch(Exception e) { Log.Exception(e); }
 				m_ActiveViews.Add(type, instance);
 			}
 		}
@@ -181,7 +185,7 @@ namespace AquaEditor
 
 		private void CreateTestScene()
 		{
-			m_TestWorld = World.Get(0);
+			m_TestWorld = World.Create("Test World");
 
 			for(int i = 0; i < 15; i++)
 			{
