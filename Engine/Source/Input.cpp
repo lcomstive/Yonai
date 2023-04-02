@@ -96,7 +96,7 @@ float Input::GetScrollDelta() { return s_Enabled ? s_ScrollDelta : 0; }
 
 void Input::SetMouseState(MouseState state)
 {
-	if (!s_Enabled)
+	if (!s_Enabled || !Window::GetNativeHandle())
 		return;
 
 #if defined(AQUA_PLATFORM_DESKTOP)
