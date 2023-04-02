@@ -20,30 +20,29 @@ namespace AquaEditor
 
 		protected override void Enabled()
 		{
-			try
-			{
-				CompileMenuItems();
-				InspectorView.GetCustomInspectors();
+			SceneManager.WorldChanged += (world, added) =>
+				Log.Info($"World '{world.Name}' [{world.ID}] has been " + (added ? "added" : "removed"));
 
-				m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+			CompileMenuItems();
+			InspectorView.GetCustomInspectors();
 
-				// Demo //
-				GenerateConsoleLines();
-				CreateTestScene();
+			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
-				Open<SceneView>();
-				Open<HierarchyView>();
-				Open<InspectorView>();
+			// Demo //
+			GenerateConsoleLines();
+			CreateTestScene();
 
-				InspectorView.Target = World.Get(0).GetEntity(0);
-			}
-			catch (Exception e) { Log.Exception(e); }
+			Open<SceneView>();
+			Open<HierarchyView>();
+			Open<InspectorView>();
+
+			InspectorView.Target = World.Get(0).GetEntity(0);
 		}
 
 		protected override void Disabled()
 		{
 			m_TestWorld?.Destroy();
-			foreach(var view in m_ActiveViews.Values)
+			foreach (var view in m_ActiveViews.Values)
 				view._Close();
 		}
 
@@ -79,7 +78,7 @@ namespace AquaEditor
 			{
 				T instance = new T();
 				try { instance._Open(); } // Inform of opening
-				catch(Exception e) { Log.Exception(e); }
+				catch (Exception e) { Log.Exception(e); }
 				m_ActiveViews.Add(type, instance);
 			}
 		}
@@ -142,7 +141,7 @@ namespace AquaEditor
 			m_RootMenuItem.AddDirectory("Window");
 
 			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-			
+
 			// Get all methods with the MenuItem attribute, in all assemblies
 			var menuItems =
 				from assembly in AppDomain.CurrentDomain.GetAssemblies()
@@ -157,8 +156,8 @@ namespace AquaEditor
 				};
 
 
-			foreach(var menuItem in menuItems)
-				m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);					
+			foreach (var menuItem in menuItems)
+				m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);
 		}
 
 		#region Demo
@@ -187,7 +186,7 @@ namespace AquaEditor
 		{
 			m_TestWorld = World.Create("Test World");
 
-			for(int i = 0; i < 15; i++)
+			for (int i = 0; i < 15; i++)
 			{
 				Entity e = m_TestWorld.CreateEntity();
 				e.AddComponent<NameComponent>().Name = "Entity";
@@ -196,7 +195,7 @@ namespace AquaEditor
 				renderer.Sprite = Resource.Load<Texture>("Textures/Texture/Test_Texture09", "assets://Textures/texture_09.png");
 				renderer.Shader = Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderStages()
 				{
-					VertexPath	 = "assets://Shaders/Sprite.vert",
+					VertexPath = "assets://Shaders/Sprite.vert",
 					FragmentPath = "assets://Shaders/NewSprite.frag"
 				});
 
@@ -271,7 +270,7 @@ namespace AquaEditor
 			ImGUI.PlotLines("FPS", m_FPSValues, $"FPS: {Time.FPS}");
 
 			ImGUI.BeginChild("Console", new Vector2(0, 150), true);
-			if(m_ConsoleLines != null)
+			if (m_ConsoleLines != null)
 				foreach ((string msg, Colour colour) in m_ConsoleLines)
 					ImGUI.Text(msg, colour);
 			ImGUI.EndChild();

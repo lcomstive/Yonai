@@ -18,8 +18,3 @@ extern EmptyMethodFn SystemMethodUpdate;
 extern EmptyMethodFn SystemMethodDestroyed;
 extern SystemMethodEnabledFn SystemMethodEnabled;
 extern SystemMethodInitialiseFn SystemMethodInitialise;
-
-ADD_MANAGED_METHOD(System, Exists, bool, (unsigned int worldID, MonoReflectionType* componentType))
-{
-	return false;
-}

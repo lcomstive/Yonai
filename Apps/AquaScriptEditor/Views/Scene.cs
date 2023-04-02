@@ -1,5 +1,4 @@
 using AquaEngine;
-using System.Collections.Generic;
 
 namespace AquaEditor.Views
 {
@@ -23,10 +22,13 @@ namespace AquaEditor.Views
 
 			m_Transform.Position = new Vector3(0, 10, -10);
 			m_Transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
+
+			SceneManager.Load(m_World, SceneAddType.Additive);
 		}
 
 		protected override void Closed()
 		{
+			SceneManager.Unload(m_World);
 			m_World.Destroy();
 
 			m_World = null;

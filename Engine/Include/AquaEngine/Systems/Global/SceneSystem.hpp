@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <mono/jit/jit.h>
 #include <AquaEngine/Systems/System.hpp>
 
 namespace AquaEngine::Systems
@@ -12,14 +13,21 @@ namespace AquaEngine::Systems
 		/// <summary>
 		/// All currently loaded scenes
 		/// </summary>
-		static std::vector<World*> m_ActiveScenes;
+		static std::vector<World*> s_ActiveScenes;
 
 		/// <summary>
 		/// Callback listeners for when scenes are added & removed
 		/// </summary>
-		static std::vector<SceneCallback> m_SceneCallbacks;
+		static std::vector<SceneCallback> s_SceneCallbacks;
 
 		static SceneSystem* s_Instance;
+
+		static MonoMethod* s_SceneChangeManagedMethod;
+
+		static void OnScriptEngineReloaded();
+
+		// Scene change callback, used to call a function in C#
+		static void ManagedSceneCallback(World* world, bool added);
 
 	public:
 		AquaAPI void Init() override;
@@ -51,12 +59,6 @@ namespace AquaEngine::Systems
 		/// Unloads all scenes from being active
 		/// </summary>
 		AquaAPI static void UnloadAllScenes();
-
-		/// <summary>
-		/// Resets all active scenes by unloading and reloading them,
-		/// in order they were added
-		/// </summary>
-		AquaAPI static void ReloadActiveScenes();
 		
 		/// <summary>
 		/// Gets all actively loaded scenes
