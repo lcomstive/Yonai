@@ -7,6 +7,7 @@ namespace AquaEditor
 	{
 		public float Speed = 1.0f;
 		public float SprintMultiplier = 2.5f;
+		public Vector2 MouseSensitivity = new Vector2(1, 1);
 
 		private Transform m_Transform;
 
@@ -57,12 +58,14 @@ namespace AquaEditor
 		private float xRot = 0, yRot = 0;
 		private Quaternion GetRotation()
 		{
+			Vector3 euler = m_Transform.Rotation.Euler;
+
 			Input.MouseState = Input.IsMouseDown(MouseButton.Right) ? MouseState.Disabled : MouseState.Normal;
 			if(Input.IsMouseDown(MouseButton.Right))
 			{
-				Vector2 mouseDelta = Input.MouseDelta * Time.DeltaTime;
-				xRot += mouseDelta.y;
-				yRot += mouseDelta.x;
+				Vector2 mouseDelta = Input.MouseDelta / 1000.0f;
+				xRot += mouseDelta.y * MouseSensitivity.x;
+				yRot += mouseDelta.x * MouseSensitivity.y;
 			}
 
 			Quaternion pitch = Quaternion.AngleAxis(xRot, Vector3.Right);

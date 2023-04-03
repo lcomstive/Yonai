@@ -18,6 +18,9 @@ namespace AquaEngine
 
 		public static float Rad2Deg(float rads) => rads * (180.0f / Pi);
 		public static float Deg2Rad(float deg) => deg * (Pi / 180.0f);
+
+		public static Vector3 Rad2Deg(Vector3 rad) => rad * (180.0f / Pi);
+		public static Vector3 Deg2Rad(Vector3 deg) => deg * (Pi / 180.0f);
 	}
 	
 	public static class Random
