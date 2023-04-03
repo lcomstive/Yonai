@@ -14,8 +14,6 @@ namespace AquaEditor.Views
 
 		protected override void Opened()
 		{
-			Log.Debug("Scene view opened");
-
 			m_World = World.Create("Scene View");
 
 			m_Target = new RenderTexture(new IVector2(1920, 1080));
@@ -30,7 +28,7 @@ namespace AquaEditor.Views
 
 			// Transform
 			Transform transform = entity.AddComponent<Transform>();
-			transform.Position = new Vector3(0, 10, -10);
+			transform.Position = new Vector3(0, 2, -15);
 			transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
 
 			SceneManager.Load(m_World, SceneAddType.Additive);
@@ -40,8 +38,6 @@ namespace AquaEditor.Views
 
 		protected override void Closed()
 		{
-			Log.Debug("Scene view closed");
-
 			SceneManager.Unload(m_World);
 			m_World.Destroy();
 

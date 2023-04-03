@@ -74,7 +74,7 @@ void SceneSystem::OnScriptEngineReloaded()
 void SceneSystem::ManagedSceneCallback(World* world, bool added)
 {
 	if (!SceneChangedMethod)
-		OnScriptEngineReloaded();
+		return;
 
 	MonoException* exception = nullptr;
 
