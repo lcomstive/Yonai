@@ -75,10 +75,14 @@
     <Compile Include="Core\World.cs" />
 
     <!-- Graphics -->
-    <Compile Include="Graphics\GraphicsCore.cs" />
+    <Compile Include="Graphics\Pipelines\NativeRenderPipeline.cs" />
+    <Compile Include="Graphics\Framebuffer.cs" />
+    <Compile Include="Graphics\IRenderPipeline.cs" />
     <Compile Include="Graphics\Material.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\Model.cs" />
+    <Compile Include="Graphics\Renderer.cs" />
+    <Compile Include="Graphics\RenderTexture.cs" />
     <Compile Include="Graphics\Screen.cs" />
     <Compile Include="Graphics\Shader.cs" />
     <Compile Include="Graphics\Texture.cs" />
