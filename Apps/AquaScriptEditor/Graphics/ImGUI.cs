@@ -13,7 +13,7 @@ namespace AquaEditor
 			public Vector2 Position, Size, WorkPosition, WorkSize;
 		}
 
-		[System.Flags]
+		[Flags]
 		public enum TextFlags : int
 		{
 			None = 0,
@@ -94,7 +94,7 @@ namespace AquaEditor
 			EscapeClearsAll = 1 << 20,
 		}
 
-		[System.Flags]
+		[Flags]
 		public enum WindowFlags
 		{
 			None = 0,
@@ -344,13 +344,72 @@ namespace AquaEditor
 			/// <summary>
 			/// Vector2
 			/// </summary>
-			SeparatorTextAlign,  
+			SeparatorTextAlign,
 
 			/// <summary>
 			/// Vector2
 			/// </summary>
 			SeparatorTextPadding,
 		};
+
+		public enum StyleColour : int
+		{
+			Text,
+			TextDisabled,
+			WindowBg,              // Background of normal windows
+			ChildBg,               // Background of child windows
+			PopupBg,               // Background of popups, menus, tooltips windows
+			Border,
+			BorderShadow,
+			FrameBg,               // Background of checkbox, radio button, plot, slider, text input
+			FrameBgHovered,
+			FrameBgActive,
+			TitleBg,
+			TitleBgActive,
+			TitleBgCollapsed,
+			MenuBarBg,
+			ScrollbarBg,
+			ScrollbarGrab,
+			ScrollbarGrabHovered,
+			ScrollbarGrabActive,
+			CheckMark,
+			SliderGrab,
+			SliderGrabActive,
+			Button,
+			ButtonHovered,
+			ButtonActive,
+			Header,                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
+			HeaderHovered,
+			HeaderActive,
+			Separator,
+			SeparatorHovered,
+			SeparatorActive,
+			ResizeGrip,            // Resize grip in lower-right and lower-left corners of windows.
+			ResizeGripHovered,
+			ResizeGripActive,
+			Tab,                   // TabItem in a TabBar
+			TabHovered,
+			TabActive,
+			TabUnfocused,
+			TabUnfocusedActive,
+			DockingPreview,        // Preview overlay color when about to docking something
+			DockingEmptyBg,        // Background color for empty node (e.g. CentralNode with no window docked into it)
+			PlotLines,
+			PlotLinesHovered,
+			PlotHistogram,
+			PlotHistogramHovered,
+			TableHeaderBg,         // Table header background
+			TableBorderStrong,     // Table outer and header borders (prefer using Alpha=1.0 here)
+			TableBorderLight,      // Table inner borders (prefer using Alpha=1.0 here)
+			TableRowBg,            // Table row background (even rows)
+			TableRowBgAlt,         // Table row background (odd rows)
+			TextSelectedBg,
+			DragDropTarget,        // Rectangle highlighting a drop target
+			NavHighlight,          // Gamepad/keyboard: current highlighted item
+			NavWindowingHighlight, // Highlight window when using CTRL+TAB
+			NavWindowingDimBg,     // Darken/colorize entire screen behind the CTRL+TAB window list, when active
+			ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
+		}
 
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
@@ -569,7 +628,7 @@ namespace AquaEditor
 
 		public static bool Drag(string label, ref Vector4 value, float speed = 1.0f, float min = 0.0f, float max = 0.0f, string format = "%.3f")
 			=> _DragFloat4(label, ref value, speed, min, max, format);
-		
+
 		public static bool Drag(string label, ref int value, float speed = 1, int min = 0, int max = 0, string format = "%i")
 			=> _DragInt(label, ref value, speed, min, max, format);
 
@@ -586,7 +645,7 @@ namespace AquaEditor
 		public static bool Drag(string label, ref Quaternion value, float speed = 1, int min = 0, int max = 0)
 		{
 			Vector3 euler = value.Euler;
-			if(_DragFloat3(label, ref euler, speed, min, max, "%.2f"))
+			if (_DragFloat3(label, ref euler, speed, min, max, "%.2f"))
 			{
 				value.Euler = euler;
 				return true;
@@ -623,7 +682,7 @@ namespace AquaEditor
 			float max,
 			string format
 		);
-		
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _DragFloat4(
 			string label,
@@ -837,6 +896,9 @@ namespace AquaEditor
 		public static void PushStyleVar(StyleVar style, Vector2 value)
 			=> _PushStyleVarV((int)style, ref value);
 
+		public static void PushStyleColour(StyleColour style, Colour value)
+			=> _PushStyleColour((int)style, ref value);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _PushStyleVar(int flag, float value);
 
@@ -844,7 +906,13 @@ namespace AquaEditor
 		private static extern void _PushStyleVarV(int flag, ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PushStyleColour(int flag, ref Colour value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void PopStyleVar(int amount = 1);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void PopStyleColour(int amount = 1);
 
 		/// <summary>
 		/// Height of a line of text, in pixels

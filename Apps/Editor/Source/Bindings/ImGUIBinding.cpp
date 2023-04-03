@@ -614,6 +614,15 @@ ADD_MANAGED_METHOD(ImGUI, _PushStyleVarV, void, (int flag, glm::vec2* value), Aq
 ADD_MANAGED_METHOD(ImGUI, PopStyleVar, void, (int amount), AquaEditor)
 { ImGui::PopStyleVar(amount); }
 
+ADD_MANAGED_METHOD(ImGUI, _PushStyleColour, void, (int var, glm::vec4* value), AquaEditor)
+{
+	const ImVec4 color(value->x, value->y, value->z, value->w);
+	ImGui::PushStyleColor(var, color);
+}
+
+ADD_MANAGED_METHOD(ImGUI, PopStyleColour, void, (int amount), AquaEditor)
+{ ImGui::PopStyleColor(amount); }
+
 // MENU //
 ADD_MANAGED_METHOD(ImGUI, BeginMenuBar, bool, (), AquaEditor)
 { return ImGui::BeginMenuBar(); }

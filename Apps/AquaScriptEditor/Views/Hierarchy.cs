@@ -6,6 +6,7 @@ namespace AquaEditor.Views
 	public class HierarchyView : View
 	{
 		private World[] m_Worlds = null;
+		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.125f);
 
 		[MenuItem("Window/Hierarchy")]
 		private static void MenuCallback() => EditorUIService.Open<HierarchyView>();
@@ -36,18 +37,31 @@ namespace AquaEditor.Views
 					Entity[] entities = world.GetEntities();
 
 					ImGUI.BeginChild($"{world.Name} [{world.ID}]",
-						new Vector2(0, entities.Length * (ImGUI.TextLineHeight + 7.5f)));
+						new Vector2(0, entities.Length * 24f));
 
 					foreach (Entity entity in entities)
 					{
-						ImGUI.Text($"[{entity.ID}]", Colour.Grey);
+						bool isSelected = InspectorView.Target == entity;
+
+						if (isSelected)
+							ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
+
+						ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 20));
+						ImGUI.Text(string.Format("[{0:00}]", entity.ID), Colour.Grey);
 
 						if (!entity.TryGetComponent(out NameComponent nameComponent) ||
 							string.IsNullOrEmpty(nameComponent.Name))
 							continue;
 
 						ImGUI.SameLine();
-						if (ImGUI.Button(nameComponent.Name))
+						ImGUI.Text(nameComponent.Name);
+
+						if(isSelected)
+							ImGUI.PopStyleColour();
+
+						ImGUI.EndChild();
+
+						if(ImGUI.IsItemClicked())
 						{
 							try { InspectorView.Target = entity; }
 							catch(System.Exception e) { Log.Exception(e); }
