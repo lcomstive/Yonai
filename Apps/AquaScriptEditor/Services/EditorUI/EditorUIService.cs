@@ -52,10 +52,41 @@ namespace AquaEditor
 				pair.Value._Update();
 		}
 
+		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
+		{
+			{ ImGUI.StyleVar.FrameRounding, 2 },
+			{ ImGUI.StyleVar.ChildRounding, 2 },
+			{ ImGUI.StyleVar.ScrollbarRounding, 2 },
+			{ ImGUI.StyleVar.ScrollbarSize, 15 },
+		};
+
+		private static readonly Dictionary<ImGUI.StyleVar, Vector2> StyleVarVectors = new Dictionary<ImGUI.StyleVar, Vector2>()
+		{
+
+		};
+
+		private static readonly Dictionary<ImGUI.StyleColour, Colour> StyleColours = new Dictionary<ImGUI.StyleColour, Colour>()
+		{
+			{ ImGUI.StyleColour.FrameBg, new Colour(1, 1, 1, 0.1f) },
+			{ ImGUI.StyleColour.FrameBgHovered, new Colour(1, 1, 1, 0.2f) },
+			{ ImGUI.StyleColour.FrameBgActive, new Colour(1, 1, 1, 0.3f) },
+
+			{ ImGUI.StyleColour.DockingEmptyBg, new Colour(0, 0, 0) },
+			{ ImGUI.StyleColour.Border, new Colour(.6f, .6f, 1.0f) },
+			{ ImGUI.StyleColour.Header, new Colour(0, 0, 0, 0.0f) },
+			{ ImGUI.StyleColour.HeaderHovered, new Colour(1, 1, 1, 0.1f) },
+			{ ImGUI.StyleColour.HeaderActive, new Colour(1, 1, 1, 0.15f) },
+			{ ImGUI.StyleColour.TextSelectedBg, new Colour(1, 1, 1, 0.2f) },
+		};
+
 		protected override void Draw()
 		{
 			BeginDockspace();
 			DrawMenuBar();
+
+			foreach (var pair in StyleVarFloats) ImGUI.PushStyleVar(pair.Key, pair.Value);
+			foreach (var pair in StyleVarVectors) ImGUI.PushStyleVar(pair.Key, pair.Value);
+			foreach(var style in StyleColours) ImGUI.PushStyleColour(style.Key, style.Value);
 
 			ImGUI.Begin("Demo");
 			DrawDemoContents();
@@ -64,6 +95,9 @@ namespace AquaEditor
 			View[] views = m_ActiveViews.Values.ToArray();
 			foreach (View view in views)
 				view._Draw();
+
+			ImGUI.PopStyleColour(StyleColours.Count);
+			ImGUI.PopStyleVar(StyleVarFloats.Count + StyleVarVectors.Count);
 
 			EndDockspace();
 		}

@@ -37,7 +37,7 @@ namespace AquaEditor.Views
 					Entity[] entities = world.GetEntities();
 
 					ImGUI.BeginChild($"{world.Name} [{world.ID}]",
-						new Vector2(0, entities.Length * 24f));
+						new Vector2(0, entities.Length * 21));
 
 					foreach (Entity entity in entities)
 					{
@@ -46,7 +46,7 @@ namespace AquaEditor.Views
 						if (isSelected)
 							ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
 
-						ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 20));
+						ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 17.5f));
 						ImGUI.Text(string.Format("[{0:00}]", entity.ID), Colour.Grey);
 
 						if (!entity.TryGetComponent(out NameComponent nameComponent) ||
