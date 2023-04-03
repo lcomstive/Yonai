@@ -5,7 +5,7 @@ namespace AquaEditor.Views
 {
 	public class HierarchyView : View
 	{
-		private List<World> m_Worlds = new List<World>();
+		private World[] m_Worlds = null;
 
 		[MenuItem("Window/Hierarchy")]
 		private static void MenuCallback() => EditorUIService.Open<HierarchyView>();
@@ -13,11 +13,7 @@ namespace AquaEditor.Views
 		protected override void Opened()
 		{
 			// Get all current worlds
-			World[] worlds = World.GetAll();
-
-			m_Worlds.Clear();
-			foreach (World world in worlds)
-				m_Worlds.Add(world);
+			m_Worlds = SceneManager.GetActiveScenes();
 
 			// Listen to scene add and remove event
 			SceneManager.WorldChanged += OnWorldChanged;
@@ -25,13 +21,8 @@ namespace AquaEditor.Views
 
 		protected override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
 
-		private void OnWorldChanged(World world, bool added)
-		{
-			if (added)
-				m_Worlds.Add(world);
-			else
-				m_Worlds.Remove(world);
-		}
+		private void OnWorldChanged(World world, bool added) =>
+			m_Worlds = SceneManager.GetActiveScenes();
 
 		protected override void Draw()
 		{
@@ -56,9 +47,10 @@ namespace AquaEditor.Views
 							continue;
 
 						ImGUI.SameLine();
-						if(ImGUI.Button(nameComponent.Name))
+						if (ImGUI.Button(nameComponent.Name))
 						{
-							Log.Debug($"Selected {nameComponent.Name}");
+							try { InspectorView.Target = entity; }
+							catch(System.Exception e) { Log.Exception(e); }
 						}
 					}
 

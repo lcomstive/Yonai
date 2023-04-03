@@ -268,3 +268,41 @@ void RenderTexture::CopyTo(RenderTexture* destination)
 		1 // Source Depth
 	);
 }
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(RenderTexture, Load, void*, (glm::ivec2* resolution, unsigned char textureFormat, unsigned int samples), AquaEngine.Graphics)
+{ return new RenderTexture(*resolution, (TextureFormat)textureFormat, samples); }
+
+ADD_MANAGED_METHOD(RenderTexture, Destroy, void, (void* handle), AquaEngine.Graphics)
+{ if(handle) delete handle; }
+
+ADD_MANAGED_METHOD(RenderTexture, Bind, void, (void* handle, unsigned int index), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->Bind(index); }
+
+ADD_MANAGED_METHOD(RenderTexture, Unbind, void, (void* handle), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->Unbind(); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetFormat, void, (void* handle, unsigned char format), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->SetFormat((TextureFormat)format); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetSamples, void, (void* handle, unsigned int samples), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->SetSamples(samples); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->SetResolution(*resolution); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetFormat, unsigned char, (void* handle), AquaEngine.Graphics)
+{ return (unsigned char)((RenderTexture*)handle)->GetFormat(); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetSamples, unsigned int, (void* handle), AquaEngine.Graphics)
+{ return ((RenderTexture*)handle)->GetSamples(); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics)
+{ *resolution = ((RenderTexture*)handle)->GetResolution(); }
+
+ADD_MANAGED_METHOD(RenderTexture, CopyTo, void, (void* handle, void* destination), AquaEngine.Graphics)
+{ ((RenderTexture*)handle)->CopyTo((RenderTexture*)destination); }
+
+#pragma endregion

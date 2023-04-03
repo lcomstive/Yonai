@@ -55,3 +55,24 @@ void RenderSystem::Draw(Camera* camera)
 {
 	GetPipeline()->Draw(camera);
 }
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(Renderer, GetPipeline, void*, (), AquaEngine.Graphics)
+{
+	RenderSystem* renderSystem = SystemManager::Global()->Get<RenderSystem>();
+	RenderPipeline* pipeline = renderSystem->GetPipeline();
+	return pipeline;
+}
+
+ADD_MANAGED_METHOD(Renderer, Draw, void, (), AquaEngine.Graphics)
+{ SystemManager::Global()->Get<RenderSystem>()->Draw(); }
+
+ADD_MANAGED_METHOD(Renderer, DrawFromCamera, void, (unsigned int worldID, unsigned int entityID), AquaEngine.Graphics)
+{
+	Camera* camera = World::GetWorld(worldID)->GetEntity(entityID).GetComponent<Camera>();
+	SystemManager::Global()->Get<RenderSystem>()->Draw(camera);
+}
+
+#pragma endregion

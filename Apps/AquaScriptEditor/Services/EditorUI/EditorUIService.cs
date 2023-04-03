@@ -36,7 +36,7 @@ namespace AquaEditor
 			Open<HierarchyView>();
 			Open<InspectorView>();
 
-			InspectorView.Target = World.Get(0).GetEntity(0);
+			// InspectorView.Target = World.Get(0).GetEntity(0);
 		}
 
 		protected override void Disabled()
@@ -185,6 +185,7 @@ namespace AquaEditor
 		private void CreateTestScene()
 		{
 			m_TestWorld = World.Create("Test World");
+			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
 
 			for (int i = 0; i < 15; i++)
 			{

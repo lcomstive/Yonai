@@ -1,4 +1,5 @@
 using AquaEngine;
+using AquaEngine.Graphics;
 
 namespace AquaEditor.Views
 {
@@ -6,7 +7,6 @@ namespace AquaEditor.Views
 	{
 		private World m_World = null;
 		private Camera m_Camera = null;
-		private Transform m_Transform = null;
 
 		[MenuItem("Window/Scene")]
 		private static void MenuCallback() => EditorUIService.Open<SceneView>();
@@ -16,14 +16,20 @@ namespace AquaEditor.Views
 			m_World = World.Create("Scene View");
 
 			Entity entity = m_World.CreateEntity();
+			entity.AddComponent<NameComponent>().Name = "Scene Camera";
 			m_Camera = entity.AddComponent<Camera>();
-			m_Transform = entity.AddComponent<Transform>();
+
+			// Camera controller
 			entity.AddComponent<SceneViewCameraController>();
 
-			m_Transform.Position = new Vector3(0, 10, -10);
-			m_Transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
+			// Transform
+			Transform transform = entity.AddComponent<Transform>();
+			transform.Position = new Vector3(0, 10, -10);
+			transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
 
 			SceneManager.Load(m_World, SceneAddType.Additive);
+
+			InspectorView.Target = entity;
 		}
 
 		protected override void Closed()
@@ -33,7 +39,6 @@ namespace AquaEditor.Views
 
 			m_World = null;
 			m_Camera = null;
-			m_Transform = null;
 		}
 
 		protected override void Draw()
@@ -53,7 +58,14 @@ namespace AquaEditor.Views
 				// Disable input system to game content unless this view is focused
 				Input.Enabled = ImGUI.IsWindowFocused;
 
-				
+				IVector2 viewportSize = ImGUI.ContentRegionAvailable;
+
+				// Draw to camera render target
+				IRenderPipeline pipeline = Renderer.Pipeline;
+				pipeline.Resolution = viewportSize;
+				pipeline.Draw(m_Camera);
+
+				ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
 			}
 			ImGUI.End();
 			ImGUI.PopStyleVar();

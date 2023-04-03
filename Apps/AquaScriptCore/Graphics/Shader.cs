@@ -46,6 +46,9 @@ namespace AquaEngine.Graphics
 		public void Set(int location, Vector2 value) => _Set_vec2(Handle, location, value);
 		public void Set(int location, Vector3 value) => _Set_vec3(Handle, location, value);
 		public void Set(int location, Vector4 value) => _Set_vec4(Handle, location, value);
+		public void Set(int location, IVector2 value) => _Set_vec2(Handle, location, (Vector2)value);
+		public void Set(int location, IVector3 value) => _Set_vec3(Handle, location, (Vector3)value);
+		public void Set(int location, IVector4 value) => _Set_vec4(Handle, location, (Vector4)value);
 	
 		public void Set(string location, int value) => _SetStr_int(Handle, location, value);
 		public void Set(string location, bool value) => _SetStr_bool(Handle, location, value);

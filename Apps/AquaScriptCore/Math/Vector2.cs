@@ -29,6 +29,7 @@ namespace AquaEngine
 		public override string ToString() => "(" + x + ", " + y + ")";
 
 		public static implicit operator string(Vector2 v) => v.ToString();
+		public static implicit operator Vector2(IVector2 v) => new Vector2(v.x, v.y);
 
 		public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.x + b.x, a.y + b.y);
 		public static Vector2 operator -(Vector2 a, Vector2 b) => new Vector2(a.x - b.x, a.y - b.y);

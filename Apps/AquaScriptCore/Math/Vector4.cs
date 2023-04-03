@@ -33,6 +33,7 @@ namespace AquaEngine
 		public override string ToString() => $"({x}, {y}, {z}, {w})";
 
 		public static implicit operator string(Vector4 v) => v.ToString();
+		public static implicit operator Vector4(IVector4 v) => new Vector4(v.x, v.y, v.z, v.w);
 
 		public static Vector4 operator +(Vector4 a, Vector4 b) => new Vector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 		public static Vector4 operator -(Vector4 a, Vector4 b) => new Vector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);

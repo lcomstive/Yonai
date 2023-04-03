@@ -3,6 +3,7 @@
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Mesh.hpp>
 #include <AquaEngine/Graphics/Framebuffer.hpp>
+#include <AquaEngine/Scripting/InternalCalls.hpp>
 
 using namespace glm;
 using namespace std;
@@ -216,3 +217,71 @@ unsigned int Framebuffer::ColourAttachmentCount() { return (unsigned int)m_Colou
 
 bool Framebuffer::HasDepthAttachment() { return m_DepthAttachment != nullptr; }
 FramebufferSpec& Framebuffer::GetSpecs() { return m_Specs; }
+
+#pragma region Internal Calls
+ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapchainTarget, unsigned int samples, MonoArray* attachments), AquaEngine.Grapghics)
+{
+	FramebufferSpec spec =
+	{
+		*resolution,
+		swapchainTarget,
+		samples
+	};
+
+	uintptr_t attachmentCount = mono_array_length(attachments);
+	for (uintptr_t i = 0; i < attachmentCount; i++)
+		spec.Attachments.push_back((TextureFormat)mono_array_get(attachments, unsigned char, i));
+
+	return new Framebuffer(spec);
+}
+
+ADD_MANAGED_METHOD(Framebuffer, Destroy, void, (void* handle), AquaEngine.Graphics)
+{ if (handle) delete handle; }
+
+ADD_MANAGED_METHOD(Framebuffer, Bind, void, (void* handle), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->Bind(); }
+
+ADD_MANAGED_METHOD(Framebuffer, Unind, void, (void* handle), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->Unbind(); }
+
+ADD_MANAGED_METHOD(Framebuffer, SetSamples, void, (void* handle, unsigned int samples), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->SetSamples(samples); }
+
+ADD_MANAGED_METHOD(Framebuffer, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->SetResolution(*resolution); }
+
+ADD_MANAGED_METHOD(Framebuffer, GetAttachmentCount, unsigned int, (void* handle), AquaEngine.Graphics)
+{ return ((Framebuffer*)handle)->AttachmentCount(); }
+
+ADD_MANAGED_METHOD(Framebuffer, GetColourAttachmentCount, unsigned int, (void* handle), AquaEngine.Graphics)
+{ return ((Framebuffer*)handle)->ColourAttachmentCount(); }
+
+ADD_MANAGED_METHOD(Framebuffer, CopyAttachmentTo, void, (void* handle, void* destination, unsigned int attachmentIndex), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->CopyAttachmentTo((RenderTexture*)destination, attachmentIndex); }
+
+ADD_MANAGED_METHOD(Framebuffer, BlitTo, void, (void* handle, void* destination, unsigned int flags), AquaEngine.Graphics)
+{ ((Framebuffer*)handle)->BlitTo((Framebuffer*)destination, flags); }
+
+ADD_MANAGED_METHOD(Framebuffer, GetAttachments, MonoArray*, (void* handle, int* outDepthAttachmentIndex), AquaEngine.Graphics)
+{
+	Framebuffer* fb = (Framebuffer*)handle;
+	vector<RenderTexture*> attachments = fb->GetAttachments();
+	RenderTexture* depthAttachment = fb->GetDepthAttachment();
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_intptr_class(), attachments.size());
+	
+	// Set default value, an invalid index
+	*outDepthAttachmentIndex = -1;
+
+	// Assign handles to array
+	for (size_t i = 0; i < attachments.size(); i++)
+	{
+		mono_array_set(output, void*, i, attachments[i]);
+
+		// Check if this attachment is the depth attachment
+		if (depthAttachment && attachments[i] == depthAttachment)
+			*outDepthAttachmentIndex = (int)i;
+	}
+
+	return output;
+}
+#pragma endregion

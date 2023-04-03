@@ -1,3 +1,4 @@
+using System;
 using AquaEngine;
 
 namespace AquaEditor.Views
@@ -24,9 +25,9 @@ namespace AquaEditor.Views
 		/// </summary>
 		protected virtual void Draw() { }
 
-		internal void _Open() => Opened();
-		internal void _Close() => Closed();
-		internal void _Draw() => Draw();
-		internal void _Update() => Update();
+		internal void _Open() { try { Opened(); } catch (Exception e) { Log.Exception(e); } }
+		internal void _Close() { try { Closed(); } catch (Exception e) { Log.Exception(e); } }
+		internal void _Draw() { try { Draw(); } catch (Exception e) { Log.Exception(e); } }
+		internal void _Update() { try { Update(); } catch (Exception e) { Log.Exception(e); } }
 	}
 }

@@ -125,6 +125,9 @@ namespace AquaEditor
 
 		private void DrawObject(string label, object value, object instance, Action<object, object> setValue)
 		{
+			if (value == null)
+				return;
+
 			Type t = value.GetType();
 
 			if (setValue == null) ImGUI.BeginDisabled();

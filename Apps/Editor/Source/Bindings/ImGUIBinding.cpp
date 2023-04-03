@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
+#include <AquaEngine/Graphics/RenderTexture.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
 using namespace AquaEngine;
@@ -98,6 +99,23 @@ ADD_MANAGED_METHOD(ImGUI, _Image, void, (unsigned int textureID, glm::vec2* size
 	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
 
 	Texture* texture = Resource::Get<Texture>(textureID);
+	ImGui::Image(
+		(ImTextureID)(texture ? texture->GetID() : 0),
+		imSize,
+		ImVec2(0, 1), // UV0
+		ImVec2(1, 0), // UV1
+		imTint,
+		imBorder
+	);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), AquaEditor)
+{
+	ImVec2 imSize(size->x, size->y);
+	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
+	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
+
+	RenderTexture* texture = (RenderTexture*)handle;
 	ImGui::Image(
 		(ImTextureID)(texture ? texture->GetID() : 0),
 		imSize,
@@ -553,28 +571,28 @@ ADD_MANAGED_METHOD(ImGUI, _SetNextWindowSize, void, (glm::vec2* position), AquaE
 ADD_MANAGED_METHOD(ImGUI, SetNextWindowViewport, void, (unsigned int viewportID), AquaEditor)
 { ImGui::SetNextWindowViewport(viewportID); }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::vec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::ivec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetWindowContentRegionMin();
-	*outRegion = glm::vec2(region.x, region.y);
+	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMax, void, (glm::vec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMax, void, (glm::ivec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetWindowContentRegionMax();
-	*outRegion = glm::vec2(region.x, region.y);
+	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetContentRegionAvail, void, (glm::vec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetContentRegionAvail, void, (glm::ivec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetContentRegionAvail();
-	*outRegion = glm::vec2(region.x, region.y);
+	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowPosition, void, (glm::vec2* outPos), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowPosition, void, (glm::ivec2* outPos), AquaEditor)
 {
 	ImVec2 pos = ImGui::GetWindowPos();
-	*outPos= glm::vec2(pos.x, pos.y);
+	*outPos= glm::ivec2(pos.x, pos.y);
 }
 
 ADD_MANAGED_METHOD(ImGUI, _IsWindowFocused, bool, (), AquaEditor)

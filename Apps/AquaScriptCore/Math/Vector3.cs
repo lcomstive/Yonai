@@ -88,6 +88,7 @@ namespace AquaEngine
 		public override string ToString() => $"({x}, {y}, {z})";
 
 		public static implicit operator string(Vector3 v) => v.ToString();
+		public static implicit operator Vector3(IVector3 v) => new Vector3(v.x, v.y, v.z);
 
 		public static Vector3 operator -(Vector3 a) => new Vector3(-a.x, -a.y, -a.z);
 

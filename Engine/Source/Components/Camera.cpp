@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace glm;
+using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
@@ -51,7 +52,23 @@ Camera* Camera::GetMainCamera() { return s_MainCamera; }
 
 ADD_MANAGED_GET_SET(Camera, Far, float)
 ADD_MANAGED_GET_SET(Camera, Near, float)
+ADD_MANAGED_GET(Camera, RenderTarget, void*)
 ADD_MANAGED_GET_SET(Camera, FieldOfView, float)
 ADD_MANAGED_GET_SET(Camera, Orthographic, bool)
 ADD_MANAGED_GET_SET(Camera, OrthographicSize, float)
+
+ADD_MANAGED_METHOD(Camera, SetMainCamera, void, (void* handle))
+{
+	((Camera*)handle)->SetMainCamera();
+}
+
+ADD_MANAGED_METHOD(Camera, GetMainCamera, void, (unsigned int* worldID, unsigned int* entityID))
+{
+	Camera* mainCamera = Camera::GetMainCamera();
+	*worldID = mainCamera ? mainCamera->Entity.GetWorld()->ID() : InvalidEntityID;
+	*entityID = mainCamera ? mainCamera->Entity.ID() : InvalidEntityID;
+}
+
+ADD_MANAGED_METHOD(Camera, SetRenderTarget, void, (void* handle, void* renderTarget))
+{ ((Camera*)handle)->RenderTarget = (RenderTexture*)renderTarget; }
 #pragma endregion

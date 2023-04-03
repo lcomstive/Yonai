@@ -12,6 +12,8 @@ namespace AquaEngine
 			return (1.0f - t) * a + t * b;
 		}
 
+		public static int Clamp(int a, int min, int max) => (a < min) ? min : ((a > max) ? max : a);
+		public static uint Clamp(uint a, uint min, uint max) => (a < min) ? min : ((a > max) ? max : a);
 		public static float Clamp(float a, float min, float max) => (a < min) ? min : ((a > max) ? max : a);
 
 		public static float Rad2Deg(float rads) => rads * (180.0f / Pi);

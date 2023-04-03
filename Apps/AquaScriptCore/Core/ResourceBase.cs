@@ -20,6 +20,7 @@ namespace AquaEngine
 			return clone;
 		}
 
+		public static implicit operator bool(ResourceBase resourceBase) => resourceBase != null;
 		public static implicit operator uint(ResourceBase resourceBase) => resourceBase.ResourceID;
 	}
 

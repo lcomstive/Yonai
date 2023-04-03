@@ -30,13 +30,13 @@ namespace AquaEngine
 		/// </summary>
 		public static void UnloadAll() => _UnloadAll();
 
-		public static List<World> GetActiveScenes()
+		public static World[] GetActiveScenes()
 		{
 			List<World> scenes = new List<World>();
 			uint[] worldIDs = _GetActiveScenes();
 			for(int i = 0; i < worldIDs.Length; i++)
 				scenes.Add(World.Get(worldIDs[i]));
-			return scenes;
+			return scenes.ToArray();
 		}
 
 		public delegate void OnWorldChanged(World world, bool added);

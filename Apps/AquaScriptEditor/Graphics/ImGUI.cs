@@ -1,5 +1,6 @@
 using AquaEngine;
 using AquaEngine.Graphics;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace AquaEditor
@@ -534,6 +535,10 @@ namespace AquaEditor
 		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref border);
 
+		public static void Image(RenderTexture texture, Vector2 size) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
+		public static void Image(RenderTexture texture, Vector2 size, Colour tint) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref s_ImageDefaultBorder);
+		public static void Image(RenderTexture texture, Vector2 size, Colour tint, Colour border) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref border);
+
 		public static bool ButtonImage(uint textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
@@ -544,6 +549,9 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Image(uint textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _ImageRenderTexture(IntPtr handle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _ImageButton(uint textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
@@ -750,17 +758,17 @@ namespace AquaEditor
 		public static bool IsWindowHovered => _IsWindowHovered();
 		public static bool IsWindowCollapsed => _IsWindowCollapsed();
 
-		public static Vector2 WindowContentRegionMin
-		{ get { _GetWindowContentRegionMin(out Vector2 output); return output; } }
+		public static IVector2 WindowContentRegionMin
+		{ get { _GetWindowContentRegionMin(out IVector2 output); return output; } }
 
-		public static Vector2 WindowContentRegionMax
-		{ get { _GetWindowContentRegionMax(out Vector2 output); return output; } }
+		public static IVector2 WindowContentRegionMax
+		{ get { _GetWindowContentRegionMax(out IVector2 output); return output; } }
 
-		public static Vector2 ContentRegionAvailable
-		{ get { _GetContentRegionAvail(out Vector2 output); return output; } }
+		public static IVector2 ContentRegionAvailable
+		{ get { _GetContentRegionAvail(out IVector2 output); return output; } }
 
-		public static Vector2 WindowPosition
-		{ get { _GetWindowPosition(out Vector2 output); return output; } }
+		public static IVector2 WindowPosition
+		{ get { _GetWindowPosition(out IVector2 output); return output; } }
 
 		public static Viewport GetViewport(uint ID)
 		{
@@ -799,16 +807,16 @@ namespace AquaEditor
 		public static extern uint GetWindowViewportID();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowContentRegionMin(out Vector2 output);
+		private static extern void _GetWindowContentRegionMin(out IVector2 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowContentRegionMax(out Vector2 output);
+		private static extern void _GetWindowContentRegionMax(out IVector2 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetContentRegionAvail(out Vector2 output);
+		private static extern void _GetContentRegionAvail(out IVector2 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowPosition(out Vector2 output);
+		private static extern void _GetWindowPosition(out IVector2 output);
 
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

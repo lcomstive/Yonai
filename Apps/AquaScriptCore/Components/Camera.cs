@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AquaEngine.Graphics;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
@@ -50,6 +51,29 @@ namespace AquaEngine
 			set => _SetOrthographicSize(Handle, value);
 		}
 
+		private RenderTexture m_RenderTarget = null;
+		public RenderTexture RenderTarget
+		{
+			get
+			{
+				IntPtr handle = _GetRenderTarget(Handle);
+
+				// Check for change in cached target
+				if (m_RenderTarget != null && m_RenderTarget.Handle != handle)
+				{
+					m_RenderTarget.Dispose();
+					m_RenderTarget = null;
+				}
+
+				// Cache render target
+				if(m_RenderTarget == null && handle != IntPtr.Zero)
+					m_RenderTarget = new RenderTexture(handle);
+
+				return m_RenderTarget;
+			}
+			set => _SetRenderTarget(Handle, (m_RenderTarget = value).Handle);
+		}
+
 		public static Camera Main
 		{
 			get
@@ -72,6 +96,9 @@ namespace AquaEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFar(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFar(IntPtr handle, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetRenderTarget(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRenderTarget(IntPtr handle, IntPtr renderTarget);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetOrthographic(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographic(IntPtr handle, bool value);

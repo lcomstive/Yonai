@@ -12,7 +12,6 @@ namespace AquaEngine::Graphics
 	protected:
 		void DrawSkybox(ResourceID skyboxTextureID);
 
-		glm::ivec2 GetResolution();
 		virtual void OnResized(glm::ivec2 resolution) {}
 
 	public:
@@ -28,6 +27,7 @@ namespace AquaEngine::Graphics
 		/// </summary>
 		AquaAPI virtual Framebuffer* GetOutput() = 0;
 
+		AquaAPI glm::ivec2 GetResolution();
 		AquaAPI void SetResolution(glm::ivec2 resolution);
 	};
 }

@@ -46,9 +46,31 @@ void RenderPipeline::SetResolution(ivec2 resolution)
 	if(m_Resolution == resolution)
 		return; // Same, ignore
 		
-	spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
+	// spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
 	m_Resolution = resolution;
 	OnResized(resolution);
 }
 
 ivec2 RenderPipeline::GetResolution() { return m_Resolution; }
+
+#pragma region Internal Calls
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, unsigned int cameraWorldID, unsigned int cameraEntityID), AquaEngine.Graphics.Pipelines)
+{
+	Camera* camera = World::GetWorld(cameraWorldID)->GetEntity(cameraEntityID).GetComponent<Camera>();
+	((RenderPipeline*)handle)->Draw(camera);
+}
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics.Pipelines)
+{ ((RenderPipeline*)handle)->SetResolution(*resolution); }
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, GetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics.Pipelines)
+{ *resolution = ((RenderPipeline*)handle)->GetResolution(); }
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, GetOutput, void*, (void* handle), AquaEngine.Graphics.Pipelines)
+{
+	Framebuffer* fb = ((RenderPipeline*)handle)->GetOutput();
+	return fb;
+}
+#pragma endregion
