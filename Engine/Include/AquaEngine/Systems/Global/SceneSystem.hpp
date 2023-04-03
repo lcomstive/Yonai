@@ -10,6 +10,8 @@ namespace AquaEngine::Systems
 
 	class SceneSystem : public System
 	{
+		static MonoMethod* SceneChangedMethod;
+		
 		/// <summary>
 		/// All currently loaded scenes
 		/// </summary>
@@ -22,8 +24,7 @@ namespace AquaEngine::Systems
 
 		static SceneSystem* s_Instance;
 
-		static MonoMethod* s_SceneChangeManagedMethod;
-
+		static void OnScriptEnginePreReloaded();
 		static void OnScriptEngineReloaded();
 
 		// Scene change callback, used to call a function in C#

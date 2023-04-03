@@ -60,6 +60,8 @@ void EditorApp::Setup()
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 	m_RenderSystem->Enable(false);
 
+	SystemManager::Global()->Add<SceneSystem>();
+
 	if(!HasArg(ProjectPathArg))
 	{
 		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
@@ -94,6 +96,7 @@ void EditorApp::Cleanup()
 {
 	Application::Cleanup();
 
+	SystemManager::Global()->Remove<SceneSystem>();
 	SystemManager::Global()->Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<AudioSystem>();
 	SystemManager::Global()->Remove<RenderSystem>();

@@ -5,19 +5,25 @@ namespace AquaEditor.Views
 {
 	public class SceneView : View
 	{
-		private World m_World = null;
-		private Camera m_Camera = null;
+		private static World m_World = null;
+		private static Camera m_Camera = null;
+		private static RenderTexture m_Target = null;
 
 		[MenuItem("Window/Scene")]
 		private static void MenuCallback() => EditorUIService.Open<SceneView>();
 
 		protected override void Opened()
 		{
+			Log.Debug("Scene view opened");
+
 			m_World = World.Create("Scene View");
+
+			m_Target = new RenderTexture(new IVector2(1920, 1080));
 
 			Entity entity = m_World.CreateEntity();
 			entity.AddComponent<NameComponent>().Name = "Scene Camera";
 			m_Camera = entity.AddComponent<Camera>();
+			m_Camera.RenderTarget = m_Target;
 
 			// Camera controller
 			entity.AddComponent<SceneViewCameraController>();
@@ -34,6 +40,8 @@ namespace AquaEditor.Views
 
 		protected override void Closed()
 		{
+			Log.Debug("Scene view closed");
+
 			SceneManager.Unload(m_World);
 			m_World.Destroy();
 
@@ -63,6 +71,8 @@ namespace AquaEditor.Views
 				// Draw to camera render target
 				IRenderPipeline pipeline = Renderer.Pipeline;
 				pipeline.Resolution = viewportSize;
+
+				m_Target.Resolution = viewportSize;
 				pipeline.Draw(m_Camera);
 
 				ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);

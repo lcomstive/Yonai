@@ -13,7 +13,7 @@ using namespace AquaEngine::Scripting;
 SceneSystem* SceneSystem::s_Instance = nullptr;
 vector<World*> SceneSystem::s_ActiveScenes = {};
 vector<SceneCallback> SceneSystem::s_SceneCallbacks = {};
-MonoMethod* SceneSystem::s_SceneChangeManagedMethod = nullptr;
+MonoMethod* SceneSystem::SceneChangedMethod = nullptr;
 
 void SceneSystem::Init()
 {
@@ -21,6 +21,9 @@ void SceneSystem::Init()
 
 	// Cache scene manager class
 	OnScriptEngineReloaded();
+
+	// Add callback for when script engine is about to get reloaded
+	ScriptEngine::AddPreReloadCallback(OnScriptEnginePreReloaded);
 
 	// Add callback for when script engine gets reloaded
 	ScriptEngine::AddReloadCallback(OnScriptEngineReloaded);
@@ -49,33 +52,36 @@ void SceneSystem::Draw()
 		scene->GetSystemManager()->Draw();
 }
 
+void SceneSystem::OnScriptEnginePreReloaded()
+{
+	UnloadAllScenes();
+	SceneChangedMethod = nullptr;
+}
+
 void SceneSystem::OnScriptEngineReloaded()
 {
-	if (ScriptEngine::IsLoaded())
-		s_SceneChangeManagedMethod = mono_class_get_method_from_name(
-			ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SceneManager"),
-			"_OnSceneChanged", // Function name
-			2 // Parameter count
-		);
-	else
-		s_SceneChangeManagedMethod = nullptr;
+	if (!ScriptEngine::IsLoaded())
+		return;
+	
+	MonoClass* managedClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SceneManager");
+	SceneChangedMethod = mono_class_get_method_from_name(
+		managedClass,
+		"_OnSceneChanged", // Function name
+		2 // Parameter count
+	);
 }
 
 void SceneSystem::ManagedSceneCallback(World* world, bool added)
 {
-	if (!s_SceneChangeManagedMethod)
-	{
-		if (ScriptEngine::IsLoaded())
-			OnScriptEngineReloaded();
-		else
-			return;
-	}
+	if (!SceneChangedMethod)
+		OnScriptEngineReloaded();
 
-	MonoObject* exception;
+	MonoException* exception = nullptr;
+
 	void* args[2];
 	args[0] = &world->m_ID;
 	args[1] = &added;
-	mono_runtime_invoke(s_SceneChangeManagedMethod, nullptr, args, &exception);
+	mono_runtime_invoke(SceneChangedMethod, nullptr, args, nullptr);
 }
 
 void SceneSystem::LoadScene(World* scene)

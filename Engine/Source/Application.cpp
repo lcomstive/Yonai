@@ -118,8 +118,6 @@ Application::Application()
 
 void Application::Setup()
 {
-	SystemManager::Global()->Add<SceneSystem>();
-
 	#pragma region Log engine information
 	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
 		"Engine",
@@ -146,10 +144,7 @@ void Application::Setup()
 #pragma endregion
 }
 
-void Application::Cleanup()
-{
-	SystemManager::Global()->Remove<SceneSystem>();
-}
+void Application::Cleanup() {}
 
 Application::~Application()
 {

@@ -52,10 +52,13 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(uint world);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadAll();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetActiveScenes();
-		
+
 		// Called from unmanaged code
-		private static void _OnSceneChanged(uint worldID, bool added) =>
+		private static void _OnSceneChanged(uint worldID, bool added)
+		{
+			Log.Debug($"_OnSceneChanged({worldID}, {added})");
 			WorldChanged?.Invoke(World.Get(worldID), added);
+		}
 		#endregion
 	}
 }

@@ -26,6 +26,7 @@ namespace AquaEditor
 				movement *= Speed;
 
 			m_Transform.Position += m_Transform.Rotation.Inverted * movement;
+			m_Transform.Rotation = rotation;
 		}
 
 		private Vector3 GetMovement()
@@ -60,7 +61,7 @@ namespace AquaEditor
 			if(Input.IsMouseDown(MouseButton.Right))
 			{
 				Vector2 mouseDelta = Input.MouseDelta * Time.DeltaTime;
-				xRot -= mouseDelta.y;
+				xRot += mouseDelta.y;
 				yRot += mouseDelta.x;
 			}
 

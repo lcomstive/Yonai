@@ -34,6 +34,7 @@ Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
 vector<Assembly*> ScriptEngine::s_Assemblies = {};
 vector<function<void()>> ScriptEngine::s_ReloadCallbacks = {};
+vector<function<void()>> ScriptEngine::s_PreReloadCallbacks = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
@@ -236,15 +237,13 @@ void ScriptEngine::Reload(bool force)
 	Timer timer;
 	timer.Start();
 
+	// Call pre-reload callbacks
+	for (const function<void()>& callback : s_PreReloadCallbacks)
+		callback();
+
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	vector<World*> worlds = World::GetWorlds();
-
-	// Cache active scenes
-	vector<unsigned int> activeSceneIDs;
-	for (World* scene : sceneSystem->GetActiveScenes())
-		activeSceneIDs.push_back(scene->ID());
-	sceneSystem->UnloadAllScenes();
 
 	for (World* world : worlds)
 	{
@@ -296,19 +295,11 @@ void ScriptEngine::Reload(bool force)
 	for (World* world : worlds)
 		world->GetSystemManager()->CreateAllManagedInstances();
 
-	// Re-activate worlds in scene system
-	for (unsigned int sceneID : activeSceneIDs)
-	{
-		World* scene = World::GetWorld(sceneID);
-		if(scene)
-			sceneSystem->AddScene(scene);
-	}
+	for (const function<void()>& callback : s_ReloadCallbacks)
+		callback();
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
-
-	for(const function<void()>& callback : s_ReloadCallbacks)
-		callback();
 }
 
 /// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
@@ -325,6 +316,9 @@ MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
 
 void ScriptEngine::AddReloadCallback(function<void()> callback)
 { s_ReloadCallbacks.emplace_back(callback); }
+
+void ScriptEngine::AddPreReloadCallback(function<void()> callback)
+{ s_PreReloadCallbacks.emplace_back(callback); }
 
 void ScriptEngine::AddInternalCall(const char* name, const void* fn)
 { mono_add_internal_call(name, fn); }

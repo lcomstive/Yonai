@@ -22,6 +22,9 @@ namespace AquaEngine::Scripting
 		// Callbacks when script engine reloads all assemblies
 		static std::vector<std::function<void()>> s_ReloadCallbacks;
 
+		// Callbacks when script engine is about to reloads
+		static std::vector<std::function<void()>> s_PreReloadCallbacks;
+
 		struct AssemblyPath
 		{
 			std::string Path;
@@ -110,5 +113,10 @@ namespace AquaEngine::Scripting
 		/// Submit a callback to be invoked whenever the script engine and assemblies are reloaded
 		/// </summary>
 		AquaAPI static void AddReloadCallback(std::function<void()> callback);
+
+		/// <summary>
+		/// Submit a callback to be invoked before the script engine and assemblies get unloaded and reloaded
+		/// </summary>
+		AquaAPI static void AddPreReloadCallback(std::function<void()> callback);
 	};
 }
