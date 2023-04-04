@@ -49,8 +49,19 @@ void World::PrepareEntities(unsigned int count) { m_EntityManager->Prepare(count
 
 Entity World::CreateEntity()
 {
-	Entity e = Entity(m_EntityManager->Create(), this);
+	Entity e(m_EntityManager->Create(), this);
 	m_Entities.emplace(e.ID(), e);
+	return e;
+}
+
+Entity World::CreateEntity(EntityID ID)
+{
+	bool validID = m_EntityManager->Insert(ID);
+	if (!validID)
+		return Entity(InvalidEntityID);
+
+	Entity e(ID, this);
+	m_Entities.emplace(ID, e);
 	return e;
 }
 

@@ -17,6 +17,7 @@ namespace AquaEngine
 		AquaAPI void Destroy();
 
 		AquaAPI EntityID Create();
+		AquaAPI bool Insert(EntityID id);
 		AquaAPI void Prepare(unsigned int count = m_DefaultChunkSize);
 
 		template<typename T>

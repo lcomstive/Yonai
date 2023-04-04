@@ -210,8 +210,16 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	return instance;
 }
 
+vector<const char*> CoreAssemblyDependencies =
+{
+	// "app://Newtonsoft.Json.dll"
+};
+
 void ScriptEngine::LoadCoreAssembly()
 {
+	for(size_t i = 0; i < CoreAssemblyDependencies.size(); i++)
+		LoadAssembly(CoreAssemblyDependencies[i], false /* Watch for changes */);
+
 	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true, false);
 	if (s_CoreAssembly)
 		s_CoreAssembly->LoadScriptCoreTypes();

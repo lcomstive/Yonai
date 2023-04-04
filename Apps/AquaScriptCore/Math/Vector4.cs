@@ -1,9 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+﻿using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
 	[System.Diagnostics.DebuggerDisplay("({x}, {y}, {z}, {w})")]
-	public struct Vector4
+	public struct Vector4 : ISerializable
 	{
 		public float x, y, z, w;
 
@@ -31,6 +33,22 @@ namespace AquaEngine
 				);
 
 		public override string ToString() => $"({x}, {y}, {z}, {w})";
+
+		public JObject OnSerialize() =>
+			new JObject(
+				new JProperty("x", x),
+				new JProperty("y", y),
+				new JProperty("z", z),
+				new JProperty("w", w)
+				);
+
+		public void OnDeserialize(JObject json)
+		{
+			x = json["x"].Value<float>();
+			y = json["y"].Value<float>();
+			z = json["z"].Value<float>();
+			w = json["w"].Value<float>();
+		}
 
 		public static implicit operator string(Vector4 v) => v.ToString();
 		public static implicit operator Vector4(IVector4 v) => new Vector4(v.x, v.y, v.z, v.w);

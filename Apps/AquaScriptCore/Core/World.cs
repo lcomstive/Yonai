@@ -1,10 +1,12 @@
 ﻿using System;
+using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class World
+	public class World : ISerializable
 	{
 		public string Name { get; private set; }
 		public uint ID { get; private set; }
@@ -13,19 +15,10 @@ namespace AquaEngine
 
 		private static Dictionary<uint, World> s_Instances = new Dictionary<uint, World>();
 
-		/// <summary>
-		/// Currently loaded world.
-		/// Set to first created instance by default, or null if none have been created
-		/// </summary>
-		public static World Current { get; private set; } = null;
-
 		internal World(uint id, string name)
 		{
 			ID = id;
 			Name = name;
-
-			if (Current == null)
-				Current = this;
 
 			if (!s_Instances.ContainsKey(ID))
 				s_Instances.Add(ID, this);
@@ -37,11 +30,48 @@ namespace AquaEngine
 		/// <returns>Success state of destruction. Only fails if already destroyed.</returns>
 		public bool Destroy()
 		{
-			if (Current == this)
-				Current = null;
 			if (s_Instances.ContainsKey(ID))
 				s_Instances.Remove(ID);
 			return _Destroy(ID);
+		}
+
+		public JObject OnSerialize()
+		{
+			JObject json = new JObject();
+			json["Name"] = Name;
+
+			JArray entityArray = new JArray();
+			Entity[] entities = GetEntities();
+			foreach (Entity entity in entities)
+				entityArray.Add(entity.OnSerialize());
+			json.Add("Entities", entityArray);
+			return json;
+		}
+
+		public void OnDeserialize(JObject json)
+		{
+			// Destroy previous entities, will be recreating them
+			Entity[] previousEntities = GetEntities();
+			foreach (Entity entity in previousEntities)
+				_DestroyEntity(ID, entity.ID);
+			m_Entities.Clear();
+
+			Name = json["Name"].Value<string>();
+
+			JArray entities = json["Entities"].Value<JArray>();
+			foreach(JObject entityJSON in entities)
+			{
+				uint entityID = entityJSON["ID"].Value<uint>();
+				if(_CreateEntityID(ID, entityID) == uint.MaxValue)
+				{
+					Log.Warning($"Failed to deserialize entity with ID [{entityID}]");
+					continue;
+				}
+
+				Entity entity = new Entity(this, entityID);
+				entity.OnDeserialize(entityJSON);
+				m_Entities.Add(entityID, entity);
+			}
 		}
 
 		#region Entities
@@ -202,6 +232,15 @@ namespace AquaEngine
 			return new World(worldID, name);
 		}
 
+		public static World Create(JObject json)
+		{
+			string name = json["Name"].Value<string>();
+			uint worldID = _Create(name);
+			World world = new World(worldID, name);
+			world.OnDeserialize(json);
+			return world;
+		}
+
 		/// <returns>True if world exists with matching ID</returns>
 		public static bool Exists(uint id) => _Exists(id);
 
@@ -222,6 +261,7 @@ namespace AquaEngine
 		// Entities
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasEntity(uint worldID, uint entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _CreateEntity(uint worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _CreateEntityID(uint worldID, uint entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyEntity(uint worldID, uint entityID);
 
 		// Systems

@@ -75,6 +75,12 @@ ADD_MANAGED_METHOD(World, CreateEntity, unsigned int, (unsigned int worldID))
 	return world ? world->CreateEntity().ID() : InvalidEntityID;
 }
 
+ADD_MANAGED_METHOD(World, CreateEntityID, unsigned int, (unsigned int worldID, unsigned int entityID))
+{
+	World* world = World::GetWorld(worldID);
+	return world ? world->CreateEntity(entityID).ID() : InvalidEntityID;
+}
+
 ADD_MANAGED_METHOD(World, DestroyEntity, void, (unsigned int worldID, unsigned int entityID))
 {
 	World* world = World::GetWorld(worldID);

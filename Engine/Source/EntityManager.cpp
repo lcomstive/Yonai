@@ -19,6 +19,16 @@ EntityID EntityManager::Create()
 	return id;
 }
 
+bool EntityManager::Insert(EntityID id)
+{
+	if (!m_Entities[id])
+		return false;
+
+	m_Entities[id] = false;
+	m_AvailableEntityCount--;
+	return true;
+}
+
 void EntityManager::Destroy(EntityID id)
 {
 	m_ComponentManager->Clear(id);

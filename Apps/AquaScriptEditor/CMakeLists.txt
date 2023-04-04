@@ -5,11 +5,14 @@ if(MSVC)
     file(GLOB_RECURSE CS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cs)
 
     add_library(${PROJECT_NAME} SHARED ${CS_FILES})
-    set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2")
 
     add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        DEBUG_POSTFIX ""
+        VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2"
+        VS_DOTNET_REFERENCES "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/Mono/Newtonsoft.Json.dll;System"
+    )
 
     if(AQUA_GENERATE_MDBS)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

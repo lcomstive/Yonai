@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+﻿using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace AquaEngine
 {
 	[DebuggerDisplay("({r}, {g}, {b}, {a})")]
-	public struct Colour
+	public struct Colour : ISerializable
 	{
 		public float r, g, b, a;
 
@@ -63,6 +65,21 @@ namespace AquaEngine
 			) / 255.0f; // (convert from range [0 - 255] -> [0.0 - 1.0]
 		}
 
+		public JObject OnSerialize() =>
+			new JObject(
+				new JProperty("r", r),
+				new JProperty("g", r),
+				new JProperty("b", b),
+				new JProperty("a", a)
+				);
+
+		public void OnDeserialize(JObject json)
+		{
+			r = json["r"].Value<float>();
+			g = json["g"].Value<float>();
+			b = json["b"].Value<float>();
+			a = json["a"].Value<float>();
+		}
 
 		public override string ToString() => $"({r}, {g}, {b}, {a})";
 

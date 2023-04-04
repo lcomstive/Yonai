@@ -6,6 +6,9 @@ using System.Reflection;
 using AquaEditor.EditorUI;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AquaEditor
 {
@@ -57,6 +60,42 @@ namespace AquaEditor
 				pair.Value._Update();
 		}
 
+		[MenuItem("File/Save", Shortcut = "CTRL+S")]
+		private static void SaveScene()
+		{
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Formatting = Formatting.Indented;
+
+			World[] activeScenes = SceneManager.GetActiveScenes();
+			foreach (World scene in activeScenes)
+			{
+				using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"app://Scene-{scene.Name}.json")))
+				using (JsonWriter writer = new JsonTextWriter(streamWriter))
+				{
+					try { serializer.Serialize(writer, scene.OnSerialize()); }
+					catch(Exception e) { Log.Exception(e); }
+				}
+			}
+		}
+		
+		[MenuItem("File/Load")]
+		private static void LoadScene()
+		{
+			JsonSerializer serializer = new JsonSerializer();
+
+			World[] scenes = SceneManager.GetActiveScenes();
+			foreach(World scene in scenes)
+			{
+				if (!VFS.Exists($"app://Scene-{scene.Name}.json"))
+					continue; // Not saved
+
+				using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"app://Scene-{scene.Name}.json")))
+				using (JsonReader reader = new JsonTextReader(streamReader))
+					try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
+					catch(Exception e) { Log.Exception(e); }
+			}
+		}
+
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
 		{
 			{ ImGUI.StyleVar.FrameRounding, 2 },
@@ -92,25 +131,29 @@ namespace AquaEditor
 
 		protected override void Draw()
 		{
-			foreach (var pair in StyleVarFloats) ImGUI.PushStyleVar(pair.Key, pair.Value);
-			foreach (var pair in StyleVarVectors) ImGUI.PushStyleVar(pair.Key, pair.Value);
-			foreach (var style in StyleColours) ImGUI.PushStyleColour(style.Key, style.Value);
+			try
+			{
+				foreach (var pair in StyleVarFloats) ImGUI.PushStyleVar(pair.Key, pair.Value);
+				foreach (var pair in StyleVarVectors) ImGUI.PushStyleVar(pair.Key, pair.Value);
+				foreach (var style in StyleColours) ImGUI.PushStyleColour(style.Key, style.Value);
 
-			BeginDockspace();
-			DrawMenuBar();
+				BeginDockspace();
+				DrawMenuBar();
 
-			ImGUI.Begin("Demo");
-			DrawDemoContents();
-			ImGUI.End();
+				ImGUI.Begin("Demo");
+				DrawDemoContents();
+				ImGUI.End();
 
-			View[] views = m_ActiveViews.Values.ToArray();
-			foreach (View view in views)
-				view._Draw();
+				View[] views = m_ActiveViews.Values.ToArray();
+				foreach (View view in views)
+					view._Draw();
 
-			EndDockspace();
+				EndDockspace();
 
-			ImGUI.PopStyleColour(StyleColours.Count);
-			ImGUI.PopStyleVar(StyleVarFloats.Count + StyleVarVectors.Count);
+				ImGUI.PopStyleColour(StyleColours.Count);
+				ImGUI.PopStyleVar(StyleVarFloats.Count + StyleVarVectors.Count);
+			}
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		#region View Handling
@@ -204,8 +247,12 @@ namespace AquaEditor
 				};
 
 
-			foreach (var menuItem in menuItems)
-				m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);
+			try
+			{
+				foreach (var menuItem in menuItems)
+					m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);
+			}
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		#region Demo

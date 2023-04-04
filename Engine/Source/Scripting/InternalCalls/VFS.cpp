@@ -65,8 +65,8 @@ ADD_MANAGED_METHOD(VFS, Move, void, (MonoString* from, MonoString* to))
 ADD_MANAGED_METHOD(VFS, Copy, void, (MonoString* from, MonoString* to))
 { VFS::Copy(mono_string_to_utf8(from), mono_string_to_utf8(to)); }
 
-ADD_MANAGED_METHOD(VFS, GetAbsolutePath, MonoString*, (MonoString* path, bool suppressWarnings))
-{ return mono_string_new(mono_domain_get(), VFS::GetAbsolutePath(mono_string_to_utf8(path), suppressWarnings).c_str()); }
+ADD_MANAGED_METHOD(VFS, GetAbsolutePath, MonoString*, (MonoString* path, bool requireFileExists, bool suppressWarnings))
+{ return mono_string_new(mono_domain_get(), VFS::GetAbsolutePath(mono_string_to_utf8(path), requireFileExists, suppressWarnings).c_str()); }
 
 ADD_MANAGED_METHOD(VFS, Exists, bool, (MonoString* path))
 { return VFS::Exists(mono_string_to_utf8(path)); }

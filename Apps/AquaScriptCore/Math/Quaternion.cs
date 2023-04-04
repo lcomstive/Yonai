@@ -1,9 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+﻿using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
 	[System.Diagnostics.DebuggerDisplay("({x}, {y}, {z}, {w})")]
-	public struct Quaternion
+	public struct Quaternion : ISerializable
 	{
 		public float x, y, z, w;
 
@@ -80,6 +82,22 @@ namespace AquaEngine
 		{
 			_MultiplyVector3(ref a, ref b, out Vector3 output);
 			return output;
+		}
+
+		public JObject OnSerialize() =>
+			new JObject(
+				new JProperty("x", x),
+				new JProperty("y", y),
+				new JProperty("z", z),
+				new JProperty("w", w)
+				);
+
+		public void OnDeserialize(JObject json)
+		{
+			x = json["x"].Value<float>();
+			y = json["y"].Value<float>();
+			z = json["z"].Value<float>();
+			w = json["w"].Value<float>();
 		}
 
 		#region Internal Calls

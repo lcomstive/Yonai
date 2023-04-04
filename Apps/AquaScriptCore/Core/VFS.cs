@@ -7,7 +7,8 @@ namespace AquaEngine
 	{
 		public static bool Exists(string path) => _Exists(path);
 		public static string CurrentDirectory => _GetCurrentDirectory();
-		public static string GetAbsolutePath(string path) => _GetAbsolutePath(path);
+		public static string GetAbsolutePath(string path, bool requireFileExists = false, bool suppressWarnings = false) =>
+			_GetAbsolutePath(path, requireFileExists, suppressWarnings);
 
 		#region Mounting
 		public static bool HasMount(string mountPoint) => _HasMount(mountPoint);
@@ -36,7 +37,7 @@ namespace AquaEngine
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(string vfsPath);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetCurrentDirectory();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetAbsolutePath(string vfsPath);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetAbsolutePath(string vfsPath, bool requireFileExists, bool suppressWarnings);
 
 		// Mount & Unmount
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasMount(string path);

@@ -158,10 +158,13 @@ size_t Assembly::GetUnmanagedHash(size_t managedHash)
 
 void Assembly::CacheTypes(bool isCore)
 {
+	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
+	if (!coreAssembly)
+		return;
+
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
-	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
 	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
 	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
 

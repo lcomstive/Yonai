@@ -35,6 +35,7 @@ namespace AquaEngine
 			set => _SetScale(Handle, ref value);
 		}
 
+		[ShouldSerialize(false)]
 		public Vector3 Right
 		{
 			get
@@ -44,6 +45,7 @@ namespace AquaEngine
 			}
 		}
 
+		[ShouldSerialize(false)]
 		public Vector3 Up
 		{
 			get
@@ -53,6 +55,7 @@ namespace AquaEngine
 			}
 		}
 
+		[ShouldSerialize(false)]
 		public Vector3 Forward
 		{
 			get

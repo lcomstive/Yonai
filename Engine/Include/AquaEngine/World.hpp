@@ -113,6 +113,7 @@ namespace AquaEngine
 
 #pragma region Entity
 		AquaAPI Entity CreateEntity();
+		AquaAPI Entity CreateEntity(EntityID id);
 		AquaAPI bool HasEntity(EntityID entity);
 		AquaAPI void DestroyEntity(EntityID entity);
 		AquaAPI void PrepareEntities(unsigned int count);

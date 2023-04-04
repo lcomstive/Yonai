@@ -1,11 +1,13 @@
 ﻿using System;
+using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
 	[System.Diagnostics.DebuggerDisplay("[{World.ID}:{ID}]")]
-	public class Entity
+	public class Entity : ISerializable
 	{
 		/// <summary>
 		/// Identifier of this entity, unique in the <see cref="World"/>
@@ -33,6 +35,52 @@ namespace AquaEngine
 		{
 			World = world;
 			ID = id;
+		}
+
+		internal Entity(World world, JObject json)
+		{
+			World = world;
+			OnDeserialize(json);
+		}
+
+		public JObject OnSerialize()
+		{
+			JObject json = new JObject();
+			json["ID"] = ID;
+
+			JArray componentsArray = new JArray();
+			Component[] components = GetComponents();
+			foreach (Component component in components)
+				componentsArray.Add(component.OnSerialize());
+			json.Add("Components", componentsArray);
+
+			return json;
+		}
+
+		public void OnDeserialize(JObject json)
+		{
+			JArray componentsArray = json["Components"].Value<JArray>();
+			foreach (JObject componentJSON in componentsArray)
+			{
+				string fullName = componentJSON["ComponentType"].Value<string>();
+				Type type = Type.GetType(fullName);
+
+				if(type == null)
+				{
+					Log.Error($"Failed to get type '{fullName}'");
+					continue;
+				}
+
+				Component component = (Component)_AddComponent(World.ID, ID, type);
+				if (component == null)
+				{
+					Log.Warning($"Failed to add component of type '{fullName}' during deserialization");
+					continue;
+				}
+
+				component.OnDeserialize(componentJSON);
+				m_Components.Add(type, component);
+			}
 		}
 
 		/// <summary>
@@ -111,11 +159,11 @@ namespace AquaEngine
 		public static implicit operator string(Entity v) => v.ToString();
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool	  _HasComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasComponent(uint worldID, uint entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _GetComponent(uint worldID, uint entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object[] _GetComponents(uint worldID, uint entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AddComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool   _RemoveComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _RemoveComponent(uint worldID, uint entityID, Type type);
 		#endregion
 	}
 }
