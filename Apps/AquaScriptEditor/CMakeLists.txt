@@ -10,6 +10,12 @@ if(MSVC)
     add_dependencies(${PROJECT_NAME} AquaScriptCore)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
+
+    if(AQUA_GENERATE_MDBS)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND pdb2mdb.bat $<TARGET_FILE:${PROJECT_NAME}>
+        )
+    endif()
 else()
     # Generator is not Visual Studio.
     # AquaScriptEditor will have to be compiled manually,
