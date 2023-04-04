@@ -41,7 +41,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Newtonsoft.Json.dll">
-      <HintPath>Dependencies/Newtonsoft.Json.dll</HintPath>
+      <HintPath>../Editor/Assets/Mono/Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
