@@ -509,6 +509,8 @@ ADD_MANAGED_METHOD(ImGUI, SetTooltip, void, (MonoString* textRaw), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, BeginTooltip, bool, (), AquaEditor) { return ImGui::BeginTooltip(); }
 ADD_MANAGED_METHOD(ImGUI, EndTooltip, void, (), AquaEditor) { ImGui::EndTooltip(); }
 
+ADD_MANAGED_METHOD(ImGUI, Separator, void, (), AquaEditor) { ImGui::Separator(); }
+
 ADD_MANAGED_METHOD(ImGUI, _PlotLines, void, (MonoString* labelRaw, MonoArray* pointsRaw, MonoString* overlayText, glm::vec2* graphSize), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
@@ -648,4 +650,52 @@ ADD_MANAGED_METHOD(ImGUI, MenuItem, bool, (MonoString* labelRaw, MonoString* sho
 	bool output = ImGui::MenuItem(label, shortcut, false, enabled);
 	mono_free(label);
 	return output;
+}
+
+// TABLE //
+ADD_MANAGED_METHOD(ImGUI, _BeginTable, bool, (MonoString* labelRaw, unsigned int columns, int flags, glm::vec2* outerSize, float innerWidth), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImVec2 size(outerSize->x, outerSize->y);
+	bool output = ImGui::BeginTable(label, columns, flags, size, innerWidth);
+	mono_free(label);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, EndTable, void, (), AquaEditor)
+{ ImGui::EndTable(); }
+
+ADD_MANAGED_METHOD(ImGUI, TableNextRow, void, (float minHeight, bool isHeader), AquaEditor)
+{ ImGui::TableNextRow(isHeader ? ImGuiTableRowFlags_Headers : 0, minHeight); }
+
+ADD_MANAGED_METHOD(ImGUI, TableSetColumnIndex, void, (int column), AquaEditor)
+{ ImGui::TableSetColumnIndex(column); }
+
+ADD_MANAGED_METHOD(ImGUI, TableNextColumn, void, (), AquaEditor)
+{ ImGui::TableNextColumn(); }
+
+ADD_MANAGED_METHOD(ImGUI, TableHeadersRow, void, (), AquaEditor)
+{ ImGui::TableHeadersRow(); }
+
+ADD_MANAGED_METHOD(ImGUI, TableHeader, void, (MonoString* labelRaw), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImGui::TableHeader(label);
+	mono_free(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, TableSetColumnEnabled, void, (int column, bool enabled), AquaEditor)
+{ ImGui::TableSetColumnEnabled(column, enabled); }
+
+ADD_MANAGED_METHOD(ImGUI, _TableGetColumnFlags, int, (int column), AquaEditor)
+{ return ImGui::TableGetColumnFlags(column); }
+
+ADD_MANAGED_METHOD(ImGUI, TableSetupScrollFreeze, void, (int column, int row), AquaEditor)
+{ return ImGui::TableSetupScrollFreeze(column, row); }
+
+ADD_MANAGED_METHOD(ImGUI, _TableSetupColumn, void, (MonoString* labelRaw, int flags, float size), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImGui::TableSetupColumn(label, flags, size);
+	mono_free(label);
 }

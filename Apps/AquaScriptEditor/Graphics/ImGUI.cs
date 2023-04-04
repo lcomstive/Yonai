@@ -411,6 +411,319 @@ namespace AquaEditor
 			ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
 		}
 
+		[Flags]
+		public enum TableFlags : int
+		{
+			// Features
+
+			None = 0,
+
+			/// <summary>
+			/// Enable resizing columns.
+			/// </summary>
+			Resizable = 1 << 0,
+
+			/// <summary>
+			/// Enable reordering columns in header row (need calling TableSetupColumn() + TableHeadersRow() to display headers)
+			/// </summary>
+			Reorderable = 1 << 1,
+
+			/// <summary>
+			/// Enable hiding/disabling columns in context menu.
+			/// </summary>
+			Hideable = 1 << 2,
+
+			/// <summary>
+			/// Enable sorting. Call TableGetSortSpecs() to obtain sort specs. Also see SortMulti and SortTristate.
+			/// </summary>
+			Sortable = 1 << 3,
+
+			/// <summary>
+			/// Disable persisting columns order, width and sort settings in the .ini file.
+			/// </summary>
+			NoSavedSettings = 1 << 4,
+
+			/// <summary>
+			/// Right-click on columns body/contents will display table context menu. By default it is available in TableHeadersRow().
+			/// </summary>
+			ContextMenuInBody = 1 << 5,
+
+			// Decorations
+
+			/// <summary>
+			/// Set each RowBg color with ImGuiCol_TableRowBg or ImGuiCol_TableRowBgAlt (equivalent of calling TableSetBgColor with ImGuiTableBgFlags_RowBg0 on each row manually)
+			/// </summary>
+			RowBg = 1 << 6,
+
+			/// <summary>
+			/// Draw horizontal borders between rows.
+			/// </summary>
+			BordersInnerH = 1 << 7,
+
+			/// <summary>
+			/// Draw horizontal borders at the top and bottom.
+			/// </summary>
+			BordersOuterH = 1 << 8,
+
+			/// <summary>
+			/// Draw vertical borders between columns.
+			/// </summary>
+			BordersInnerV = 1 << 9,
+
+			/// <summary>
+			/// Draw vertical borders on the left and right sides.
+			/// </summary>
+			BordersOuterV = 1 << 10,
+
+			/// <summary>
+			/// Draw horizontal borders.
+			/// </summary>
+			BordersH = BordersInnerH | BordersOuterH,
+
+			/// <summary>
+			/// Draw vertical borders.
+			/// </summary>
+			BordersV = BordersInnerV | BordersOuterV,
+
+			/// <summary>
+			/// Draw inner borders.
+			/// </summary>
+			BordersInner = BordersInnerV | BordersInnerH,
+
+			/// <summary>
+			/// Draw outer borders.
+			/// </summary>
+			BordersOuter = BordersOuterV | BordersOuterH,
+
+			/// <summary>
+			/// Draw all borders.
+			/// </summary>
+			Borders = BordersInner | BordersOuter,
+
+			/// <summary>
+			/// [ALPHA] Disable vertical borders in columns Body (borders will always appear in Headers). -> May move to style
+			/// </summary>
+			NoBordersInBody = 1 << 11,
+
+			/// <summary>
+			/// [ALPHA] Disable vertical borders in columns Body until hovered for resize (borders will always appear in Headers). -> May move to style
+			/// </summary>
+			NoBordersInBodyUntilResize = 1 << 12,
+
+			// Sizing Policy (read above for defaults)
+
+			/// <summary>
+			/// Columns default to _WidthFixed or _WidthAuto (if resizable or not resizable), matching contents width.
+			/// </summary>
+			SizingFixedFit = 1 << 13,
+
+			/// <summary>
+			/// Columns default to _WidthFixed or _WidthAuto (if resizable or not resizable), matching the maximum contents width of all columns. Implicitly enable NoKeepColumnsVisible.
+			/// </summary>
+			SizingFixedSame = 2 << 13,
+
+			/// <summary>
+			/// Columns default to _WidthStretch with default weights proportional to each columns contents widths.
+			/// </summary>
+			SizingStretchProp = 3 << 13,
+
+			/// <summary>
+			/// Columns default to _WidthStretch with default weights all equal, unless overridden by TableSetupColumn().
+			/// </summary>
+			SizingStretchSame = 4 << 13,
+
+			// Sizing Extra Options
+
+			/// <summary>
+			/// Make outer width auto-fit to columns, overriding outer_size.x value. Only available when ScrollX/ScrollY are disabled and Stretch columns are not used.
+			/// </summary>
+			NoHostExtendX = 1 << 16,
+
+			/// <summary>
+			/// Make outer height stop exactly at outer_size.y (prevent auto-extending table past the limit). Only available when ScrollX/ScrollY are disabled. Data below the limit will be clipped and not visible.
+			/// </summary>
+			NoHostExtendY = 1 << 17,
+
+			/// <summary>
+			/// Disable keeping column always minimally visible when ScrollX is off and table gets too small. Not recommended if columns are resizable.
+			/// </summary>
+			NoKeepColumnsVisible = 1 << 18,
+
+			/// <summary>
+			/// Disable distributing remainder width to stretched columns (width allocation on a 100-wide table with 3 columns: Without this flag: 33,33,34. With this flag: 33,33,33). With larger number of columns, resizing will appear to be less smooth.
+			/// </summary>
+			PreciseWidths = 1 << 19,
+
+			// Clipping
+
+			/// <summary>
+			/// Disable clipping rectangle for every individual columns (reduce draw command count, items will be able to overflow into other columns). Generally incompatible with TableSetupScrollFreeze().
+			/// </summary>
+			NoClip = 1 << 20,
+
+			// Padding
+
+			/// <summary>
+			/// Default if BordersOuterV is on. Enable outermost padding. Generally desirable if you have headers.
+			/// </summary>
+			PadOuterX = 1 << 21,
+
+			/// <summary>
+			/// Default if BordersOuterV is off. Disable outermost padding.
+			/// </summary>
+			NoPadOuterX = 1 << 22,
+
+			/// <summary>
+			/// Disable inner padding between columns (double inner padding if BordersOuterV is on, single inner padding if BordersOuterV is off).
+			/// </summary>
+			NoPadInnerX = 1 << 23,
+
+			// Scrolling
+
+			/// <summary>
+			/// Enable horizontal scrolling. Require 'outer_size' parameter of BeginTable() to specify the container size. Changes default sizing policy. Because this creates a child window, ScrollY is currently generally recommended when using ScrollX.
+			/// </summary>
+			ScrollX = 1 << 24,
+
+			/// <summary>
+			/// Enable vertical scrolling. Require 'outer_size' parameter of BeginTable() to specify the container size.
+			/// </summary>
+			ScrollY = 1 << 25,
+
+			// Sorting
+
+			/// <summary>
+			/// Hold shift when clicking headers to sort on multiple column. TableGetSortSpecs() may return specs where (SpecsCount > 1).
+			/// </summary>
+			SortMulti = 1 << 26,
+
+			/// <summary>
+			/// Allow no sorting, disable default sorting. TableGetSortSpecs() may return specs where (SpecsCount == 0).
+			/// </summary>
+			SortTristate = 1 << 27,
+		};
+
+		[Flags]
+		public enum TableColumnFlags : int
+		{
+			// Input configuration flags
+			None = 0,
+
+			/// <summary>
+			/// Overriding/master disable flag: hide column, won't show in context menu (unlike calling TableSetColumnEnabled() which manipulates the user accessible state)
+			/// </summary>
+			Disabled = 1 << 0,
+
+			/// <summary>
+			/// Default as a hidden/disabled column.
+			/// </summary>
+			DefaultHide = 1 << 1,
+
+			/// <summary>
+			/// Default as a sorting column.
+			/// </summary>
+			DefaultSort = 1 << 2,
+
+			/// <summary>
+			/// Column will stretch. Preferable with horizontal scrolling disabled (default if table sizing policy is _SizingStretchSame or _SizingStretchProp).
+			/// </summary>
+			WidthStretch = 1 << 3,
+
+			/// <summary>
+			/// Column will not stretch. Preferable with horizontal scrolling enabled (default if table sizing policy is _SizingFixedFit and table is resizable).
+			/// </summary>
+			WidthFixed = 1 << 4,
+
+			/// <summary>
+			/// Disable manual resizing.
+			/// </summary>
+			NoResize = 1 << 5,
+
+			/// <summary>
+			/// Disable manual reordering this column, this will also prevent other columns from crossing over this column.
+			/// </summary>
+			NoReorder = 1 << 6,
+
+			/// <summary>
+			/// Disable ability to hide/disable this column.
+			/// </summary>
+			NoHide = 1 << 7,
+
+			/// <summary>
+			/// Disable clipping for this column (all NoClip columns will render in a same draw command).
+			/// </summary>
+			NoClip = 1 << 8,
+
+			/// <summary>
+			/// Disable ability to sort on this field (even if ImGuiTableFlags_Sortable is set on the table).
+			/// </summary>
+			NoSort = 1 << 9,
+
+			/// <summary>
+			/// Disable ability to sort in the ascending direction.
+			/// </summary>
+			NoSortAscending = 1 << 10,
+
+			/// <summary>
+			/// Disable ability to sort in the descending direction.
+			/// </summary>
+			NoSortDescending = 1 << 11,
+
+			/// <summary>
+			/// TableHeadersRow() will not submit label for this column. Convenient for some small columns. Name will still appear in context menu.
+			/// </summary>
+			NoHeaderLabel = 1 << 12,
+
+			/// <summary>
+			/// Disable header text width contribution to automatic column width.
+			/// </summary>
+			NoHeaderWidth = 1 << 13,
+
+			/// <summary>
+			/// Make the initial sort direction Ascending when first sorting on this column (default).
+			/// </summary>
+			PreferSortAscending = 1 << 14,
+
+			/// <summary>
+			/// Make the initial sort direction Descending when first sorting on this column.
+			/// </summary>
+			PreferSortDescending = 1 << 15,
+
+			/// <summary>
+			/// Use current Indent value when entering cell (default for column 0).
+			/// </summary>
+			IndentEnable = 1 << 16,
+
+			/// <summary>
+			/// Ignore current Indent value when entering cell (default for columns > 0). Indentation changes _within_ the cell will still be honored.
+			/// </summary>
+			IndentDisable = 1 << 17,
+
+			// Output status flags, read-only via TableGetColumnFlags()
+
+			/// <summary>
+			/// Status: is enabled == not hidden by user/api (referred to as "Hide" in _DefaultHide and _NoHide) flags.
+			/// </summary>
+			IsEnabled = 1 << 24,  
+
+			/// <summary>
+			/// Status: is visible == is enabled AND not clipped by scrolling.
+			/// </summary>
+			IsVisible = 1 << 25,  
+
+			/// <summary>
+			/// Status: is currently part of the sort specs
+			/// </summary>
+			IsSorted = 1 << 26,   
+
+			/// <summary>
+			/// Status: is hovered by mouse
+			/// </summary>
+			IsHovered = 1 << 27,  
+
+
+		}
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -482,6 +795,9 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Unindent(float width = 0.0f);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Separator();
 		#endregion
 
 		#region Controls
@@ -938,6 +1254,53 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool MenuItem(string label, string shortcut = "", bool enabled = true);
+		#endregion
+
+		#region Tables
+		public static bool BeginTable(string label, uint columns, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
+			BeginTable(label, columns, Vector2.Zero, flags, innerWidth);
+
+		public static bool BeginTable(string label, uint columns, Vector2 outerSize, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
+			_BeginTable(label, columns, (int)flags, ref outerSize, innerWidth);
+
+		public static void TableSetupColumn(string label, TableColumnFlags flags = TableColumnFlags.None, float size = 0) =>
+			_TableSetupColumn(label, (int)flags, size);
+
+		/// <returns>
+		/// Column flags so you can query their Enabled/Visible/Sorted/Hovered status flags. Pass -1 to use current column.
+		/// </returns>
+		public static TableColumnFlags TableGetColumnFlags(int column = -1) =>
+			(TableColumnFlags)_TableGetColumnFlags(column);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _BeginTable(string label, uint columns, int flags, ref Vector2 outerSize, float innerWidth);
+
+		/// <summary>
+		/// Only call if <b>BeginTable</b> returns true
+		/// </summary>
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndTable();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TableNextRow(float minHeight = 0.0f, bool isHeader = false);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TableNextColumn();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TableHeadersRow();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TableSetColumnEnabled(int column, bool enabled);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TableSetColumnIndex(int column);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _TableSetupColumn(string label, int flags, float size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int _TableGetColumnFlags(int column);
 		#endregion
 	}
 }

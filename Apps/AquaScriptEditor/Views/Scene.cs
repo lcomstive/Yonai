@@ -49,6 +49,7 @@ namespace AquaEditor.Views
 		{
 			bool isOpen = true;
 			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowPadding, Vector2.Zero);
+			ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, Colour.Black);
 			if (ImGUI.Begin("Scene", ref isOpen))
 			{
 				Vector2 offset = ImGUI.WindowPosition;
@@ -75,6 +76,7 @@ namespace AquaEditor.Views
 			}
 			ImGUI.End();
 			ImGUI.PopStyleVar();
+			ImGUI.PopStyleColour();
 
 			// Check if window requested to be closed
 			if (!isOpen)

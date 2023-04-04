@@ -41,13 +41,23 @@ namespace AquaEditor
 				return;
 			ImGUI.Indent();
 
+			IVector2 contentRegion = ImGUI.ContentRegionAvailable;
+			if (!ImGUI.BeginTable(type.Name, 2, new Vector2(contentRegion.x, 0), ImGUI.TableFlags.NoBordersInBody))
+				return;
+			ImGUI.TableSetupColumn("##Key",
+				ImGUI.TableColumnFlags.WidthFixed,
+				contentRegion.x * 0.3f
+			);
+			ImGUI.TableSetupColumn("##Value");
+			ImGUI.TableHeadersRow();
+
 			foreach (var field in fields)
 			{
-				bool show = true;
+				bool show = field.IsPublic;
 				if (field.IsPublic && field.GetCustomAttribute<HideInInspectorAttribute>() != null)
 					show = false;
-				if (!field.IsPublic && field.GetCustomAttribute<ShowInInspectorAttribute>() == null)
-					show = false;
+				if (field.GetCustomAttribute<ShowInInspectorAttribute>() != null)
+					show = true;
 
 				if (show)
 					DrawObject(
@@ -63,91 +73,103 @@ namespace AquaEditor
 				if (property.GetCustomAttribute<HideInInspectorAttribute>() != null)
 					continue;
 
-				DrawObject(
-					property.Name,
-					property.PropertyType,
-					property.GetValue(component),
-					component,
-					property.CanWrite ? property.SetValue : (Action<object, object>)null
-				);
+				MethodInfo[] accessors = property.GetAccessors(true);
+				bool canRead = accessors.Length > 0 && accessors[0].IsPublic;
+				if (property.GetCustomAttribute<ShowInInspectorAttribute>() != null)
+					canRead = true;
+
+				bool canWrite = property.CanWrite && accessors.Length > 1 && accessors[1].IsPublic;
+				if (accessors.Length > 1 && accessors[1].GetCustomAttribute<ShowInInspectorAttribute>() != null)
+					canWrite = true;
+
+				if(canRead)
+					DrawObject(
+						property.Name,
+						property.PropertyType,
+						property.GetValue(component),
+						component,
+						canWrite ? property.SetValue : (Action<object, object>)null
+					);
 			}
 
+			ImGUI.EndTable();
 			ImGUI.Unindent();
 		}
 
 		private void Draw(string label, string value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Input(label, ref value))
+			if (ImGUI.Input($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, float value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag(label, ref value))
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}	
 		
 		private void Draw(string label, int value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag(label, ref value))
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, bool value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Checkbox(label, ref value))
+			if (ImGUI.Checkbox($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, Vector2 value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag(label, ref value))
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, Vector3 value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag(label, ref value))
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, Vector4 value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag(label, ref value))
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 		
 		private void Draw(string label, Quaternion value, object instance, Action<object, object> setValue)
 		{
 			Vector3 euler = value.Euler;
-			if (ImGUI.Drag(label, ref euler))
+			if (ImGUI.Drag($"##{label}", ref euler))
 				setValue.Invoke(instance, Quaternion.FromEuler(euler));
 		}
 		
 		private void Draw(string label, Colour value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.ColourEdit4(label, ref value))
+			if (ImGUI.ColourEdit4($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 
 		private void Draw(string label, Texture value, object instance, Action<object, object> setValue)
 		{
 			ImGUI.Image(value, new Vector2(50, 50));
-			ImGUI.SameLine();
-			ImGUI.Text(label);
 		}
 
 		private void Draw(string label, RenderTexture value, object instance, Action<object, object> setValue)
 		{
 			ImGUI.Image(value, new Vector2(50, 50));
-			ImGUI.SameLine();
-			ImGUI.Text(label);
 		}
 
 		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue)
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
 
+			ImGUI.TableNextRow(25);
+			ImGUI.TableSetColumnIndex(0);
+			ImGUI.Text(label);
+
+			ImGUI.TableSetColumnIndex(1);
 			if (t		== typeof(int))				Draw(label, (int)value,				instance, setValue);
 			else if (t	== typeof(bool))			Draw(label, (bool)value,			instance, setValue);
 			else if (t	== typeof(float))			Draw(label, (float)value,			instance, setValue);
