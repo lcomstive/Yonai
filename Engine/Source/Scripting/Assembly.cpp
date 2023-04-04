@@ -254,7 +254,7 @@ void Assembly::LoadScriptCoreTypes()
 
 	// System.aqua_Initialise
 	method = mono_class_get_method_from_name(system, "aqua_Initialise", 1);
-	SystemMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	SystemMethodInitialise = method ? (void(*)(MonoObject*, uint64_t, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	// System.aqua_Enable
 	method = mono_class_get_method_from_name(system, "aqua_Enable", 1);

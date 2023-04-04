@@ -14,14 +14,16 @@ namespace AquaEditor
 		{
 			Entity entity = (Entity)target;
 
-			ImGUI.Text(string.Format("{0:0}:{1:00}", entity.World.ID, entity.ID), Colour.Grey);
-			if(entity.TryGetComponent(out NameComponent nameComponent))
+			NameComponent nameComponent;
+			if(!entity.TryGetComponent(out nameComponent))
 			{
-				ImGUI.SameLine();
-				string name = nameComponent.Name;
-				if (ImGUI.Input("##nameComponent", ref name))
-					nameComponent.Name = name;
+				nameComponent = entity.AddComponent<NameComponent>();
+				nameComponent.Name = "Entity";
 			}
+
+			string name = nameComponent.Name;
+			if (ImGUI.Input("##nameComponent", ref name))
+				nameComponent.Name = name;
 
 			Component[] components = entity.GetComponents();
 			foreach(Component component in components)

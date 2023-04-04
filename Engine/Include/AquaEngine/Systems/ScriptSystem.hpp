@@ -21,6 +21,6 @@ namespace AquaEngine::Systems
 		AquaAPI void OnScriptingReloadedBefore() override;
 
 	private:
-		unsigned int GetWorldID();
+		UUID GetWorldID();
 	};
 }

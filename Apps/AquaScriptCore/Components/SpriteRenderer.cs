@@ -7,7 +7,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Texture to draw
 		/// </summary>
-		public uint Sprite
+		public UUID Sprite
 		{
 			get => _GetSprite(World.ID, Entity.ID);
 			set => _SetSprite(World.ID, Entity.ID, value);
@@ -29,19 +29,19 @@ namespace AquaEngine
 		/// <summary>
 		/// Shader program to draw sprite
 		/// </summary>
-		public uint Shader
+		public UUID Shader
 		{
 			get => _GetShader(World.ID, Entity.ID);
 			set => _SetShader(World.ID, Entity.ID, value);
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetSprite(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSprite(uint worldID, uint entityID, uint position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetColour(uint worldID, uint entityID, out Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetColour(uint worldID, uint entityID, ref Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetShader(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(uint worldID, uint entityID, uint shader);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSprite(ulong worldID, ulong entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSprite(ulong worldID, ulong entityID, ulong position);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetColour(ulong worldID, ulong entityID, out Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetColour(ulong worldID, ulong entityID, ref Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(ulong worldID, ulong entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(ulong worldID, ulong entityID, ulong shader);
 		#endregion
 	}
 }

@@ -18,10 +18,10 @@ extern SystemMethodInitialiseFn SystemMethodInitialise;
 	World* world = GetWorld(); \
 	spdlog::trace(msg " system '{}' [{}]", GetTypeName(ManagedData.Type), (world ? ("World #" + std::to_string(world->ID())) : "Global"));
 
-unsigned int ScriptSystem::GetWorldID()
+UUID ScriptSystem::GetWorldID()
 {
 	World* world = GetWorld();
-	return world ? world->ID() : InvalidEntityID;
+	return world ? world->ID() : 0;
 }
 
 char* GetTypeName(MonoType* type) { return mono_type_get_name_full(type, MonoTypeNameFormat::MONO_TYPE_NAME_FORMAT_REFLECTION); }

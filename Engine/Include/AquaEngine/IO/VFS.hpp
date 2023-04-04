@@ -122,6 +122,12 @@ namespace AquaEngine::IO
 		AquaAPI static void Move(const std::string& originalPath, const std::string& newPath);
 		AquaAPI static void Copy(const std::string& originalPath, const std::string& copyPath);
 
+		/// <returns>True if directory was created successfully<returns>
+		AquaAPI static bool CreateDirectory(const std::string& path);
+
+		/// <returns>True if directory was deleted successfully<returns>
+		AquaAPI static bool DeleteDirectory(const std::string& path);
+
 		/// <summary>
 		/// Gets the absolute path of a filepath.
 		/// If <paramref name="requireFileExists"/> set to false, gets the first matching mount.

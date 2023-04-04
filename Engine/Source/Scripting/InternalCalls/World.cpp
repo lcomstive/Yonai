@@ -27,7 +27,7 @@ size_t _GetComponentType(MonoReflectionType* componentType)
 { return Assembly::GetTypeHash(mono_reflection_type_get_type(componentType)); }
 
 #pragma region World
-ADD_MANAGED_METHOD(World, Get, bool, (unsigned int worldID, MonoString** outName))
+ADD_MANAGED_METHOD(World, Get, bool, (uint64_t worldID, MonoString** outName))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -45,15 +45,15 @@ ADD_MANAGED_METHOD(World, GetAll, void, (MonoArray** outWorldIDs))
 {
 	vector<World*> worlds = World::GetWorlds();
 
-	*outWorldIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), worlds.size());
+	*outWorldIDs = mono_array_new(mono_domain_get(), mono_get_uint64_class(), worlds.size());
 	for (size_t i = 0; i < worlds.size(); i++)
-		mono_array_set(*outWorldIDs, unsigned int, i, worlds[i]->ID());
+		mono_array_set(*outWorldIDs, uint64_t, i, worlds[i]->ID());
 }
 
-ADD_MANAGED_METHOD(World, Exists, bool, (unsigned int worldID))
+ADD_MANAGED_METHOD(World, Exists, bool, (uint64_t worldID))
 { return World::GetWorld(worldID) != nullptr; }
 
-ADD_MANAGED_METHOD(World, Destroy, bool, (unsigned int worldID))
+ADD_MANAGED_METHOD(World, Destroy, bool, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -63,62 +63,64 @@ ADD_MANAGED_METHOD(World, Destroy, bool, (unsigned int worldID))
 	return true;
 }
 
-ADD_MANAGED_METHOD(World, Create, bool, (MonoString* name))
+ADD_MANAGED_METHOD(World, Create, uint64_t, (MonoString* nameRaw))
 {
-	World* world = new World(mono_string_to_utf8(name));
+	char* name = mono_string_to_utf8(nameRaw);
+	World* world = new World(name);
+	mono_free(name);
 	return world->ID();
 }
 
-ADD_MANAGED_METHOD(World, CreateEntity, unsigned int, (unsigned int worldID))
+ADD_MANAGED_METHOD(World, CreateEntity, uint64_t, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	return world ? world->CreateEntity().ID() : InvalidEntityID;
 }
 
-ADD_MANAGED_METHOD(World, CreateEntityID, unsigned int, (unsigned int worldID, unsigned int entityID))
+ADD_MANAGED_METHOD(World, CreateEntityID, uint64_t, (uint64_t worldID, uint64_t entityID))
 {
 	World* world = World::GetWorld(worldID);
 	return world ? world->CreateEntity(entityID).ID() : InvalidEntityID;
 }
 
-ADD_MANAGED_METHOD(World, DestroyEntity, void, (unsigned int worldID, unsigned int entityID))
+ADD_MANAGED_METHOD(World, DestroyEntity, void, (uint64_t worldID, uint64_t entityID))
 {
 	World* world = World::GetWorld(worldID);
 	if (world)
 		world->DestroyEntity(entityID);
 }
 
-ADD_MANAGED_METHOD(World, HasEntity, bool, (unsigned int worldID, unsigned int entityID))
+ADD_MANAGED_METHOD(World, HasEntity, bool, (uint64_t worldID, uint64_t entityID))
 {
 	World* world = World::GetWorld(worldID);
 	return world ? world->HasEntity(entityID) : false;
 }
 
-ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (unsigned int worldID))
+ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
 	auto entities = world->Entities();
-	MonoArray* entityIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
+	MonoArray* entityIDs = mono_array_new(mono_domain_get(), mono_get_uint64_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
-		mono_array_set(entityIDs, unsigned int, i, entities[i].ID());
+		mono_array_set(entityIDs, uint64_t, i, entities[i].ID());
 	return entityIDs;
 }
 
-ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (unsigned int worldID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (uint64_t worldID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
 	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType));
-	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint64_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
-		mono_array_set(output, unsigned int, i, entities[i]);
+		mono_array_set(output, uint64_t, i, entities[i]);
 	return output;
 }
 
-ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (unsigned int worldID, MonoArray* inputTypes))
+ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, MonoArray* inputTypes))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -130,15 +132,15 @@ ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (unsigned int world
 		componentTypes.emplace_back(_GetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
 
 	vector<EntityID> entities = world->GetComponentManager()->GetEntities(componentTypes);
-	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), entities.size());
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint64_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
-		mono_array_set(output, unsigned int, i, entities[i]);
+		mono_array_set(output, uint64_t, i, entities[i]);
 	return output;
 }
 #pragma endregion
 
 #pragma region Entity
-ADD_MANAGED_METHOD(Entity, HasComponent, bool, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, HasComponent, bool, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world || !world->HasEntity(entityID))
@@ -147,9 +149,9 @@ ADD_MANAGED_METHOD(Entity, HasComponent, bool, (unsigned int worldID, unsigned i
 	return world->GetComponentManager()->Has(entityID, _GetComponentType(componentType));
 }
 
-ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType));
+ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType));
 
-ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -169,7 +171,7 @@ ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (unsigned int worldID, uns
 	return managedData.AddFn(world, entityID)->ManagedData.GetInstance();
 }
 
-ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world || !world->HasEntity(entityID))
@@ -189,7 +191,7 @@ ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (unsigned int worldID, unsigne
 	return world->GetComponentManager()->Remove(entityID, type);
 }
 
-ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -202,7 +204,7 @@ ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (unsigned int worldID, uns
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
 }
 
-ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -235,7 +237,7 @@ size_t GetSystemType(MonoReflectionType* componentType)
 	return Assembly::GetManagedSystemData(managedType).Type;
 }
 
-SystemManager* GetSystemManager(unsigned int worldID)
+SystemManager* GetSystemManager(uint64_t worldID)
 {
 	if (worldID == InvalidEntityID)
 		return SystemManager::Global();
@@ -244,7 +246,7 @@ SystemManager* GetSystemManager(unsigned int worldID)
 	return world ? world->GetSystemManager() : nullptr;
 }
 
-ADD_MANAGED_METHOD(World, HasSystem, bool, (unsigned int worldID, MonoReflectionType* systemType))
+ADD_MANAGED_METHOD(World, HasSystem, bool, (uint64_t worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -252,7 +254,7 @@ ADD_MANAGED_METHOD(World, HasSystem, bool, (unsigned int worldID, MonoReflection
 	return systemManager->Has(GetSystemType(systemType));
 }
 
-ADD_MANAGED_METHOD(World, GetSystem, MonoObject*, (unsigned int worldID, MonoReflectionType* systemType))
+ADD_MANAGED_METHOD(World, GetSystem, MonoObject*, (uint64_t worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -266,7 +268,7 @@ ADD_MANAGED_METHOD(World, GetSystem, MonoObject*, (unsigned int worldID, MonoRef
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
 }
 
-ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (unsigned int worldID, MonoReflectionType* systemType))
+ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (uint64_t worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)
@@ -286,7 +288,7 @@ ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (unsigned int worldID, MonoRef
 	return systemData.AddFn(systemManager)->ManagedData.GetInstance();
 }
 
-ADD_MANAGED_METHOD(World, RemoveSystem, bool, (unsigned int worldID, MonoReflectionType* systemType))
+ADD_MANAGED_METHOD(World, RemoveSystem, bool, (uint64_t worldID, MonoReflectionType* systemType))
 {
 	SystemManager* systemManager = GetSystemManager(worldID);
 	if (!systemManager)

@@ -12,13 +12,13 @@ namespace AquaEngine
 
 	public class SoundSource : NativeComponent
 	{
-		public uint Sound
+		public UUID Sound
 		{
 			get => _GetSound(Handle);
 			set => _SetSound(Handle, value);
 		}
 
-		public uint MixerID
+		public UUID MixerID
 		{
 			get => _GetMixer(Handle);
 			set => _SetMixer(Handle, value);
@@ -28,12 +28,12 @@ namespace AquaEngine
 		{
 			get
 			{
-				uint mixerID = MixerID;
-				return mixerID == uint.MaxValue ? null : Resource.Get<SoundMixer>(mixerID);
+				UUID mixerID = MixerID;
+				return mixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(mixerID);
 			}
 
-			// Sets mixer ID to desired mixer, or InvalidResourceID if null, which results in output directly to master output
-			set => MixerID = value?.ResourceID ?? uint.MaxValue;
+			// Sets mixer ID to desired mixer, or UUID.Invalid if null, which results in output directly to master output
+			set => MixerID = value?.ResourceID ?? UUID.Invalid;
 		}
 
 		/// <summary>
@@ -104,8 +104,8 @@ namespace AquaEngine
 		public void Seek(float seconds) => _Seek(Handle, seconds);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetSound(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSound(IntPtr handle, uint soundClip);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSound(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSound(IntPtr handle, ulong soundClip);
 	
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Play(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Pause(IntPtr handle);
@@ -123,8 +123,8 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetSpatialization(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSpatialization(IntPtr handle, bool value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetMixer(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMixer(IntPtr handle, uint value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetMixer(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMixer(IntPtr handle, ulong value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetVolume(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVolume(IntPtr handle, float value);

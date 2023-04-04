@@ -6,7 +6,7 @@ namespace AquaEditor.Views
 	public class HierarchyView : View
 	{
 		private World[] m_Worlds = null;
-		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.125f);
+		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.25f);
 
 		[MenuItem("Window/Hierarchy")]
 		private static void MenuCallback() => EditorUIService.Open<HierarchyView>();
@@ -47,13 +47,14 @@ namespace AquaEditor.Views
 							ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
 
 						ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 17.5f));
-						ImGUI.Text(string.Format("[{0:00}]", entity.ID), Colour.Grey);
 
-						if (!entity.TryGetComponent(out NameComponent nameComponent) ||
-							string.IsNullOrEmpty(nameComponent.Name))
-							continue;
+						NameComponent nameComponent;
+						if (!entity.TryGetComponent(out nameComponent))
+						{
+							nameComponent = entity.AddComponent<NameComponent>();
+							nameComponent.Name = $"Entity {entity.ID}";
+						}
 
-						ImGUI.SameLine();
 						ImGUI.Text(nameComponent.Name);
 
 						if(isSelected)

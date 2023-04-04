@@ -9,7 +9,7 @@ namespace AquaEditor
 	{
 		public struct Viewport
 		{
-			public uint ID, ParentID;
+			public ulong ID, ParentID;
 			public Vector2 Position, Size, WorkPosition, WorkSize;
 		}
 
@@ -762,7 +762,7 @@ namespace AquaEditor
 		private static extern void _SetNextWindowSize(ref Vector2 position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetNextWindowViewport(uint viewportID);
+		public static extern void SetNextWindowViewport(ulong viewportID);
 		#endregion
 
 		#region State
@@ -911,9 +911,9 @@ namespace AquaEditor
 		private static Colour s_ImageDefaultBorder = new Colour(0, 0, 0, 0);
 		private static Colour s_ButtonImageDefaultBackground = new Colour(0, 0, 0, 0);
 
-		public static void Image(uint textureID, Vector2 size) => _Image(textureID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
-		public static void Image(uint textureID, Vector2 size, Colour tint) => _Image(textureID, ref size, ref tint, ref s_ImageDefaultBorder);
-		public static void Image(uint textureID, Vector2 size, Colour tint, Colour border) => _Image(textureID, ref size, ref tint, ref border);
+		public static void Image(ulong textureID, Vector2 size) => _Image(textureID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
+		public static void Image(ulong textureID, Vector2 size, Colour tint) => _Image(textureID, ref size, ref tint, ref s_ImageDefaultBorder);
+		public static void Image(ulong textureID, Vector2 size, Colour tint, Colour border) => _Image(textureID, ref size, ref tint, ref border);
 
 		public static void Image(Texture texture, Vector2 size) => _Image(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
 		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ImageDefaultBorder);
@@ -923,22 +923,22 @@ namespace AquaEditor
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint, Colour border) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref border);
 
-		public static bool ButtonImage(uint textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(uint textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
+		public static bool ButtonImage(ulong textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
 
 		public static bool ButtonImage(Texture texture, Vector2 size, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _Image(uint textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
+		private static extern void _Image(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _ImageRenderTexture(IntPtr handle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _ImageButton(uint textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
+		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
 		#endregion
 
 		#region Drag
@@ -1154,7 +1154,7 @@ namespace AquaEditor
 		public static IVector2 WindowPosition
 		{ get { _GetWindowPosition(out IVector2 output); return output; } }
 
-		public static Viewport GetViewport(uint ID)
+		public static Viewport GetViewport(ulong ID)
 		{
 			Viewport viewport = new Viewport() { ID = ID };
 			_GetViewport(
@@ -1176,19 +1176,19 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _GetViewport(
-			uint ID,
+			ulong ID,
 			out Vector2 position,
 			out Vector2 size,
 			out Vector2 workPosition,
 			out Vector2 workSize,
-			out uint parentID
+			out ulong parentID
 			);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern uint GetMainViewportID();
+		public static extern ulong GetMainViewportID();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern uint GetWindowViewportID();
+		public static extern ulong GetWindowViewportID();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _GetWindowContentRegionMin(out IVector2 output);
@@ -1266,10 +1266,10 @@ namespace AquaEditor
 		#endregion
 
 		#region Tables
-		public static bool BeginTable(string label, uint columns, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
+		public static bool BeginTable(string label, ulong columns, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
 			BeginTable(label, columns, Vector2.Zero, flags, innerWidth);
 
-		public static bool BeginTable(string label, uint columns, Vector2 outerSize, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
+		public static bool BeginTable(string label, ulong columns, Vector2 outerSize, TableFlags flags = TableFlags.None, float innerWidth = 0) =>
 			_BeginTable(label, columns, (int)flags, ref outerSize, innerWidth);
 
 		public static void TableSetupColumn(string label, TableColumnFlags flags = TableColumnFlags.None, float size = 0) =>
@@ -1282,7 +1282,7 @@ namespace AquaEditor
 			(TableColumnFlags)_TableGetColumnFlags(column);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _BeginTable(string label, uint columns, int flags, ref Vector2 outerSize, float innerWidth);
+		private static extern bool _BeginTable(string label, ulong columns, int flags, ref Vector2 outerSize, float innerWidth);
 
 		/// <summary>
 		/// Only call if <b>BeginTable</b> returns true

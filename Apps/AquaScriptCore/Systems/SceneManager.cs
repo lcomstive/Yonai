@@ -33,7 +33,7 @@ namespace AquaEngine
 		public static World[] GetActiveScenes()
 		{
 			List<World> scenes = new List<World>();
-			uint[] worldIDs = _GetActiveScenes();
+			ulong[] worldIDs = _GetActiveScenes();
 			for(int i = 0; i < worldIDs.Length; i++)
 				scenes.Add(World.Get(worldIDs[i]));
 			return scenes.ToArray();
@@ -47,18 +47,15 @@ namespace AquaEngine
 		public static event OnWorldChanged WorldChanged;
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(uint world);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _LoadAdditive(uint world);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(uint world);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(ulong world);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _LoadAdditive(ulong world);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(ulong world);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadAll();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint[] _GetActiveScenes();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetActiveScenes();
 
 		// Called from unmanaged code
-		private static void _OnSceneChanged(uint worldID, bool added)
-		{
-			Log.Debug($"_OnSceneChanged({worldID}, {added})");
+		private static void _OnSceneChanged(ulong worldID, bool added) =>
 			WorldChanged?.Invoke(World.Get(worldID), added);
-		}
 		#endregion
 	}
 }

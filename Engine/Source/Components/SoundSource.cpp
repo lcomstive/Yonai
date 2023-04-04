@@ -192,10 +192,10 @@ void SoundSource::SetMixer(ResourceID mixer)
 #pragma region Scripting Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(SoundSource, GetSound, unsigned int, (void* instance))
+ADD_MANAGED_METHOD(SoundSource, GetSound, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetSound(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, unsigned int value))
+ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, uint64_t value))
 { ((SoundSource*)instance)->SetSound(value); }
 
 ADD_MANAGED_METHOD(SoundSource, Play, void, (void* instance))
@@ -234,7 +234,7 @@ ADD_MANAGED_METHOD(SoundSource, GetSpatialization, bool, (void* instance))
 ADD_MANAGED_METHOD(SoundSource, SetSpatialization, void, (void* instance, bool value))
 { ((SoundSource*)instance)->SetSpatialization(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetMixer, unsigned int, (void* instance))
+ADD_MANAGED_METHOD(SoundSource, GetMixer, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetMixer(); }
 
 ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, unsigned int value))

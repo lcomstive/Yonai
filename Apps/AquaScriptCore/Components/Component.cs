@@ -184,6 +184,7 @@ namespace AquaEngine
 			else if (t == typeof(bool))	  json[label] = (bool)value;
 			else if (t == typeof(float))  json[label] = (float)value;
 			else if (t == typeof(string)) json[label] = (string)value;
+			else if (t == typeof(UUID))   json[label] = (ulong)(UUID)value;
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be serialized");
 		}
@@ -195,6 +196,7 @@ namespace AquaEngine
 			else if (t == typeof(bool))	  return json[label].Value<bool>();
 			else if (t == typeof(float))  return json[label].Value<float>();
 			else if (t == typeof(string)) return json[label].Value<string>();
+			else if (t == typeof(UUID))	  return (UUID)json[label].Value<ulong>();
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be deserialized");
 			return null;
@@ -219,7 +221,7 @@ namespace AquaEngine
 
 		#region Unmanaged Calls
 		// Called from C++
-		internal void aqua_Initialise(uint worldID, uint entityID) => Entity = new Entity(World.Get(worldID), entityID);
+		internal void aqua_Initialise(ulong worldID, ulong entityID) => Entity = new Entity(World.Get(worldID), entityID);
 
 		// Called from C++
 		private void aqua_Enable(bool enable)

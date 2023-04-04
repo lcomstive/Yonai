@@ -9,23 +9,17 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Components;
 
-unordered_map<unsigned int, World*> World::s_Worlds;
+unordered_map<UUID, World*> World::s_Worlds;
 
 World::World(string name) : m_Name(name)
 {
-	m_ID = 0;
-	while (s_Worlds.find(m_ID) != s_Worlds.end())
-		m_ID++;
 	s_Worlds.emplace(m_ID, this);
 
 	m_SystemManager = make_unique<AquaEngine::SystemManager>(this);
 	m_ComponentManager = make_unique<AquaEngine::ComponentManager>(m_ID);
-	m_EntityManager = make_unique<AquaEngine::EntityManager>(m_ComponentManager.get(), m_ID);
-
-	m_EntityManager->Prepare();
 }
 
-unsigned int World::ID() { return m_ID; }
+UUID& World::ID() { return m_ID; }
 string& World::Name() { return m_Name; }
 void World::Name(string& name) { m_Name = name; }
 
@@ -45,62 +39,48 @@ void World::Update()
 	m_ComponentManager->CallUpdateFn();
 }
 
-void World::PrepareEntities(unsigned int count) { m_EntityManager->Prepare(count); }
-
 Entity World::CreateEntity()
 {
-	Entity e(m_EntityManager->Create(), this);
+	Entity e(this);
 	m_Entities.emplace(e.ID(), e);
 	return e;
 }
 
 Entity World::CreateEntity(EntityID ID)
 {
-	bool validID = m_EntityManager->Insert(ID);
-	if (!validID)
-		return Entity(InvalidEntityID);
-
 	Entity e(ID, this);
 	m_Entities.emplace(ID, e);
 	return e;
 }
 
-unsigned int World::EntityCount() { return m_EntityManager->EntityCount(); }
+size_t World::EntityCount() { return m_Entities.size(); }
 
 vector<Entity> World::Entities()
 {
-	vector<EntityID> IDs = m_EntityManager->Entities();
-	vector<Entity> entities(IDs.size());
-	for (size_t i = 0; i < IDs.size(); i++)
-		entities[i] = GetEntity(IDs[i]);
+	vector<Entity> entities;
+	for (auto pair : m_Entities)
+		entities.push_back(pair.second);
 	return entities;
 }
 
 bool World::HasEntity(EntityID entity)
-{
-	return m_Entities.find(entity) != m_Entities.end();
-}
+{ return m_Entities.find(entity) != m_Entities.end(); }
 
 Entity World::GetEntity(EntityID entity)
-{
-	return m_Entities.find(entity) != m_Entities.end() ? m_Entities.at(entity) : Entity();
-}
+{ return m_Entities.find(entity) != m_Entities.end() ? m_Entities.at(entity) : Entity(); }
 
 void World::DestroyEntity(EntityID entity)
 {
-	m_EntityManager->Destroy(entity);
 	if(m_Entities.find(entity) != m_Entities.end())
 		m_Entities.erase(entity);
 }
 
 void* World::GetComponent(EntityID entity, size_t type)
-{
-	return m_ComponentManager->Get(entity, type);
-}
+{ return m_ComponentManager->Get(entity, type); }
 
 void World::OnActiveStateChanged(bool isActive)
 {
-	spdlog::debug("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
+	spdlog::trace("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
 	m_ComponentManager->OnWorldActiveStateChanged(isActive);
 
 	m_SystemManager->Enable(isActive);
@@ -120,15 +100,14 @@ bool World::HasComponents(EntityID entity) { return !m_ComponentManager->IsEmpty
 void World::SetupEntityComponent(EntityID id, Component* component) { component->Entity = GetEntity(id); }
 
 SystemManager* World::GetSystemManager() { return m_SystemManager.get(); }
-EntityManager* World::GetEntityManager() { return m_EntityManager.get(); }
 ComponentManager* World::GetComponentManager() { return m_ComponentManager.get(); }
 
 void World::ClearComponents(EntityID entity) { m_ComponentManager->Clear(entity); }
 
-World* World::GetWorld(unsigned int id)
+World* World::GetWorld(UUID id)
 { return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
 
-bool World::Exists(unsigned int id) { return s_Worlds.find(id) != s_Worlds.end(); }
+bool World::Exists(UUID id) { return s_Worlds.find(id) != s_Worlds.end(); }
 
 vector<World*> World::GetWorlds()
 {

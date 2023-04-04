@@ -25,6 +25,12 @@ ADD_MANAGED_METHOD(VFS, Unmount, void, (MonoString* mountPoint))
 ADD_MANAGED_METHOD(VFS, UnmountPath, void, (MonoString* mountPoint, MonoString* mountPath))
 { VFS::Unmount(mono_string_to_utf8(mountPoint), mono_string_to_utf8(mountPath)); }
 
+ADD_MANAGED_METHOD(VFS, CreateDirectory, bool, (MonoString* path))
+{ return VFS::CreateDirectory(mono_string_to_utf8(path)); }
+
+ADD_MANAGED_METHOD(VFS, DeleteDirectory, bool, (MonoString* path))
+{ return VFS::DeleteDirectory(mono_string_to_utf8(path)); }
+
 ADD_MANAGED_METHOD(VFS, ReadText, MonoString*, (MonoString* path))
 {
 	string content = VFS::ReadText(mono_string_to_utf8(path));

@@ -56,22 +56,22 @@ Shader* Material::PrepareShader()
 
 #pragma region Internal Calls
 // _Load(string path, out uint resourceID, out IntPtr handle);
-ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, unsigned int* resourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, uint64_t* resourceID, void** outHandle), AquaEngine.Graphics)
 {
 	*resourceID = Resource::Load<Material>(mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Material>(*resourceID);
 }
 
-ADD_MANAGED_GET_SET(Material, Shader, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AlbedoMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, Shader, uint64_t, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AlbedoMap, uint64_t, AquaEngine.Graphics)
 ADD_MANAGED_GET_SET(Material, AlphaClipping, bool, AquaEngine.Graphics)
 ADD_MANAGED_GET_SET(Material, AlphaClipThreshold, float, AquaEngine.Graphics)
 ADD_MANAGED_GET_SET(Material, Roughness, float, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, RoughnessMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, RoughnessMap, uint64_t, AquaEngine.Graphics)
 ADD_MANAGED_GET_SET(Material, Metalness, float, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, MetalnessMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, NormalMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AmbientOcclusionMap, unsigned int, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, MetalnessMap, uint64_t, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, NormalMap, uint64_t, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, AmbientOcclusionMap, uint64_t, AquaEngine.Graphics)
 ADD_MANAGED_GET_SET(Material, Transparent, bool, AquaEngine.Graphics)
 
 ADD_MANAGED_METHOD(Material, GetAlbedo, void, (void* handle, glm::vec4* value), AquaEngine.Graphics)

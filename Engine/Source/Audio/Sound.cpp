@@ -32,7 +32,7 @@ float Sound::GetLength()
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, MonoString* audioFilePath, unsigned int* outResourceID, void** outHandle))
+ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, MonoString* audioFilePath, unsigned long long* outResourceID, void** outHandle))
 {
 	*outResourceID = Resource::Load<Sound>(mono_string_to_utf8(path), mono_string_to_utf8(audioFilePath));
 	*outHandle = Resource::Get<Sound>(*outResourceID);

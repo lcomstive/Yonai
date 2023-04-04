@@ -129,7 +129,7 @@ TEST(ECS, WorldHasEntity)
 	EXPECT_FALSE(world.HasEntity(123));
 
 	AquaEngine::Entity entity = world.CreateEntity();
-	unsigned int entityID = entity.ID();
+	AquaEngine::EntityID entityID = entity.ID();
 	EXPECT_TRUE(entity.IsValid());
 	EXPECT_TRUE(world.HasEntity(entityID));
 

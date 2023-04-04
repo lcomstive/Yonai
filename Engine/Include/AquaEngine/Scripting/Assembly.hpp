@@ -28,7 +28,7 @@ namespace AquaEngine::Scripting
 			/// Component* (World* world, unsigned int entityID).
 			/// Returns created instance of component matching type <see cref="Type" />
 			/// </summary>
-			std::function<Components::Component* (World*, unsigned int)> AddFn;
+			std::function<Components::Component* (World*, UUID)> AddFn;
 		};
 
 		struct ManagedSystemData

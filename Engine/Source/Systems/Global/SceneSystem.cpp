@@ -151,21 +151,21 @@ void SceneSystem::RemoveSceneCallback(SceneCallback callback)
 	}
 }
 
-ADD_MANAGED_METHOD(SceneManager, Load, void, (unsigned int worldID))
+ADD_MANAGED_METHOD(SceneManager, Load, void, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (world)
 		SceneSystem::LoadScene(world);
 }
 
-ADD_MANAGED_METHOD(SceneManager, LoadAdditive, void, (unsigned int worldID))
+ADD_MANAGED_METHOD(SceneManager, LoadAdditive, void, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (world)
 		SceneSystem::AddScene(world);
 }
 
-ADD_MANAGED_METHOD(SceneManager, Unload, void, (unsigned int worldID))
+ADD_MANAGED_METHOD(SceneManager, Unload, void, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);
 	if (world)
@@ -178,10 +178,10 @@ ADD_MANAGED_METHOD(SceneManager, UnloadAll)
 ADD_MANAGED_METHOD(SceneManager, GetActiveScenes, MonoArray*)
 {
 	vector<World*> scenes = SceneSystem::GetActiveScenes();
-	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint32_class(), scenes.size());
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint64_class(), scenes.size());
 
 	for (size_t i = 0; i < scenes.size(); i++)
-		mono_array_set(output, unsigned int, i, scenes[i]->ID());
+		mono_array_set(output, uint64_t, i, scenes[i]->ID());
 
 	return output;
 }

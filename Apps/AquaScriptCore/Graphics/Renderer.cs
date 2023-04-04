@@ -68,7 +68,7 @@ namespace AquaEngine.Graphics
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(uint worldID, uint entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(ulong worldID, ulong entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetPipeline();
 		#endregion
 	}

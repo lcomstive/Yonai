@@ -13,7 +13,7 @@ namespace AquaEngine.Graphics
 			{
 				// Check for change
 				if(m_Shader != value)
-					_SetShader(Handle, m_Shader = value);
+					_SetShader(Handle, (m_Shader = value).ResourceID);
 			}
 		}
 
@@ -70,7 +70,7 @@ namespace AquaEngine.Graphics
 
 		internal override bool Load(string path, params object[] args)
 		{
-			_Load(path, out uint resourceID, out IntPtr handle);
+			_Load(path, out ulong resourceID, out IntPtr handle);
 
 			Handle = handle;
 			ResourceID = resourceID;
@@ -88,16 +88,16 @@ namespace AquaEngine.Graphics
 			m_AlbedoMap = Resource.Get<Texture>(_GetAlbedoMap(Handle));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out uint resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetShader(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(IntPtr handle, uint value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(IntPtr handle, ulong value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAlbedo(IntPtr handle, out Vector4 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedo(IntPtr handle, ref Vector4 value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetAlbedoMap(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedoMap(IntPtr handle, uint value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetAlbedoMap(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedoMap(IntPtr handle, ulong value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetAlphaClipping(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlphaClipping(IntPtr handle, bool value);

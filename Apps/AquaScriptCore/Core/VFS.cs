@@ -32,6 +32,9 @@ namespace AquaEngine
 		public static void Remove(string path) => _Remove(path);
 		public static void Copy(string source, string target) => _Copy(source, target);
 		public static void Move(string source, string target) => _Move(source, target);
+
+		public static bool CreateDirectory(string path) => _CreateDirectory(path);
+		public static bool DeleteDirectory(string path) => _DeleteDirectory(path);
 		#endregion
 
 		#region Internal Calls
@@ -56,6 +59,9 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Remove(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Move(string source, string target);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Copy(string source, string target);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _CreateDirectory(string path);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _DeleteDirectory(string path);
 		#endregion
 	}
 }

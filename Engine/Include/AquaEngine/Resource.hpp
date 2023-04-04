@@ -45,7 +45,6 @@ namespace AquaEngine
 		static std::unordered_map<ResourceID, unsigned int> s_ResourceIDs;
 
 		AquaAPI static ResourceInstance* GetInstance(ResourceID id);
-		AquaAPI static ResourceID AllocateID(unsigned int instanceIndex);
 
 	public:
 		template<typename T, class... ArgTypes>
@@ -70,7 +69,7 @@ namespace AquaEngine
 
 			// Create new resource
 			s_Instances.emplace_back(ResourceInstance(new T(constructorArgs...), loadType));
-			ResourceID id = AllocateID((unsigned int)s_Instances.size() - 1);
+			ResourceID id;
 			s_InstancePaths.emplace(path, id);
 
 			return id;

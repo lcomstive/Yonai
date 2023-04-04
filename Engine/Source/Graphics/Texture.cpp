@@ -136,13 +136,13 @@ void Texture::Bind(unsigned int index)
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Texture, Load0, void, (MonoString* path, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Load0, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
 	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Texture>(*outResourceID);
 }
 
-ADD_MANAGED_METHOD(Texture, Load1, void, (MonoString* path, MonoString* filePath, bool hdr, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Load1, void, (MonoString* path, MonoString* filePath, bool hdr, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
 	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path), mono_string_to_utf8(filePath), hdr);
 	*outHandle = Resource::Get<Texture>(*outResourceID);

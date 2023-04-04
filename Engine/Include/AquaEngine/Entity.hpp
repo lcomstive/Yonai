@@ -1,12 +1,12 @@
 #pragma once
-#include <AquaEngine/API.hpp>
+#include <AquaEngine/UUID.hpp>
 
 namespace AquaEngine
 {
 	/// <summary>
 	/// Represents an Entity
 	/// </summary>
-	typedef unsigned int EntityID;
+	typedef UUID EntityID;
 
-	const EntityID InvalidEntityID = (EntityID)-1;
+	const EntityID InvalidEntityID = 0;
 }

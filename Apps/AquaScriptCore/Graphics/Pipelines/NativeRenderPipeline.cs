@@ -48,7 +48,7 @@ namespace AquaEngine.Graphics.Pipelines
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetResolution(IntPtr handle, ref IVector2 resolution);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, uint cameraWorldID, uint cameraEntityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, ulong cameraWorldID, ulong cameraEntityID);
 
 		// Returns handle to framebuffer
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetOutput(IntPtr handle);

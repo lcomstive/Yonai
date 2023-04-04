@@ -23,7 +23,7 @@ namespace AquaEngine
 		 */
 		internal override bool Load(string path, params object[] args)
 		{
-			uint resourceID;
+			ulong resourceID;
 			IntPtr handle;
 
 			string name = args.Length > 0 && args[0] is string ? "Mixer" : (string)args[0];
@@ -45,8 +45,8 @@ namespace AquaEngine
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, string mixerName, out uint resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string mixerName, uint parentMixerID, out uint resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, string mixerName, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string mixerName, ulong parentMixerID, out ulong resourceID, out IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetVolume(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVolume(IntPtr handle, float value);

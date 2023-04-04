@@ -17,7 +17,7 @@ extern EmptyMethodFn ComponentMethodDestroyed;
 extern ComponentMethodEnabledFn ComponentMethodEnabled;
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
-ComponentManager::ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
+ComponentManager::ComponentManager(UUID worldID) : m_WorldID(worldID) { }
 
 void ComponentManager::Destroy()
 {
@@ -49,18 +49,18 @@ ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
 	return component;
 }
 
-bool ComponentManager::IsEmpty(EntityID& id)
+bool ComponentManager::IsEmpty(EntityID id)
 {
 	return m_EntityComponents.find(id) == m_EntityComponents.end() ||
 		m_EntityComponents[id].size() == 0;
 }
 
-bool ComponentManager::Has(EntityID& id, size_t type)
+bool ComponentManager::Has(EntityID id, size_t type)
 {
 	return m_ComponentArrays.find(type) != m_ComponentArrays.end() && m_ComponentArrays[type].Has(id);
 }
 
-bool ComponentManager::Has(EntityID& id, type_info& type)
+bool ComponentManager::Has(EntityID id, type_info& type)
 {
 	return Has(id, type.hash_code());
 }
@@ -78,7 +78,7 @@ void ComponentManager::Clear(EntityID id)
 	m_EntityComponents[id].clear();
 }
 
-bool ComponentManager::Remove(EntityID& id, size_t type)
+bool ComponentManager::Remove(EntityID id, size_t type)
 {
 	if (!Has(id, type) || m_ComponentArrays.find(type) == m_ComponentArrays.end())
 		return false;
@@ -173,7 +173,7 @@ void ComponentManager::InvalidateAllManagedInstances()
 	}
 }
 
-AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
+AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, UUID entityID)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedComponentData managedData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);

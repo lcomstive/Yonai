@@ -237,7 +237,7 @@ ResourceID Mesh::Sphere()
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
 	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Mesh>(*outID);
@@ -245,7 +245,7 @@ ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, unsigned int* outID, vo
 
 ADD_MANAGED_METHOD(Mesh, Load1, void,
 	(MonoString* path, MonoArray* inVertices, MonoArray* inIndices,
-		unsigned char drawMode, unsigned int* outID, void** outHandle),
+		unsigned char drawMode, uint64_t* outID, void** outHandle),
 	AquaEngine.Graphics)
 {
 	vector<Mesh::Vertex> vertices;

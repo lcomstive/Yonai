@@ -33,7 +33,7 @@ namespace AquaEditor
 
 			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
 
-			uint missingTextureID = Resource.Load<Texture>("Textures/Missing", "assets://Textures/Black.jpg");
+			UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", "assets://Textures/Black.jpg");
 			MissingTexture = Resource.Get<Texture>(missingTextureID);
 
 			// Demo //
@@ -60,40 +60,52 @@ namespace AquaEditor
 				pair.Value._Update();
 		}
 
+		private const string SceneDir = "project://Assets/Scenes/";
 		[MenuItem("File/Save", Shortcut = "CTRL+S")]
 		private static void SaveScene()
 		{
-			JsonSerializer serializer = new JsonSerializer();
-			serializer.Formatting = Formatting.Indented;
-
-			World[] activeScenes = SceneManager.GetActiveScenes();
-			foreach (World scene in activeScenes)
+			try
 			{
-				using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"app://Scene-{scene.Name}.json")))
-				using (JsonWriter writer = new JsonTextWriter(streamWriter))
+				if(!VFS.Exists(SceneDir))
+					VFS.CreateDirectory(SceneDir);
+
+				JsonSerializer serializer = new JsonSerializer();
+				serializer.Formatting = Formatting.Indented;
+
+				World[] activeScenes = SceneManager.GetActiveScenes();
+				foreach (World scene in activeScenes)
 				{
-					try { serializer.Serialize(writer, scene.OnSerialize()); }
-					catch(Exception e) { Log.Exception(e); }
+					using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
+					using (JsonWriter writer = new JsonTextWriter(streamWriter))
+					{
+						try { serializer.Serialize(writer, scene.OnSerialize()); }
+						catch (Exception e) { Log.Exception(e); }
+					}
 				}
 			}
+			catch(Exception e) { Log.Exception(e); }
 		}
 		
 		[MenuItem("File/Load")]
 		private static void LoadScene()
 		{
-			JsonSerializer serializer = new JsonSerializer();
-
-			World[] scenes = SceneManager.GetActiveScenes();
-			foreach(World scene in scenes)
+			try
 			{
-				if (!VFS.Exists($"app://Scene-{scene.Name}.json"))
-					continue; // Not saved
+				JsonSerializer serializer = new JsonSerializer();
 
-				using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"app://Scene-{scene.Name}.json")))
-				using (JsonReader reader = new JsonTextReader(streamReader))
-					try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
-					catch(Exception e) { Log.Exception(e); }
+				World[] scenes = SceneManager.GetActiveScenes();
+				foreach (World scene in scenes)
+				{
+					if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
+						continue; // Not saved
+
+					using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
+					using (JsonReader reader = new JsonTextReader(streamReader))
+						try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
+						catch (Exception e) { Log.Exception(e); }
+				}
 			}
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
@@ -145,8 +157,16 @@ namespace AquaEditor
 				ImGUI.End();
 
 				View[] views = m_ActiveViews.Values.ToArray();
-				foreach (View view in views)
-					view._Draw();
+				for (int i = 0; i < views.Length; i++)
+				{
+					try { views[i]._Draw(); }
+					catch(Exception e)
+					{
+						Log.Exception(e);
+						// Remove view with exception, otherwise it will (likely) do it each frame
+						m_ActiveViews.Remove(m_ActiveViews.Keys.ElementAt(i));
+					}
+				}
 
 				EndDockspace();
 
@@ -165,9 +185,13 @@ namespace AquaEditor
 			if (!m_ActiveViews.ContainsKey(type))
 			{
 				T instance = new T();
-				try { instance._Open(); } // Inform of opening
+				try
+				{
+					// Inform of opening
+					instance._Open();
+					m_ActiveViews.Add(type, instance);
+				}
 				catch (Exception e) { Log.Exception(e); }
-				m_ActiveViews.Add(type, instance);
 			}
 		}
 
@@ -268,7 +292,7 @@ namespace AquaEditor
 		private float m_AngleRads = MathUtils.Deg2Rad(50);
 		private IVector2 m_TestIVec2 = new IVector2(420, 69);
 
-		private uint m_TextureID = uint.MaxValue;
+		private UUID m_TextureID = UUID.Invalid;
 		private string m_Input = "String input field";
 		private string m_Password = "Password";
 		private string m_MultilineInput = "Multiline\nString\nField";
@@ -285,7 +309,8 @@ namespace AquaEditor
 			for (int i = 0; i < 15; i++)
 			{
 				Entity e = m_TestWorld.CreateEntity();
-				e.AddComponent<NameComponent>().Name = "Entity";
+				NameComponent nameComponent = e.AddComponent<NameComponent>();
+				nameComponent.Name = "Entity";
 
 				SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
 				renderer.Sprite = Resource.Load<Texture>("Textures/Texture/Test_Texture09", "assets://Textures/texture_09.png");

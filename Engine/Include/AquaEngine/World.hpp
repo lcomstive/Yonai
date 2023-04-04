@@ -1,9 +1,10 @@
 #pragma once
+#include <set>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <AquaEngine/API.hpp>
-#include <AquaEngine/EntityManager.hpp>
+#include <AquaEngine/UUID.hpp>
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/ComponentManager.hpp>
 
@@ -15,14 +16,19 @@ namespace AquaEngine
 
 	class World
 	{
+	public:
+		struct Entity;
+
 	private:
-		unsigned int m_ID;
+		UUID m_ID;
 		std::string m_Name;
-		std::unique_ptr<EntityManager> m_EntityManager;
+
 		std::unique_ptr<SystemManager> m_SystemManager;
 		std::unique_ptr<ComponentManager> m_ComponentManager;
 
-		static std::unordered_map<unsigned int, World*> s_Worlds;
+		std::unordered_map<EntityID, Entity> m_Entities;
+
+		static std::unordered_map<UUID, World*> s_Worlds;
 
 		AquaAPI void SetupEntityComponent(EntityID id, Components::Component* component);
 
@@ -42,7 +48,8 @@ namespace AquaEngine
 			World* m_World;
 
 		public:
-			AquaAPI Entity(EntityID entity = 0, World* world = nullptr) : m_ID(entity), m_World(world) { }
+			AquaAPI Entity(World* world = nullptr) : m_ID(), m_World(world) { }
+			AquaAPI Entity(EntityID& id, World* world = nullptr) : m_ID(id), m_World(world) { }
 
 			AquaAPI EntityID ID();
 			AquaAPI AquaEngine::World* GetWorld();
@@ -105,7 +112,7 @@ namespace AquaEngine
 
 		AquaAPI World(std::string name = "World");
 
-		AquaAPI unsigned int ID();
+		AquaAPI UUID& ID();
 		AquaAPI std::string& Name();
 		AquaAPI void Name(std::string& name);
 
@@ -159,7 +166,7 @@ namespace AquaEngine
 			return e;
 		}
 
-		AquaAPI unsigned int EntityCount();
+		AquaAPI size_t EntityCount();
 
 		AquaAPI std::vector<Entity> Entities();
 
@@ -305,16 +312,12 @@ namespace AquaEngine
 
 #pragma region Getters
 		AquaAPI AquaEngine::SystemManager* GetSystemManager();
-		AquaAPI AquaEngine::EntityManager* GetEntityManager();
 		AquaAPI AquaEngine::ComponentManager* GetComponentManager();
 
 		static std::vector<World*> GetWorlds();
-		static World* GetWorld(unsigned int id);
-		static bool Exists(unsigned int id);
+		static World* GetWorld(UUID id);
+		static bool Exists(UUID id);
 #pragma endregion
-
-	private:
-		std::unordered_map<EntityID, Entity> m_Entities;
 	};
 
 	typedef struct World::Entity Entity;

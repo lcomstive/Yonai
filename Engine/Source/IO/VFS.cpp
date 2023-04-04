@@ -134,6 +134,30 @@ void VFS::Write(const string& path, vector<unsigned char> contents)
 	mapping->Write(mapping->GetMountedPath(path), contents);
 }
 
+bool VFS::CreateDirectory(const string& path)
+{
+	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
+	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+		return false;
+	}
+
+	return mapping->CreateDirectory(mapping->GetMountedPath(path));
+}
+
+bool VFS::DeleteDirectory(const string& path)
+{
+	VFSMapping* mapping = GetMapping(path, false, FilePermissions::Write);
+	if (!mapping)
+	{
+		spdlog::warn("Could not find virtual mapping to suit '{}'", path);
+		return false;
+	}
+
+	return mapping->DeleteDirectory(mapping->GetMountedPath(path));
+}
+
 void VFS::ReplaceText(const string& path, const string& from, const string& to)
 {
 	VFSMapping* mapping = GetMapping(path, true, FilePermissions::ReadWrite);

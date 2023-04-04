@@ -12,7 +12,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Identifier of this entity, unique in the <see cref="World"/>
 		/// </summary>
-		public uint ID { get; internal set; }
+		public UUID ID { get; internal set; }
 
 		/// <summary>
 		/// <see cref="World"/> this entity resides in
@@ -20,18 +20,13 @@ namespace AquaEngine
 		public World World { get; internal set; }
 
 		/// <summary>
-		/// An identifier to represent an invalid entity
-		/// </summary>
-		public const uint InvalidEntityID = uint.MaxValue;
-
-		/// <summary>
 		/// Checks if <see cref="ID"/> is valid
 		/// </summary>
-		public bool IsValid => ID != InvalidEntityID;
+		public bool IsValid => ID != UUID.Invalid;
 
 		private Dictionary<Type, object> m_Components = new Dictionary<Type, object>();
 
-		internal Entity(World world, uint id)
+		internal Entity(World world, UUID id)
 		{
 			World = world;
 			ID = id;
@@ -46,7 +41,7 @@ namespace AquaEngine
 		public JObject OnSerialize()
 		{
 			JObject json = new JObject();
-			json["ID"] = ID;
+			json["ID"] = ID.ToString();
 
 			JArray componentsArray = new JArray();
 			Component[] components = GetComponents();
@@ -159,11 +154,11 @@ namespace AquaEngine
 		public static implicit operator string(Entity v) => v.ToString();
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _GetComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object[] _GetComponents(uint worldID, uint entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AddComponent(uint worldID, uint entityID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _RemoveComponent(uint worldID, uint entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasComponent(ulong worldID, ulong entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _GetComponent(ulong worldID, ulong entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object[] _GetComponents(ulong worldID, ulong entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AddComponent(ulong worldID, ulong entityID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _RemoveComponent(ulong worldID, ulong entityID, Type type);
 		#endregion
 	}
 }

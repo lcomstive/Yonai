@@ -7,5 +7,5 @@ using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
-ADD_MANAGED_GET_SET(MeshRenderer, Mesh, unsigned int)
-ADD_MANAGED_GET_SET(MeshRenderer, Material, unsigned int)
+ADD_MANAGED_GET_SET(MeshRenderer, Mesh, uint64_t)
+ADD_MANAGED_GET_SET(MeshRenderer, Material, uint64_t)

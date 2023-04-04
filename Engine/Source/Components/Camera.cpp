@@ -62,7 +62,7 @@ ADD_MANAGED_METHOD(Camera, SetMainCamera, void, (void* handle))
 	((Camera*)handle)->SetMainCamera();
 }
 
-ADD_MANAGED_METHOD(Camera, GetMainCamera, void, (unsigned int* worldID, unsigned int* entityID))
+ADD_MANAGED_METHOD(Camera, GetMainCamera, void, (uint64_t* worldID, uint64_t* entityID))
 {
 	Camera* mainCamera = Camera::GetMainCamera();
 	*worldID = mainCamera ? mainCamera->Entity.GetWorld()->ID() : InvalidEntityID;

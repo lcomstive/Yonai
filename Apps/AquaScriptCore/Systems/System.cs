@@ -45,7 +45,7 @@ namespace AquaEngine
 		protected virtual void Destroyed() { }
 
 		#region Global Systems
-		private static uint GlobalWorldID = uint.MaxValue;
+		private static UUID GlobalWorldID = UUID.Invalid;
 
 		/// <summary>
 		/// Checks if a system exists globally

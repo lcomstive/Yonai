@@ -80,7 +80,7 @@ namespace AquaEngine
 			get
 			{
 				_GetMainCamera(out uint worldID, out uint entityID);
-				if (worldID == Entity.InvalidEntityID || entityID == Entity.InvalidEntityID)
+				if (worldID == UUID.Invalid || entityID == UUID.Invalid)
 					return null;
 				return World.Get(worldID).GetEntity(entityID).GetComponent<Camera>();
 			}

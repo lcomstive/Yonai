@@ -6,7 +6,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
-ADD_MANAGED_METHOD(NativeComponent, GetHandle, void*, (unsigned int worldID, unsigned int entityID, MonoReflectionType* type))
+ADD_MANAGED_METHOD(NativeComponent, GetHandle, void*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* type))
 {
 	World* world = World::GetWorld(worldID);
 	if(!world)

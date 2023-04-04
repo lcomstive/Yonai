@@ -6,8 +6,8 @@ namespace AquaEngine::Scripting
 	typedef void (*EmptyMethodFn)(MonoObject*, MonoException**);
 
 	typedef void (*ComponentMethodEnabledFn)(MonoObject*, bool, MonoException**);
-	typedef void (*ComponentMethodInitialiseFn)(MonoObject*, unsigned int, unsigned int, MonoException**);
+	typedef void (*ComponentMethodInitialiseFn)(MonoObject*, uint64_t, uint64_t, MonoException**);
 
 	typedef void (*SystemMethodEnabledFn)(MonoObject*, bool, MonoException**);
-	typedef void (*SystemMethodInitialiseFn)(MonoObject*, unsigned int, MonoException**);
+	typedef void (*SystemMethodInitialiseFn)(MonoObject*, uint64_t, MonoException**);
 }

@@ -5,7 +5,7 @@ namespace AquaEngine
 	[System.Diagnostics.DebuggerDisplay("[{ResourceID}]")]
 	public abstract class ResourceBase : ICloneable
 	{
-		public uint ResourceID { get; internal set; }
+		public UUID ResourceID { get; internal set; }
 
 		internal abstract bool Load(string path, params object[] args);
 
@@ -21,7 +21,7 @@ namespace AquaEngine
 		}
 
 		public static implicit operator bool(ResourceBase resourceBase) => resourceBase != null;
-		public static implicit operator uint(ResourceBase resourceBase) => resourceBase.ResourceID;
+		public static implicit operator UUID(ResourceBase resourceBase) => resourceBase.ResourceID;
 	}
 
 	public abstract class NativeResourceBase : ResourceBase

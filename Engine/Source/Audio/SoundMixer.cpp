@@ -21,7 +21,7 @@ ma_sound_group* SoundMixer::GetHandle() { return &m_Group; }
 float SoundMixer::GetVolume() { return m_Volume; }
 void SoundMixer::SetVolume(float value)
 {
-	m_Volume = std::max(value, 0.0f);
+	m_Volume = (std::max)(value, 0.0f);
 	ma_sound_group_set_volume(&m_Group, m_Volume);
 }
 
@@ -40,13 +40,13 @@ void SoundMixer::SetParent(ResourceID parent)
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(SoundMixer, Load0, void, (MonoString* path, MonoString* mixerName, unsigned int* outResourceID, void** outHandle))
+ADD_MANAGED_METHOD(SoundMixer, Load0, void, (MonoString* path, MonoString* mixerName, uint64_t* outResourceID, void** outHandle))
 {
 	*outResourceID = Resource::Load<SoundMixer>(mono_string_to_utf8(path), mono_string_to_utf8(mixerName));
 	*outHandle = Resource::Get<SoundMixer>(*outResourceID);
 }
 
-ADD_MANAGED_METHOD(SoundMixer, Load1, void, (MonoString* path, MonoString* mixerName, unsigned int parent, unsigned int* outResourceID, void** outHandle))
+ADD_MANAGED_METHOD(SoundMixer, Load1, void, (MonoString* path, MonoString* mixerName, unsigned int parent, uint64_t* outResourceID, void** outHandle))
 {
 	*outResourceID = Resource::Load<SoundMixer>(mono_string_to_utf8(path), mono_string_to_utf8(mixerName), parent);
 	*outHandle = Resource::Get<SoundMixer>(*outResourceID);

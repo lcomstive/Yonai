@@ -1,9 +1,9 @@
 #pragma once
-#include <AquaEngine/API.hpp>
+#include <AquaEngine/UUID.hpp>
 
 namespace AquaEngine
 {
-	typedef unsigned int ResourceID;
+	typedef UUID ResourceID;
 
-	const ResourceID InvalidResourceID = (unsigned int)-1;
+	const ResourceID InvalidResourceID = 0;
 }

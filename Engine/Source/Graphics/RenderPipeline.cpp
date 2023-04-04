@@ -56,7 +56,7 @@ ivec2 RenderPipeline::GetResolution() { return m_Resolution; }
 #pragma region Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, unsigned int cameraWorldID, unsigned int cameraEntityID), AquaEngine.Graphics.Pipelines)
+ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, uint64_t cameraWorldID, uint64_t cameraEntityID), AquaEngine.Graphics.Pipelines)
 {
 	Camera* camera = World::GetWorld(cameraWorldID)->GetEntity(cameraEntityID).GetComponent<Camera>();
 	((RenderPipeline*)handle)->Draw(camera);

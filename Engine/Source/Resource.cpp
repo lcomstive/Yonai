@@ -98,15 +98,6 @@ Resource::ResourceInstance* Resource::GetInstance(ResourceID id)
 	return IsValidResourceID(id) ? &s_Instances[s_ResourceIDs[id]] : nullptr;
 }
 
-ResourceID Resource::AllocateID(unsigned int instanceIndex)
-{
-	ResourceID id = 0;
-	while (s_ResourceIDs.find(id) != s_ResourceIDs.end())
-		id++;
-	s_ResourceIDs.emplace(id, instanceIndex);
-	return id;
-}
-
 bool Resource::Exists(string path)
 {
 	return s_InstancePaths.find(path) != s_InstancePaths.end();
@@ -142,7 +133,7 @@ ResourceID Resource::Duplicate(ResourceID original, string newPath)
 	
 	s_Instances.emplace_back(resourceInstance);
 
-	ResourceID id = AllocateID((unsigned int)s_Instances.size() - 1);
+	ResourceID id;
 	s_InstancePaths.emplace(newPath, id);
 
 	return id;

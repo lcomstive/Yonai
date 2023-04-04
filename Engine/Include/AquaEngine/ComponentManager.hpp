@@ -85,14 +85,14 @@ namespace AquaEngine
 			}
 		};
 
-		unsigned int m_WorldID;
+		UUID m_WorldID;
 
 		bool m_WorldIsActive = false;
 		std::unordered_map<size_t, ComponentData> m_ComponentArrays;
 		std::unordered_map<EntityID, std::vector<size_t>> m_EntityComponents;
 		
 		void OnWorldActiveStateChanged(bool isActive);
-		AquaEngine::Scripting::ManagedData CreateManagedInstance(size_t typeHash, unsigned int entityID);
+		AquaEngine::Scripting::ManagedData CreateManagedInstance(size_t typeHash, UUID entityID);
 
 		/// <summary>
 		/// Releases all 'Component::ManagedInstance's,
@@ -106,7 +106,7 @@ namespace AquaEngine
 		friend class Scripting::ScriptEngine;
 
 	public:
-		AquaAPI ComponentManager(unsigned int worldID);
+		AquaAPI ComponentManager(UUID worldID);
 
 		/// <summary>
 		/// Release all resources
@@ -276,27 +276,27 @@ namespace AquaEngine
 				std::vector<EntityID>() : m_ComponentArrays[type].GetEntities();
 		}
 
-		AquaAPI bool IsEmpty(EntityID& id);
+		AquaAPI bool IsEmpty(EntityID id);
 
-		AquaAPI bool Has(EntityID& id, size_t type);
-		AquaAPI bool Has(EntityID& id, std::type_info& type);
+		AquaAPI bool Has(EntityID id, size_t type);
+		AquaAPI bool Has(EntityID id, std::type_info& type);
 
 		template<typename T>
-		bool Has(EntityID& id) { return Has(id, typeid(T).hash_code()); }
+		bool Has(EntityID id) { return Has(id, typeid(T).hash_code()); }
 
 		template<typename T1, typename T2>
-		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id); }
+		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id); }
 
 		template<typename T1, typename T2, typename T3>
-		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id); }
+		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id); }
 
 		template<typename T1, typename T2, typename T3, typename T4>
-		bool Has(EntityID& id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id) && Has<T4>(id); }
+		bool Has(EntityID id) { return Has<T1>(id) && Has<T2>(id) && Has<T3>(id) && Has<T4>(id); }
 
-		AquaAPI bool Remove(EntityID& id, size_t type);
+		AquaAPI bool Remove(EntityID id, size_t type);
 
 		template<typename T>
-		bool Remove(EntityID& id) { return Remove(id, typeid(T).hash_code()); }
+		bool Remove(EntityID id) { return Remove(id, typeid(T).hash_code()); }
 
 		AquaAPI void Clear(EntityID id);
 	};

@@ -6,42 +6,42 @@ namespace AquaEngine
 {
 	public static class Resource
 	{
-		private static Dictionary<uint, ResourceBase> s_Instances = new Dictionary<uint, ResourceBase>();
+		private static Dictionary<UUID, ResourceBase> s_Instances = new Dictionary<UUID, ResourceBase>();
 
 		/// <summary>
 		/// Retrieves the ID of resource at <paramref name="path"/>
 		/// </summary>
 		/// <returns>ID of found resource, or <code>uint.MaxValue</code> if not found</returns>
-		public static uint GetID(string path) => _GetID(path);
+		public static UUID GetID(string path) => _GetID(path);
 
 		/// <summary>
 		/// Gets the path associated with the resource matching ID <paramref name="resourceID"/>
 		/// <returns>Path of loaded resource, or empty if not valid</returns>
-		public static string GetPath(uint resourceID) => _GetPath(resourceID);
+		public static string GetPath(UUID resourceID) => _GetPath(resourceID);
 
 		/// <summary>
 		/// Creates a copy of resource at <paramref name="resourceID"/>, with the given path
 		/// </summary>
 		/// <returns>ID of the newly created resource</returns>
-		public static uint Duplicate(uint resourceID, string newPath)
+		public static UUID Duplicate(UUID resourceID, string newPath)
 		{
-			uint newID = _Duplicate(resourceID, newPath);
-			if(newID == uint.MaxValue)
+			UUID newID = _Duplicate(resourceID, newPath);
+			if(newID == UUID.Invalid)
 				return newID;
 			s_Instances.Add(newID, (ResourceBase)s_Instances[resourceID].Clone());
 			return newID;
 		}
 
-		public static T Duplicate<T>(uint resourceID, string newPath) where T : ResourceBase, new()
+		public static T Duplicate<T>(UUID resourceID, string newPath) where T : ResourceBase, new()
 		{
-			uint newID = Duplicate(resourceID, newPath);
-			if(newID == uint.MaxValue)
+			UUID newID = Duplicate(resourceID, newPath);
+			if(newID == UUID.Invalid)
 				return null;
 			return (T)s_Instances[resourceID];
 		}
 
 		/// <returns>True if resource is found matching <paramref name="resourceID"/></returns>
-		public static bool Exists(uint resourceID) => _Exists(resourceID);
+		public static bool Exists(UUID resourceID) => _Exists(resourceID);
 
 		/// <summary>
 		/// Loads a new resource with virtual path <paramref name="path"/>.
@@ -54,14 +54,14 @@ namespace AquaEngine
 		public static T Load<T>(string path, params object[] args) where T : ResourceBase, new()
 		{
 			// Check for existing cached instance 
-			uint resourceID = _GetID(path);
-			if (resourceID != uint.MaxValue && s_Instances.ContainsKey(resourceID))
+			UUID resourceID = _GetID(path);
+			if (resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return (T)s_Instances[resourceID];
 			
 			T instance = new T();
 
 			// Check if native instance exists
-			if(resourceID == uint.MaxValue)
+			if(resourceID == UUID.Invalid)
 			{
 				// No resource found in unmanaged code,
 				// create new resource with args
@@ -82,7 +82,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Removes a resource from memory.
 		/// </summary>
-		public static void Unload(uint resourceID)
+		public static void Unload(UUID resourceID)
 		{
 			if(s_Instances.ContainsKey(resourceID))
 			{
@@ -94,10 +94,10 @@ namespace AquaEngine
 		}
 
 		/// <returns>Instance of resource with matching ID, or null if invalid ID is provided</returns>
-		public static T Get<T>(uint resourceID) where T : ResourceBase, new()
+		public static T Get<T>(UUID resourceID) where T : ResourceBase, new()
 		{
 			// Check for valid ID
-			if (resourceID == uint.MaxValue || !Exists(resourceID))
+			if (resourceID == UUID.Invalid || !Exists(resourceID))
 				return null;
 
 			// Check for cached instance
@@ -121,11 +121,11 @@ namespace AquaEngine
 
 		public static T Get<T>(string path) where T : ResourceBase, new()
 		{
-			uint resourceID = GetID(path);
-			return resourceID == uint.MaxValue ? null : Get<T>(resourceID);
+			UUID resourceID = GetID(path);
+			return resourceID == UUID.Invalid ? null : Get<T>(resourceID);
 		}
 
-		private static void LoadExistingResource<T>(T instance, uint resourceID) where T : ResourceBase, new()
+		private static void LoadExistingResource<T>(T instance, UUID resourceID) where T : ResourceBase, new()
 		{
 			instance.ResourceID = resourceID;
 
@@ -140,12 +140,12 @@ namespace AquaEngine
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetID(string path);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(uint resourceID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(uint resourceID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _Duplicate(uint resourceID, string newPath);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(uint resourceID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetInstance(uint resourceID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetID(string path);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(ulong resourceID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(ulong resourceID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _Duplicate(ulong resourceID, string newPath);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(ulong resourceID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetInstance(ulong resourceID);
 		#endregion
 	}
 }

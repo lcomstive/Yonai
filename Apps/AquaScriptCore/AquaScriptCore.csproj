@@ -76,6 +76,7 @@
     <Compile Include="Core\ResourceBase.cs" />
     <Compile Include="Core\Resources.cs" />
     <Compile Include="Core\Time.cs" />
+    <Compile Include="Core\UUID.cs" />
     <Compile Include="Core\VFS.cs" />
     <Compile Include="Core\World.cs" />
 

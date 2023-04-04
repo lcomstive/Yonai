@@ -202,7 +202,7 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
 	*outID = Resource::Load<Model>(mono_string_to_utf8(path), mono_string_to_utf8(filepath));
 	*outHandle = Resource::Get<Model>(*outID);
@@ -211,12 +211,12 @@ ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, u
 ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
 {
 	vector<pair<ResourceID, ResourceID>> meshes = ((Model*)handle)->GetMeshesAndMaterials();
-	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
-	*outMaterialIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
+	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint64_class(), meshes.size());
+	*outMaterialIDs = mono_array_new(mono_domain_get(), mono_get_uint64_class(), meshes.size());
 	for(size_t i = 0; i < meshes.size(); i++)
 	{
-		mono_array_set(*outMeshIDs, unsigned int, i, meshes[i].first);
-		mono_array_set(*outMaterialIDs, unsigned int, i, meshes[i].second);
+		mono_array_set(*outMeshIDs, uint64_t, i, meshes[i].first);
+		mono_array_set(*outMaterialIDs, uint64_t, i, meshes[i].second);
 	}
 }
 
