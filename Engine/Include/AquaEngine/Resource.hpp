@@ -42,7 +42,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Links a ResourceID to an index in s_Instances
 		/// </summary>
-		static std::unordered_map<ResourceID, unsigned int> s_ResourceIDs;
+		AquaAPI static std::unordered_map<ResourceID, size_t> s_ResourceIDs;
 
 		AquaAPI static ResourceInstance* GetInstance(ResourceID id);
 
@@ -71,6 +71,7 @@ namespace AquaEngine
 			s_Instances.emplace_back(ResourceInstance(new T(constructorArgs...), loadType));
 			ResourceID id;
 			s_InstancePaths.emplace(path, id);
+			s_ResourceIDs.emplace(id, s_Instances.size() - 1);
 
 			return id;
 		}

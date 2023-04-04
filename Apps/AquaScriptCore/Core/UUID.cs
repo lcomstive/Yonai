@@ -15,5 +15,10 @@ namespace AquaEngine
 
 		public static implicit operator ulong(UUID uuid) => uuid.m_Value;
 		public static implicit operator UUID(ulong id) => new UUID(id);
+
+		public static bool operator ==(UUID a, UUID b) => a.m_Value == b.m_Value;
+		public static bool operator !=(UUID a, UUID b) => a.m_Value != b.m_Value;
+
+		public override bool Equals(object obj) => obj is UUID && ((UUID)obj).m_Value == m_Value;
 	}
 }

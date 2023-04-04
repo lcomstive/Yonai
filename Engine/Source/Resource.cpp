@@ -5,7 +5,7 @@ using namespace AquaEngine;
 
 vector<Resource::ResourceInstance> Resource::s_Instances;
 unordered_map<string, ResourceID> Resource::s_InstancePaths;
-unordered_map<ResourceID, unsigned int> Resource::s_ResourceIDs;
+unordered_map<ResourceID, size_t> Resource::s_ResourceIDs;
 
 string Resource::GetPath(ResourceID id)
 {
@@ -44,14 +44,14 @@ void Resource::Unload(ResourceID resource)
 	}
 
 	// Unload data & remove from instances
-	unsigned int instanceIndex = s_ResourceIDs[resource];
+	size_t instanceIndex = s_ResourceIDs[resource];
 	delete s_Instances[instanceIndex].Data;
 	s_Instances[instanceIndex].Data = nullptr;
 
 	// Put last instance into removed index, then erase the last element.
 	// This is done because with a traditional vector::erase all elements get relocated,
 	//	moving the final element to override the erased instance provides more efficiency
-	unsigned int lastIndex = (unsigned int)s_Instances.size() - 1;
+	size_t lastIndex = s_Instances.size() - 1;
 	if (instanceIndex < lastIndex)
 	{
 		// Move last instance to override erased one

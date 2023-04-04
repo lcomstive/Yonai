@@ -16,7 +16,7 @@ namespace AquaEngine.Graphics
 
 		internal override bool Load(string path, params object[] args)
 		{
-			uint resourceID;
+			ulong resourceID;
 			IntPtr handle;
 
 			if (args.Length >= 1)
@@ -32,8 +32,8 @@ namespace AquaEngine.Graphics
 		public void Bind(uint index = 0) => _Bind(Handle, index);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out uint resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string filePath, bool hdr, out uint resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string filePath, bool hdr, out ulong resourceID, out IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		#endregion
