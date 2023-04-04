@@ -248,6 +248,7 @@ filesystem::path& Application::GetExecutablePath() { return m_ExecutablePath; }
 void WindowedApplication::Setup()
 {
 	Application::Setup();
+	SystemManager::Global()->Add<SceneSystem>();
 	SystemManager::Global()->Add<ImGUISystem>();
 
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
@@ -259,6 +260,7 @@ void WindowedApplication::Cleanup()
 	Application::Cleanup();
 	SystemManager::Global()->Remove<RenderSystem>();
 	SystemManager::Global()->Remove<ImGUISystem>();
+	SystemManager::Global()->Remove<SceneSystem>();
 }
 
 AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
