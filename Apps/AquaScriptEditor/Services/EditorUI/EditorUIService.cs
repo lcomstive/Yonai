@@ -11,6 +11,8 @@ namespace AquaEditor
 {
 	public class EditorUIService : AquaSystem
 	{
+		public static Texture MissingTexture { get; private set; }
+
 		private MenuItemData m_RootMenuItem = new MenuItemData("Root");
 
 		/// <summary>
@@ -27,6 +29,9 @@ namespace AquaEditor
 			InspectorView.GetCustomInspectors();
 
 			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+
+			uint missingTextureID = Resource.Load<Texture>("Textures/Missing", "assets://Textures/Black.jpg");
+			MissingTexture = Resource.Get<Texture>(missingTextureID);
 
 			// Demo //
 			GenerateConsoleLines();

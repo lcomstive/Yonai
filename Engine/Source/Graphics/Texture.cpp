@@ -112,14 +112,17 @@ void Texture::GenerateImage(bool hdr)
 	// Generate mipmaps
 	glGenerateMipmap(GL_TEXTURE_2D);
 
+	m_Resolution = glm::ivec2(width, height);
+
 #ifndef NDEBUG
 	profileTimer.Stop();
-	spdlog::debug("Loaded texture '{}' in {}ms {}", m_Path, profileTimer.ElapsedTime().count(), hdr ? "[HDR]" : "");
+	spdlog::debug("Loaded texture '{}' ({}x{}) in {}ms {}", m_Path, width, height, profileTimer.ElapsedTime().count(), hdr ? "[HDR]" : "");
 #endif
 }
 
 string Texture::GetPath() { return m_Path; }
 unsigned int Texture::GetID() { return m_ID; }
+glm::ivec2& Texture::GetResolution() { return m_Resolution; }
 
 void Texture::Bind(unsigned int index)
 {
@@ -147,5 +150,8 @@ ADD_MANAGED_METHOD(Texture, Load1, void, (MonoString* path, MonoString* filePath
 
 ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)
 { ((Texture*)instance)->Bind(index); }
+
+ADD_MANAGED_METHOD(Texture, GetResolution, void, (void* instance, glm::ivec2* outResolution), AquaEngine.Graphics)
+{ *outResolution = ((Texture*)instance)->GetResolution(); }
 
 #pragma endregion

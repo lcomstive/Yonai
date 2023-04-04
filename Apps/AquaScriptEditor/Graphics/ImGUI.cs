@@ -798,6 +798,15 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Separator();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void PushItemWidth(float width);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void PopItemWidth();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetNextItemWidth(float width);
 		#endregion
 
 		#region Controls

@@ -5,6 +5,15 @@ namespace AquaEngine.Graphics
 {
 	public class Texture : NativeResourceBase
 	{
+		public IVector2 Resolution
+		{
+			get
+			{
+				_GetResolution(Handle, out IVector2 result);
+				return result;
+			}
+		}
+
 		internal override bool Load(string path, params object[] args)
 		{
 			uint resourceID;
@@ -26,6 +35,7 @@ namespace AquaEngine.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out uint resourceID, out IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string filePath, bool hdr, out uint resourceID, out IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		#endregion
 	}
 }

@@ -14,7 +14,7 @@ namespace AquaEditor
 		{
 			Entity entity = (Entity)target;
 
-			ImGUI.Text($"[{entity.World.ID}:{entity.ID}]", Colour.Grey);
+			ImGUI.Text(string.Format("{0:0}:{1:00}", entity.World.ID, entity.ID), Colour.Grey);
 			if(entity.TryGetComponent(out NameComponent nameComponent))
 			{
 				ImGUI.SameLine();
@@ -42,13 +42,11 @@ namespace AquaEditor
 			ImGUI.Indent();
 
 			IVector2 contentRegion = ImGUI.ContentRegionAvailable;
-			if (!ImGUI.BeginTable(type.Name, 2, new Vector2(contentRegion.x, 0), ImGUI.TableFlags.NoBordersInBody))
+			if (!ImGUI.BeginTable(type.Name, 2))
 				return;
-			ImGUI.TableSetupColumn("##Key",
-				ImGUI.TableColumnFlags.WidthFixed,
-				contentRegion.x * 0.3f
-			);
-			ImGUI.TableSetupColumn("##Value");
+
+			ImGUI.TableSetupColumn("Key", ImGUI.TableColumnFlags.WidthFixed, contentRegion.x * 0.3f);
+			ImGUI.TableSetupColumn("Value");
 			ImGUI.TableHeadersRow();
 
 			foreach (var field in fields)
@@ -151,25 +149,51 @@ namespace AquaEditor
 				setValue.Invoke(instance, value);
 		}
 
+		private const float TexturePreviewSize = 125;
+		private Vector2 TextureDrawSize = new Vector2(50, 50);
+
 		private void Draw(string label, Texture value, object instance, Action<object, object> setValue)
 		{
-			ImGUI.Image(value, new Vector2(50, 50));
+			ImGUI.Image(value ?? EditorUIService.MissingTexture, TextureDrawSize);
+
+			if (value != null && ImGUI.IsItemHovered() && ImGUI.BeginTooltip())
+			{
+				float aspectRatio = value.Resolution.x / (float)value.Resolution.y;
+				ImGUI.Image(value,
+					new Vector2(TexturePreviewSize * aspectRatio, TexturePreviewSize));
+				ImGUI.EndTooltip();
+			}
 		}
 
 		private void Draw(string label, RenderTexture value, object instance, Action<object, object> setValue)
 		{
-			ImGUI.Image(value, new Vector2(50, 50));
+			if (value != null)
+				ImGUI.Image(value, TextureDrawSize);
+			else
+				ImGUI.Image(EditorUIService.MissingTexture, TextureDrawSize);
+
+			if (value != null && ImGUI.IsItemHovered() && ImGUI.BeginTooltip())
+			{
+				float aspectRatio = value.Resolution.x / (float)value.Resolution.y;
+				ImGUI.Image(value,
+					new Vector2(TexturePreviewSize * aspectRatio, TexturePreviewSize));
+				ImGUI.EndTooltip();
+			}
 		}
 
 		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue)
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
 
-			ImGUI.TableNextRow(25);
+			IVector2 region = ImGUI.ContentRegionAvailable;
+
+			ImGUI.TableNextRow();
 			ImGUI.TableSetColumnIndex(0);
+
 			ImGUI.Text(label);
 
 			ImGUI.TableSetColumnIndex(1);
+			ImGUI.SetNextItemWidth(region.x);
 			if (t		== typeof(int))				Draw(label, (int)value,				instance, setValue);
 			else if (t	== typeof(bool))			Draw(label, (bool)value,			instance, setValue);
 			else if (t	== typeof(float))			Draw(label, (float)value,			instance, setValue);

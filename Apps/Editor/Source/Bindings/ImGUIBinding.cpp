@@ -511,6 +511,15 @@ ADD_MANAGED_METHOD(ImGUI, EndTooltip, void, (), AquaEditor) { ImGui::EndTooltip(
 
 ADD_MANAGED_METHOD(ImGUI, Separator, void, (), AquaEditor) { ImGui::Separator(); }
 
+ADD_MANAGED_METHOD(ImGUI, PushItemWidth, void, (float width), AquaEditor)
+{ ImGui::PushItemWidth(width); }
+
+ADD_MANAGED_METHOD(ImGUI, PopItemWidth, void, (), AquaEditor)
+{ ImGui::PopItemWidth(); }
+
+ADD_MANAGED_METHOD(ImGUI, SetNextItemWidth, void, (float width), AquaEditor)
+{ ImGui::SetNextItemWidth(width); }
+
 ADD_MANAGED_METHOD(ImGUI, _PlotLines, void, (MonoString* labelRaw, MonoArray* pointsRaw, MonoString* overlayText, glm::vec2* graphSize), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
