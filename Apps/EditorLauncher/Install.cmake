@@ -38,6 +38,7 @@ elseif(WIN32)
 
 	install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
 	install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
+	install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptEditor.dll DESTINATION .)
 
 	if(AQUA_BUILD_BASE_GAME)
 		install(TARGETS BaseGame DESTINATION .)
@@ -45,6 +46,7 @@ elseif(WIN32)
 
 	if(BUILD_SHARED_LIBS)
 		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/bin/mono-2.0-sgen.dll DESTINATION .)
 	endif()
 
 	if(DEFINED ENV{CMAKE_CONFIG})
