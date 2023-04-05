@@ -308,4 +308,21 @@ ADD_MANAGED_METHOD(World, RemoveSystem, bool, (uint64_t worldID, MonoReflectionT
 	return systemManager->Remove(type);
 }
 
+ADD_MANAGED_METHOD(World, EnableSystem, void, (uint64_t worldID, MonoReflectionType* systemType, bool enable))
+{
+	SystemManager* systemManager = GetSystemManager(worldID);
+	if (!systemManager)
+		return;
+
+	size_t type = GetSystemType(systemType);
+	Systems::System* system = systemManager->Get(type);
+	system->Enable(enable);
+	if (system && system->ManagedData.IsValid())
+	{
+		MonoException* exception = nullptr;
+		MonoObject* instance = system->ManagedData.GetInstance();
+		SystemMethodEnabled(instance, enable, &exception);
+	}
+}
+
 #pragma endregion

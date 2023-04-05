@@ -194,6 +194,8 @@ namespace AquaEngine
 		public T GetSystem<T>() => (T)_GetSystem(ID, typeof(T));
 
 		public bool RemoveSystem<T>() => _RemoveSystem(ID, typeof(T));
+
+		public void EnableSystem<T>(bool enable) => _EnableSystem(ID, typeof(T), enable);
 		#endregion
 
 		#region Static getters
@@ -270,6 +272,7 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _GetSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _AddSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _RemoveSystem(ulong worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _EnableSystem(ulong worldID, Type type, bool enable);
 		#endregion
 	}
 }
