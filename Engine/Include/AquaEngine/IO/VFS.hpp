@@ -131,6 +131,7 @@ namespace AquaEngine::IO
 		/// <summary>
 		/// Gets the absolute path of a filepath.
 		/// If <paramref name="requireFileExists"/> set to false, gets the first matching mount.
+		/// In the event no matching path is found, the path parameter is returned.
 		/// </summary>
 		/// <param name="needExistingFile">Does the path need to exist inside the mapping? When false, only returns writeable mappings</param>
 		AquaAPI static std::string GetAbsolutePath(std::string path, bool requireFileExists = false, bool suppressWarning = false);

@@ -7,11 +7,12 @@ namespace AquaEngine::Graphics
 {
 	class Texture
 	{
+		bool m_HDR;
 		unsigned int m_ID;
 		std::string m_Path;
 		glm::ivec2 m_Resolution;
 
-		void GenerateImage(bool hdr);
+		void GenerateImage();
 
 	public:
 		AquaAPI Texture();
@@ -23,5 +24,8 @@ namespace AquaEngine::Graphics
 		AquaAPI glm::ivec2& GetResolution();
 		
 		AquaAPI void Bind(unsigned int index = 0);
+
+		AquaAPI void Import(const char* path, bool hdr = false);
+		AquaAPI void Import(std::string& path, bool hdr = false);
 	};
 }

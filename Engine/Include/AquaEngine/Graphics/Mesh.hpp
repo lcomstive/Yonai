@@ -43,12 +43,12 @@ namespace AquaEngine::Graphics
 		~Mesh();
 
 		AquaAPI void Draw();
-		AquaAPI void SetData(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+		AquaAPI void Import(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, DrawMode drawMode = DrawMode::Triangles);
 
-		AquaAPI std::vector<Vertex>& GetVertices() { return m_Vertices; }
-		AquaAPI void SetVertices(std::vector<Vertex>& vertices) { m_Vertices = vertices; }
-		AquaAPI std::vector<unsigned int>& GetIndices() { return m_Indices; }
-		AquaAPI void SetIndices(std::vector<unsigned int>& indices) { m_Indices = indices; }
+		AquaAPI std::vector<Vertex>& GetVertices();
+		AquaAPI void SetVertices(std::vector<Vertex>& vertices);
+		AquaAPI std::vector<unsigned int>& GetIndices();
+		AquaAPI void SetIndices(std::vector<unsigned int>& indices);
 
 		AquaAPI static ResourceID Quad();
 		AquaAPI static ResourceID Cube();

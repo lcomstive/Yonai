@@ -28,7 +28,9 @@ namespace AquaEngine
 			UUID newID = _Duplicate(resourceID, newPath);
 			if(newID == UUID.Invalid)
 				return newID;
-			s_Instances.Add(newID, (ResourceBase)s_Instances[resourceID].Clone());
+			ResourceBase resource = s_Instances[resourceID].Clone(newID, newPath);
+			resource._Load();
+			s_Instances.Add(newID, resource);
 			return newID;
 		}
 
@@ -51,7 +53,7 @@ namespace AquaEngine
 		/// <param name="path">Virtual path to give loaded resource. This is a name used only for loading resources and does not represent a filepath.</param>
 		/// <param name="args">Arguments to pass to resource during creation</param>
 		/// <returns>Found or created instance of resource</returns>
-		public static T Load<T>(string path, params object[] args) where T : ResourceBase, new()
+		public static T Load<T>(string path, IImportSettings importSettings) where T : ResourceBase, new()
 		{
 			// Check for existing cached instance 
 			UUID resourceID = _GetID(path);
@@ -63,11 +65,13 @@ namespace AquaEngine
 			// Check if native instance exists
 			if(resourceID == UUID.Invalid)
 			{
-				// No resource found in unmanaged code,
-				// create new resource with args
+				// No resource found in unmanaged code, create new resource
 				instance.ResourceID = resourceID;
-				instance.Load(path, args);
-				instance.OnLoad();
+				instance.ResourcePath = path;
+				instance.ImportSettings = importSettings;
+
+				instance._Load();
+				instance.Import(importSettings);
 
 				// Cache created resource
 				s_Instances.Add(instance.ResourceID, instance);
@@ -86,14 +90,14 @@ namespace AquaEngine
 		{
 			if(s_Instances.ContainsKey(resourceID))
 			{
-				s_Instances[resourceID].OnUnload();
+				s_Instances[resourceID]._Unload();
 				s_Instances.Remove(resourceID);
 			}
 
 			_Unload(resourceID);
 		}
 
-		/// <returns>Instance of resource with matching ID, or null if invalid ID is provided</returns>
+		/// <returns>Instance of resource with matching ID, or null if ID is invalid</returns>
 		public static T Get<T>(UUID resourceID) where T : ResourceBase, new()
 		{
 			// Check for valid ID
@@ -125,6 +129,16 @@ namespace AquaEngine
 			return resourceID == UUID.Invalid ? null : Get<T>(resourceID);
 		}
 
+		public static void SaveDatabase()
+		{
+			// TODO: Save all resources with ISerializable interface to file (e.g. "editor://Resources.json")
+		}
+
+		public static void LoadDatabase()
+		{
+			// TODO: Load resources with ISerializable interface from file
+		}
+
 		private static void LoadExistingResource<T>(T instance, UUID resourceID) where T : ResourceBase, new()
 		{
 			instance.ResourceID = resourceID;
@@ -132,11 +146,11 @@ namespace AquaEngine
 			// Check if resource is a native (C++) interop resource
 			NativeResourceBase nativeResource = instance as NativeResourceBase;
 			if(nativeResource != null)
-				nativeResource?.LoadFromHandle(_GetInstance(resourceID));
+				nativeResource?.SetHandle(_GetInstance(resourceID));
 
 			s_Instances.Add(resourceID, instance);
 
-			instance.OnLoad();
+			instance._Load();
 		}
 
 		#region Internal Calls

@@ -1,40 +1,66 @@
+using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public struct ShaderStages
+	public class ShaderImportSettings : IImportSettings
 	{
 		public string VertexPath;
 		public string FragmentPath;
 		public string ComputePath;
-		public string GeomtryPath;
+		public string GeometryPath;
 	}
 
-	public class Shader : NativeResourceBase
+	public class Shader : NativeResourceBase, ISerializable
 	{
-		internal override bool Load(string path, params object[] args)
+		public ShaderImportSettings ShaderStages { get; private set; }
+
+		protected override void OnLoad()
 		{
-			uint resourceID;
-			IntPtr handle;
-
-			if (args.Length >= 1)
-			{
-				if(!(args[0] is ShaderStages))
-				{
-					Log.Error("Shader requires argument of type AquaEngine.Graphics.ShaderStages");
-					return false;
-				}
-				ShaderStages stages = (ShaderStages)args[0];
-				_Load1(path, stages.VertexPath, stages.FragmentPath, stages.ComputePath, stages.GeomtryPath, out resourceID, out handle);
-			}
-			else
-				_Load0(path, out resourceID, out handle);
-
+			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
-			return true;
 		}
+
+		protected override void OnImported()
+		{
+			if(!TryGetImportSettings(out ShaderImportSettings importSettings))
+			{
+				_UnloadStages(Handle);
+				return;
+			}
+
+			ShaderStages = importSettings;
+			_UpdateStages(
+				Handle,
+				ShaderStages.VertexPath,
+				ShaderStages.FragmentPath,
+				ShaderStages.ComputePath,
+				ShaderStages.GeometryPath
+			);
+		}
+
+		public JObject OnSerialize()
+		{
+			if (ShaderStages == null)
+				return null;
+			return new JObject(
+				new JProperty("Vertex",	  ShaderStages.VertexPath),
+				new JProperty("Fragment", ShaderStages.FragmentPath),
+				new JProperty("Compute",  ShaderStages.ComputePath),
+				new JProperty("Geometry", ShaderStages.GeometryPath)
+			);
+		}
+
+		public void OnDeserialize(JObject json) => Import(new ShaderImportSettings()
+		{
+			VertexPath   = json["Vertex"].Value<string>(),
+			FragmentPath = json["Fragment"].Value<string>(),
+			ComputePath  = json["Compute"].Value<string>(),
+			GeometryPath = json["Geometry"].Value<string>()
+		});
 
 		public void Bind() => _Bind(Handle);
 		public void Unbind() => _Unbind(Handle);
@@ -59,19 +85,13 @@ namespace AquaEngine.Graphics
 		public void Set(string location, Vector4 value) => _SetStr_vec4(Handle, location, value);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out uint resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path,
-																							 string vertexPath,
-																							 string fragmentPath,
-																							 string computePath,
-																							 string geometryPath,
-																							 out uint resourceID,
-																							 out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unbind(IntPtr handle);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void UpdateStages(IntPtr handle,
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadStages(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UpdateStages(IntPtr handle,
 																							 string vertexPath,
 																							 string fragmentPath,
 																							 string computePath,

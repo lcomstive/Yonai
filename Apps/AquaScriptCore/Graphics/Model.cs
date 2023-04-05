@@ -1,17 +1,25 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using AquaEngine.IO;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json.Linq;
 
 namespace AquaEngine.Graphics
 {
-	public class Model : NativeResourceBase
+	public class ModelImportSettings : IImportSettings
 	{
+		public string FilePath;
+	}
+
+	public class Model : NativeResourceBase, ISerializable
+	{
+		public string FilePath { get; private set; }
+
 		public struct MeshData
 		{
 			public Mesh Mesh;
 			public Material Material;
 
-			public MeshData(uint meshID, uint materialID)
+			public MeshData(UUID meshID, UUID materialID)
 			{
 				Mesh = Resource.Get<Mesh>(meshID);
 				Material = Resource.Get<Material>(materialID);
@@ -23,34 +31,40 @@ namespace AquaEngine.Graphics
 		/// </summary>
 		public MeshData[] Meshes { get; private set; }
 
-		internal override bool Load(string path, params object[] args)
+		protected override void OnLoad()
 		{
-			uint resourceID;
-			IntPtr handle;
-
-			if(args.Length < 1 || !(args[0] is string))
-					throw new ArgumentException("Model loading requires parameters of type string, representing virtual filesystem path (e.g. assets://cube.fbx)");
-
-			_Load(path, (string)args[0], out resourceID, out handle);
+			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 
 			ResourceID = resourceID;
 			Handle = handle;
-			return true;
 		}
 
-		internal override void OnLoad()
+		protected override void OnImported()
 		{
-			_GetMeshes(Handle, out uint[] meshIDs, out uint[] materialIDs);
+			// Load model
+			TryGetImportSettings(out ModelImportSettings settings);
+			_Import(Handle, FilePath = settings?.FilePath ?? string.Empty);
+
+			// Get meshes
+			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
 
 			Meshes = new MeshData[meshIDs.Length];
-			for(int i = 0; i < meshIDs.Length; i++)
+			for (int i = 0; i < meshIDs.Length; i++)
 				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
+
 		}
 
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, string filepath, out uint resourceID, out IntPtr handle);
+		public JObject OnSerialize() => new JObject(
+				new JProperty("FilePath", FilePath)
+			);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMeshes(IntPtr handle, out uint[] meshIDs, out uint[] materialIDs);
+		public void OnDeserialize(JObject json) => Import(new ModelImportSettings() { FilePath = json["FilePath"].Value<string>() });
+
+		#region Internal Calls
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMeshes(IntPtr handle, out ulong[] meshIDs, out ulong[] materialIDs);
 		#endregion
 	}
 }

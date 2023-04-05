@@ -31,9 +31,12 @@ namespace AquaEditor
 			CompileMenuItems();
 			InspectorView.GetCustomInspectors();
 
-			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", "assets://Textures/Test.png");
+			TextureImportSettings textureSettings = new TextureImportSettings();
+			textureSettings.FilePath = "assets://Textures/Test.png";
+			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", textureSettings);
 
-			UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", "assets://Textures/Black.jpg");
+			textureSettings.FilePath = "assets://Textures/Black.jpg";
+			UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", textureSettings);
 			MissingTexture = Resource.Get<Texture>(missingTextureID);
 
 			// Demo //
@@ -313,8 +316,11 @@ namespace AquaEditor
 				nameComponent.Name = "Entity";
 
 				SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
-				renderer.Sprite = Resource.Load<Texture>("Textures/Texture/Test_Texture09", "assets://Textures/texture_09.png");
-				renderer.Shader = Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderStages()
+				renderer.Sprite = Resource.Load<Texture>(
+					"Textures/Texture/Test_Texture09",
+					new TextureImportSettings("assets://Textures/texture_09.png")
+				);
+				renderer.Shader = Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderImportSettings()
 				{
 					VertexPath = "assets://Shaders/Sprite.vert",
 					FragmentPath = "assets://Shaders/NewSprite.frag"

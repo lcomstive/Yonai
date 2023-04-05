@@ -1,12 +1,10 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <functional>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/World.hpp>
 #include <mono/metadata/assembly.h>
-#include <AquaEngine/Scripting/Class.hpp>
 
 namespace AquaEngine
 {
@@ -17,29 +15,30 @@ namespace AquaEngine::Scripting
 {
 	// Forward declaration for 'friend' below
 	class ScriptEngine;
+	struct Class;
 
 	struct Assembly
 	{
 		struct ManagedComponentData
 		{
-			size_t Type;
+			size_t Type = 0;
 
 			/// <summary>
 			/// Component* (World* world, unsigned int entityID).
 			/// Returns created instance of component matching type <see cref="Type" />
 			/// </summary>
-			std::function<Components::Component* (World*, UUID)> AddFn;
+			std::function<Components::Component* (World*, UUID)> AddFn = nullptr;
 		};
 
 		struct ManagedSystemData
 		{
-			size_t Type;
+			size_t Type = 0;
 
 			/// <summary>
 			/// System* (World* world).
 			/// Returns created instance of system matching type <see cref="Type" />
 			/// </summary>
-			std::function<Systems::System* (SystemManager*)> AddFn;
+			std::function<Systems::System* (SystemManager*)> AddFn = nullptr;
 		};
 
 	private:

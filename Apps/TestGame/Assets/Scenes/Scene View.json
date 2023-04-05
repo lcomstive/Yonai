@@ -2,7 +2,7 @@
   "Name": "Scene View",
   "Entities": [
     {
-      "ID": "1197326180195983773",
+      "ID": "16574991804513825068",
       "Components": [
         {
           "ComponentType": "AquaEngine.NameComponent",
@@ -10,7 +10,7 @@
         },
         {
           "ComponentType": "AquaEngine.Camera",
-          "FOV": 90.0,
+          "FOV": 60.0,
           "Near": 0.1,
           "Far": 1000.0,
           "Orthographic": false,
@@ -28,15 +28,15 @@
         {
           "ComponentType": "AquaEngine.Transform",
           "Position": {
-            "x": 0.0,
-            "y": 2.0,
-            "z": -15.0
+            "x": -10.0887623,
+            "y": 1.95424676,
+            "z": -6.77346945
           },
           "Rotation": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 0.0
+            "x": 0.9597813,
+            "y": -0.09048613,
+            "z": 0.264593929,
+            "w": -0.02494535
           },
           "Scale": {
             "x": 1.0,

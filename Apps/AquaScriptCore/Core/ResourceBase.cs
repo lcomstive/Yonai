@@ -2,22 +2,63 @@ using System;
 
 namespace AquaEngine
 {
-	[System.Diagnostics.DebuggerDisplay("[{ResourceID}]")]
-	public abstract class ResourceBase : ICloneable
+	public abstract class ResourceBase
 	{
 		public UUID ResourceID { get; internal set; }
+		public string ResourcePath { get; internal set; }
 
-		internal abstract bool Load(string path, params object[] args);
+		public IImportSettings ImportSettings { get; internal set; }
 
-		internal virtual void OnLoad() { }
-		internal virtual void OnUnload() { }
-		internal virtual void OnDuplicated(ResourceBase original) { }
+		/// <summary>
+		/// When the resource is created
+		/// </summary>
+		protected virtual void OnLoad() { }
 
-		public virtual object Clone()
+		/// <summary>
+		/// When the resource is destroyed
+		/// </summary>
+		protected virtual void OnUnload() { }
+
+		/// <summary>
+		/// When <see cref="ImportSettings"/> get updated
+		/// </summary>
+		protected virtual void OnImported() { }
+
+		/// <summary>
+		/// This instance was created as a duplicate from <paramref name="original"/>.
+		/// Called before <see cref="OnLoad"/>.
+		/// </summary>
+		protected virtual void OnCloned(ResourceBase original) { }
+
+		internal ResourceBase Clone(UUID newID, string newPath)
 		{
-			ResourceBase clone = (ResourceBase)this.MemberwiseClone();
-			clone.OnDuplicated(this);
+			ResourceBase clone = (ResourceBase)MemberwiseClone();
+
+			clone.ResourceID = newID;
+			clone.ResourcePath = newPath;
+			clone.ImportSettings = ImportSettings;
+			clone.OnCloned(this);
+
 			return clone;
+		}
+
+		internal void _Load() => OnLoad();
+		internal void _Unload() => OnUnload();
+
+		public void Import(IImportSettings settings)
+		{
+			ImportSettings = settings;
+			OnImported();
+		}
+
+		protected bool TryGetImportSettings<T>(out T value) where T : class, IImportSettings
+		{
+			value = null;
+			if (ImportSettings == null ||
+				!ImportSettings.GetType().Equals(typeof(T)))
+				return false;
+			value = (T)ImportSettings;
+			return true;
 		}
 
 		public static implicit operator bool(ResourceBase resourceBase) => resourceBase != null;
@@ -28,13 +69,9 @@ namespace AquaEngine
 	{
 		protected IntPtr Handle { get; set; }
 
-		internal void LoadFromHandle(IntPtr handle) => Handle = handle;
+		internal void SetHandle(IntPtr handle) => Handle = handle;
 
-		public override object Clone()
-		{
-			NativeResourceBase clone = (NativeResourceBase)base.Clone();
-			clone.Handle = Handle;
-			return clone;
-		}
+		protected override void OnCloned(ResourceBase original) =>
+			Handle = ((NativeResourceBase)original).Handle;
 	}
 }

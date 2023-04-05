@@ -1,10 +1,25 @@
+using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class Texture : NativeResourceBase
+	public class TextureImportSettings : IImportSettings
 	{
+		public bool HDR = false;
+		public string FilePath = string.Empty;
+
+		public TextureImportSettings() { }
+		public TextureImportSettings(string filePath) => FilePath = filePath;
+	}
+
+	public class Texture : NativeResourceBase, ISerializable
+	{
+		public bool HDR => m_ImportSettings?.HDR ?? false;
+		public string FilePath => m_ImportSettings?.FilePath ?? string.Empty;
+
 		public IVector2 Resolution
 		{
 			get
@@ -14,26 +29,43 @@ namespace AquaEngine.Graphics
 			}
 		}
 
-		internal override bool Load(string path, params object[] args)
+		private TextureImportSettings m_ImportSettings = null;
+
+		protected override void OnLoad()
 		{
 			ulong resourceID;
 			IntPtr handle;
 
-			if (args.Length >= 1)
-				_Load1(path, (string)args[0], args.Length >= 2 ? (bool)args[2] : false, out resourceID, out handle);
-			else
-				_Load0(path, out resourceID, out handle);
-
+			_Load(ResourcePath, out resourceID, out handle);
 			ResourceID = resourceID;
 			Handle = handle;
-			return true;
+		}
+
+		protected override void OnImported()
+		{
+			TryGetImportSettings(out m_ImportSettings);
+			_Import(Handle, FilePath, HDR);
 		}
 
 		public void Bind(uint index = 0) => _Bind(Handle, index);
 
+		public JObject OnSerialize() =>
+			new JObject(
+				new JProperty("FilePath", FilePath),
+				new JProperty("HDR", HDR)
+			);
+
+		public void OnDeserialize(JObject json) =>
+			Import(new TextureImportSettings()
+			{
+				HDR= json["HDR"].Value<bool>(),
+				FilePath = json["FilePath"].Value<string>()
+			});
+			
+
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, string filePath, bool hdr, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filePath, bool hdr);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		#endregion

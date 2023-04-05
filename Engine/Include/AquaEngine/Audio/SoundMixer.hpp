@@ -10,6 +10,7 @@ namespace AquaEngine
 	{
 		float m_Volume;
 
+		ResourceID m_Parent;
 		ma_sound_group m_Group;
 
 	public:
@@ -27,5 +28,7 @@ namespace AquaEngine
 		/// Sets the parent of this mixer, or InvalidResourceID for output to master
 		/// </summary>
 		AquaAPI void SetParent(ResourceID parent);
+
+		AquaAPI ResourceID GetParent();
 	};
 }

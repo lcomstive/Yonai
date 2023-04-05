@@ -1,10 +1,22 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
+	public class MaterialImportSettings : IImportSettings
+	{
+		public UUID Shader = UUID.Invalid;
+		public Vector4 Albedo = Vector4.One;
+		public UUID AlbedoMap = UUID.Invalid;
+		public bool AlphaClipping = false;
+		public float AlphaThreshold = 0.1f;
+	}
+
 	public class Material : NativeResourceBase
 	{
+		private MaterialImportSettings m_Settings;
+
 		private Shader m_Shader = null;
 		public Shader Shader
 		{
@@ -13,20 +25,19 @@ namespace AquaEngine.Graphics
 			{
 				// Check for change
 				if(m_Shader != value)
-					_SetShader(Handle, (m_Shader = value).ResourceID);
+					_SetShader(Handle, (m_Shader = value)?.ResourceID ?? UUID.Invalid);
 			}
 		}
 
-		private Vector4 m_Albedo = Vector4.One;
 		public Vector4 Albedo
 		{
-			get => m_Albedo;
+			get => m_Settings.Albedo;
 			set
 			{
 				// Check for change
-				if(m_Albedo != value)
+				if(m_Settings.Albedo != value)
 				{
-					m_Albedo = value;
+					m_Settings.Albedo = value;
 					_SetAlbedo(Handle, ref value);
 				}
 			}
@@ -40,52 +51,48 @@ namespace AquaEngine.Graphics
 			{
 				// Check for change
 				if(m_AlbedoMap != value)
-					_SetAlbedoMap(Handle, (m_AlbedoMap = value).ResourceID);
+					_SetAlbedoMap(Handle, (m_AlbedoMap = value)?.ResourceID ?? UUID.Invalid);
 			}
 		}
 
-		private bool m_AlphaClipping = false;
 		public bool AlphaClipping
 		{
-			get => m_AlphaClipping;
+			get => m_Settings.AlphaClipping;
 			set
 			{
 				// Check for change
-				if(m_AlphaClipping != value)
-					_SetAlphaClipping(Handle, m_AlphaClipping = value);
+				if(m_Settings.AlphaClipping != value)
+					_SetAlphaClipping(Handle, m_Settings.AlphaClipping = value);
 			}
 		}
 
-		private float m_AlphaClipThreshold = 0.1f;
 		public float AlphaThreshold
 		{
-			get => m_AlphaClipThreshold;
+			get => m_Settings.AlphaThreshold;
 			set
 			{
 				// Check for change
-				if(m_AlphaClipThreshold != value)
-					_SetAlphaClipThreshold(Handle, m_AlphaClipThreshold = value);
+				if(m_Settings.AlphaThreshold != value)
+					_SetAlphaClipThreshold(Handle, m_Settings.AlphaThreshold = value);
 			}
 		}
 
-		internal override bool Load(string path, params object[] args)
+		protected override void OnLoad()
 		{
-			_Load(path, out ulong resourceID, out IntPtr handle);
+			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 
 			Handle = handle;
 			ResourceID = resourceID;
-
-			return true;
 		}
 
-		internal override void OnLoad()
+		protected override void OnImported()
 		{
-			_GetAlbedo(Handle, out m_Albedo);
-			
-			m_AlphaClipping = _GetAlphaClipping(Handle);
-			m_Shader = Resource.Get<Shader>(_GetShader(Handle));
-			m_AlphaClipThreshold = _GetAlphaClipThreshold(Handle);
-			m_AlbedoMap = Resource.Get<Texture>(_GetAlbedoMap(Handle));
+			if (!TryGetImportSettings(out m_Settings))
+				// Reset to default values
+				m_Settings = new MaterialImportSettings();
+
+			m_Shader = Resource.Get<Shader>(m_Settings.Shader);
+			m_AlbedoMap = Resource.Get<Texture>(m_Settings.AlbedoMap);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);

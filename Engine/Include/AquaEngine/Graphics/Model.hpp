@@ -24,8 +24,6 @@ namespace AquaEngine::Graphics
 		std::string m_Path;
 		std::vector<ResourceID> m_MeshIDs;
 
-		Model();
-
 		void Load();
 		ResourceID CreateMaterial(aiMaterial* material);
 		void CreateEntity(MeshData& mesh, Entity* parent);
@@ -34,7 +32,11 @@ namespace AquaEngine::Graphics
 		void CreateMeshMaterialPair(const MeshData& data, std::vector<std::pair<ResourceID, ResourceID>>& output);
 
 	public:
-		Model(std::string path);
+		Model();
+		Model(std::string& path);
+
+		void Import(const char* path);
+		void Import(std::string& path);
 
 		std::vector<ResourceID> GetMeshes();
 

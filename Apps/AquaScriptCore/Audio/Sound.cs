@@ -3,28 +3,35 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
+	public class SoundImportSettings : IImportSettings
+	{
+		public string FilePath;
+	}
+
 	public class Sound : NativeResourceBase
 	{
-		internal override bool Load(string path, params object[] args)
+		protected override void OnLoad()
 		{
-			uint resourceID;
+			ulong resourceID;
 			IntPtr handle;
 
-			if (args.Length < 1)
-			{
-				Log.Warning("Args for sound: <audioFilePath>");
-				return false;
-			}
-
-			_Load(path, (string)args[0], out resourceID, out handle);
+			_Load(ResourcePath, out resourceID, out handle);
 
 			ResourceID = resourceID;
 			Handle = handle;
-			return true;
+		}
+
+		protected override void OnImported()
+		{
+			if(TryGetImportSettings(out SoundImportSettings importSettings))
+				_Import(Handle, importSettings.FilePath);
+			else
+				_Import(Handle, string.Empty);
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, string audioFilePath, out uint resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string audioFilePath);
 		#endregion
 	}
 }

@@ -20,7 +20,18 @@ using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
 Model::Model() : m_Path(""), m_Root(), m_MeshIDs() { }
-Model::Model(string path) : m_Path(path), m_Root(), m_MeshIDs() { Load(); }
+Model::Model(string& path) : Model() { Import(path); }
+
+void Model::Import(const char* path) { Import(string(path)); }
+void Model::Import(string& path)
+{
+	if (!m_Path.empty())
+		// Release previous model
+		m_Root = {};
+
+	m_Path = path;
+	Load();
+}
 
 void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 {
@@ -58,6 +69,9 @@ vector<pair<ResourceID, ResourceID>> Model::GetMeshesAndMaterials()
 
 void Model::Load()
 {
+	if (m_Path.empty())
+		return;
+
 	Importer importer;
 
 	const aiScene* scene = nullptr;
@@ -100,13 +114,13 @@ void LoadMaterialTextures(
 	string currentDirectory,
 	aiTextureType textureType,
 	aiMaterial* aiMat,
-	ResourceID& materialTexture)
+	ResourceID& outputID)
 {
 	int textureCount = aiMat->GetTextureCount(textureType);
 
 	if (aiMat->GetTextureCount(textureType) <= 0)
 	{
-		materialTexture = InvalidResourceID;
+		outputID = InvalidResourceID;
 		return;
 	}
 
@@ -116,7 +130,7 @@ void LoadMaterialTextures(
 	string texturePath = currentDirectory + aiTexturePath.C_Str();
 	replace(texturePath.begin(), texturePath.end(), '\\', '/');
 
-	materialTexture = Resource::Load<Texture>(texturePath, texturePath);
+	outputID = Resource::Load<Texture>(texturePath, texturePath);
 }
 
 ResourceID Model::CreateMaterial(aiMaterial* aiMat)
@@ -202,11 +216,16 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
-	*outID = Resource::Load<Model>(mono_string_to_utf8(path), mono_string_to_utf8(filepath));
+	char* path = mono_string_to_utf8(pathRaw);
+	*outID = Resource::Load<Model>(path);
 	*outHandle = Resource::Get<Model>(*outID);
+	mono_free(path);
 }
+
+ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath), AquaEngine.Graphics)
+{ ((Model*)handle)->Import(mono_string_to_utf8(filepath)); }
 
 ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
 {

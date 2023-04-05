@@ -7,12 +7,14 @@ using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 
-Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(GL_INVALID_VALUE), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles) { }
+Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(GL_INVALID_VALUE), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles)
+{
+	Setup();
+}
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, DrawMode drawMode) : Mesh()
 {
-	m_DrawMode = drawMode;
-	SetData(vertices, indices);
+	Import(vertices, indices, drawMode);
 }
 
 Mesh::~Mesh()
@@ -25,11 +27,12 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &m_VAO);
 }
 
-void Mesh::SetData(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+void Mesh::Import(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, DrawMode drawMode)
 {
-	m_Vertices = vertices;
-	m_Indices = indices;
-	Setup();
+	m_DrawMode = drawMode;
+
+	SetIndices(indices);
+	SetVertices(vertices);
 }
 
 void Mesh::Setup()
@@ -40,16 +43,8 @@ void Mesh::Setup()
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
-	// Fill vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
-
-	// Fill index data
-	if (m_Indices.size() > 0)
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
-	}
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
 	// Vertex data layout
 	// Position
@@ -73,6 +68,27 @@ void Mesh::Draw()
 		glDrawElements((GLenum)m_DrawMode, (GLsizei)m_Indices.size(), GL_UNSIGNED_INT, 0);
 	else
 		glDrawArrays((GLenum)m_DrawMode, 0, (GLint)m_Vertices.size());
+	glBindVertexArray(0);
+}
+
+vector<Mesh::Vertex>& Mesh::GetVertices() { return m_Vertices; }
+vector<unsigned int>& Mesh::GetIndices() { return m_Indices; }
+
+void Mesh::SetVertices(vector<Vertex>& vertices)
+{
+	m_Vertices = vertices;
+
+	glBindVertexArray(m_VAO);
+	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
+	glBindVertexArray(0);
+}
+
+void Mesh::SetIndices(vector<unsigned int>& indices)
+{
+	m_Indices = indices;
+
+	glBindVertexArray(m_VAO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
 	glBindVertexArray(0);
 }
 
@@ -233,19 +249,18 @@ ResourceID Mesh::Sphere()
 }
 
 #pragma region Internal Calls
-#include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
-	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path));
+	char* path = mono_string_to_utf8(pathRaw);
+	*outID = Resource::Load<Mesh>(path);
 	*outHandle = Resource::Get<Mesh>(*outID);
 }
 
-ADD_MANAGED_METHOD(Mesh, Load1, void,
-	(MonoString* path, MonoArray* inVertices, MonoArray* inIndices,
-		unsigned char drawMode, uint64_t* outID, void** outHandle),
+ADD_MANAGED_METHOD(Mesh, Import, void,
+	(void* handle, MonoArray* inVertices, MonoArray* inIndices, unsigned char drawMode),
 	AquaEngine.Graphics)
 {
 	vector<Mesh::Vertex> vertices;
@@ -260,9 +275,12 @@ ADD_MANAGED_METHOD(Mesh, Load1, void,
 	for(size_t i = 0; i < indices.size(); i++)
 		indices[i] = mono_array_get(inIndices, unsigned int, i);
 
-	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path), vertices, indices, (Mesh::DrawMode)drawMode);
-	*outHandle = Resource::Get<Mesh>(*outID);
+	((Mesh*)handle)->Import(vertices, indices, (Mesh::DrawMode)drawMode);
 }
+
+ADD_MANAGED_METHOD(Mesh, GetQuadID, uint64_t, (), AquaEngine.Graphics) { return QuadID; }
+ADD_MANAGED_METHOD(Mesh, GetCubeID, uint64_t, (), AquaEngine.Graphics) { return CubeID; }
+ADD_MANAGED_METHOD(Mesh, GetSphereID, uint64_t, (), AquaEngine.Graphics) { return SphereID; }
 
 #define GET_CLASS(name) Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", #name)
 
@@ -298,8 +316,7 @@ ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPosition
 		vertices[i].TexCoords = mono_array_get(inTexCoords, glm::vec2, i);
 	}
 	
-	Mesh* mesh = (Mesh*)handle;
-	mesh->SetData(vertices, mesh->GetIndices());
+	((Mesh*)handle)->SetVertices(vertices);
 }
 
 ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices), AquaEngine.Graphics)
@@ -318,7 +335,6 @@ ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices),
 	for(size_t i = 0; i < indexCount; i++)
 		indices[i] = mono_array_get(inIndices, unsigned int, i);
 	
-	Mesh* mesh = (Mesh*)handle;
-	mesh->SetData(mesh->GetVertices(), indices);
+	((Mesh*)handle)->SetIndices(indices);
 }
 #pragma endregion

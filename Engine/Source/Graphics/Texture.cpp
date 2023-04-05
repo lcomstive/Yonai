@@ -15,12 +15,10 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 
-Texture::Texture() : m_Path(""), m_ID(GL_INVALID_VALUE) { }
+Texture::Texture() : m_Path(""), m_ID(GL_INVALID_VALUE), m_Resolution(), m_HDR(false) { }
 
-Texture::Texture(string path, bool hdr) : m_Path(path), m_ID(GL_INVALID_VALUE)
-{
-	GenerateImage(hdr);
-}
+Texture::Texture(string path, bool hdr) : m_ID(GL_INVALID_VALUE), m_Resolution()
+{ Import(path, hdr); }
 
 Texture::~Texture()
 {
@@ -28,7 +26,21 @@ Texture::~Texture()
 		glDeleteTextures(1, &m_ID);
 }
 
-void Texture::GenerateImage(bool hdr)
+void Texture::Import(const char* path, bool hdr) { Import(string(path), hdr); }
+void Texture::Import(std::string& path, bool hdr)
+{
+	m_Path = path;
+	m_HDR = hdr;
+
+	// Destroy any previous texture
+	if (m_ID != GL_INVALID_VALUE)
+		glDeleteTextures(1, &m_ID);
+
+	// Create new texture
+	GenerateImage();
+}
+
+void Texture::GenerateImage()
 {
 	if (m_Path.empty())
 	{
@@ -51,14 +63,14 @@ void Texture::GenerateImage(bool hdr)
 	{
 		// Load from virtual filesystem
 		vector<unsigned char> fileContents = VFS::Read(m_Path);
-		if (!hdr)
+		if (!m_HDR)
 			data = stbi_load_from_memory(fileContents.data(), (int)fileContents.size(), &width, &height, &channelCount, 0);
 		else
 			data = stbi_loadf_from_memory(fileContents.data(), (int)fileContents.size(), &width, &height, &channelCount, 0);
 	}
 	else // Load from filepath
 	{
-		if(!hdr)
+		if(!m_HDR)
 			data = stbi_load(m_Path.c_str(), &width, &height, &channelCount, 0);
 		else
 			data = stbi_loadf(m_Path.c_str(), &width, &height, &channelCount, 0);
@@ -91,20 +103,20 @@ void Texture::GenerateImage(bool hdr)
 	{
 	case 1:
 		textureFormat = GL_R;
-		internalFormat = hdr ? GL_R16F : GL_R;
+		internalFormat = m_HDR ? GL_R16F : GL_R;
 		break;
 	case 3:
 		textureFormat = GL_RGB;
-		internalFormat = hdr ? GL_RGB16F : GL_RGB;
+		internalFormat = m_HDR ? GL_RGB16F : GL_RGB;
 		break;
 	case 4:
 		textureFormat = GL_RGBA;
-		internalFormat = hdr ? GL_RGBA16F : GL_RGBA;
+		internalFormat = m_HDR ? GL_RGBA16F : GL_RGBA;
 		break;
 	}
 
 	// Fill OpenGL texture data with binary data
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, textureFormat, hdr ? GL_FLOAT : GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, textureFormat, m_HDR ? GL_FLOAT : GL_UNSIGNED_BYTE, data);
 
 	// Release resources, these are now stored inside OpenGL's texture buffer
 	stbi_image_free(data);
@@ -116,7 +128,7 @@ void Texture::GenerateImage(bool hdr)
 
 #ifndef NDEBUG
 	profileTimer.Stop();
-	spdlog::debug("Loaded texture '{}' ({}x{}) in {}ms {}", m_Path, width, height, profileTimer.ElapsedTime().count(), hdr ? "[HDR]" : "");
+	spdlog::debug("Loaded texture '{}' ({}x{}) in {}ms {}", m_Path, width, height, profileTimer.ElapsedTime().count(), m_HDR ? "[HDR]" : "");
 #endif
 }
 
@@ -136,16 +148,19 @@ void Texture::Bind(unsigned int index)
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Texture, Load0, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
-	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path));
+	char* path = mono_string_to_utf8(pathRaw);
+	*outResourceID = Resource::Load<Texture>(path);
 	*outHandle = Resource::Get<Texture>(*outResourceID);
+	mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Texture, Load1, void, (MonoString* path, MonoString* filePath, bool hdr, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr), AquaEngine.Graphics)
 {
-	*outResourceID = Resource::Load<Texture>(mono_string_to_utf8(path), mono_string_to_utf8(filePath), hdr);
-	*outHandle = Resource::Get<Texture>(*outResourceID);
+	char* path = mono_string_to_utf8(filepath);
+	((Texture*)instance)->Import(path, hdr);
+	mono_free(path);
 }
 
 ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)

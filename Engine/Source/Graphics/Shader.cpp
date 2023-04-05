@@ -301,25 +301,9 @@ ShaderUniform Shader::GetUniformInfo(std::string locationName) const
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Shader, Load0, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Load, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
 	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path));
-	*outHandle = Resource::Get<Shader>(*outResourceID);
-}
-
-ADD_MANAGED_METHOD(Shader, Load1, void,
-	(MonoString* path, MonoString* vertexPath, MonoString* fragmentPath,
-		MonoString* computePath, MonoString* geometryPath,
-		uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
-{
-	ShaderStageInfo stageInfo =
-	{
-		vertexPath ? mono_string_to_utf8(vertexPath) : "",
-		fragmentPath ? mono_string_to_utf8(fragmentPath) : "",
-		computePath ? mono_string_to_utf8(computePath) : "",
-		geometryPath ? mono_string_to_utf8(geometryPath) : ""
-	};
-	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path), stageInfo);
 	*outHandle = Resource::Get<Shader>(*outResourceID);
 }
 
@@ -342,6 +326,9 @@ ADD_MANAGED_METHOD(Shader, UpdateStages, void,
 	};
 	((Shader*)instance)->UpdateStages(stageInfo);
 }
+
+ADD_MANAGED_METHOD(Shader, UnloadStages, void, (void* instance), AquaEngine.Graphics)
+{ ((Shader*)instance)->UpdateStages({}); }
 
 ADD_MANAGED_METHOD(Shader, Set_int, void, (void* instance, int location, int value), AquaEngine.Graphics)
 { ((Shader*)instance)->Set(location, value); }

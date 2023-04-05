@@ -1,9 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
+	public class MeshImportSettings : IImportSettings
+	{
+		public uint[] Indices = null;
+		public Mesh.Vertex[] Vertices = null;
+		public DrawMode DrawMode = DrawMode.Triangles;
+	}
+
 	public class Mesh : NativeResourceBase
 	{
 		public struct Vertex
@@ -13,21 +19,20 @@ namespace AquaEngine.Graphics
 			public Vector2 TexCoords;
 		}
 
-		private uint[] m_Indices;
-		private Vertex[] m_Vertices;
+		private MeshImportSettings m_Settings;
 
 		/// <summary>
 		/// The vertex buffer for this mesh
 		/// </summary>
 		public Vertex[] Vertices
 		{
-			get => m_Vertices;
+			get => m_Settings.Vertices;
 			set
 			{
-				if(m_Vertices == value)
+				if(m_Settings.Vertices == value)
 					return; // No change
 
-				m_Vertices = value;
+				m_Settings.Vertices = value;
 				UpdateVertices();
 			}
 		}
@@ -37,55 +42,34 @@ namespace AquaEngine.Graphics
 		/// </summary>
 		public uint[] Indices
 		{
-			get => m_Indices;
+			get => m_Settings.Indices;
 			set
 			{
-				if(m_Indices == value)
+				if(m_Settings.Indices == value)
 					return; // No change
 
-				m_Indices = value;
-				_SetIndices(Handle, m_Indices);
+				m_Settings.Indices = value;
+				_SetIndices(Handle, m_Settings.Indices);
 			}
 		}
 
-		internal override bool Load(string path, params object[] args)
+		public DrawMode DrawMode => m_Settings.DrawMode;
+
+		protected override void OnLoad()
 		{
-			uint resourceID;
-			IntPtr handle;
-
-			if(args.Length >= 2)
-			{
-				if(!(args[0] is Vertex[]) || !(args[1] is uint[]))
-					throw new ArgumentException("Mesh loading requires parameters of type Vertex[], uint[]");
-
-				Vertex[] vertices = (Vertex[])args[0];
-				uint[] indices = (uint[])args[1];
-				DrawMode drawMode = args.Length >= 3 ? (DrawMode)args[2] : DrawMode.Triangles;
-
-				_Load1(path, vertices, indices, (byte)drawMode, out resourceID, out handle);
-			}
-			else
-				_Load0(path, out resourceID, out handle);
-
+			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
-			return true;
 		}
 
-		internal override void OnLoad()
+		protected override void OnImported()
 		{
-			_GetVertices(Handle, out Vector3[] positions, out Vector3[] normals, out Vector2[] texCoords);
+			if (!TryGetImportSettings(out m_Settings))
+				// Set to default values if invalid import settings
+				m_Settings = new MeshImportSettings();
 
-			m_Vertices = new Vertex[positions.Length];
-			for(int i = 0;i < positions.Length;i++)
-				m_Vertices[i] = new Vertex()
-				{
-					Position = positions[i],
-					Normal = normals[i],
-					TexCoords = texCoords[i]
-				};
-
-			_GetIndices(Handle, out m_Indices);
+			// Update vertices, indices and drawmode in unmanaged code
+			_Import(Handle, Vertices, Indices, (byte)DrawMode);
 		}
 
 		/// <summary>
@@ -93,14 +77,14 @@ namespace AquaEngine.Graphics
 		/// </summary>
 		public void UpdateVertices()
 		{
-			Vector3[] positions = new Vector3[m_Vertices.Length];
-			Vector3[] normals = new Vector3[m_Vertices.Length];
-			Vector2[] texCoords = new Vector2[m_Vertices.Length];
-			for(int i = 0;i < m_Vertices.Length;i++)
+			Vector3[] positions = new Vector3[m_Settings.Vertices.Length];
+			Vector3[] normals = new Vector3[m_Settings.Vertices.Length];
+			Vector2[] texCoords = new Vector2[m_Settings.Vertices.Length];
+			for(int i = 0;i < m_Settings.Vertices.Length;i++)
 			{
-				positions[i] = m_Vertices[i].Position;
-				normals[i] = m_Vertices[i].Normal;
-				texCoords[i] = m_Vertices[i].TexCoords;
+				positions[i] = m_Settings.Vertices[i].Position;
+				normals[i]   = m_Settings.Vertices[i].Normal;
+				texCoords[i] = m_Settings.Vertices[i].TexCoords;
 			}
 			_SetVertices(Handle, positions, normals, texCoords);
 		}
@@ -108,17 +92,29 @@ namespace AquaEngine.Graphics
 		/// <summary>
 		/// Uploads the index buffer to unmanaged memory
 		/// </summary>
-		public void UpdateIndices() => _SetIndices(Handle, m_Indices);
+		public void UpdateIndices() => _SetIndices(Handle, m_Settings.Indices);
+
+		public static UUID QuadID => _GetQuadID();
+		public static UUID CubeID => _GetCubeID();
+		public static UUID SphereID => _GetSphereID();
+
+		public static Mesh Quad => Resource.Get<Mesh>(QuadID);
+		public static Mesh Cube => Resource.Get<Mesh>(CubeID);
+		public static Mesh Sphere => Resource.Get<Mesh>(SphereID);
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load0(string path, out uint resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load1(string path, Vertex[] vertices, uint[] indices, byte drawMode, out uint resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, Vertex[] vertices, uint[] indices, byte drawMode);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVertices(IntPtr handle, Vector3[] positions, Vector3[] normals, Vector2[] texCoords);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetVertices(IntPtr handle, out Vector3[] positions, out Vector3[] normals, out Vector2[] texCoords);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetIndices(IntPtr handle, uint[] indices);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetIndices(IntPtr handle, out uint[] indices);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetQuadID();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetCubeID();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSphereID();
 		#endregion
 	}
 }

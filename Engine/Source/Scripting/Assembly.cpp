@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>
