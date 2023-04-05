@@ -44,7 +44,7 @@ namespace AquaEngine
 
 		public:
 			AquaAPI Entity(World* world = nullptr) : m_ID(), m_World(world) { }
-			AquaAPI Entity(EntityID& id, World* world = nullptr) : m_ID(id), m_World(world) { }
+			AquaAPI Entity(EntityID id, World* world = nullptr) : m_ID(id), m_World(world) { }
 
 			AquaAPI EntityID ID();
 			AquaAPI AquaEngine::World* GetWorld();
