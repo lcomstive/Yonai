@@ -218,8 +218,11 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
+	if (*outID == InvalidResourceID)
+		*outID = ResourceID(); // Assign resource ID
+
 	char* path = mono_string_to_utf8(pathRaw);
-	*outID = Resource::Load<Model>(path);
+	Resource::Load<Model>(*outID, path);
 	*outHandle = Resource::Get<Model>(*outID);
 	mono_free(path);
 }

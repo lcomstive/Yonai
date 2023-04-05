@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class SoundMixerImportSettings : IImportSettings
+	public struct SoundMixerImportSettings : IImportSettings
 	{
 		public string Name;
 		public float Volume;
@@ -40,10 +40,8 @@ namespace AquaEngine
 
 		protected override void OnLoad()
 		{
-			ulong resourceID;
-			IntPtr handle;
-
-			_Load(ResourcePath, out resourceID, out handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 
 			ResourceID = resourceID;
 			Handle = handle;

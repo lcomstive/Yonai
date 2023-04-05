@@ -4,13 +4,22 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class MaterialImportSettings : IImportSettings
+	public struct MaterialImportSettings : IImportSettings
 	{
-		public UUID Shader = UUID.Invalid;
-		public Vector4 Albedo = Vector4.One;
-		public UUID AlbedoMap = UUID.Invalid;
-		public bool AlphaClipping = false;
-		public float AlphaThreshold = 0.1f;
+		public UUID Shader;
+		public Colour Albedo;
+		public UUID AlbedoMap;
+		public bool AlphaClipping;
+		public float AlphaThreshold;
+
+		public MaterialImportSettings(UUID shader)
+		{
+			Shader = shader;
+			Albedo = Colour.White;
+			AlbedoMap = UUID.Invalid;
+			AlphaClipping = false;
+			AlphaThreshold = 0.1f;
+		}
 	}
 
 	public class Material : NativeResourceBase
@@ -79,7 +88,8 @@ namespace AquaEngine.Graphics
 
 		protected override void OnLoad()
 		{
-			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 
 			Handle = handle;
 			ResourceID = resourceID;

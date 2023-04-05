@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class ShaderImportSettings : IImportSettings
+	public struct ShaderImportSettings : IImportSettings
 	{
 		public string VertexPath;
 		public string FragmentPath;
@@ -15,11 +15,12 @@ namespace AquaEngine.Graphics
 
 	public class Shader : NativeResourceBase, ISerializable
 	{
-		public ShaderImportSettings ShaderStages { get; private set; }
+		public ShaderImportSettings ShaderStages;
 
 		protected override void OnLoad()
 		{
-			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
 
@@ -53,8 +54,6 @@ namespace AquaEngine.Graphics
 
 		public JObject OnSerialize()
 		{
-			if (ShaderStages == null)
-				return null;
 			return new JObject(
 				new JProperty("Vertex",	  ShaderStages.VertexPath),
 				new JProperty("Fragment", ShaderStages.FragmentPath),

@@ -1,6 +1,6 @@
 [
   {
-    "ID": "1424136817810510799",
+    "ID": "2752277415421139505",
     "Path": "Textures/UI_Testing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -9,7 +9,7 @@
     }
   },
   {
-    "ID": "9858804742852629215",
+    "ID": "7728150875853156462",
     "Path": "Textures/Missing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -18,7 +18,7 @@
     }
   },
   {
-    "ID": "5467780560557261244",
+    "ID": "5233419978503333005",
     "Path": "Textures/Texture/Test_Texture09",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -27,7 +27,7 @@
     }
   },
   {
-    "ID": "5107988973597226201",
+    "ID": "8854165795897580542",
     "Path": "Shaders/NewSpriteShader",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -35,6 +35,24 @@
       "Fragment": "assets://Shaders/NewSprite.frag",
       "Compute": null,
       "Geometry": null
+    }
+  },
+  {
+    "ID": "123456789",
+    "Path": "Textures/Grid",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Grid.png",
+      "HDR": false
+    }
+  },
+  {
+    "ID": "696969",
+    "Path": "Textures/Splash",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Splash.png",
+      "HDR": false
     }
   }
 ]

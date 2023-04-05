@@ -50,6 +50,12 @@ namespace AquaEngine
 		template<typename T, class... ArgTypes>
 		static ResourceID Load(std::string path, ArgTypes... constructorArgs)
 		{
+			return Load<T, ArgTypes...>(ResourceID(), path, constructorArgs...);
+		}
+		
+		template<typename T, class... ArgTypes>
+		static ResourceID Load(ResourceID id, std::string path, ArgTypes... constructorArgs)
+		{
 			replace(path.begin(), path.end(), '\\', '/');
 
 			std::type_index loadType = typeid(T);
@@ -69,7 +75,6 @@ namespace AquaEngine
 
 			// Create new resource
 			s_Instances.emplace_back(ResourceInstance(new T(constructorArgs...), loadType));
-			ResourceID id;
 			s_InstancePaths.emplace(path, id);
 			s_ResourceIDs.emplace(id, s_Instances.size() - 1);
 

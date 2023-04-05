@@ -29,6 +29,9 @@ Texture::~Texture()
 void Texture::Import(const char* path, bool hdr) { Import(string(path), hdr); }
 void Texture::Import(std::string& path, bool hdr)
 {
+	if (m_Path == path && hdr == m_HDR)
+		return; // No change
+
 	m_Path = path;
 	m_HDR = hdr;
 
@@ -152,7 +155,9 @@ void Texture::Bind(unsigned int index)
 ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
 	char* path = pathRaw ? mono_string_to_utf8(pathRaw) : "";
-	*outResourceID = Resource::Load<Texture>(path);
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID();
+	Resource::Load<Texture>(*outResourceID, path);
 	*outHandle = Resource::Get<Texture>(*outResourceID);
 
 	if(pathRaw)

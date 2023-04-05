@@ -3,11 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class MeshImportSettings : IImportSettings
+	public struct MeshImportSettings : IImportSettings
 	{
-		public uint[] Indices = null;
-		public Mesh.Vertex[] Vertices = null;
-		public DrawMode DrawMode = DrawMode.Triangles;
+		public uint[] Indices;
+		public DrawMode DrawMode;
+		public Mesh.Vertex[] Vertices;
 	}
 
 	public class Mesh : NativeResourceBase
@@ -57,7 +57,8 @@ namespace AquaEngine.Graphics
 
 		protected override void OnLoad()
 		{
-			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
 

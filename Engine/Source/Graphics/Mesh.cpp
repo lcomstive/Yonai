@@ -254,8 +254,11 @@ ResourceID Mesh::Sphere()
 
 ADD_MANAGED_METHOD(Mesh, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
 {
+	if (*outID == InvalidResourceID)
+		*outID = ResourceID(); // Assign resource ID
+
 	char* path = mono_string_to_utf8(pathRaw);
-	*outID = Resource::Load<Mesh>(path);
+	Resource::Load<Mesh>(*outID, path);
 	*outHandle = Resource::Get<Mesh>(*outID);
 }
 

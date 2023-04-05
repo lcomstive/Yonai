@@ -12,15 +12,20 @@ namespace AquaEditor
 
 		protected override void Enabled()
 		{
-			Log.Debug("Launched editor service");
-
-			if (!EditorWindow.ContextIsInitialised())
+			try
 			{
-				EditorWindow.InitContext();
-				CreateWindow();
-			}
+				Log.Debug("Launched editor service");
 
-			Add<EditorUIService>();
+				if (!EditorWindow.ContextIsInitialised())
+				{
+					EditorWindow.InitContext();
+					CreateWindow();
+				}
+
+				Resource.LoadDatabase();
+				Add<EditorUIService>();
+			}
+			catch(System.Exception e) { Log.Exception(e); }
 		}
 
 		protected override void Disabled()
@@ -28,6 +33,7 @@ namespace AquaEditor
 			Log.Error("Disabled editor service");
 
 			Remove<EditorUIService>();
+			Resource.SaveDatabase();
 		}
 
 		protected override void Update()

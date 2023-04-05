@@ -58,7 +58,10 @@ Shader* Material::PrepareShader()
 // _Load(string path, out uint resourceID, out IntPtr handle);
 ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, uint64_t* resourceID, void** outHandle), AquaEngine.Graphics)
 {
-	*resourceID = Resource::Load<Material>(mono_string_to_utf8(path));
+	if (*resourceID == InvalidResourceID)
+		*resourceID = ResourceID(); // Assign resource ID
+	
+	Resource::Load<Material>(*resourceID, mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Material>(*resourceID);
 }
 

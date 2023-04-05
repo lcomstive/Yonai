@@ -303,7 +303,9 @@ ShaderUniform Shader::GetUniformInfo(std::string locationName) const
 
 ADD_MANAGED_METHOD(Shader, Load, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
-	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path));
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID(); // Assign resource ID
+	Resource::Load<Shader>(*outResourceID, mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Shader>(*outResourceID);
 }
 

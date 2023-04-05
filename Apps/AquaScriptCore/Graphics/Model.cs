@@ -5,9 +5,11 @@ using Newtonsoft.Json.Linq;
 
 namespace AquaEngine.Graphics
 {
-	public class ModelImportSettings : IImportSettings
+	public struct ModelImportSettings : IImportSettings
 	{
 		public string FilePath;
+
+		public ModelImportSettings(string filePath) => FilePath = filePath;
 	}
 
 	public class Model : NativeResourceBase, ISerializable
@@ -33,7 +35,8 @@ namespace AquaEngine.Graphics
 
 		protected override void OnLoad()
 		{
-			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 
 			ResourceID = resourceID;
 			Handle = handle;
@@ -43,7 +46,7 @@ namespace AquaEngine.Graphics
 		{
 			// Load model
 			TryGetImportSettings(out ModelImportSettings settings);
-			_Import(Handle, FilePath = settings?.FilePath ?? string.Empty);
+			_Import(Handle, FilePath = settings.FilePath);
 
 			// Get meshes
 			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);

@@ -12,18 +12,28 @@ namespace AquaEngine
 	public static class Resource
 	{
 		private const string DatabaseFilePath = "project://Resources.json";
+		private static Dictionary<string, UUID> s_Paths = new Dictionary<string, UUID>();
 		private static Dictionary<UUID, ResourceBase> s_Instances = new Dictionary<UUID, ResourceBase>();
 
 		/// <summary>
 		/// Retrieves the ID of resource at <paramref name="path"/>
 		/// </summary>
-		/// <returns>ID of found resource, or <code>uint.MaxValue</code> if not found</returns>
-		public static UUID GetID(string path) => _GetID(path);
+		/// <returns>ID of found resource, or <see cref="UUID.Invalid"/> if not found</returns>
+		public static UUID GetID(string path)
+		{
+			// Check native resourceIDs
+			UUID id = _GetID(path);
+			if (id != UUID.Invalid) return id;
+			if (s_Paths.ContainsKey(path))
+				return s_Paths[path];
+			return UUID.Invalid;
+		}
 
 		/// <summary>
 		/// Gets the path associated with the resource matching ID <paramref name="resourceID"/>
-		/// <returns>Path of loaded resource, or empty if not valid</returns>
-		public static string GetPath(UUID resourceID) => _GetPath(resourceID);
+		/// <returns>Path of loaded resource, or null if not valid</returns>
+		public static string GetPath(UUID resourceID) =>
+			_GetPath(resourceID) ?? (Exists(resourceID) ? s_Instances[resourceID].ResourcePath : null);
 
 		/// <summary>
 		/// Creates a copy of resource at <paramref name="resourceID"/>, with the given path
@@ -49,7 +59,10 @@ namespace AquaEngine
 		}
 
 		/// <returns>True if resource is found matching <paramref name="resourceID"/></returns>
-		public static bool Exists(UUID resourceID) => _Exists(resourceID);
+		public static bool Exists(UUID resourceID) => s_Instances.ContainsKey(resourceID) || _Exists(resourceID);
+
+		/// <returns>True if resource path is found matching <paramref name="path"/></returns>
+		public static bool Exists(string path) => s_Paths.ContainsKey(path);
 
 		/// <summary>
 		/// Loads a new resource with virtual path <paramref name="path"/>.
@@ -62,7 +75,7 @@ namespace AquaEngine
 		public static T Load<T>(string path, IImportSettings importSettings) where T : ResourceBase, new()
 		{
 			// Check for existing cached instance 
-			UUID resourceID = _GetID(path);
+			UUID resourceID = GetID(path);
 			if (resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return (T)s_Instances[resourceID];
 
@@ -77,22 +90,28 @@ namespace AquaEngine
 				instance.ImportSettings = importSettings;
 
 				instance._Load();
+				if (instance.ResourceID == UUID.Invalid)
+					instance.ResourceID = _CreateID();
+
 				instance.Import(importSettings);
 
 				// Cache created resource
 				s_Instances.Add(instance.ResourceID, instance);
+				s_Paths.Add(path, instance.ResourceID);
 			}
 			else
+			{
 				// Add found unmanaged resource, cache in s_Instances
 				LoadExistingUnmanagedResource(instance, resourceID);
-
+				s_Paths.Add(path, resourceID);
+			}
 			return instance;
 		}
-		
-		private static ResourceBase Load(UUID resourceID, string path, Type type)
+
+		internal static ResourceBase Load(UUID resourceID, string path, Type type)
 		{
 			// Ensure type inherits from ResourceBase
-			if(!typeof(ResourceBase).IsAssignableFrom(type))
+			if (!typeof(ResourceBase).IsAssignableFrom(type))
 				throw new ArgumentException($"Resources.Load() type '{type.Name}' is invalid");
 
 			// Check for existing cached instance 
@@ -103,6 +122,8 @@ namespace AquaEngine
 			instance.ResourcePath = path;
 			instance.ResourceID = resourceID;
 
+			s_Paths.Add(path, instance.ResourceID);
+			
 			// Check if native instance exists
 			if (resourceID == UUID.Invalid)
 			{
@@ -115,7 +136,6 @@ namespace AquaEngine
 			else
 				// Add found unmanaged resource, cache in s_Instances
 				LoadExistingUnmanagedResource(instance, resourceID);
-
 			return instance;
 		}
 
@@ -128,6 +148,14 @@ namespace AquaEngine
 			{
 				s_Instances[resourceID]._Unload();
 				s_Instances.Remove(resourceID);
+			}
+
+			foreach(var pair in s_Paths)
+			{
+				if (pair.Value != resourceID)
+					continue;
+				s_Paths.Remove(pair.Key);
+				break;
 			}
 
 			_Unload(resourceID);
@@ -160,6 +188,11 @@ namespace AquaEngine
 			return instance;
 		}
 
+		/// <summary>
+		/// Gets the type of a resource, or null if not found
+		/// </summary>
+		public static Type GetType(UUID resourceID) => Exists(resourceID) ? s_Instances[resourceID].GetType() : null;
+
 		public static T Get<T>(string path) where T : ResourceBase, new()
 		{
 			UUID resourceID = GetID(path);
@@ -172,7 +205,7 @@ namespace AquaEngine
 		public static void SaveDatabase()
 		{
 			int count = 0;
-			
+
 			JArray resources = new JArray();
 			foreach (var pair in s_Instances)
 			{
@@ -213,11 +246,15 @@ namespace AquaEngine
 			JsonSerializer serializer = new JsonSerializer();
 			int count = 0;
 
+			// Check that file exists
+			if (!VFS.Exists(DatabaseFilePath))
+				return;
+
 			using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath(DatabaseFilePath)))
 			using (JsonReader reader = new JsonTextReader(streamReader))
 			{
 				JArray root = serializer.Deserialize<JArray>(reader);
-				foreach(JObject resource in root)
+				foreach (JObject resource in root)
 				{
 					UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());
 					string resourcePath = resource["Path"].Value<string>();
@@ -227,7 +264,7 @@ namespace AquaEngine
 
 					ResourceBase instance = Load(id, resourcePath, type);
 
-					if (type.IsAssignableFrom(typeof(ISerializable)))
+					if (typeof(ISerializable).IsAssignableFrom(type))
 						((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
 
 					count++;
@@ -249,6 +286,7 @@ namespace AquaEngine
 		}
 
 		#region Internal Calls
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _CreateID();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetID(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(ulong resourceID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(ulong resourceID);

@@ -14,12 +14,16 @@ ADD_MANAGED_METHOD(Resource, Duplicate, uint64_t, (unsigned int originalID, Mono
 
 ADD_MANAGED_METHOD(Resource, GetPath, MonoString*, (unsigned int id))
 {
-	return mono_string_new(mono_domain_get(),
-		(Resource::IsValidResourceID(id) ? Resource::GetPath(id) : string()).c_str());
+	if (Resource::IsValidResourceID(id))
+		return mono_string_new(mono_domain_get(), Resource::GetPath(id).c_str());
+	return nullptr;
 }
 
 ADD_MANAGED_METHOD(Resource, GetID, uint64_t, (MonoString* path))
 { return Resource::GetID(mono_string_to_utf8(path)); }
+
+ADD_MANAGED_METHOD(Resource, CreateID, uint64_t, ())
+{ return UUID(); }
 
 ADD_MANAGED_METHOD(Resource, Unload, void, (uint64_t resourceID))
 { Resource::Unload(resourceID); }

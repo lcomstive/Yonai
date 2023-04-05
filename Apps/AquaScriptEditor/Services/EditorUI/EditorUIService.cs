@@ -28,27 +28,32 @@ namespace AquaEditor
 			SceneManager.WorldChanged += (world, added) =>
 				Log.Info($"World '{world.Name}' [{world.ID}] has been " + (added ? "added" : "removed"));
 
-			CompileMenuItems();
-			InspectorView.GetCustomInspectors();
+			try
+			{
+				CompileMenuItems();
+				InspectorView.GetCustomInspectors();
 
-			TextureImportSettings textureSettings = new TextureImportSettings();
-			textureSettings.FilePath = "assets://Textures/Test.png";
-			m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", textureSettings);
+				TextureImportSettings textureSettings = new TextureImportSettings();
+				textureSettings.FilePath = "assets://Textures/Test.png";
+				m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", textureSettings);
 
-			textureSettings.FilePath = "assets://Textures/Black.jpg";
-			UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", textureSettings);
-			MissingTexture = Resource.Get<Texture>(missingTextureID);
+				textureSettings.FilePath = "assets://Textures/Black.jpg";
+				UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", textureSettings);
+				MissingTexture = Resource.Get<Texture>(missingTextureID);
 
-			// Demo //
-			GenerateConsoleLines();
-			// CreateTestScene();
-			LoadTestScene();
+				// Demo //
+				GenerateConsoleLines();
 
-			Open<SceneView>();
-			Open<HierarchyView>();
-			Open<InspectorView>();
+				CreateTestScene();
+				// LoadTestScene();
 
-			// InspectorView.Target = World.Get(0).GetEntity(0);
+				Open<SceneView>();
+				Open<HierarchyView>();
+				Open<InspectorView>();
+
+				// InspectorView.Target = World.Get(0).GetEntity(0);
+			}
+			catch (Exception e) { Log.Exception(e); }
 		}
 
 		protected override void Disabled()
@@ -68,7 +73,7 @@ namespace AquaEditor
 		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S")]
 		private static void SaveScene()
 		{
-			if(!VFS.Exists(SceneDir))
+			if (!VFS.Exists(SceneDir))
 				VFS.CreateDirectory(SceneDir);
 
 			JsonSerializer serializer = new JsonSerializer();
@@ -85,7 +90,7 @@ namespace AquaEditor
 				}
 			}
 		}
-		
+
 		[MenuItem("File/Scene/Load")]
 		private static void LoadScene()
 		{
@@ -163,7 +168,7 @@ namespace AquaEditor
 				for (int i = 0; i < views.Length; i++)
 				{
 					try { views[i]._Draw(); }
-					catch(Exception e)
+					catch (Exception e)
 					{
 						Log.Exception(e);
 						// Remove view with exception, otherwise it will (likely) do it each frame
@@ -176,7 +181,7 @@ namespace AquaEditor
 				ImGUI.PopStyleColour(StyleColours.Count);
 				ImGUI.PopStyleVar(StyleVarFloats.Count + StyleVarVectors.Count);
 			}
-			catch(Exception e) { Log.Exception(e); }
+			catch (Exception e) { Log.Exception(e); }
 		}
 
 		#region View Handling
@@ -261,25 +266,31 @@ namespace AquaEditor
 			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
 
 			// Get all methods with the MenuItem attribute, in all assemblies
-			var menuItems =
-				from assembly in AppDomain.CurrentDomain.GetAssemblies()
-				from type in assembly.GetTypes()
-				from method in type.GetMethods(bindingFlags)
-				let attribute = method.GetCustomAttribute<MenuItemAttribute>()
-				where attribute != null
-				select new
-				{
-					Method = method,
-					Attribute = attribute
-				};
-
-
 			try
 			{
-				foreach (var menuItem in menuItems)
-					m_RootMenuItem.Add(menuItem.Method, menuItem.Attribute);
+				List<(MethodInfo, MenuItemAttribute)> menuItems = new List<(MethodInfo, MenuItemAttribute)>();
+				Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+				foreach (Assembly assembly in assemblies)
+				{
+					try
+					{
+						foreach (Type type in assembly.GetTypes())
+						{
+							foreach (MethodInfo method in type.GetMethods(bindingFlags))
+							{
+								MenuItemAttribute attribute = method.GetCustomAttribute<MenuItemAttribute>();
+								if (attribute != null)
+									menuItems.Add((method, attribute));
+							}
+						}
+					}
+					catch { }
+				}
+
+				foreach ((MethodInfo method, MenuItemAttribute attribute) in menuItems)
+					m_RootMenuItem.Add(method, attribute);
 			}
-			catch(Exception e) { Log.Exception(e); }
+			catch (Exception e) { Log.Exception(e); }
 		}
 
 		#region Demo

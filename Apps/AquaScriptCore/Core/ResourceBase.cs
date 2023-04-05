@@ -51,9 +51,14 @@ namespace AquaEngine
 			OnImported();
 		}
 
-		protected bool TryGetImportSettings<T>(out T value) where T : class, IImportSettings
+		/// <summary>
+		/// Tries casting <see cref="ImportSettings"/> to <typeparamref name="T"/>.
+		/// Returns default value if cannot cast, or if ImportSettings are null.
+		/// </summary>
+		/// <returns>True if successfully cast</returns>
+		protected bool TryGetImportSettings<T>(out T value) where T : struct, IImportSettings
 		{
-			value = null;
+			value = default;
 			if (ImportSettings == null ||
 				!ImportSettings.GetType().Equals(typeof(T)))
 				return false;

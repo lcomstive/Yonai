@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class SoundImportSettings : IImportSettings
+	public struct SoundImportSettings : IImportSettings
 	{
 		public string FilePath;
 	}
@@ -12,10 +12,8 @@ namespace AquaEngine
 	{
 		protected override void OnLoad()
 		{
-			ulong resourceID;
-			IntPtr handle;
-
-			_Load(ResourcePath, out resourceID, out handle);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
 
 			ResourceID = resourceID;
 			Handle = handle;

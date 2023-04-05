@@ -84,12 +84,16 @@ namespace AquaEngine
 		public void Destroy() => World.DestroyEntity(ID);
 
 		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
-		public bool HasComponent<T>() where T : Component => _HasComponent(World.ID, ID, typeof(T));
+		public bool HasComponent<T>() where T : Component =>
+			m_Components.ContainsKey(typeof(T)) || _HasComponent(World.ID, ID, typeof(T));
 
 		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
 		public T AddComponent<T>() where T : Component
 		{
 			Type type = typeof(T);
+			if (HasComponent<T>())
+				return (T)m_Components[type];
+
 			T component = (T)_AddComponent(World.ID, ID, type);
 			if (component == null)
 				return null;

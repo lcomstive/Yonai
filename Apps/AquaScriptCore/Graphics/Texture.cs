@@ -6,19 +6,22 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine.Graphics
 {
-	public class TextureImportSettings : IImportSettings
+	public struct TextureImportSettings : IImportSettings
 	{
-		public bool HDR = false;
-		public string FilePath = string.Empty;
+		public bool HDR;
+		public string FilePath;
 
-		public TextureImportSettings() { }
-		public TextureImportSettings(string filePath) => FilePath = filePath;
+		public TextureImportSettings(string filePath, bool hdr = false)
+		{
+			FilePath = filePath;
+			HDR = hdr;
+		}
 	}
 
 	public class Texture : NativeResourceBase, ISerializable
 	{
-		public bool HDR => m_ImportSettings?.HDR ?? false;
-		public string FilePath => m_ImportSettings?.FilePath ?? string.Empty;
+		public bool HDR => m_ImportSettings.HDR;
+		public string FilePath => m_ImportSettings.FilePath;
 
 		public IVector2 Resolution
 		{
@@ -29,11 +32,11 @@ namespace AquaEngine.Graphics
 			}
 		}
 
-		private TextureImportSettings m_ImportSettings = null;
+		private TextureImportSettings m_ImportSettings;
 
 		protected override void OnLoad()
 		{
-			ulong resourceID;
+			ulong resourceID = ResourceID;
 			IntPtr handle;
 
 			_Load(ResourcePath, out resourceID, out handle);
@@ -49,7 +52,8 @@ namespace AquaEngine.Graphics
 
 		protected override void OnImported()
 		{
-			TryGetImportSettings(out m_ImportSettings);
+			if (!TryGetImportSettings(out m_ImportSettings))
+				Log.Warning("Texture.OnImport invalid import settings?");
 			_Import(Handle, FilePath, HDR);
 		}
 
@@ -64,7 +68,7 @@ namespace AquaEngine.Graphics
 		public void OnDeserialize(JObject json) =>
 			Import(new TextureImportSettings()
 			{
-				HDR= json["HDR"].Value<bool>(),
+				HDR		 = json["HDR"].Value<bool>(),
 				FilePath = json["FilePath"].Value<string>()
 			});
 			
