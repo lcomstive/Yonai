@@ -23,7 +23,7 @@ Model::Model() : m_Path(""), m_Root(), m_MeshIDs() { }
 Model::Model(string& path) : Model() { Import(path); }
 
 void Model::Import(const char* path) { Import(string(path)); }
-void Model::Import(string& path)
+void Model::Import(string path)
 {
 	if (!m_Path.empty())
 		// Release previous model

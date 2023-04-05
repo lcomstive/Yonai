@@ -16,17 +16,12 @@ namespace AquaEngine
 
 	class World
 	{
-	public:
-		struct Entity;
-
 	private:
 		UUID m_ID;
 		std::string m_Name;
 
 		std::unique_ptr<SystemManager> m_SystemManager;
 		std::unique_ptr<ComponentManager> m_ComponentManager;
-
-		std::unordered_map<EntityID, Entity> m_Entities;
 
 		static std::unordered_map<UUID, World*> s_Worlds;
 
@@ -109,6 +104,11 @@ namespace AquaEngine
 
 			AquaAPI bool IsValid();
 		};
+		
+	private:
+		std::unordered_map<EntityID, Entity> m_Entities;
+			
+	public:
 
 		AquaAPI World(std::string name = "World");
 
@@ -133,7 +133,7 @@ namespace AquaEngine
 		template<typename T>
 		Entity CreateEntity()
 		{
-			Entity e = Entity(m_EntityManager->Create(), this);
+			Entity e = Entity(EntityID(), this);
 			m_Entities.emplace(e.ID(), e);
 			AddComponent<T>(e.ID());
 			return e;
@@ -142,7 +142,7 @@ namespace AquaEngine
 		template<typename T1, typename T2>
 		Entity CreateEntity()
 		{
-			Entity e = Entity(m_EntityManager->Create(), this);
+			Entity e = Entity(EntityID(), this);
 			AddComponent<T1, T2>(e.ID());
 			m_Entities.emplace(e.ID(), e);
 			return e;
@@ -151,7 +151,7 @@ namespace AquaEngine
 		template<typename T1, typename T2, typename T3>
 		Entity CreateEntity()
 		{
-			Entity e = Entity(m_EntityManager->Create(), this);
+			Entity e = Entity(EntityID(), this);
 			AddComponent<T1, T2, T3>(e.ID());
 			m_Entities.emplace(e.ID(), e);
 			return e;
@@ -160,7 +160,7 @@ namespace AquaEngine
 		template<typename T1, typename T2, typename T3, typename T4>
 		Entity CreateEntity()
 		{
-			Entity e = Entity(m_EntityManager->Create(), this);
+			Entity e = Entity(EntityID(), this);
 			AddComponent<T1, T2, T3, T4>(e.ID());
 			m_Entities.emplace(e.ID(), e);
 			return e;
@@ -173,7 +173,7 @@ namespace AquaEngine
 		template<typename T>
 		std::vector<Entity> Entities()
 		{
-			std::vector<EntityID> IDs = m_EntityManager->Entities<T>();
+			std::vector<EntityID> IDs = m_ComponentManager->Entities<T>();
 			std::vector<Entity> entities(IDs.size());
 			for (size_t i = 0; i < IDs.size(); i++)
 				entities[i] = GetEntity(IDs[i]);
@@ -183,7 +183,7 @@ namespace AquaEngine
 		template<typename T1, typename T2>
 		std::vector<Entity> Entities()
 		{
-			std::vector<EntityID> IDs = m_EntityManager->Entities<T1, T2>();
+			std::vector<EntityID> IDs = m_ComponentManager->Entities<T1, T2>();
 			std::vector<Entity> entities(IDs.size());
 			for (size_t i = 0; i < IDs.size(); i++)
 				entities[i] = GetEntity(IDs[i]);
@@ -193,7 +193,7 @@ namespace AquaEngine
 		template<typename T1, typename T2, typename T3>
 		std::vector<Entity> Entities()
 		{
-			std::vector<EntityID> IDs = m_EntityManager->Entities<T1, T2, T3>();
+			std::vector<EntityID> IDs = m_ComponentManager->Entities<T1, T2, T3>();
 			std::vector<Entity> entities(IDs.size());
 			for (size_t i = 0; i < IDs.size(); i++)
 				entities[i] = GetEntity(IDs[i]);
@@ -203,7 +203,7 @@ namespace AquaEngine
 		template<typename T1, typename T2, typename T3, typename T4>
 		std::vector<Entity> Entities()
 		{
-			std::vector<EntityID> IDs = m_EntityManager->Entities<T1, T2, T3, T4>();
+			std::vector<EntityID> IDs = m_ComponentManager->Entities<T1, T2, T3, T4>();
 			std::vector<Entity> entities(IDs.size());
 			for (size_t i = 0; i < IDs.size(); i++)
 				entities[i] = GetEntity(IDs[i]);

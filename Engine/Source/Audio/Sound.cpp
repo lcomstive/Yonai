@@ -20,7 +20,7 @@ float Sound::GetLength()
 }
 
 void Sound::Import(const char* filepath) { Import(string(filepath)); }
-void Sound::Import(string& filepath)
+void Sound::Import(string filepath)
 {
 	if (!m_FilePath.empty())
 		// Unload previously loaded sound

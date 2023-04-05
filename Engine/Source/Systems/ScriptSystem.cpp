@@ -21,7 +21,7 @@ extern SystemMethodInitialiseFn SystemMethodInitialise;
 UUID ScriptSystem::GetWorldID()
 {
 	World* world = GetWorld();
-	return world ? world->ID() : 0;
+	return world ? world->ID() : (UUID)0;
 }
 
 char* GetTypeName(MonoType* type) { return mono_type_get_name_full(type, MonoTypeNameFormat::MONO_TYPE_NAME_FORMAT_REFLECTION); }

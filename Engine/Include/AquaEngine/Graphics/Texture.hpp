@@ -27,6 +27,6 @@ namespace AquaEngine::Graphics
 		AquaAPI void Bind(unsigned int index = 0);
 
 		AquaAPI void Import(const char* path, bool hdr = false);
-		AquaAPI void Import(std::string& path, bool hdr = false);
+		AquaAPI void Import(std::string path, bool hdr = false);
 	};
 }

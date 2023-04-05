@@ -27,7 +27,7 @@ Texture::~Texture()
 }
 
 void Texture::Import(const char* path, bool hdr) { Import(string(path), hdr); }
-void Texture::Import(std::string& path, bool hdr)
+void Texture::Import(std::string path, bool hdr)
 {
 	if (m_Path == path && hdr == m_HDR)
 		return; // No change
@@ -154,7 +154,7 @@ void Texture::Bind(unsigned int index)
 
 ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
-	char* path = pathRaw ? mono_string_to_utf8(pathRaw) : "";
+	char* path = mono_string_to_utf8(pathRaw);
 	if (*outResourceID == InvalidResourceID)
 		*outResourceID = ResourceID();
 	Resource::Load<Texture>(*outResourceID, path);
@@ -166,7 +166,7 @@ ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResou
 
 ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr), AquaEngine.Graphics)
 {
-	char* path = filepath ? mono_string_to_utf8(filepath) : "";
+	char* path = mono_string_to_utf8(filepath);
 	((Texture*)instance)->Import(path, hdr);
 	if(filepath)
 		mono_free(path);

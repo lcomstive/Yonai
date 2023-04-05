@@ -16,7 +16,7 @@ namespace AquaEngine
 		AquaAPI ~Sound();
 
 		AquaAPI void Import(const char* filepath);
-		AquaAPI void Import(std::string& filepath);
+		AquaAPI void Import(std::string filepath);
 
 		/// <returns>Length of the clip, in seconds</returns>
 		AquaAPI float GetLength();

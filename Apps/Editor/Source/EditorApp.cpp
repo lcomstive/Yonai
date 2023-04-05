@@ -40,9 +40,6 @@ string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AquaScriptCorePath = "app://AquaScriptCore.dll";
 
-vector<SoundMixer*> soundMixers = {};
-vector<SoundSource*> soundSources = {};
-
 void EditorApp::Setup()
 {
 	Application::Setup();
@@ -86,9 +83,6 @@ void EditorApp::Setup()
 	io.IniFilename = ImGuiIniFilename.c_str();
 
 	LoadProject();
-
-	// LoadScene();
-
 	LaunchEditorService();
 }
 
@@ -111,35 +105,6 @@ void EditorApp::OnUpdate()
 		ScriptEngine::Reload();
 
 	Draw();
-}
-
-void EditorApp::LoadScene()
-{
-	m_CurrentScene = new World("Test World");
-
-	// 2D Sprite Test
-	ResourceID textureID = Resource::Load<Texture>("Texture/Test", "assets://Textures/Test.png");
-	ResourceID spriteShader = Resource::Load<Shader>("Shaders/Sprite", ShaderStageInfo
-		{
-			"assets://Shaders/Sprite.vert",
-			"assets://Shaders/Sprite.frag"
-		});
-
-	// Test C# component
-	auto assemblies = ScriptEngine::GetAssemblies();
-	if(assemblies.size() <= 1)
-		return;
-	Assembly* assembly = assemblies[1];
-	MonoType* monoType = assembly->GetTypeFromClassName("TestGame", "TestComponent");
-
-	// Implemented in C#
-	MonoType* testSystem = assembly->GetTypeFromClassName("TestGame", "TestSystem");
-	if (testSystem)
-		m_CurrentScene->GetSystemManager()->Add(testSystem);
-
-	// Add scene to active scenes
-	SceneSystem::UnloadAllScenes();
-	SceneSystem::AddScene(m_CurrentScene);
 }
 
 void EditorApp::LaunchEditorService()

@@ -36,7 +36,7 @@ namespace AquaEngine::Graphics
 		Model(std::string& path);
 
 		void Import(const char* path);
-		void Import(std::string& path);
+		void Import(std::string path);
 
 		std::vector<ResourceID> GetMeshes();
 
