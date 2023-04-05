@@ -330,6 +330,16 @@ ADD_MANAGED_METHOD(Shader, UpdateStages, void,
 ADD_MANAGED_METHOD(Shader, UnloadStages, void, (void* instance), AquaEngine.Graphics)
 { ((Shader*)instance)->UpdateStages({}); }
 
+ADD_MANAGED_METHOD(Shader, GetStages, void, (void* instance, MonoString** outVertex, MonoString** outFragment, MonoString** outCompute, MonoString** outGeometry), AquaEngine.Graphics)
+{
+	Shader* shader = (Shader*)instance;
+	ShaderStageInfo& info = shader->GetStages();
+	*outVertex = info.VertexPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.VertexPath.c_str());
+	*outFragment = info.FragmentPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.FragmentPath.c_str());
+	*outCompute = info.ComputePath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.ComputePath.c_str());
+	*outGeometry = info.GeometryPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.GeometryPath.c_str());
+}
+
 ADD_MANAGED_METHOD(Shader, Set_int, void, (void* instance, int location, int value), AquaEngine.Graphics)
 { ((Shader*)instance)->Set(location, value); }
 ADD_MANAGED_METHOD(Shader, SetStr_int, void, (void* instance, MonoString* location, int value), AquaEngine.Graphics)

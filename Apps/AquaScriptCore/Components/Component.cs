@@ -1,11 +1,7 @@
 ﻿using System;
 using AquaEngine.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel;
-using AquaEngine.Graphics;
-using System.Reflection.Emit;
 
 namespace AquaEngine
 {
@@ -184,19 +180,19 @@ namespace AquaEngine
 			else if (t == typeof(bool))	  json[label] = (bool)value;
 			else if (t == typeof(float))  json[label] = (float)value;
 			else if (t == typeof(string)) json[label] = (string)value;
-			else if (t == typeof(UUID))   json[label] = (ulong)(UUID)value;
+			else if (t == typeof(UUID))   json[label] = ((UUID)value).ToString();
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be serialized");
 		}
 		
 		private object DeserializeObject(JObject json, string label, Type t)
 		{
-			if (t == typeof(int))		  return json[label].Value<int>();
-			else if (t == typeof(uint))	  return json[label].Value<uint>();
-			else if (t == typeof(bool))	  return json[label].Value<bool>();
-			else if (t == typeof(float))  return json[label].Value<float>();
+			if (t == typeof(int)) return json[label].Value<int>();
+			else if (t == typeof(uint)) return json[label].Value<uint>();
+			else if (t == typeof(bool)) return json[label].Value<bool>();
+			else if (t == typeof(float)) return json[label].Value<float>();
 			else if (t == typeof(string)) return json[label].Value<string>();
-			else if (t == typeof(UUID))	  return (UUID)json[label].Value<ulong>();
+			else if (t == typeof(UUID)) return (UUID)ulong.Parse(json[label].Value<string>());
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be deserialized");
 			return null;

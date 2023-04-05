@@ -59,7 +59,8 @@ ivec2 RenderPipeline::GetResolution() { return m_Resolution; }
 ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, uint64_t cameraWorldID, uint64_t cameraEntityID), AquaEngine.Graphics.Pipelines)
 {
 	Camera* camera = World::GetWorld(cameraWorldID)->GetEntity(cameraEntityID).GetComponent<Camera>();
-	((RenderPipeline*)handle)->Draw(camera);
+	if(camera)
+		((RenderPipeline*)handle)->Draw(camera);
 }
 
 ADD_MANAGED_METHOD(NativeRenderPipeline, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics.Pipelines)

@@ -22,6 +22,15 @@ namespace AquaEngine.Graphics
 			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
+
+			ShaderStages = new ShaderImportSettings();
+			_GetStages(
+				Handle,
+				out ShaderStages.VertexPath,
+				out ShaderStages.FragmentPath,
+				out ShaderStages.ComputePath,
+				out ShaderStages.GeometryPath
+			);
 		}
 
 		protected override void OnImported()
@@ -96,6 +105,12 @@ namespace AquaEngine.Graphics
 																							 string fragmentPath,
 																							 string computePath,
 																							 string geometryPath);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetStages(IntPtr handle,
+																							 out string vertexPath,
+																							 out string fragmentPath,
+																							 out string computePath,
+																							 out string geometryPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Set_int(IntPtr handle, int location, int value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetStr_int(IntPtr handle, string location, int value);

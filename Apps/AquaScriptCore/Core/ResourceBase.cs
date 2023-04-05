@@ -4,8 +4,8 @@ namespace AquaEngine
 {
 	public abstract class ResourceBase
 	{
-		public UUID ResourceID { get; internal set; }
-		public string ResourcePath { get; internal set; }
+		public UUID ResourceID { get; internal set; } = UUID.Invalid;
+		public string ResourcePath { get; internal set; } = string.Empty;
 
 		public IImportSettings ImportSettings { get; internal set; }
 

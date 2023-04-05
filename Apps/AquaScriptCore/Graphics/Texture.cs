@@ -39,6 +39,12 @@ namespace AquaEngine.Graphics
 			_Load(ResourcePath, out resourceID, out handle);
 			ResourceID = resourceID;
 			Handle = handle;
+
+			m_ImportSettings = new TextureImportSettings()
+			{
+				FilePath = _GetPath(Handle),
+				HDR = _GetHDR(Handle)
+			};
 		}
 
 		protected override void OnImported()
@@ -67,6 +73,9 @@ namespace AquaEngine.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filePath, bool hdr);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetHDR(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		#endregion
 	}

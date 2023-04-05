@@ -1,8 +1,6 @@
 using System;
 using AquaEngine;
 using System.Reflection;
-using System.Linq;
-using System.Collections.Generic;
 using AquaEngine.Graphics;
 
 namespace AquaEditor
@@ -196,18 +194,24 @@ namespace AquaEditor
 
 			ImGUI.TableSetColumnIndex(1);
 			ImGUI.SetNextItemWidth(region.x);
-			if (t		== typeof(int))				Draw(label, (int)value,				instance, setValue);
-			else if (t	== typeof(bool))			Draw(label, (bool)value,			instance, setValue);
-			else if (t	== typeof(float))			Draw(label, (float)value,			instance, setValue);
-			else if (t	== typeof(string))			Draw(label, (string)value,			instance, setValue);
-			else if (t	== typeof(Colour))			Draw(label, (Colour)value,			instance, setValue);
-			else if (t	== typeof(Vector2))			Draw(label, (Vector2)value,			instance, setValue);
-			else if (t	== typeof(Vector3))			Draw(label, (Vector3)value,			instance, setValue);
-			else if (t	== typeof(Vector4))			Draw(label, (Vector4)value,			instance, setValue);
-			else if (t	== typeof(Texture))			Draw(label, (Texture)value,			instance, setValue);
-			else if (t	== typeof(Quaternion))		Draw(label, (Quaternion)value,		instance, setValue);
-			else if (t	== typeof(RenderTexture))	Draw(label, (RenderTexture)value,	instance, setValue);
-			else ImGUI.Text($"'{label}' ({t}) doesn't have a valid way of being drawn");
+			if (t	   == typeof(int))				Draw(label, (int)value,				instance, setValue);
+			else if (t == typeof(bool))				Draw(label, (bool)value,			instance, setValue);
+			else if (t == typeof(float))			Draw(label, (float)value,			instance, setValue);
+			else if (t == typeof(string))			Draw(label, (string)value,			instance, setValue);
+			else if (t == typeof(Colour))			Draw(label, (Colour)value,			instance, setValue);
+			else if (t == typeof(Vector2))			Draw(label, (Vector2)value,			instance, setValue);
+			else if (t == typeof(Vector3))			Draw(label, (Vector3)value,			instance, setValue);
+			else if (t == typeof(Vector4))			Draw(label, (Vector4)value,			instance, setValue);
+			else if (t == typeof(Texture))			Draw(label, (Texture)value,			instance, setValue);
+			else if (t == typeof(Quaternion))		Draw(label, (Quaternion)value,		instance, setValue);
+			else if (t == typeof(RenderTexture))	Draw(label, (RenderTexture)value,	instance, setValue);
+			else if (t == typeof(UUID))
+			{
+				UUID uuid = (UUID)value;
+				if (Resource.Exists(uuid))
+					ImGUI.Text("[Resource] " + Resource.GetPath(uuid));
+			}
+			else ImGUI.Text(t.Name);
 
 			if (setValue == null) ImGUI.EndDisabled();
 		}

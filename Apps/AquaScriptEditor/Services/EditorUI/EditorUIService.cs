@@ -41,7 +41,8 @@ namespace AquaEditor
 
 			// Demo //
 			GenerateConsoleLines();
-			CreateTestScene();
+			// CreateTestScene();
+			LoadTestScene();
 
 			Open<SceneView>();
 			Open<HierarchyView>();
@@ -64,52 +65,51 @@ namespace AquaEditor
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Save", Shortcut = "CTRL+S")]
+		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S")]
 		private static void SaveScene()
 		{
-			try
+			if(!VFS.Exists(SceneDir))
+				VFS.CreateDirectory(SceneDir);
+
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Formatting = Formatting.Indented;
+
+			World[] activeScenes = SceneManager.GetActiveScenes();
+			foreach (World scene in activeScenes)
 			{
-				if(!VFS.Exists(SceneDir))
-					VFS.CreateDirectory(SceneDir);
-
-				JsonSerializer serializer = new JsonSerializer();
-				serializer.Formatting = Formatting.Indented;
-
-				World[] activeScenes = SceneManager.GetActiveScenes();
-				foreach (World scene in activeScenes)
+				using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
+				using (JsonWriter writer = new JsonTextWriter(streamWriter))
 				{
-					using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
-					using (JsonWriter writer = new JsonTextWriter(streamWriter))
-					{
-						try { serializer.Serialize(writer, scene.OnSerialize()); }
-						catch (Exception e) { Log.Exception(e); }
-					}
+					try { serializer.Serialize(writer, scene.OnSerialize()); }
+					catch (Exception e) { Log.Exception(e); }
 				}
 			}
-			catch(Exception e) { Log.Exception(e); }
 		}
 		
-		[MenuItem("File/Load")]
+		[MenuItem("File/Scene/Load")]
 		private static void LoadScene()
 		{
-			try
+			JsonSerializer serializer = new JsonSerializer();
+
+			World[] scenes = SceneManager.GetActiveScenes();
+			foreach (World scene in scenes)
 			{
-				JsonSerializer serializer = new JsonSerializer();
+				if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
+					continue; // Not saved
 
-				World[] scenes = SceneManager.GetActiveScenes();
-				foreach (World scene in scenes)
-				{
-					if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
-						continue; // Not saved
-
-					using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
-					using (JsonReader reader = new JsonTextReader(streamReader))
-						try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
-						catch (Exception e) { Log.Exception(e); }
-				}
+				using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
+				using (JsonReader reader = new JsonTextReader(streamReader))
+					try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
+					catch (Exception e) { Log.Exception(e); }
 			}
-			catch(Exception e) { Log.Exception(e); }
 		}
+
+		[MenuItem("File/Resources/Save")]
+		private static void SaveResources() => Resource.SaveDatabase();
+
+		[MenuItem("File/Resources/Load")]
+		private static void LoadResources() => Resource.LoadDatabase();
+
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
 		{
@@ -303,10 +303,11 @@ namespace AquaEditor
 		private float[] m_FPSValues = new float[100];
 
 		private World m_TestWorld = null;
+		private const string TestSceneName = "Test World";
 
 		private void CreateTestScene()
 		{
-			m_TestWorld = World.Create("Test World");
+			m_TestWorld = World.Create(TestSceneName);
 			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
 
 			for (int i = 0; i < 15; i++)
@@ -327,6 +328,31 @@ namespace AquaEditor
 				});
 
 				e.AddComponent<Transform>().Position = Vector3.Right * i * 2.5f;
+			}
+		}
+
+		private void LoadTestScene()
+		{
+			JsonSerializer serializer = new JsonSerializer();
+
+			Resource.Load<Texture>(
+				"Textures/Texture/Test_Texture09",
+				new TextureImportSettings("assets://Textures/texture_09.png")
+			);
+			Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderImportSettings()
+			{
+				VertexPath = "assets://Shaders/Sprite.vert",
+				FragmentPath = "assets://Shaders/NewSprite.frag"
+			});
+
+			if (!VFS.Exists($"{SceneDir}{TestSceneName}.json"))
+				return; // Not found
+
+			using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{TestSceneName}.json")))
+			using (JsonReader reader = new JsonTextReader(streamReader))
+			{
+				m_TestWorld = World.Create(serializer.Deserialize<JObject>(reader));
+				SceneManager.Load(m_TestWorld, SceneAddType.Additive);
 			}
 		}
 

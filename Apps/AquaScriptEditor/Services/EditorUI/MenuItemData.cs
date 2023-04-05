@@ -26,7 +26,8 @@ namespace AquaEditor.EditorUI
 			if (IsDirectory)
 				RenderDirectory();
 			else if (ImGUI.MenuItem(Name, Attribute.Shortcut))
-				Callback?.Invoke(null, null);
+				try { Callback?.Invoke(null, null); }
+				catch(System.Exception e) { Log.Exception(e); }
 		}
 
 		private void RenderDirectory()

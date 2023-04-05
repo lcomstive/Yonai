@@ -40,7 +40,6 @@ namespace AquaEngine
 		{
 			x = json["x"]?.Value<float>() ?? 0;
 			y = json["y"]?.Value<float>() ?? 0;
-			Log.Debug($"Vector2.Deserialize = {this}");
 		}
 
 		public static implicit operator string(Vector2 v) => v.ToString();

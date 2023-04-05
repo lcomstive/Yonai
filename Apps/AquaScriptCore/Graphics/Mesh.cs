@@ -60,6 +60,22 @@ namespace AquaEngine.Graphics
 			_Load(ResourcePath, out ulong resourceID, out IntPtr handle);
 			ResourceID = resourceID;
 			Handle = handle;
+
+			// Get existing vertices
+			_GetVertices(Handle, out Vector3[] positions, out Vector3[] normals, out Vector2[] texCoords);
+			m_Settings.Vertices = new Vertex[positions.Length];
+			for(int i = 0; i < positions.Length; i++)
+			{
+				m_Settings.Vertices[i] = new Vertex()
+				{
+					Position = positions[i],
+					Normal = normals[i],
+					TexCoords = texCoords[i]
+				};
+			}
+
+			// Get existing indices
+			_GetIndices(Handle, out m_Settings.Indices);
 		}
 
 		protected override void OnImported()

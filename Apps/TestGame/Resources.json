@@ -1,0 +1,40 @@
+[
+  {
+    "ID": "1424136817810510799",
+    "Path": "Textures/UI_Testing",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Test.png",
+      "HDR": false
+    }
+  },
+  {
+    "ID": "9858804742852629215",
+    "Path": "Textures/Missing",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Black.jpg",
+      "HDR": false
+    }
+  },
+  {
+    "ID": "5467780560557261244",
+    "Path": "Textures/Texture/Test_Texture09",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/texture_09.png",
+      "HDR": false
+    }
+  },
+  {
+    "ID": "5107988973597226201",
+    "Path": "Shaders/NewSpriteShader",
+    "Type": "AquaEngine.Graphics.Shader",
+    "Properties": {
+      "Vertex": "assets://Shaders/Sprite.vert",
+      "Fragment": "assets://Shaders/NewSprite.frag",
+      "Compute": null,
+      "Geometry": null
+    }
+  }
+]

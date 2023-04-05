@@ -132,6 +132,7 @@ void Texture::GenerateImage()
 #endif
 }
 
+bool Texture::GetHDR() { return m_HDR; }
 string Texture::GetPath() { return m_Path; }
 unsigned int Texture::GetID() { return m_ID; }
 glm::ivec2& Texture::GetResolution() { return m_Resolution; }
@@ -150,17 +151,20 @@ void Texture::Bind(unsigned int index)
 
 ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
 {
-	char* path = mono_string_to_utf8(pathRaw);
+	char* path = pathRaw ? mono_string_to_utf8(pathRaw) : "";
 	*outResourceID = Resource::Load<Texture>(path);
 	*outHandle = Resource::Get<Texture>(*outResourceID);
-	mono_free(path);
+
+	if(pathRaw)
+		mono_free(path);
 }
 
 ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr), AquaEngine.Graphics)
 {
-	char* path = mono_string_to_utf8(filepath);
+	char* path = filepath ? mono_string_to_utf8(filepath) : "";
 	((Texture*)instance)->Import(path, hdr);
-	mono_free(path);
+	if(filepath)
+		mono_free(path);
 }
 
 ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)
@@ -168,5 +172,15 @@ ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), Aq
 
 ADD_MANAGED_METHOD(Texture, GetResolution, void, (void* instance, glm::ivec2* outResolution), AquaEngine.Graphics)
 { *outResolution = ((Texture*)instance)->GetResolution(); }
+
+ADD_MANAGED_METHOD(Texture, GetHDR, bool, (void* instance), AquaEngine.Graphics)
+{ return ((Texture*)instance)->GetHDR(); }
+
+ADD_MANAGED_METHOD(Texture, GetPath, MonoString*, (void* instance), AquaEngine.Graphics)
+{
+	Texture* texture = (Texture*)instance;
+	return texture && !texture->GetPath().empty() ?
+		mono_string_new(mono_domain_get(), texture->GetPath().c_str()) : nullptr;
+}
 
 #pragma endregion

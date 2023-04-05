@@ -68,7 +68,7 @@ namespace AquaEngine
 		public JObject OnSerialize() =>
 			new JObject(
 				new JProperty("r", r),
-				new JProperty("g", r),
+				new JProperty("g", g),
 				new JProperty("b", b),
 				new JProperty("a", a)
 				);
