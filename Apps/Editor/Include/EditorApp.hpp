@@ -26,12 +26,6 @@ namespace AquaEditor
 		void InitialiseScripting();
 
 		/// <summary>
-		/// Reads project information from '/Project/project.json'.
-		/// Stores data in m_ProjectInfo.
-		/// </summary>
-		void LoadProject();
-
-		/// <summary>
 		/// Loads editor script and loads the initial editor service
 		/// </summary>
 		void LaunchEditorService();

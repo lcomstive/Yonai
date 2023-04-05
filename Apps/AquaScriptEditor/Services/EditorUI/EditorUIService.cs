@@ -44,8 +44,8 @@ namespace AquaEditor
 				// Demo //
 				// GenerateConsoleLines();
 
-				// CreateTestScene();
-				LoadTestScene();
+				CreateTestScene();
+				// LoadTestScene();
 
 				Open<SceneView>();
 				Open<HierarchyView>();
