@@ -51,7 +51,12 @@ function(CheckMonoInstallDir rootDir)
         endif()
     else()
     ]]
-        find_library(MONO_LIBRARY NAMES libmono-static-sgen libmonosgen-2.0 PATHS "${rootDir}/lib" REQUIRED)
+        find_library(MONO_LIBRARY NAMES
+            libmono-static-sgen
+            mono-static-sgen
+            libmonosgen-2.0
+            monosgen-2.0
+            PATHS "${rootDir}/lib" REQUIRED)
     # endif()
 
     if(WIN32)

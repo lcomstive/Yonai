@@ -19,6 +19,11 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # OpenGL
+if(UNIX AND NOT APPLE)
+	# Prefer newer OpenGL libs over legacy ones
+	set(OpenGL_GL_PREFERENCE "GLVND")
+endif()
+
 find_package(OpenGL REQUIRED)
 
 # GLFW
