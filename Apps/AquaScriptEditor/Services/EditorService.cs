@@ -23,8 +23,7 @@ namespace AquaEditor
 				}
 
 				Resource.LoadDatabase();
-				EditorUIService uiService = Add<EditorUIService>();
-				uiService.Enable();
+				Add<EditorUIService>();
 			}
 			catch(System.Exception e) { Log.Exception(e); }
 		}

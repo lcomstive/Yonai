@@ -14,7 +14,7 @@ if(MSVC)
 
     if(AQUA_GENERATE_MDBS)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND pdb2mdb.bat $<TARGET_FILE:${PROJECT_NAME}>
+            COMMAND $<IF:$<CONFIG:Debug>,${MONO_MDB2PDB},echo> $<TARGET_FILE:${PROJECT_NAME}>
         )
     endif()
 else()

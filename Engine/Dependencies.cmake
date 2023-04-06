@@ -100,25 +100,17 @@ if(LINUX)
 endif()
 
 # Mono
-if(WIN32)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS
-		ws2_32.lib
-		version.lib
-		Bcrypt.lib
-		winmm.lib
-	)
+include(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/FindMono.cmake)
+if(MONO_FOUND)
+	link_directories(${MONO_LIBRARY_DIRS})
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${MONO_LIBRARY})
+	list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS ${MONO_INCLUDE_DIRS})
 
-	if(BUILD_SHARED_LIBS)
-		# Shared mono lib
-		list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/mono-2.0-sgen$<$<CONFIG:Debug>:-debug>.lib)
-	else()
-		# Static mono lib
-		list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmono-static-sgen$<$<CONFIG:Debug>:-debug>.lib)
-	endif()
-elseif(APPLE)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.1.dylib)
-elseif(UNIX)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/native/libmonosgen-2.0.so.1)
+	set(MONO_SHARED_LIB "${MONO_SHARED_LIB}" PARENT_SCOPE)
+
+    if(WIN32)
+        set(MONO_MDB2PDB ${MONO_ROOT}/bin/pdb2mdb.bat PARENT_SCOPE)
+    endif()
 endif()
 
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/mono/include")

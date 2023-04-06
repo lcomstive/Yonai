@@ -65,27 +65,18 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		${AQUA_RESOURCES_DIR}/Assets/
 )
 
-if(WIN32 AND BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD	
-		# Copy mono .dll to output
+		# Copy mono shared library to output
 		COMMAND echo Copying Mono dynamic lib to output
 
 		COMMAND ${CMAKE_COMMAND} -E copy
-			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/bin/mono-2.0-sgen$<$<CONFIG:Debug>:-debug>.dll
-			${AQUA_RESOURCES_DIR}/mono-2.0-sgen.dll
+			${MONO_SHARED_LIB}
+			${AQUA_RESOURCES_DIR}/
 	)
 endif()
 
 if(APPLE)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		# Copy mono library to output
-		COMMAND echo Copying mono lib to output
-
-		COMMAND ${CMAKE_COMMAND} -E copy
-			${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/native/libmonosgen-2.0.1.dylib
-			${AQUA_RESOURCES_DIR}
-		)
-
 	if(BUILD_SHARED_LIBS)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 			# Copy AquaEngine library to output

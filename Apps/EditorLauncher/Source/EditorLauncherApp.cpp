@@ -125,9 +125,9 @@ bool EditorLauncherApp::LaunchEditor()
 	// If editor is opening and setting enabled, close the launcher
 	if (m_Settings.CloseLaucherOnEditorOpen)
 		Exit();
+	*/
 
 	return true;
-	*/
 }
 
 void EditorLauncherApp::AddProjectPrompt()

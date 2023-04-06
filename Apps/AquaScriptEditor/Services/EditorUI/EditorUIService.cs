@@ -44,8 +44,8 @@ namespace AquaEditor
 				// Demo //
 				// GenerateConsoleLines();
 
-				CreateTestScene();
-				// LoadTestScene();
+				// CreateTestScene();
+				LoadTestScene();
 
 				Open<SceneView>();
 				Open<HierarchyView>();
@@ -88,8 +88,8 @@ namespace AquaEditor
 			foreach (World scene in scenes)
 			{
 				// Check if exists
-				if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
-					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>($"{SceneDir}{scene.Name}.json"));
+				if (VFS.Exists($"{SceneDir}{scene.Name}.json"))
+					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
 			}
 		}
 

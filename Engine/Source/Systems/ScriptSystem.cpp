@@ -33,8 +33,10 @@ void ScriptSystem::Init()
 	if (!ManagedData.IsValid())
 		return;
 
+	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
-	SystemMethodInitialise(ManagedData.GetInstance(), GetWorldID(), &exception);
+	SystemMethodInitialise(instance, GetWorldID(), &exception);
+	SystemMethodStart(instance, &exception);
 }
 
 void ScriptSystem::Destroy()
@@ -55,10 +57,8 @@ void ScriptSystem::OnEnabled()
 	if (!ManagedData.IsValid())
 		return;
 
-	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
-	SystemMethodEnabled(instance, true, &exception);
-	SystemMethodStart(instance, &exception);
+	SystemMethodEnabled(ManagedData.GetInstance(), true, &exception);
 }
 
 void ScriptSystem::OnDisabled()

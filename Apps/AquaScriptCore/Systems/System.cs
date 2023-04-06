@@ -17,7 +17,7 @@ namespace AquaEngine
 		protected virtual void Draw() { }
 
 		/// <summary>
-		/// Called when this system is created (after <see cref="OnEnabled"/>)
+		/// Called when this system is created (before <see cref="OnEnabled"/>)
 		/// </summary>
 		protected virtual void Start() { }
 

@@ -1,50 +1,50 @@
-{
-  "Name": "Scene View",
-  "Entities": [
-    {
-      "ID": "16076872972800238282",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Scene Camera"
-        },
-        {
-          "ComponentType": "AquaEngine.Camera",
-          "FOV": 0.0,
-          "Near": 0.0,
-          "Far": 0.0,
-          "Orthographic": false,
-          "OrthographicSize": 0.0
-        },
-        {
-          "ComponentType": "AquaEditor.SceneViewCameraController, AquaScriptEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Speed": 0.0,
-          "SprintMultiplier": 0.0,
-          "MouseSensitivity": {
-            "x": 0.0,
-            "y": 0.0
-          }
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 0.0
-          },
-          "Scale": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          }
-        }
-      ]
-    }
-  ]
+{
+  "Name": "Scene View",
+  "Entities": [
+    {
+      "ID": "11457774027671642260",
+      "Components": [
+        {
+          "ComponentType": "AquaEngine.NameComponent",
+          "Name": "Scene Camera"
+        },
+        {
+          "ComponentType": "AquaEngine.Camera",
+          "FOV": 60.0,
+          "Near": 0.1,
+          "Far": 1000.0,
+          "Orthographic": false,
+          "OrthographicSize": 5.0
+        },
+        {
+          "ComponentType": "AquaEditor.SceneViewCameraController, AquaScriptEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Speed": 1.0,
+          "SprintMultiplier": 2.5,
+          "MouseSensitivity": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "ComponentType": "AquaEngine.Transform",
+          "Position": {
+            "x": 2.10069656,
+            "y": 1.57179356,
+            "z": -11.4686909
+          },
+          "Rotation": {
+            "x": 0.9823931,
+            "y": -0.07925394,
+            "z": 0.168634355,
+            "w": -0.0136044687
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    }
+  ]
 }
