@@ -19,7 +19,7 @@ namespace AquaEngine
 
 namespace std
 {
-	template<typename T> struct hash;
+	// template<typename T> struct hash;
 
 	template<>
 	struct hash<AquaEngine::UUID>

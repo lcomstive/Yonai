@@ -23,8 +23,8 @@ namespace AquaEngine
 		{
 			// Check native resourceIDs
 			UUID id = _GetID(path);
-			if (id != UUID.Invalid) return id;
-			if (s_Paths.ContainsKey(path))
+			if(id != UUID.Invalid) return id;
+			if(s_Paths.ContainsKey(path))
 				return s_Paths[path];
 			return UUID.Invalid;
 		}
@@ -42,7 +42,7 @@ namespace AquaEngine
 		public static UUID Duplicate(UUID resourceID, string newPath)
 		{
 			UUID newID = _Duplicate(resourceID, newPath);
-			if (newID == UUID.Invalid)
+			if(newID == UUID.Invalid)
 				return newID;
 			ResourceBase resource = s_Instances[resourceID].Clone(newID, newPath);
 			resource._Load();
@@ -53,7 +53,7 @@ namespace AquaEngine
 		public static T Duplicate<T>(UUID resourceID, string newPath) where T : ResourceBase, new()
 		{
 			UUID newID = Duplicate(resourceID, newPath);
-			if (newID == UUID.Invalid)
+			if(newID == UUID.Invalid)
 				return null;
 			return (T)s_Instances[resourceID];
 		}
@@ -76,7 +76,7 @@ namespace AquaEngine
 		{
 			// Check for existing cached instance 
 			UUID resourceID = GetID(path);
-			if (resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
+			if(resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return (T)s_Instances[resourceID];
 
 			T instance = new T();
@@ -84,13 +84,13 @@ namespace AquaEngine
 			instance.ResourceID = resourceID;
 
 			// Check if native instance exists
-			if (resourceID == UUID.Invalid)
+			if(resourceID == UUID.Invalid)
 			{
 				// No resource found in unmanaged code, create new resource
 				instance.ImportSettings = importSettings;
 
 				instance._Load();
-				if (instance.ResourceID == UUID.Invalid)
+				if(instance.ResourceID == UUID.Invalid)
 					instance.ResourceID = _CreateID();
 
 				instance.Import(importSettings);
@@ -111,11 +111,11 @@ namespace AquaEngine
 		internal static ResourceBase Load(UUID resourceID, string path, Type type)
 		{
 			// Ensure type inherits from ResourceBase
-			if (!typeof(ResourceBase).IsAssignableFrom(type))
+			if(!typeof(ResourceBase).IsAssignableFrom(type))
 				throw new ArgumentException($"Resources.Load() type '{type.Name}' is invalid");
 
 			// Check for existing cached instance 
-			if (resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
+			if(resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return s_Instances[resourceID];
 
 			ResourceBase instance = (ResourceBase)Activator.CreateInstance(type);
@@ -123,9 +123,9 @@ namespace AquaEngine
 			instance.ResourceID = resourceID;
 
 			s_Paths.Add(path, instance.ResourceID);
-			
+
 			// Check if native instance exists
-			if (resourceID == UUID.Invalid)
+			if(resourceID == UUID.Invalid)
 			{
 				// No resource found in unmanaged code, create new resource
 				instance._Load();
@@ -144,7 +144,7 @@ namespace AquaEngine
 		/// </summary>
 		public static void Unload(UUID resourceID)
 		{
-			if (s_Instances.ContainsKey(resourceID))
+			if(s_Instances.ContainsKey(resourceID))
 			{
 				s_Instances[resourceID]._Unload();
 				s_Instances.Remove(resourceID);
@@ -152,7 +152,7 @@ namespace AquaEngine
 
 			foreach(var pair in s_Paths)
 			{
-				if (pair.Value != resourceID)
+				if(pair.Value != resourceID)
 					continue;
 				s_Paths.Remove(pair.Key);
 				break;
@@ -165,14 +165,14 @@ namespace AquaEngine
 		public static T Get<T>(UUID resourceID) where T : ResourceBase, new()
 		{
 			// Check for valid ID
-			if (resourceID == UUID.Invalid || !Exists(resourceID))
+			if(resourceID == UUID.Invalid || !Exists(resourceID))
 				return null;
 
 			// Check for cached instance
-			if (s_Instances.ContainsKey(resourceID))
+			if(s_Instances.ContainsKey(resourceID))
 			{
 				object foundInstance = s_Instances[resourceID];
-				if (foundInstance is T)
+				if(foundInstance is T)
 					return (T)foundInstance;
 				else
 				{
@@ -204,10 +204,8 @@ namespace AquaEngine
 		/// </summary>
 		public static void SaveDatabase()
 		{
-			int count = 0;
-
 			JArray resources = new JArray();
-			foreach (var pair in s_Instances)
+			foreach(var pair in s_Instances)
 			{
 				JObject resource = new JObject();
 				resource["ID"] = pair.Key.ToString();
@@ -215,27 +213,17 @@ namespace AquaEngine
 
 				Type resourceType = pair.Value.GetType();
 				resource["Type"] = resourceType.FullName;
-				if (!resourceType.Namespace.StartsWith("AquaEngine"))
+				if(!resourceType.Namespace.StartsWith("AquaEngine"))
 					resource["Type"] += ", " + resourceType.Assembly.GetName();
 
 				ISerializable serializable = pair.Value as ISerializable;
-				if (serializable != null)
+				if(serializable != null)
 					resource["Properties"] = serializable.OnSerialize();
 
 				resources.Add(resource);
-				count++;
 			}
 
-			JsonSerializer serializer = new JsonSerializer();
-
-			if (Application.Configuration == Application.BuildType.Debug)
-				serializer.Formatting = Formatting.Indented;
-
-			using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath(DatabaseFilePath)))
-			using (JsonWriter writer = new JsonTextWriter(streamWriter))
-				serializer.Serialize(writer, resources);
-
-			Log.Debug($"Saved {count} resources into database");
+			VFS.Write(DatabaseFilePath, JsonConvert.SerializeObject(resources, Formatting.Indented));
 		}
 
 		/// <summary>
@@ -243,35 +231,24 @@ namespace AquaEngine
 		/// </summary>
 		public static void LoadDatabase()
 		{
-			JsonSerializer serializer = new JsonSerializer();
-			int count = 0;
-
 			// Check that file exists
-			if (!VFS.Exists(DatabaseFilePath))
+			if(!VFS.Exists(DatabaseFilePath))
 				return;
 
-			using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath(DatabaseFilePath)))
-			using (JsonReader reader = new JsonTextReader(streamReader))
+			JArray root = JsonConvert.DeserializeObject<JArray>(VFS.ReadText(DatabaseFilePath));
+			foreach(JObject resource in root)
 			{
-				JArray root = serializer.Deserialize<JArray>(reader);
-				foreach (JObject resource in root)
-				{
-					UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());
-					string resourcePath = resource["Path"].Value<string>();
+				UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());
+				string resourcePath = resource["Path"].Value<string>();
 
-					string typeName = resource["Type"].Value<string>();
-					Type type = Type.GetType(typeName);
+				string typeName = resource["Type"].Value<string>();
+				Type type = Type.GetType(typeName);
 
-					ResourceBase instance = Load(id, resourcePath, type);
+				ResourceBase instance = Load(id, resourcePath, type);
 
-					if (typeof(ISerializable).IsAssignableFrom(type))
-						((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
-
-					count++;
-				}
+				if(typeof(ISerializable).IsAssignableFrom(type))
+					((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
 			}
-
-			Log.Debug($"Loaded {count} resources from database");
 		}
 
 		private static void LoadExistingUnmanagedResource(ResourceBase instance, UUID resourceID)

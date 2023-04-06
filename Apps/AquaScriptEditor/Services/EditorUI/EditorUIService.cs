@@ -42,7 +42,7 @@ namespace AquaEditor
 				MissingTexture = Resource.Get<Texture>(missingTextureID);
 
 				// Demo //
-				GenerateConsoleLines();
+				// GenerateConsoleLines();
 
 				CreateTestScene();
 				// LoadTestScene();
@@ -76,36 +76,20 @@ namespace AquaEditor
 			if (!VFS.Exists(SceneDir))
 				VFS.CreateDirectory(SceneDir);
 
-			JsonSerializer serializer = new JsonSerializer();
-			serializer.Formatting = Formatting.Indented;
-
 			World[] activeScenes = SceneManager.GetActiveScenes();
 			foreach (World scene in activeScenes)
-			{
-				using (StreamWriter streamWriter = new StreamWriter(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
-				using (JsonWriter writer = new JsonTextWriter(streamWriter))
-				{
-					try { serializer.Serialize(writer, scene.OnSerialize()); }
-					catch (Exception e) { Log.Exception(e); }
-				}
-			}
+				VFS.Write($"{SceneDir}{scene.Name}.json", JsonConvert.SerializeObject(scene.OnSerialize(), Formatting.Indented));
 		}
 
 		[MenuItem("File/Scene/Load")]
 		private static void LoadScene()
 		{
-			JsonSerializer serializer = new JsonSerializer();
-
 			World[] scenes = SceneManager.GetActiveScenes();
 			foreach (World scene in scenes)
 			{
+				// Check if exists
 				if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
-					continue; // Not saved
-
-				using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{scene.Name}.json")))
-				using (JsonReader reader = new JsonTextReader(streamReader))
-					try { scene.OnDeserialize(serializer.Deserialize<JObject>(reader)); }
-					catch (Exception e) { Log.Exception(e); }
+					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>($"{SceneDir}{scene.Name}.json"));
 			}
 		}
 
@@ -344,8 +328,6 @@ namespace AquaEditor
 
 		private void LoadTestScene()
 		{
-			JsonSerializer serializer = new JsonSerializer();
-
 			Resource.Load<Texture>(
 				"Textures/Texture/Test_Texture09",
 				new TextureImportSettings("assets://Textures/texture_09.png")
@@ -359,12 +341,8 @@ namespace AquaEditor
 			if (!VFS.Exists($"{SceneDir}{TestSceneName}.json"))
 				return; // Not found
 
-			using (StreamReader streamReader = new StreamReader(VFS.GetAbsolutePath($"{SceneDir}{TestSceneName}.json")))
-			using (JsonReader reader = new JsonTextReader(streamReader))
-			{
-				m_TestWorld = World.Create(serializer.Deserialize<JObject>(reader));
-				SceneManager.Load(m_TestWorld, SceneAddType.Additive);
-			}
+			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
+			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
 		}
 
 		private void DrawDemoContents()

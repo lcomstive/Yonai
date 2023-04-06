@@ -44,6 +44,9 @@ namespace AquaEngine
 		/// </summary>
 		protected virtual void Destroyed() { }
 
+		public void Enable(bool enable = true) =>
+			World._EnableSystem(World?.ID ?? GlobalWorldID, GetType(), enable);
+
 		#region Global Systems
 		private static UUID GlobalWorldID = UUID.Invalid;
 

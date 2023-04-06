@@ -131,12 +131,4 @@ void EditorLauncherApp::AddNewProject(fs::path projectDir)
 
 	// Create .csproj using C# files in Scripting/ subdirectory
 	CreateCSharpProject(projectDir, projectName);
-
-	m_Projects.emplace_back(ProjectInfo
-		{
-			projectName,
-			projectInfo,
-			projectDir.string()
-		});
-	WriteSettings();
 }

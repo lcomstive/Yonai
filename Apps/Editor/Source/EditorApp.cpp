@@ -82,7 +82,6 @@ void EditorApp::Setup()
 	ImGuiIniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini");
 	io.IniFilename = ImGuiIniFilename.c_str();
 
-	LoadProject();
 	LaunchEditorService();
 }
 
@@ -113,31 +112,6 @@ void EditorApp::LaunchEditorService()
 	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll");
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
 	SystemManager::Global()->Add(editorService);
-}
-
-void EditorApp::LoadProject()
-{
-	string projectPath = fmt::format("file://{}/project.json", m_ProjectPath.string());
-	replace(projectPath.begin(), projectPath.end(), '\\', '/');
-
-	m_ProjectInfo = ReadProject(projectPath);
-
-	if(m_ProjectInfo.Name.empty())
-	{
-		// Failed to load, exit application
-		Exit();
-		return;
-	}
-	else
-		// Successfully loaded
-		spdlog::info("Loaded project '{}'", m_ProjectInfo.Name.c_str());
-
-	for(const string& assembly : m_ProjectInfo.Assemblies)
-	{
-		if(assembly.empty())
-			continue;
-		ScriptEngine::LoadAssembly(assembly, true);
-	}
 }
 
 void EditorApp::InitialiseScripting()
