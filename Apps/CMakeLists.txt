@@ -2,7 +2,7 @@ option(AQUA_BUILD_EDITOR "Build the Aqua Editor" ON)
 option(AQUA_BUILD_BASE_GAME "Build the base game application" ON)
 
 if(MSVC)
-	option(AQUA_GENERATE_MDBS "Generate mono-compatible debug symbol files for AquaScriptCore and AquaScriptEditor" OFF)
+	option(AQUA_GENERATE_MDBS "Generate mono-compatible debug symbol files for AquaScriptCore and AquaScriptEditor" ON)
 endif()
 
 if(WIN32)

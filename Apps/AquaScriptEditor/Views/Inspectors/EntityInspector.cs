@@ -23,7 +23,7 @@ namespace AquaEditor
 			if (ImGUI.Input("##nameComponent", ref name))
 				nameComponent.Name = name;
 
-			Component[] components = entity.GetComponents();
+			Component[] components = entity.GetComponents(true /* include inactive */);
 			foreach(Component component in components)
 				DrawComponentInspector(component);
 		}

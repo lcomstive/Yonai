@@ -44,14 +44,12 @@ namespace AquaEditor
 				// Demo //
 				// GenerateConsoleLines();
 
-				// CreateTestScene();
-				LoadTestScene();
-
 				Open<SceneView>();
 				Open<HierarchyView>();
 				Open<InspectorView>();
 
-				// InspectorView.Target = World.Get(0).GetEntity(0);
+				// CreateTestScene();
+				LoadTestScene();
 			}
 			catch (Exception e) { Log.Exception(e); }
 		}
@@ -85,11 +83,15 @@ namespace AquaEditor
 		private static void LoadScene()
 		{
 			World[] scenes = SceneManager.GetActiveScenes();
+			SceneManager.UnloadAll();
 			foreach (World scene in scenes)
 			{
 				// Check if exists
-				if (VFS.Exists($"{SceneDir}{scene.Name}.json"))
-					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
+				if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
+					continue;
+
+				scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
+				SceneManager.Load(scene, SceneAddType.Additive);
 			}
 		}
 
@@ -342,7 +344,7 @@ namespace AquaEditor
 				return; // Not found
 
 			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
-			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
+			SceneManager.Load(m_TestWorld, SceneAddType.Single);
 		}
 
 		private void DrawDemoContents()

@@ -11,10 +11,7 @@ using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
-extern EmptyMethodFn ComponentMethodStart;
 extern EmptyMethodFn ComponentMethodUpdate;
-extern EmptyMethodFn ComponentMethodDestroyed;
-extern ComponentMethodEnabledFn ComponentMethodEnabled;
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
 ComponentManager::ComponentManager(UUID worldID) : m_WorldID(worldID) { }
@@ -25,7 +22,7 @@ void ComponentManager::Destroy()
 		iterator.second.Destroy();
 }
 
-vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
+vector<pair<size_t, void*>> ComponentManager::Get(EntityID id, bool includeInactive)
 {
 	std::vector<std::pair<size_t, void*>> components;
 
@@ -33,7 +30,11 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 		return components;
 
 	for (auto& type : m_EntityComponents[id])
-		components.emplace_back(type, m_ComponentArrays[type].Get(id));
+	{
+		Component* component = m_ComponentArrays[type].Get(id);
+		if (includeInactive || component->Enabled)
+			components.emplace_back(type, component);
+	}
 
 	return components;
 }
@@ -101,7 +102,6 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 	m_WorldIsActive = isActive;
 
 	MonoException* exception = nullptr;
-	// Call all components' Enabled/Disabled and Start functions
 	for (auto componentPair : m_ComponentArrays)
 	{
 		auto entities = componentPair.second.GetEntities();
@@ -110,15 +110,6 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 			Component* instance = componentPair.second.Instances[entityPair.second];
 			if (!instance->ManagedData.IsValid())
 				instance->ManagedData = CreateManagedInstance(componentPair.first, entityPair.first);
-			if (!instance->ManagedData.IsValid() )
-				continue;
-
-			MonoObject* monoInstance = instance->ManagedData.GetInstance();
-			ComponentMethodEnabled(monoInstance, m_WorldIsActive, &exception);
-			if (m_WorldIsActive)
-				ComponentMethodStart(monoInstance, &exception);
-			else
-				ComponentMethodDestroyed(monoInstance, &exception);
 		}
 	}
 }
@@ -126,12 +117,12 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 Component* ComponentManager::Get(EntityID id, size_t type)
 { return IsEmpty(id) ? nullptr : m_ComponentArrays[type].Get(id); }
 
-vector<EntityID> ComponentManager::GetEntities(size_t type)
+vector<EntityID> ComponentManager::GetEntities(size_t type, bool includeInactive)
 {
 	return m_ComponentArrays.find(type) == m_ComponentArrays.end() ? vector<EntityID>() : m_ComponentArrays[type].GetEntities();
 }
 
-vector<EntityID> ComponentManager::GetEntities(vector<size_t> types)
+vector<EntityID> ComponentManager::GetEntities(vector<size_t> types, bool includeInactive)
 {
 	vector<EntityID> output;
 	
@@ -216,9 +207,9 @@ void ComponentManager::CallUpdateFn()
 		for (size_t i = 0; i < componentPair.second.Instances.size(); i++)
 		{
 			Component* instance = componentPair.second.Instances[i];
-
-			if (!instance->Entity.GetWorld())
-				continue; // Invalid entity, world is not set?
+			if (!instance->Enabled || // Not enabled
+				!instance->Entity.GetWorld()) // Invalid entity, world is not set? 
+				continue; 
 
 			if (instance->ManagedData.IsValid() && instance->ManagedData.ShouldSendMessages)
 			{
@@ -251,15 +242,6 @@ void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 	instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
 	if (!instance->ManagedData.IsValid())
 		return;
-
-	// If world is active, call Enabled and then Start
-	MonoException* exception = nullptr;
-	if (Owner->m_WorldIsActive)
-	{
-		MonoObject* monoInstance = instance->ManagedData.GetInstance();
-		ComponentMethodEnabled(monoInstance, true, &exception);
-		ComponentMethodStart(monoInstance, &exception);
-	}
 }
 
 Component* ComponentManager::ComponentData::Get(EntityID entity)
@@ -298,13 +280,16 @@ void ComponentManager::ComponentData::Remove(EntityID entity)
 	}
 }
 
-std::vector<EntityID> ComponentManager::ComponentData::GetEntities()
+std::vector<EntityID> ComponentManager::ComponentData::GetEntities(bool includeInactive)
 {
 	std::vector<EntityID> entities;
-	entities.resize(EntityIndex.size());
-	unsigned int i = 0;
+	entities.reserve(EntityIndex.size());
 	for (const auto& pair : EntityIndex)
-		entities[i++] = pair.first;
+	{
+		Component* component = Instances[pair.second];
+		if(includeInactive || component->Enabled)
+			entities.push_back(pair.first);
+	}
 	return entities;
 }
 #pragma endregion

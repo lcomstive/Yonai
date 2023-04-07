@@ -47,7 +47,8 @@ void RenderSystem::Draw()
 	{
 		auto cameras = scene->GetComponents<Camera>();
 		for (auto camera : cameras)
-			Draw(camera);
+			if(camera->Enabled)
+				Draw(camera);
 	}
 }
 

@@ -14,6 +14,9 @@ namespace AquaEditor.Views
 
 		protected override void Opened()
 		{
+			if (m_World)
+				return; // Already created world
+
 			m_World = World.Create("Scene View");
 
 			m_Target = new RenderTexture(new IVector2(1920, 1080));
@@ -32,8 +35,7 @@ namespace AquaEditor.Views
 			transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
 
 			SceneManager.Load(m_World, SceneAddType.Additive);
-
-			InspectorView.Target = entity;
+			m_World.Deserialized += GetCamera;
 		}
 
 		protected override void Closed()
@@ -43,6 +45,18 @@ namespace AquaEditor.Views
 
 			m_World = null;
 			m_Camera = null;
+		}
+
+		private void GetCamera()
+		{
+			Camera[] cameras = m_World.GetComponents<Camera>();
+			bool updateInspector = InspectorView.Target == m_Camera;
+
+			m_Camera = cameras.Length > 0 ? cameras[0] : null;
+			m_Camera.RenderTarget = m_Target;
+
+			if(updateInspector)
+				InspectorView.Target = m_Camera?.Entity ?? null;
 		}
 
 		protected override void Draw()

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class MeshRenderer : NativeComponent
+	public class MeshRenderer : Component
 	{
 		private uint m_Mesh = uint.MaxValue;
 		public uint Mesh

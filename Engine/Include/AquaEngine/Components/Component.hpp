@@ -6,6 +6,8 @@ namespace AquaEngine::Components
 {
 	struct Component
 	{
+		bool Enabled = false;
+
 		/// <summary>
 		/// Entity this component is attached to
 		/// </summary>

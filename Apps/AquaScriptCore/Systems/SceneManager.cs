@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
 	public enum SceneAddType { Single, Additive }
 
-	public class SceneManager : AquaSystem
+	public class SceneManager
 	{
+		private static Dictionary<UUID, World> m_ActiveWorlds = new Dictionary<UUID, World>();
+
 		/// <summary>
 		/// Clears all currently active scenes and loads a new one
 		/// </summary>
@@ -18,26 +21,36 @@ namespace AquaEngine
 				case SceneAddType.Single: _Load(world.ID); break;
 				case SceneAddType.Additive: _LoadAdditive(world.ID); break;
 			}
+			world.SetActive(true);
+
+			m_ActiveWorlds.Add(world.ID, world);
+			WorldChanged?.Invoke(world, true);
 		}
 
 		/// <summary>
 		/// Removes a scene from being active
 		/// </summary>
-		public static void Unload(World world) => _Unload(world.ID);
+		public static void Unload(World world)
+		{
+			_Unload(world.ID);
+			world.SetActive(false);
+			m_ActiveWorlds.Remove(world.ID);
+
+			WorldChanged?.Invoke(world, false);
+		}
 
 		/// <summary>
 		/// Removes all scenes from being active
 		/// </summary>
-		public static void UnloadAll() => _UnloadAll();
-
-		public static World[] GetActiveScenes()
+		public static void UnloadAll()
 		{
-			List<World> scenes = new List<World>();
-			ulong[] worldIDs = _GetActiveScenes();
-			for(int i = 0; i < worldIDs.Length; i++)
-				scenes.Add(World.Get(worldIDs[i]));
-			return scenes.ToArray();
+			World[] worlds = m_ActiveWorlds.Values.ToArray();
+			foreach (World world in worlds)
+				Unload(world);
+			_UnloadAll();
 		}
+
+		public static World[] GetActiveScenes() => m_ActiveWorlds.Values.ToArray();
 
 		public delegate void OnWorldChanged(World world, bool added);
 
@@ -53,9 +66,20 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadAll();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetActiveScenes();
 
-		// Called from unmanaged code
-		private static void _OnSceneChanged(ulong worldID, bool added) =>
-			WorldChanged?.Invoke(World.Get(worldID), added);
+		private void _UpdateScenes()
+		{
+			// Cache active worlds from unmanaged code
+			ulong[] worldIDs = _GetActiveScenes();
+			for (int i = 0; i < worldIDs.Length; i++)
+			{
+				World world = World.Get(worldIDs[i]);
+				world.SetActive(true);
+				m_ActiveWorlds.Add(world.ID, world);
+				WorldChanged?.Invoke(world, true);
+			}
+
+			Log.Debug($"Found {worldIDs.Length} active worlds during startup");
+		}
 		#endregion
 	}
 }

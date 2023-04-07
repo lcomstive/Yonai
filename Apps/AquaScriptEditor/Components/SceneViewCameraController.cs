@@ -10,10 +10,18 @@ namespace AquaEditor
 		public Vector2 MouseSensitivity = new Vector2(1, 1);
 
 		private Transform m_Transform;
+		private float xRot = 0, yRot = 0;
 
 		private const float ControllerDeadzone = 0.1f;
 
-		protected override void Start() => m_Transform = GetComponent<Transform>();
+		protected override void Start()
+		{
+			m_Transform = GetComponent<Transform>();
+
+			Vector3 euler = m_Transform.Rotation.Euler;
+			yRot = MathUtils.Deg2Rad(euler.y);
+			xRot = MathUtils.Deg2Rad(euler.x);
+		}
 
 		protected override void Update()
 		{
@@ -55,7 +63,6 @@ namespace AquaEditor
 			return movement * Time.DeltaTime;
 		}
 
-		private float xRot = 0, yRot = 0;
 		private Quaternion GetRotation()
 		{
 			Vector3 euler = m_Transform.Rotation.Euler;

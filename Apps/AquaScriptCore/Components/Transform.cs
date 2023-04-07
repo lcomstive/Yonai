@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Transform : NativeComponent
+	public class Transform : Component
 	{
 		public Vector3 Position
 		{

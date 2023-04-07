@@ -63,7 +63,7 @@ namespace AquaEngine
 			/// <summary>
 			/// Gets all entities with this component type
 			/// </summary>
-			AquaAPI std::vector<EntityID> GetEntities();
+			AquaAPI std::vector<EntityID> GetEntities(bool includeInactive = false);
 
 			/// <summary>
 			/// Adds a new instance, attaching to entity
@@ -75,12 +75,13 @@ namespace AquaEngine
 			T* Get(EntityID entity) { return (T*)(Has(entity) ? Instances[EntityIndex[entity]] : nullptr); }
 
 			template<typename T>
-			std::vector<T*> Get()
+			std::vector<T*> Get(bool includeInactive = false)
 			{
 				std::vector<T*> components;
 				components.reserve(Instances.size());
 				for (const auto& pair : EntityIndex)
-					components.push_back((T*)Instances[pair.second]);
+					if(includeInactive || ((Component*)Instances[pair.second])->Enabled)
+						components.push_back((T*)Instances[pair.second]);
 				return components;
 			}
 		};
@@ -183,8 +184,8 @@ namespace AquaEngine
 
 		Components::Component* Get(EntityID id, size_t type);
 
-		std::vector<EntityID> GetEntities(size_t type);
-		std::vector<EntityID> GetEntities(std::vector<size_t> types);
+		std::vector<EntityID> GetEntities(size_t type, bool includeInactive = false);
+		std::vector<EntityID> GetEntities(std::vector<size_t> types, bool includeInactive = false);
 
 		/// <summary>
 		/// Gets component from entity
@@ -203,18 +204,18 @@ namespace AquaEngine
 		/// Gets all components from entity
 		/// </summary>
 		/// <returns>All components, tuple of type and their data</returns>
-		AquaAPI std::vector<std::pair<size_t, void*>> Get(EntityID id);
+		AquaAPI std::vector<std::pair<size_t, void*>> Get(EntityID id, bool includeInactive = false);
 
 		/// <summary>
 		/// Gets all entities with component
 		/// </summary>
 		/// <returns>Vector of components and associated entities, or empty if doesn't exist</returns>
 		template<typename T>
-		std::vector<T*> Get()
+		std::vector<T*> Get(bool includeInactive = false)
 		{
 			size_t type = typeid(T).hash_code();
 			return m_ComponentArrays.find(type) == m_ComponentArrays.end() ?
-				std::vector<T*>() : m_ComponentArrays[type].Get<T>();
+				std::vector<T*>() : m_ComponentArrays[type].Get<T>(includeInactive);
 		}
 
 		/// <summary>
@@ -222,14 +223,14 @@ namespace AquaEngine
 		/// </summary>
 		/// <returns>Vector of components on entities</returns>
 		template<typename T>
-		std::vector<T*> Get(EntityID entities[], unsigned int entityCount)
+		std::vector<T*> Get(EntityID entities[], unsigned int entityCount, bool includeInactive = false)
 		{
 			size_t type = typeid(T).hash_code();
 			std::vector<T*> components;
 			for (unsigned int i = 0; i < entityCount; i++)
 			{
 				T* component = m_ComponentArrays[type].Get<T>(entities[i]);
-				if (component)
+				if (component && (includeInactive || component->Enabled))
 					components.push_back(component);
 			}
 			return components;
@@ -246,7 +247,7 @@ namespace AquaEngine
 		/// Gets all entities with desired components
 		/// </summary>
 		template<typename T1, typename T2>
-		std::vector<std::pair<T1*, T2*>> Get()
+		std::vector<std::pair<T1*, T2*>> Get(bool includeInactive)
 		{
 			std::vector<T1*> type1 = Get<T1>();
 			std::vector<T2*> type2 = Get<T2>();
@@ -257,7 +258,8 @@ namespace AquaEngine
 			{
 				for (T2* t2 : type2)
 				{
-					if (t1->Entity.ID() == t2->Entity.ID())
+					if (t1->Entity.ID() == t2->Entity.ID() &&
+						(includeInactive || (t1->Enabled && t2->Enabled)))
 						components.emplace_back(std::make_pair(t1, t2));
 				}
 			}

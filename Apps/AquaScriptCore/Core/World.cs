@@ -3,6 +3,7 @@ using AquaEngine.IO;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace AquaEngine
 {
@@ -10,6 +11,20 @@ namespace AquaEngine
 	{
 		public string Name { get; private set; }
 		public UUID ID { get; private set; }
+
+		private bool m_IsActive = false;
+		/// <summary>
+		/// True when world is loaded and active in <see cref="SceneManager"/>
+		/// </summary>
+		public bool IsActive
+		{
+			get => m_IsActive;
+			set
+			{
+				if (m_IsActive != value)
+					SetActive(value);
+			}
+		}
 
 		private Dictionary<UUID, Entity> m_Entities = new Dictionary<UUID, Entity>();
 
@@ -45,6 +60,8 @@ namespace AquaEngine
 			foreach (Entity entity in entities)
 				entityArray.Add(entity.OnSerialize());
 			json.Add("Entities", entityArray);
+
+			Serialized?.Invoke();
 			return json;
 		}
 
@@ -53,7 +70,10 @@ namespace AquaEngine
 			// Destroy previous entities, will be recreating them
 			Entity[] previousEntities = GetEntities();
 			foreach (Entity entity in previousEntities)
+			{
+				entity.Destroy();
 				_DestroyEntity(ID, entity.ID);
+			}
 			m_Entities.Clear();
 
 			Name = json["Name"].Value<string>();
@@ -72,6 +92,44 @@ namespace AquaEngine
 				Entity entity = new Entity(this, entityID);
 				entity.OnDeserialize(entityJSON);
 				m_Entities.Add(entityID, entity);
+			}
+
+			// If enabled in SceneManager, enable and start all components
+			if (m_IsActive)
+				SetActive(true);
+
+			Deserialized?.Invoke();
+		}
+
+		internal void SetActive(bool active)
+		{
+			m_IsActive = active;
+
+			Entity[] entities = m_Entities.Values.ToArray();
+
+			// Enable / disable components
+			foreach (Entity entity in entities)
+			{
+				Component[] components = entity.GetComponents();
+				foreach (Component component in components)
+				{
+					if (component.Enabled)
+						component._Enable(active, true);
+				}
+			}
+
+			// Start / destroy components
+			foreach (Entity entity in entities)
+			{
+				foreach (Component component in entity.GetComponents())
+				{
+					if (!component.Enabled) continue;
+
+					if(m_IsActive)
+						component._Start();
+					else
+						component._Destroy();
+				}
 			}
 		}
 
@@ -104,9 +162,12 @@ namespace AquaEngine
 
 		public void DestroyEntity(UUID entityID)
 		{
-			_DestroyEntity(ID, entityID);
 			if (m_Entities.ContainsKey(entityID))
+			{
 				m_Entities.Remove(entityID);
+				m_Entities[entityID].Destroy();
+			}
+			_DestroyEntity(ID, entityID);
 		}
 
 		public Entity[] GetEntities()
@@ -128,9 +189,9 @@ namespace AquaEngine
 			return entities;
 		}
 
-		public T[] GetComponents<T>() where T : Component
+		public T[] GetComponents<T>(bool includeInactive = false) where T : Component
 		{
-			ulong[] entityIDs = _GetComponents(ID, typeof(T));
+			ulong[] entityIDs = _GetComponents(ID, typeof(T), includeInactive);
 			if (entityIDs == null)
 				return new T[0];
 
@@ -145,9 +206,9 @@ namespace AquaEngine
 			return components;
 		}
 		
-		public (T1[], T2[]) GetComponents<T1, T2>() where T1 : Component where T2 : Component
+		public (T1[], T2[]) GetComponents<T1, T2>(bool includeInactive = false) where T1 : Component where T2 : Component
 		{
-			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) });
+			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) }, includeInactive);
 			if (entityIDs == null)
 				return (new T1[0], new T2[0]);
 
@@ -164,9 +225,9 @@ namespace AquaEngine
 			return (components1, components2);
 		}
 		
-		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>() where T1 : Component where T2 : Component where T3 : Component
+		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>(bool includeInactive = false) where T1 : Component where T2 : Component where T3 : Component
 		{
-			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) });
+			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) }, includeInactive);
 			if (entityIDs == null)
 				return (new T1[0], new T2[0], new T3[0]);
 
@@ -258,14 +319,14 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAll(out ulong[] worldIDs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetEntities(ulong worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type, bool includeInactive);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types, bool includeInactive);
 
 		// Entities
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasEntity(ulong worldID, ulong entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _CreateEntity(ulong worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _CreateEntityID(ulong worldID, ulong entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyEntity(ulong worldID, ulong entityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void _DestroyEntity(ulong worldID, ulong entityID);
 
 		// Systems
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _HasSystem(ulong worldID, Type type);
@@ -274,5 +335,11 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _RemoveSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _EnableSystem(ulong worldID, Type type, bool enable);
 		#endregion
+
+		public delegate void OnSerialized();
+		public event OnSerialized Serialized;
+
+		public delegate void OnDeserialized();
+		public event OnDeserialized Deserialized;
 	}
 }

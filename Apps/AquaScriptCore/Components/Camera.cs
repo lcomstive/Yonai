@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Camera : NativeComponent
+	public class Camera : Component
 	{
 		/// <summary>
 		/// Field of view

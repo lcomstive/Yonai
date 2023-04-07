@@ -73,6 +73,8 @@ void World::DestroyEntity(EntityID entity)
 {
 	if(m_Entities.find(entity) != m_Entities.end())
 		m_Entities.erase(entity);
+
+	m_ComponentManager->Clear(entity);
 }
 
 void* World::GetComponent(EntityID entity, size_t type)

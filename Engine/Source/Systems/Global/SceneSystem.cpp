@@ -27,9 +27,6 @@ void SceneSystem::Init()
 
 	// Add callback for when script engine gets reloaded
 	ScriptEngine::AddReloadCallback(OnScriptEngineReloaded);
-
-	// Add callback for scene changes, to inform C#
-	AddSceneCallback(ManagedSceneCallback);
 }
 
 void SceneSystem::Destroy()
@@ -54,7 +51,7 @@ void SceneSystem::Draw()
 
 void SceneSystem::OnScriptEnginePreReloaded()
 {
-	UnloadAllScenes();
+	// UnloadAllScenes();
 	SceneChangedMethod = nullptr;
 }
 
@@ -66,22 +63,11 @@ void SceneSystem::OnScriptEngineReloaded()
 	MonoClass* managedClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SceneManager");
 	SceneChangedMethod = mono_class_get_method_from_name(
 		managedClass,
-		"_OnSceneChanged", // Function name
-		2 // Parameter count
+		"_UpdateScenes", // Function name
+		0 // Parameter count
 	);
-}
 
-void SceneSystem::ManagedSceneCallback(World* world, bool added)
-{
-	if (!SceneChangedMethod)
-		return;
-
-	MonoException* exception = nullptr;
-
-	void* args[2];
-	args[0] = &world->m_ID;
-	args[1] = &added;
-	mono_runtime_invoke(SceneChangedMethod, nullptr, args, nullptr);
+	mono_runtime_invoke(SceneChangedMethod, nullptr, nullptr, nullptr);
 }
 
 void SceneSystem::LoadScene(World* scene)
@@ -100,7 +86,7 @@ void SceneSystem::AddScene(World* scene)
 
 void SceneSystem::UnloadAllScenes()
 {
-	for (size_t i = 0; i < s_ActiveScenes.size(); i++)
+	for (size_t i = 0; i <= s_ActiveScenes.size(); i++)
 		UnloadScene(0);
 }
 
@@ -130,6 +116,8 @@ void SceneSystem::UnloadScene(int index)
 		callback(s_ActiveScenes[index], false);
 
 	s_ActiveScenes.erase(s_ActiveScenes.begin() + index);
+
+	spdlog::debug("Unloaded scene, remaining: {}", (int)s_ActiveScenes.size());
 }
 
 std::vector<World*>& SceneSystem::GetActiveScenes() { return s_ActiveScenes; }

@@ -13,6 +13,7 @@
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
+using namespace AquaEngine::Components;
 
 extern EmptyMethodFn ComponentMethodStart;
 extern EmptyMethodFn ComponentMethodUpdate;
@@ -108,19 +109,19 @@ ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (uint64_t worldID))
 	return entityIDs;
 }
 
-ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (uint64_t worldID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (uint64_t worldID, MonoReflectionType* componentType, bool includeInactive))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
 		return nullptr;
-	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType));
+	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType), includeInactive);
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint64_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
 		mono_array_set(output, uint64_t, i, entities[i]);
 	return output;
 }
 
-ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, MonoArray* inputTypes))
+ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, MonoArray* inputTypes, bool includeInactive))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -131,7 +132,7 @@ ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, 
 	for (size_t i = 0; i < inputTypesLength; i++)
 		componentTypes.emplace_back(_GetComponentType(mono_array_get(inputTypes, MonoReflectionType*, i)));
 
-	vector<EntityID> entities = world->GetComponentManager()->GetEntities(componentTypes);
+	vector<EntityID> entities = world->GetComponentManager()->GetEntities(componentTypes, includeInactive);
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_uint64_class(), entities.size());
 	for (size_t i = 0; i < entities.size(); i++)
 		mono_array_set(output, uint64_t, i, entities[i]);
@@ -151,7 +152,7 @@ ADD_MANAGED_METHOD(Entity, HasComponent, bool, (uint64_t worldID, uint64_t entit
 
 ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType));
 
-ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType, void** outHandle))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -162,13 +163,22 @@ ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_
 
 	// Check for existing component of same type on entity
 	if (world->GetComponentManager()->Has(entityID, typeHash))
-		return world->GetComponentManager()->Get(entityID, typeHash)->ManagedData.GetInstance();
+	{
+		Component* component = world->GetComponentManager()->Get(entityID, typeHash);
+		*outHandle = component;
+		return component->ManagedData.GetInstance();
+	}
 
 	// Get unmanaged->managed data
+	Component* component = nullptr;
 	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 	if (!managedData.AddFn)
-		return world->AddComponent(entityID, managedType)->ManagedData.GetInstance();
-	return managedData.AddFn(world, entityID)->ManagedData.GetInstance();
+		component = world->AddComponent(entityID, managedType);
+	else
+		component = managedData.AddFn(world, entityID);
+	
+	*outHandle = component;
+	return component->ManagedData.GetInstance();
 }
 
 ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
@@ -204,7 +214,7 @@ ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
 }
 
-ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
+ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (uint64_t worldID, uint64_t entityID, bool includeInactive))
 {
 	World* world = World::GetWorld(worldID);
 	if (!world)
@@ -212,7 +222,7 @@ ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (uint64_t worldID, uint64_
 
 	// Key: type hash
 	// Value: component instance
-	auto componentPairs = world->GetComponentManager()->Get(entityID);
+	auto componentPairs = world->GetComponentManager()->Get(entityID, includeInactive);
 
 	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_object_class(), componentPairs.size());
 	for (int i = 0; i < componentPairs.size(); i++)

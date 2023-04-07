@@ -10,7 +10,7 @@ namespace AquaEngine
 		Paused
 	}
 
-	public class SoundSource : NativeComponent
+	public class SoundSource : Component
 	{
 		public UUID Sound
 		{
