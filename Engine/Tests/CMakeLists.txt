@@ -19,8 +19,8 @@ if(APPLE)
 		COMMAND echo Copying mono dynamic lib to output library folder
 
 		COMMAND ${CMAKE_COMMAND} -E copy
-			${CMAKE_CURRENT_SOURCE_DIR}/../Vendor/mono/native/libmonosgen-2.0.1.dylib
-			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libmonosgen-2.0.1.dylib
+			${MONO_SHARED_LIB}
+			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	)
 
 	SetRPath()

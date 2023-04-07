@@ -46,7 +46,7 @@ elseif(WIN32)
 
 	if(BUILD_SHARED_LIBS)
 		install(FILES $<TARGET_RUNTIME_DLLS:AquaEditor> DESTINATION .)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../Engine/Vendor/mono/bin/mono-2.0-sgen.dll DESTINATION .)
+		install(FILES ${MONO_ROOT}/bin/mono-2.0-sgen.dll DESTINATION .)
 	endif()
 
 	if(DEFINED ENV{CMAKE_CONFIG})

@@ -2,16 +2,16 @@
     Tries to find Mono installation on system in the following paths:
 
     Windows
-        - C:/Program Files/Mono/
+        - C:/Program Files/Mono
         - %MONO_ROOT%
 
     Mac OS
-        - /opt/homebrew/
-        - /Library/Frameworks/Mono.framework/
+        - /opt/homebrew
+        - /Library/Frameworks/Mono.framework
 
     Linux
-        - /usr/
-        - /usr/local/
+        - /usr
+        - /usr/local
        
     Defines:
 
@@ -40,11 +40,19 @@ function(CheckMonoInstallDir rootDir)
     set(MONO_INCLUDE_DIRS ${rootDir}/include/mono-2.0 PARENT_SCOPE)
     set(MONO_FOUND TRUE PARENT_SCOPE)
 
-    find_file(MONO_LIBRARY NAMES
-        libmono-static-sgen.lib # Windows
-        libmonosgen-2.0.so      # Linux
-        libmonosgen-2.0.dylib   # Mac
-        PATHS "${rootDir}/lib" REQUIRED)
+    if(BUILD_SHARED_LIBS)
+        find_file(MONO_LIBRARY NAMES
+            libmono-static-sgen.lib # Windows only runs with static linkage
+            libmonosgen-2.0.so      # Linux
+            libmonosgen-2.0.dylib   # Mac
+            PATHS "${rootDir}/lib" REQUIRED)
+    else()
+        find_file(MONO_LIBRARY NAMES
+            libmono-static-sgen.lib # Windows
+            libmonosgen-2.0.a       # Linux / Mac
+            PATHS "${rootDir}/lib" REQUIRED)
+    endif()
+
     message("Mono library: ${MONO_LIBRARY}")
 
     if(WIN32)
@@ -54,7 +62,10 @@ function(CheckMonoInstallDir rootDir)
     endif()
 endfunction()
 
-set(MONO_POTENTIAL_DIRS ${MONO_ROOT} "$ENV{MONO_ROOT}")
+set(MONO_POTENTIAL_DIRS ${MONO_ROOT})
+if(NOT("$ENV{MONO_ROOT}" STREQUAL ""))
+    list(APPEND MONO_POTENTIAL_DIRS "$ENV{MONO_ROOT}")
+endif()
 
 if(WIN32)
     list(APPEND MONO_POTENTIAL_DIRS "C:\\Program Files\\Mono")
