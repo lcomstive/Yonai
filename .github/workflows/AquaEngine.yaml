@@ -42,12 +42,6 @@ jobs:
     - if: matrix.config.os == 'windows-latest'
       run: choco install mono
 
-    - if: matrix.config.os == 'macOS-latest'
-      run: |
-        brew update
-        brew install mono libiconv
-        brew upgrade
-
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
       run: echo "CMAKE_CONFIG=Release" >> $GITHUB_ENV
