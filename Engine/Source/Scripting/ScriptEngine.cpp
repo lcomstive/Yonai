@@ -7,6 +7,7 @@
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
 #include <AquaEngine/Application.hpp>
+#include <mono/metadata/mono-config.h>
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
@@ -24,6 +25,7 @@ using namespace AquaEngine::Scripting;
 namespace fs = std::filesystem;
 
 const char* AssembliesPath = "app://Assets/Mono/";
+const char* MonoConfigPath = "app://Assets/Mono/Config";
 const char* AppDomainName = "AquaEngineAppDomain";
 
 string ScriptEngine::s_CoreDLLPath = "";
@@ -88,6 +90,14 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 		return;
 	}
 	mono_set_assemblies_path(assembliesPath.c_str());
+
+	if (VFS::Exists(MonoConfigPath))
+	{
+		string configFile = VFS::GetAbsolutePath(MonoConfigPath);
+		mono_config_parse(configFile.c_str());
+		spdlog::debug("Mono config file: {}", configFile.c_str());
+	}
+
 
 	// Setup debugging session
 	if (allowDebugging)

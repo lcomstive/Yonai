@@ -92,6 +92,11 @@ if(APPLE)
 				${AQUA_RESOURCES_DIR}
 		)
 	endif()
+
+	# Copy libmono-native.dylib to resource directory
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_DIRS}/libmono-native.dylib ${AQUA_RESOURCES_DIR}
+	)
 endif()
 
 AddPlatformSpecifics()

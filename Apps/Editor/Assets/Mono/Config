@@ -1,0 +1,3 @@
+<configuration>
+	<dllmap dll="System.Native" target="libmono-native.dylib" os="osx" />
+</configuration>

@@ -1,4 +1,5 @@
 using AquaEngine;
+using AquaEngine.Systems;
 
 namespace AquaEditor
 {
@@ -21,6 +22,8 @@ namespace AquaEditor
 					EditorWindow.InitContext();
 					CreateWindow();
 				}
+
+				Add<ImGUISystem>();
 
 				Resource.LoadDatabase();
 				Add<EditorUIService>();

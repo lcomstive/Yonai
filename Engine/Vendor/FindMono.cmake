@@ -6,6 +6,7 @@
         - %MONO_ROOT%
 
     Mac OS
+        - /opt/homebrew/
         - /Library/Frameworks/Mono.framework/
 
     Linux
@@ -39,28 +40,17 @@ function(CheckMonoInstallDir rootDir)
     set(MONO_INCLUDE_DIRS ${rootDir}/include/mono-2.0 PARENT_SCOPE)
     set(MONO_FOUND TRUE PARENT_SCOPE)
 
-    #[[
-    if(BUILD_SHARED_LIBS)
-        find_library(MONO_LIBRARY NAMES mono-2.0-sgen PATHS "${rootDir}/lib" REQUIRED)
-
-        if(WIN32)
-            set(MONO_LIBRARY ${MONO_LIBRARY} ws2_32 winmm version bcrypt PARENT_SCOPE)
-            set(MONO_SHARED_LIB "${rootDir}/bin/mono-2.0-sgen.dll" PARENT_SCOPE)            
-        else()
-            set(MONO_SHARED_LIB "${MONO_LIBRARY}" PARENT_SCOPE)
-        endif()
-    else()
-    ]]
-        find_library(MONO_LIBRARY NAMES
-            libmono-static-sgen
-            mono-static-sgen
-            libmonosgen-2.0
-            monosgen-2.0
-            PATHS "${rootDir}/lib" REQUIRED)
-    # endif()
+    find_file(MONO_LIBRARY NAMES
+        libmono-static-sgen.lib # Windows
+        libmonosgen-2.0.so      # Linux
+        libmonosgen-2.0.dylib   # Mac
+        PATHS "${rootDir}/lib" REQUIRED)
+    message("Mono library: ${MONO_LIBRARY}")
 
     if(WIN32)
         set(MONO_LIBRARY ${MONO_LIBRARY} ws2_32 winmm version bcrypt PARENT_SCOPE)
+    elseif(APPLE)
+        set(MONO_LIBRARY ${MONO_LIBRARY} iconv PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -69,7 +59,8 @@ set(MONO_POTENTIAL_DIRS ${MONO_ROOT} "$ENV{MONO_ROOT}")
 if(WIN32)
     list(APPEND MONO_POTENTIAL_DIRS "C:\\Program Files\\Mono")
 elseif(APPLE)
-    list(APPEND MONO_POTENTIAL_DIRS "/Library/Frameworks/Mono.framework")
+    list(APPEND MONO_POTENTIAL_DIRS "/opt/homebrew")
+    list(APPEND MONO_POTENTIAL_DIRS "/Library/Frameworks/Mono.framework/Versions/Current")
 elseif(UNIX)
     list(APPEND MONO_POTENTIAL_DIRS "/usr")
     list(APPEND MONO_POTENTIAL_DIRS "/usr/local")
