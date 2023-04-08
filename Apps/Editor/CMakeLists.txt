@@ -93,10 +93,18 @@ if(APPLE)
 		)
 	endif()
 
-	# Copy libmono-native.dylib to resource directory
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_DIRS}/libmono-native.dylib ${AQUA_RESOURCES_DIR}
-	)
+	find_file(MONO_LIBRARY_NATIVE NAMES
+		libmono-native.dylib   # Homebrew
+		libmono-native-compat.dylib   # Default Framework
+		PATHS "${MONO_LIBRARY_DIRS}" REQUIRED)
+
+	if(MONO_LIBRARY_NATIVE)
+		# Copy libmono-native-*.dylib to resource directory
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+			COMMAND echo Copying ${MONO_LIBRARY_NATIVE} to output
+			COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${AQUA_RESOURCES_DIR}/libmono-native.dylib
+		)
+	endif()
 endif()
 
 AddPlatformSpecifics()
