@@ -20,7 +20,6 @@
         MONO_LIBRARY        Library to link
         MONO_LIBRARY_DIRS   Directory containing MONO_LIBRARIES
         MONO_INCLUDE_DIRS   Directory containing header files
-        MONO_SHARED_LIB     Shared library to copy to binary directory. Empty if BUILD_SHARED_LIBS is off.
 
     To override Mono install directory, add a CMake variable MONO_ROOT
 
