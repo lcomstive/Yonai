@@ -48,7 +48,7 @@ function(CheckMonoInstallDir rootDir)
             PATHS "${rootDir}/lib" REQUIRED)
 
         if(NOT WIN32)
-            set(MONO_SHARED_LIB ${MONO_LIBRARY})
+            set(MONO_SHARED_LIB ${MONO_LIBRARY} PARENT_SCOPE)
         endif()
     else()
         find_file(MONO_LIBRARY NAMES

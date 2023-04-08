@@ -13,15 +13,17 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 if(APPLE)
-	# Copy mono library to @executable/libs/ folder for finding in rpath
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		# Copy mono library to output
-		COMMAND echo Copying mono dynamic lib to output library folder
+	if(BUILD_SHARED_LIBS)
+		# Copy mono library to @executable/libs/ folder for finding in rpath
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+			# Copy mono library to output
+			COMMAND echo Copying mono dynamic lib to output library folder
 
-		COMMAND ${CMAKE_COMMAND} -E copy
-			${MONO_SHARED_LIB}
-			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-	)
+			COMMAND ${CMAKE_COMMAND} -E copy
+				${MONO_SHARED_LIB}
+				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+		)
+	endif()
 
 	SetRPath()
 elseif(WIN32)
