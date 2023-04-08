@@ -60,7 +60,6 @@
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\NameComponent.cs" />
-    <Compile Include="Components\NativeComponent.cs" />
     <Compile Include="Components\SoundSource.cs" />
     <Compile Include="Components\SpriteRenderer.cs" />
     <Compile Include="Components\Transform.cs" />
