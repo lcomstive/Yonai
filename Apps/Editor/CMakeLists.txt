@@ -65,14 +65,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		${AQUA_RESOURCES_DIR}/Assets/
 )
 
-if(BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD	
 		# Copy mono shared library to output
 		COMMAND echo Copying Mono dynamic lib to output
+		COMMAND echo (${MONO_SHARED_LIB})
 
 		COMMAND ${CMAKE_COMMAND} -E copy
-			${MONO_LIBRARY}
-			${AQUA_RESOURCES_DIR}/
+			${MONO_SHARED_LIB}
+			${AQUA_RESOURCES_DIR}
 	)
 endif()
 

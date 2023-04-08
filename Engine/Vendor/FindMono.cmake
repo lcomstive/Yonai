@@ -20,6 +20,7 @@
         MONO_LIBRARY        Library to link
         MONO_LIBRARY_DIRS   Directory containing MONO_LIBRARIES
         MONO_INCLUDE_DIRS   Directory containing header files
+        MONO_SHARED_LIB     Shared library to copy to binary directory. Empty if BUILD_SHARED_LIBS is off.
 
     To override Mono install directory, add a CMake variable MONO_ROOT
 
@@ -45,6 +46,10 @@ function(CheckMonoInstallDir rootDir)
             libmonosgen-2.0.so      # Linux
             libmonosgen-2.0.dylib   # Mac
             PATHS "${rootDir}/lib" REQUIRED)
+
+        if(NOT WIN32)
+            set(MONO_SHARED_LIB ${MONO_LIBRARY})
+        endif()
     else()
         find_file(MONO_LIBRARY NAMES
             libmono-static-sgen.lib # Windows
