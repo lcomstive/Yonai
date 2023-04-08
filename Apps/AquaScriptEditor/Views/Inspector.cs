@@ -22,7 +22,7 @@ namespace AquaEditor.Views
 			{
 				if (m_Target == value) return; // No change
 				Type previousType = m_Target?.GetType();
-				Type newType = value.GetType();
+				Type newType = value?.GetType();
 
 				// Assign target
 				m_Target = value;

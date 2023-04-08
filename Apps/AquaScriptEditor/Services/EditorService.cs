@@ -27,6 +27,8 @@ namespace AquaEditor
 
 				Resource.LoadDatabase();
 				Add<EditorUIService>();
+
+				Add<BehaviourSystem>();
 			}
 			catch(System.Exception e) { Log.Exception(e); }
 		}

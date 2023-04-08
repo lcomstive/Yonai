@@ -34,10 +34,7 @@ void World::Destroy()
 }
 
 void World::Update()
-{
-	m_SystemManager->Update();
-	m_ComponentManager->CallUpdateFn();
-}
+{ m_SystemManager->Update(); }
 
 Entity World::CreateEntity()
 {
@@ -82,7 +79,8 @@ void* World::GetComponent(EntityID entity, size_t type)
 
 void World::OnActiveStateChanged(bool isActive)
 {
-	spdlog::trace("World '{}' active state changed to {}", Name(), isActive ? "active" : "inactive");
+	const char* name = Name().c_str();
+	spdlog::trace("World '{}' active state changed to {}", name, isActive ? "active" : "inactive");
 	m_ComponentManager->OnWorldActiveStateChanged(isActive);
 
 	m_SystemManager->Enable(isActive);

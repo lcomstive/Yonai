@@ -16,6 +16,9 @@ const vec3 WorldUp = { 0, 1, 0 };
 mat4 Camera::GetViewMatrix()
 {
 	Transform* transform = Entity.GetComponent<Transform>();
+	if (!transform)
+		return mat4(1.0f);
+
 	quat rotation = transform->Rotation;
 	vec3 up = vec3(0, 1, 0) * rotation;
 	vec3 forward = vec3(0, 0, 1) * rotation;
@@ -39,6 +42,8 @@ mat4 Camera::GetProjectionMatrix(glm::ivec2 resolution) { return GetProjectionMa
 
 void Camera::FillShader(Shader* shader, ivec2 resolution)
 {
+	if (!shader)
+		return;
 	shader->Set("camera.ViewMatrix", GetViewMatrix());
 	shader->Set("camera.ProjectionMatrix", GetProjectionMatrix(resolution));
 	shader->Set("camera.Position", Entity.GetComponent<Transform>()->GetGlobalPosition());
@@ -70,5 +75,8 @@ ADD_MANAGED_METHOD(Camera, GetMainCamera, void, (uint64_t* worldID, uint64_t* en
 }
 
 ADD_MANAGED_METHOD(Camera, SetRenderTarget, void, (void* handle, void* renderTarget))
-{ ((Camera*)handle)->RenderTarget = (RenderTexture*)renderTarget; }
+{
+	((Camera*)handle)->RenderTarget = (RenderTexture*)renderTarget;
+	spdlog::trace("Camera render target set to {}", (renderTarget ? to_string(((RenderTexture*)renderTarget)->GetID()) : "(null)"));
+}
 #pragma endregion

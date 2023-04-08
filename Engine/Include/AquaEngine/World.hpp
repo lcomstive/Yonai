@@ -228,10 +228,10 @@ namespace AquaEngine
 		/// </summary>
 		/// <returns>Map of components and associated entities, or empty if doesn't exist</returns>
 		template<typename T>
-		std::vector<T*> GetComponents(bool includeInactive = false) { return m_ComponentManager->Get<T>(); }
+		std::vector<T*> GetComponents() { return m_ComponentManager->Get<T>(); }
 
 		template<typename T1, typename T2>
-		std::vector<std::pair<T1*, T2*>> GetComponents(bool includeInactive = false) { return m_ComponentManager->Get<T1, T2>(includeInactive); }
+		std::vector<std::pair<T1*, T2*>> GetComponents() { return m_ComponentManager->Get<T1, T2>(); }
 
 		template<typename T>
 		T* AddComponent(EntityID id, size_t type)

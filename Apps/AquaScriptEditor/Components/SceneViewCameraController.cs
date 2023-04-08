@@ -3,7 +3,7 @@ using System;
 
 namespace AquaEditor
 {
-	public class SceneViewCameraController : Component
+	public class SceneViewCameraController : Behaviour
 	{
 		public float Speed = 1.0f;
 		public float SprintMultiplier = 2.5f;
@@ -14,16 +14,24 @@ namespace AquaEditor
 
 		private const float ControllerDeadzone = 0.1f;
 
-		protected override void Start()
+		public override void Start()
 		{
 			m_Transform = GetComponent<Transform>();
+
+			if (!m_Transform)
+			{
+				Log.Warning("Transform empty??");
+				return;
+			}
+			else
+				Log.Warning("Transform found");
 
 			Vector3 euler = m_Transform.Rotation.Euler;
 			yRot = MathUtils.Deg2Rad(euler.y);
 			xRot = MathUtils.Deg2Rad(euler.x);
 		}
 
-		protected override void Update()
+		public override void Update()
 		{
 			Vector3 movement = GetMovement();
 			Quaternion rotation = GetRotation();

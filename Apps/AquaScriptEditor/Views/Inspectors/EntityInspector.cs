@@ -1,5 +1,6 @@
 using System;
 using AquaEngine;
+using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
 
@@ -8,6 +9,16 @@ namespace AquaEditor
 	[CustomInspector(typeof(Entity))]
 	public class EntityInspector : CustomInspector
 	{
+		public override void Opened() => SceneManager.WorldChanged += OnWorldChanged;
+		public override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
+
+		private void OnWorldChanged(World world, bool added)
+		{
+			Entity target = InspectorView.Target as Entity;
+			if (target && target.World.Equals(world))
+				InspectorView.Target = null;
+		}
+
 		public override void DrawInspector(object target)
 		{
 			Entity entity = (Entity)target;
@@ -23,7 +34,7 @@ namespace AquaEditor
 			if (ImGUI.Input("##nameComponent", ref name))
 				nameComponent.Name = name;
 
-			Component[] components = entity.GetComponents(true /* include inactive */);
+			Component[] components = entity.GetComponents();
 			foreach(Component component in components)
 				DrawComponentInspector(component);
 		}

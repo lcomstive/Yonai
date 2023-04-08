@@ -66,12 +66,15 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadAll();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetActiveScenes();
 
-		private void _UpdateScenes()
+		private static void _UpdateScenes()
 		{
 			// Cache active worlds from unmanaged code
 			ulong[] worldIDs = _GetActiveScenes();
 			for (int i = 0; i < worldIDs.Length; i++)
 			{
+				if (m_ActiveWorlds.ContainsKey(worldIDs[i]))
+					continue; // Already added
+
 				World world = World.Get(worldIDs[i]);
 				world.SetActive(true);
 				m_ActiveWorlds.Add(world.ID, world);

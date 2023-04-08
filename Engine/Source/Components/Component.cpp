@@ -5,6 +5,3 @@
 using namespace AquaEngine;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
-
-ADD_MANAGED_METHOD(Component, SetEnabled, void, (void* handle, bool enabled))
-{ ((Component*)handle)->Enabled = enabled; }

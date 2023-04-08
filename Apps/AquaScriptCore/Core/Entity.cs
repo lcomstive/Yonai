@@ -45,7 +45,7 @@ namespace AquaEngine
 			json["ID"] = ID.ToString();
 
 			JArray componentsArray = new JArray();
-			Component[] components = GetComponents(true /* include inactive */);
+			Component[] components = GetComponents();
 			foreach (Component component in components)
 				componentsArray.Add(component.OnSerialize());
 			json.Add("Components", componentsArray);
@@ -92,20 +92,28 @@ namespace AquaEngine
 				return;
 			}
 
-			foreach (var component in m_Components)
+			// Handle behaviour
+			Type behaviourType = typeof(IBehaviour);
+			foreach (var pair in m_Components)
 			{
-				if (component.Value.Enabled)
-					component.Value.Enabled = false; // Call OnDisabled
-				component.Value._Destroy();
+				if (!behaviourType.IsAssignableFrom(pair.Key))
+					continue;
+
+				IBehaviour behaviour = (IBehaviour)pair.Value;
+				behaviour.Enabled = false;
+				behaviour.Destroyed();
 			}
 		}
 
 		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
-		public bool HasComponent<T>() where T : Component =>
-			m_Components.ContainsKey(typeof(T)) || _HasComponent(World.ID, ID, typeof(T));
+		public bool HasComponent(Type type) =>
+			m_Components.ContainsKey(type) || _HasComponent(World.ID, ID, type);
+
+		/// <returns>True if this entity has an attached <see cref="Component"/></returns>
+		public bool HasComponent<T>() where T : Component => HasComponent(typeof(T));
 
 		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
-		public T AddComponent<T>(bool enable = true) where T : Component
+		public T AddComponent<T>() where T : Component
 		{
 			Type type = typeof(T);
 			if (HasComponent<T>())
@@ -117,52 +125,40 @@ namespace AquaEngine
 			component.Handle = handle;
 			m_Components.Add(type, component);
 
+			// Handle behaviour
 			if (World.IsActive)
 			{
-				component._Enable(enable, true);
-				if(enable)
-					component._Start();
+				Type behaviourType = typeof(IBehaviour);
+				foreach (var pair in m_Components)
+					if (behaviourType.IsAssignableFrom(pair.Key))
+						((IBehaviour)pair.Value).Start();
 			}
-			else
-				component.m_Enabled = enable; // Silently set enabled status
 
 			return component;
 		}
 
 		/// <returns>Instance of <see cref="Component"/> attached to entity, or null if not found</returns>
-		public T GetComponent<T>() where T : Component
+		public Component GetComponent(Type type)
 		{
-			if (!HasComponent<T>())
+			if (!HasComponent(type))
 				return null;
 
-			Type type = typeof(T);
 			if (!m_Components.ContainsKey(type))
-				m_Components.Add(type, (Component)_GetComponent(World.ID, ID, typeof(T)));
-			return (T)m_Components[type];
+				m_Components.Add(type, (Component)_GetComponent(World.ID, ID, type));
+			return m_Components[type];
 		}
 
-		public Component[] GetComponents(bool includeInactive = false)
+		public T GetComponent<T>() where T : Component => (T)GetComponent(typeof(T));
+
+		public Component[] GetComponents() => m_Components.Values.ToArray();
+
+		/// <returns>True if component exists on entity, false otherwise</returns>
+		public bool TryGetComponent(Type type, out Component component)
 		{
-			/*
-			List<Component> list = new List<Component>();
-			object[] instances = _GetComponents(World.ID, ID, includeInactive);
-			for (int i = 0; i < instances.Length; i++)
-			{
-				if (instances[i] == null)
-					continue;
-
-				Component component = instances[i] as Component;
-				if (component)
-					list.Add(component);
-				else
-					Log.Warning($"Instance not found for '{instances[i].GetType().Name}'");
-			}
-
-			return list.ToArray();
-			*/
-			return m_Components.Values.ToArray();
+			component = GetComponent(type);
+			return component != null;
 		}
-
+		
 		/// <returns>True if component exists on entity, false otherwise</returns>
 		public bool TryGetComponent<T>(out T component) where T : Component
 		{
@@ -181,12 +177,42 @@ namespace AquaEngine
 			if (m_Components.ContainsKey(type))
 				m_Components.Remove(type);
 
+			// Handle behaviour
+			if (World.IsActive)
+			{
+				Type behaviourType = typeof(IBehaviour);
+				foreach (var pair in m_Components)
+					if (behaviourType.IsAssignableFrom(pair.Key))
+						((IBehaviour)pair.Value).Destroyed();
+			}
+
 			return _RemoveComponent(World.ID, ID, type);
 		}
 
 		public override string ToString() => $"[{World.ID}:{ID}]";
 
 		public static implicit operator string(Entity v) => v.ToString();
+		public static implicit operator bool(Entity a) => a != null && a.ID != UUID.Invalid;
+
+		public static bool operator ==(Entity a, object other) => a.Equals(other);
+		public static bool operator !=(Entity a, object other) => !a.Equals(other);
+
+		public static bool operator ==(Entity a, Entity b) => (a?.ID ?? UUID.Invalid) == (b?.ID ?? UUID.Invalid);
+		public static bool operator !=(Entity a, Entity b) => (a?.ID ?? UUID.Invalid) != (b?.ID ?? UUID.Invalid);
+
+		public override bool Equals(object obj)
+		{
+			if (obj == null) return false;
+
+			UUID comparisonID = UUID.Invalid;
+			if(obj is Entity) comparisonID = ((Entity)obj).ID;
+			else if(obj is UUID) comparisonID = (UUID)obj;
+			else if(obj is ulong) comparisonID = new UUID((ulong)obj);
+
+			return comparisonID != UUID.Invalid && comparisonID == ID;
+		}
+
+		public override int GetHashCode() => ID.GetHashCode();
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasComponent(ulong worldID, ulong entityID, Type type);

@@ -158,6 +158,8 @@ ADD_MANAGED_METHOD(SceneManager, Unload, void, (uint64_t worldID))
 	World* world = World::GetWorld(worldID);
 	if (world)
 		SceneSystem::UnloadScene(world);
+	else
+		spdlog::warn("[SceneManager.Unload] Could not find world with ID '{}'", worldID);
 }
 
 ADD_MANAGED_METHOD(SceneManager, UnloadAll)

@@ -86,12 +86,16 @@ namespace AquaEditor
 			SceneManager.UnloadAll();
 			foreach (World scene in scenes)
 			{
-				// Check if exists
-				if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
-					continue;
+				try
+				{
+					// Check if exists
+					if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
+						continue;
 
-				scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
-				SceneManager.Load(scene, SceneAddType.Additive);
+					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
+					SceneManager.Load(scene, SceneAddType.Additive);
+				}
+				catch(Exception e) { Log.Exception(e); }
 			}
 		}
 
@@ -344,7 +348,7 @@ namespace AquaEditor
 				return; // Not found
 
 			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
-			SceneManager.Load(m_TestWorld, SceneAddType.Single);
+			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
 		}
 
 		private void DrawDemoContents()

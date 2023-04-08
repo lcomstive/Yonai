@@ -107,31 +107,35 @@ namespace AquaEngine
 
 			Entity[] entities = m_Entities.Values.ToArray();
 
-			// Enable / disable components
-			foreach (Entity entity in entities)
-			{
-				Component[] components = entity.GetComponents();
-				foreach (Component component in components)
-				{
-					if (component.Enabled)
-						component._Enable(active, true);
-				}
-			}
-
-			// Start / destroy components
+			// Handle behaviours
+			Type behaviourType = typeof(IBehaviour);
 			foreach (Entity entity in entities)
 			{
 				foreach (Component component in entity.GetComponents())
 				{
-					if (!component.Enabled) continue;
+					if (!behaviourType.IsAssignableFrom(component.GetType()))
+						continue;
+					IBehaviour behaviour = (IBehaviour)component;
 
 					if(m_IsActive)
-						component._Start();
+						behaviour.Start();
 					else
-						component._Destroy();
+						behaviour.Destroyed();
 				}
 			}
 		}
+
+		public override bool Equals(object obj)
+		{
+			UUID id = UUID.Invalid;
+			if (obj is World) id = ((World)obj).ID;
+			else if (obj is UUID) id = (UUID)obj;
+			else if (obj is ulong) id = new UUID((ulong)obj);
+
+			return id != UUID.Invalid && id == ID;
+		}
+
+		public override int GetHashCode() => ID.GetHashCode();
 
 		#region Entities
 		/// <returns>Instance of entity matching ID, or null if does not exist in this world</returns>
@@ -189,11 +193,28 @@ namespace AquaEngine
 			return entities;
 		}
 
-		public T[] GetComponents<T>(bool includeInactive = false) where T : Component
+		public Component[] GetComponents(Type type)
 		{
-			ulong[] entityIDs = _GetComponents(ID, typeof(T), includeInactive);
-			if (entityIDs == null)
-				return new T[0];
+			ulong[] entityIDs = _GetComponents(ID, type);
+			if (entityIDs == null) return new Component[0];
+
+			Component[] components = new Component[entityIDs.Length];
+			for(int i = 0; i < entityIDs.Length; i++)
+			{
+				UUID entityID = entityIDs[i];
+				if (!m_Entities.ContainsKey(entityID))
+					m_Entities.Add(entityID, new Entity(this, entityID));
+				components[i] = m_Entities[entityID].GetComponent(type);
+			}
+
+			return components;
+		}
+
+		public T[] GetComponents<T>() where T : Component
+		{
+			Type type = typeof(T);
+			ulong[] entityIDs = _GetComponents(ID, type);
+			if (entityIDs == null) return new T[0];
 
 			T[] components = new T[entityIDs.Length];
 			for (int i = 0; i < entityIDs.Length; i++)
@@ -201,14 +222,14 @@ namespace AquaEngine
 				UUID entityID = entityIDs[i];
 				if (!m_Entities.ContainsKey(entityID))
 					m_Entities.Add(entityID, new Entity(this, entityID));
-				components[i] = m_Entities[entityID].GetComponent<T>();
+				components[i] = (T)m_Entities[entityID].GetComponent(type);
 			}
+
 			return components;
 		}
-		
-		public (T1[], T2[]) GetComponents<T1, T2>(bool includeInactive = false) where T1 : Component where T2 : Component
+		public (T1[], T2[]) GetComponents<T1, T2>() where T1 : Component where T2 : Component
 		{
-			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) }, includeInactive);
+			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2) });
 			if (entityIDs == null)
 				return (new T1[0], new T2[0]);
 
@@ -225,9 +246,9 @@ namespace AquaEngine
 			return (components1, components2);
 		}
 		
-		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>(bool includeInactive = false) where T1 : Component where T2 : Component where T3 : Component
+		public (T1[], T2[], T3[]) GetComponents<T1, T2, T3>() where T1 : Component where T2 : Component where T3 : Component
 		{
-			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) }, includeInactive);
+			ulong[] entityIDs = _GetComponentsMultiple(ID, new Type[] { typeof(T1), typeof(T2), typeof(T3) });
 			if (entityIDs == null)
 				return (new T1[0], new T2[0], new T3[0]);
 
@@ -319,8 +340,8 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAll(out ulong[] worldIDs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetEntities(ulong worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type, bool includeInactive);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types, bool includeInactive);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types);
 
 		// Entities
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasEntity(ulong worldID, ulong entityID);

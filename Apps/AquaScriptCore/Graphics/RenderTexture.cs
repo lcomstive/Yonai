@@ -60,10 +60,15 @@ namespace AquaEngine.Graphics
 
 		public void Dispose()
 		{
+			Log.Warning("RenderTexture disposed");
+
 			// if _Load is called memory is allocated, _Destroy frees that memory.
 			// if RenderTexture(IntPtr) constructor is called instead, we don't manage this memory.
-			if(m_CreatedResource)
+			if (m_CreatedResource && Handle != IntPtr.Zero)
+			{
 				_Destroy(Handle);
+				Handle = IntPtr.Zero;
+			}
 		}
 
 		public void Bind(uint textureIndex = 0) => _Bind(Handle, textureIndex);

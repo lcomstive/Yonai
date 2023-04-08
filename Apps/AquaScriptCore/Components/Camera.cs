@@ -72,7 +72,7 @@ namespace AquaEngine
 
 				return m_RenderTarget;
 			}
-			set => _SetRenderTarget(Handle, (m_RenderTarget = value).Handle);
+			set => _SetRenderTarget(Handle, (m_RenderTarget = value)?.Handle ?? IntPtr.Zero);
 		}
 
 		public static Camera Main

@@ -1,36 +1,21 @@
 using AquaEngine;
-using System.Collections.Generic;
 
 namespace AquaEditor.Views
 {
 	public class HierarchyView : View
 	{
-		private World[] m_Worlds = null;
 		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.25f);
 
 		[MenuItem("Window/Hierarchy")]
 		private static void MenuCallback() => EditorUIService.Open<HierarchyView>();
 
-		protected override void Opened()
-		{
-			// Get all current worlds
-			m_Worlds = SceneManager.GetActiveScenes();
-
-			// Listen to scene add and remove event
-			SceneManager.WorldChanged += OnWorldChanged;
-		}
-
-		protected override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
-
-		private void OnWorldChanged(World world, bool added) =>
-			m_Worlds = SceneManager.GetActiveScenes();
-
 		protected override void Draw()
 		{
+			World[] worlds = SceneManager.GetActiveScenes();
 			bool isOpen = true;
 			if (ImGUI.Begin("Hierarchy", ref isOpen))
 			{
-				foreach (World world in m_Worlds)
+				foreach (World world in worlds)
 				{
 					if (!ImGUI.Foldout(world.Name, true))
 						continue;
@@ -41,7 +26,7 @@ namespace AquaEditor.Views
 
 					foreach (Entity entity in entities)
 					{
-						bool isSelected = InspectorView.Target == entity;
+						bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
 
 						if (isSelected)
 							ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);

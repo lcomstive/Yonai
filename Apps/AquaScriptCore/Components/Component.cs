@@ -8,13 +8,6 @@ namespace AquaEngine
 {
 	public abstract class Component : ISerializable
 	{
-		internal bool m_Enabled = false;
-		public bool Enabled
-		{
-			get => m_Enabled;
-			set => _Enable(value);
-		}
-
 		internal IntPtr Handle { get; set; }
 
 		/// <summary>
@@ -29,35 +22,6 @@ namespace AquaEngine
 		/// </summary>
 		[HideInInspector]
 		public Entity Entity { get; private set; }
-
-		/// <summary>
-		/// Called when this script is created and attached to an <see cref="Entity"/> (after <see cref="OnEnabled"/>)
-		/// </summary>
-		protected virtual void Start() { }
-
-		/// <summary>
-		/// Called once per frame
-		/// </summary>
-		protected virtual void Update() { }
-
-		/// <summary>
-		/// Called when script has been enabled.
-		/// Can also be called when attached to an <see cref="Entity"/>,
-		/// this function is called before <see cref="Start"/> in this case
-		/// </summary>
-		protected virtual void OnEnabled() { }
-
-		/// <summary>
-		/// Called when the script has been disabled.
-		/// Can also be called when attached <see cref="Entity"/> is being destroyed,
-		/// this function is called before <see cref="OnDestroyed"/> in this case
-		/// </summary>
-		protected virtual void OnDisabled() { }
-
-		/// <summary>
-		/// Called when the attached <see cref="Entity"/> is about to be destroyed (after <see cref="OnDisabled"/>)
-		/// </summary>
-		protected virtual void Destroyed() { }
 
 		/// <summary>
 		/// Returns true if object is not null
@@ -147,12 +111,6 @@ namespace AquaEngine
 					property.SetValue(this, serializable);
 				}
 			}
-
-			// Update unmanaged code of enable state
-			if (World.IsActive)
-				_Enable(m_Enabled, true); // Also call OnEnable or OnDisable
-			else
-				_SetEnabled(Handle, m_Enabled);
 		}
 
 		private bool ShouldSerializeField(FieldInfo field)
@@ -232,24 +190,8 @@ namespace AquaEngine
 		#endregion
 
 		#region Internal Calls
-		internal void _Start() => Start();
-		internal void _Destroy() => Destroyed();
-
-		internal void _Enable(bool enable, bool force = false)
-		{
-			if(m_Enabled == enable && !force) return; // No change
-			_SetEnabled(Handle, m_Enabled = enable);
-
-			if (enable)
-				OnEnabled();
-			else
-				OnDisabled();
-		}
-
 		// Called from C++
 		internal void aqua_Initialise(ulong worldID, ulong entityID) => Entity = new Entity(World.Get(worldID), entityID);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetEnabled(IntPtr handle, bool enabled);
 		#endregion
 	}
 }

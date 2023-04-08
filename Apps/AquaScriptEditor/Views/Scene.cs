@@ -40,6 +40,12 @@ namespace AquaEditor.Views
 
 		protected override void Closed()
 		{
+			if(InspectorView.Target?.Equals(m_Camera.Entity) ?? false)
+				InspectorView.Target = null;
+
+			m_Target.Dispose();
+			m_Camera.RenderTarget = null;
+
 			SceneManager.Unload(m_World);
 			m_World.Destroy();
 

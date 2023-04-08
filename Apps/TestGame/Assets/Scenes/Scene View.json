@@ -6,8 +6,7 @@
       "Components": [
         {
           "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Scene Camera",
-          "Enabled": true
+          "Name": "Scene Camera"
         },
         {
           "ComponentType": "AquaEngine.Camera",
@@ -15,13 +14,12 @@
           "Near": 0.1,
           "Far": 1000.0,
           "Orthographic": false,
-          "OrthographicSize": 5.0,
-          "Enabled": true
+          "OrthographicSize": 5.0
         },
         {
           "ComponentType": "AquaEditor.SceneViewCameraController, AquaScriptEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Speed": 1.0,
-          "SprintMultiplier": 2.5,
+          "Speed": 2.0,
+          "SprintMultiplier": 5.0,
           "MouseSensitivity": {
             "x": 1.0,
             "y": 1.0
@@ -31,22 +29,21 @@
         {
           "ComponentType": "AquaEngine.Transform",
           "Position": {
-            "x": -0.3352863,
-            "y": 0.8177596,
-            "z": -4.94466066
+            "x": -8.823192,
+            "y": 0.647006,
+            "z": -9.062772
           },
           "Rotation": {
-            "x": 0.997247338,
-            "y": -0.07358933,
-            "z": 0.009053922,
-            "w": -0.0006681112
+            "x": 0.9803121,
+            "y": -0.008212118,
+            "z": -0.197276518,
+            "w": 0.00165259431
           },
           "Scale": {
             "x": 1.0,
             "y": 1.0,
             "z": 1.0
-          },
-          "Enabled": true
+          }
         }
       ]
     }
