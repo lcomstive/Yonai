@@ -3,6 +3,7 @@ using AquaEngine;
 using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
+using Newtonsoft.Json.Linq;
 
 namespace AquaEditor
 {
@@ -199,6 +200,13 @@ namespace AquaEditor
 			}
 		}
 
+		private void DrawEnum(string label, Type type, object value, object instance, Action<object, object> setValue)
+		{
+			// TODO: ImGUI combo box
+			// string[] values = Enum.GetNames(type);
+			ImGUI.Text(Enum.GetName(type, value) ?? string.Empty);
+		}
+
 		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue)
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
@@ -229,6 +237,8 @@ namespace AquaEditor
 				if (Resource.Exists(uuid))
 					ImGUI.Text("[Resource] " + Resource.GetPath(uuid));
 			}
+			else if(t.IsEnum)
+				DrawEnum(label, t, value, instance, setValue);
 			else ImGUI.Text(t.Name);
 
 			if (setValue == null) ImGUI.EndDisabled();

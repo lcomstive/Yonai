@@ -48,52 +48,14 @@ namespace AquaEditor.Views
 							ImGUI.PopStyleColour();
 
 						ImGUI.EndChild();
+						DrawContextMenu(entity);
 
 						if(ImGUI.IsItemClicked())
-						{
-							try { InspectorView.Target = entity; }
-							catch(System.Exception e) { Log.Exception(e); }
-						}
-
-						if(ImGUI.BeginPopupContextItem($"Hierarchy:{entity.World.ID}:{entity.ID}", ImGUI.PopupFlags.MouseButtonRight))
-						{
-							if (ImGUI.Selectable("Delete"))
-								entity.Destroy();
-
-							ImGUI.EndPopup();
-						}
+							InspectorView.Target = entity;
 					}
 
 					ImGUI.EndChild();
-
-					if (ImGUI.BeginPopupContextItem($"Hierarchy:{world.ID}", ImGUI.PopupFlags.MouseButtonRight))
-					{
-						if (ImGUI.BeginMenu("New"))
-						{
-							if (ImGUI.Selectable("Entity"))
-								world.CreateEntity().AddComponent<NameComponent>().Name = "Entity";
-
-							ImGUI.Separator();
-							ImGUI.Text("3D Objects", Colour.Grey);
-
-							if (ImGUI.Selectable("Cube"))
-								CreatePrimitive(world, Mesh.Cube, "Cube");
-							if (ImGUI.Selectable("Sphere"))
-								CreatePrimitive(world, Mesh.Sphere, "Sphere");
-							if (ImGUI.Selectable("Quad"))
-								CreatePrimitive(world, Mesh.Quad, "Quad");
-
-							ImGUI.Separator();
-							ImGUI.Text("2D Objects", Colour.Grey);
-
-							if (ImGUI.Selectable("Sprite"))
-								CreateSprite(world);
-
-							ImGUI.EndMenu();
-						}
-
-						ImGUI.EndPopup();
-					}
+					DrawContextMenu(world);
 				}
 			}
 			ImGUI.End();
@@ -103,24 +65,73 @@ namespace AquaEditor.Views
 				EditorUIService.Close<HierarchyView>();
 		}
 
-		private void CreatePrimitive(World world, UUID meshID, string name)
+		private void DrawContextMenu(Entity entity)
+		{
+			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{entity.World.ID}:{entity.ID}", ImGUI.PopupFlags.MouseButtonRight))
+				return;
+
+			if (ImGUI.Selectable("Delete"))
+				entity.Destroy();
+
+			ImGUI.EndPopup();
+		}
+
+		private void DrawContextMenu(World world)
+		{
+			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{world.ID}", ImGUI.PopupFlags.MouseButtonRight))
+				return;
+
+			if (ImGUI.BeginMenu("New"))
+			{
+				if (ImGUI.Selectable("Entity"))
+					world.CreateEntity().AddComponent<NameComponent>().Name = "Entity";
+
+				if (ImGUI.Selectable("Camera"))
+					CreateEntity(world, "Camera").AddComponent<Camera>();
+
+				if (ImGUI.Selectable("Sound Source"))
+					CreateEntity(world, "Sound Source").AddComponent<SoundSource>();
+
+				ImGUI.Separator();
+				ImGUI.Text("3D Objects", Colour.Grey);
+
+				if (ImGUI.Selectable("Cube"))
+					CreatePrimitive(world, Mesh.Cube, "Cube");
+				if (ImGUI.Selectable("Sphere"))
+					CreatePrimitive(world, Mesh.Sphere, "Sphere");
+				if (ImGUI.Selectable("Quad"))
+					CreatePrimitive(world, Mesh.Quad, "Quad");
+
+				ImGUI.Separator();
+				ImGUI.Text("2D Objects", Colour.Grey);
+
+				if (ImGUI.Selectable("Sprite"))
+					CreateSprite(world);
+
+				ImGUI.EndMenu();
+			}
+
+			ImGUI.EndPopup();
+		}
+
+		private Entity CreateEntity(World world, string name)
 		{
 			Entity entity = world.CreateEntity();
 			entity.AddComponent<NameComponent>().Name = name;
 			entity.AddComponent<Transform>();
+			return entity;
+		}
 
-			MeshRenderer meshRenderer = entity.AddComponent<MeshRenderer>();
+		private void CreatePrimitive(World world, UUID meshID, string name)
+		{
+			MeshRenderer meshRenderer = CreateEntity(world, name).AddComponent<MeshRenderer>();
 			meshRenderer.Mesh = meshID;
 			meshRenderer.Material = Resource.Get<Material>("Materials/Default3D");
 		}
 
 		private void CreateSprite(World world)
 		{
-			Entity entity = world.CreateEntity();
-			entity.AddComponent<NameComponent>().Name = "Sprite";
-			entity.AddComponent<Transform>();
-
-			SpriteRenderer spriteRenderer = entity.AddComponent<SpriteRenderer>();
+			SpriteRenderer spriteRenderer = CreateEntity(world, "Sprite").AddComponent<SpriteRenderer>();
 			spriteRenderer.Sprite = Resource.Get<Texture>("Textures/DefaultSprite");
 			spriteRenderer.Shader = Resource.Get<Shader>("Shaders/2D/Default");
 		}

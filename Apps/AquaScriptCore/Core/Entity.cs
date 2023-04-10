@@ -47,7 +47,10 @@ namespace AquaEngine
 			JArray componentsArray = new JArray();
 			Component[] components = GetComponents();
 			foreach (Component component in components)
-				componentsArray.Add(component.OnSerialize());
+			{
+				try { componentsArray.Add(component.OnSerialize()); }
+				catch (Exception e) { Log.Exception(e); }
+			}
 			json.Add("Components", componentsArray);
 
 			return json;
@@ -75,8 +78,13 @@ namespace AquaEngine
 					continue;
 				}
 
-				component.OnDeserialize(componentJSON);
-				m_Components.Add(type, component);
+				try
+				{
+					component.OnDeserialize(componentJSON);
+					m_Components.Add(type, component);
+				}
+				catch(Exception e)
+				{ Log.Exception(e); }
 			}
 		}
 

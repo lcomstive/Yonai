@@ -15,10 +15,12 @@ namespace AquaEngine
 		public static void Error(string msg) => _NativeLog(msg, 4);
 		public static void Critical(string msg) => _NativeLog(msg, 5);
 
-		public static void Exception(Exception e)
+		public static void Exception(Exception e, string additionalInfo = "")
 		{
-			string msg = e.Message + "\n\n";
-			msg += e.Source + "\n\t";
+			string msg = string.Empty;
+			if (!string.IsNullOrEmpty(additionalInfo))
+				msg = additionalInfo + "\n";
+			msg += e.Message + "\n\n" + e.Source + "\n\t";
 			msg += e.StackTrace;
 			_NativeLog(msg, 4);
 		}

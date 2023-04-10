@@ -24,6 +24,7 @@ namespace AquaEngine
 			set => _SetMixer(Handle, value);
 		}
 
+		[ShouldSerialize(false)]
 		public SoundMixer Mixer
 		{
 			get

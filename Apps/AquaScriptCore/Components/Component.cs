@@ -133,40 +133,60 @@ namespace AquaEngine
 			ShouldSerializeAttribute shouldSerializeAttr = property.GetCustomAttribute<ShouldSerializeAttribute>();
 			if (shouldSerializeAttr != null && !shouldSerializeAttr.ShouldSerialize)
 				return false;
+			else if (shouldSerializeAttr?.ShouldSerialize ?? false)
+				return true;
 
 			if (shouldSerializeAttr == null && property.GetCustomAttribute<HideInInspectorAttribute>() != null)
 				return false;
 
 			MethodInfo[] accessors = property.GetAccessors(true);
-			bool canRead = accessors.Length > 0 && accessors[0].IsPublic;
-			if (property.GetCustomAttribute<ShowInInspectorAttribute>() != null)
-				canRead = true;
+			bool canRead  = false;
+			bool canWrite = false;
 
-			return canRead || shouldSerializeAttr != null;
+			foreach(MethodInfo accessor in accessors)
+			{
+				if (accessor.Name.StartsWith("set_") && accessor.IsPublic)
+					canWrite = true;
+				if (accessor.Name.StartsWith("get_") && accessor.IsPublic)
+					canRead = true;
+			}
+
+			if (!canWrite)
+				return false;
+
+			return canRead;
 		}
 
 		private void SerializeObject(JObject json, string label, Type t, object value)
 		{
 			if (typeof(ISerializable).IsAssignableFrom(t))
-				json[label] = ((ISerializable)value).OnSerialize();
-			else if (t == typeof(int))	  json[label] = (int)value;
-			else if (t == typeof(uint))	  json[label] = (uint)value;
-			else if (t == typeof(bool))	  json[label] = (bool)value;
-			else if (t == typeof(float))  json[label] = (float)value;
-			else if (t == typeof(string)) json[label] = (string)value;
-			else if (t == typeof(UUID))   json[label] = ((UUID)value).ToString();
+			{
+				try { json[label] = ((ISerializable)value).OnSerialize(); }
+				catch(Exception e)
+				{
+					Log.Exception(e, $"{label} ({t.Name})");
+				}
+			}
+			else if (t == typeof(int))		json[label] = (int)value;
+			else if (t == typeof(uint))		json[label] = (uint)value;
+			else if (t == typeof(bool))		json[label] = (bool)value;
+			else if (t == typeof(float))	json[label] = (float)value;
+			else if (t == typeof(string))	json[label] = (string)value;
+			else if (t == typeof(UUID))		json[label] = ((UUID)value).ToString();
+			else if (t.IsEnum)				json[label] = Enum.GetName(t, value);
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be serialized");
 		}
 		
 		private object DeserializeObject(JObject json, string label, Type t)
 		{
-			if (t == typeof(int)) return json[label].Value<int>();
-			else if (t == typeof(uint)) return json[label].Value<uint>();
-			else if (t == typeof(bool)) return json[label].Value<bool>();
-			else if (t == typeof(float)) return json[label].Value<float>();
-			else if (t == typeof(string)) return json[label].Value<string>();
-			else if (t == typeof(UUID)) return (UUID)ulong.Parse(json[label].Value<string>());
+			if (t == typeof(int))			return json[label].Value<int>();
+			else if (t == typeof(uint))		return json[label].Value<uint>();
+			else if (t == typeof(bool))		return json[label].Value<bool>();
+			else if (t == typeof(float))	return json[label].Value<float>();
+			else if (t == typeof(string))	return json[label].Value<string>();
+			else if (t == typeof(UUID))		return (UUID)ulong.Parse(json[label].Value<string>());
+			else if (t.IsEnum)				return Enum.Parse(t, json[label].Value<string>());
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be deserialized");
 			return null;
