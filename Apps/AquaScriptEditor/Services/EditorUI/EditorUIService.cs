@@ -35,11 +35,28 @@ namespace AquaEditor
 
 				TextureImportSettings textureSettings = new TextureImportSettings();
 				textureSettings.FilePath = "assets://Textures/Test.png";
-				m_TextureID = Resource.Load<Texture>("Textures/UI_Testing", textureSettings);
+				m_TextureID = Resource.Load<Texture>("Textures/DefaultSprite", textureSettings);
 
 				textureSettings.FilePath = "assets://Textures/Black.jpg";
 				UUID missingTextureID = Resource.Load<Texture>("Textures/Missing", textureSettings);
 				MissingTexture = Resource.Get<Texture>(missingTextureID);
+
+				Resource.Load<Material>("Materials/Default3D", new MaterialImportSettings()
+				{
+					Shader = Resource.Load<Shader>("Shaders/3D/Default", new ShaderImportSettings()
+					{
+						VertexPath = "assets://Shaders/Lit.vert",
+						FragmentPath = "assets://Shaders/Lit.frag"
+					})
+				});
+				Resource.Load<Material>("Materials/Default2D", new MaterialImportSettings()
+				{
+					Shader = Resource.Load<Shader>("Shaders/2D/Default", new ShaderImportSettings()
+					{
+						VertexPath = "assets://Shaders/Sprite.vert",
+						FragmentPath = "assets://Shaders/Sprite.frag"
+					})
+				});
 
 				// Demo //
 				// GenerateConsoleLines();
@@ -97,6 +114,19 @@ namespace AquaEditor
 				}
 				catch(Exception e) { Log.Exception(e); }
 			}
+		}
+
+		[MenuItem("File/Scene/Recreate Test Scene")]
+		private static void RecreateTestScene()
+		{
+			EditorUIService uiService = Get<EditorUIService>();
+			if(uiService.m_TestWorld)
+			{
+				SceneManager.Unload(uiService.m_TestWorld);
+				uiService.m_TestWorld.Destroy();
+				uiService.m_TestWorld = null;
+			}
+			uiService.CreateTestScene();
 		}
 
 		[MenuItem("File/Resources/Save")]

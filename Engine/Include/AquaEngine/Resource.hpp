@@ -78,6 +78,10 @@ namespace AquaEngine
 			s_InstancePaths.emplace(path, id);
 			s_ResourceIDs.emplace(id, s_Instances.size() - 1);
 
+#if 1
+			spdlog::trace("Created new resource '{}' [{}][{}]", path.c_str(), loadType.name(), id);
+#endif
+
 			return id;
 		}
 

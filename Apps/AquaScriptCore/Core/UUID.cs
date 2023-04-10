@@ -3,7 +3,7 @@ using System;
 namespace AquaEngine
 {
 	[System.Diagnostics.DebuggerDisplay("{m_Value}")]
-	public class UUID
+	public struct UUID
 	{
 		private ulong m_Value;
 

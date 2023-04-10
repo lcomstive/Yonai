@@ -42,6 +42,8 @@ namespace AquaEngine.Graphics
 			Handle = handle;
 		}
 
+		protected override void OnNativeLoad() => OnLoad();
+
 		protected override void OnImported()
 		{
 			// Load model
@@ -53,6 +55,7 @@ namespace AquaEngine.Graphics
 
 			Meshes = new MeshData[meshIDs.Length];
 			for (int i = 0; i < meshIDs.Length; i++)
+				// TODO: ERROR HERE. TRYING TO GET MATERIAL BUT MESH ID
 				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
 
 		}

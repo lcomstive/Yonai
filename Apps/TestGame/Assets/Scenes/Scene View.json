@@ -2,7 +2,7 @@
   "Name": "Scene View",
   "Entities": [
     {
-      "ID": "17302727434178540354",
+      "ID": "13945301269300928106",
       "Components": [
         {
           "ComponentType": "AquaEngine.NameComponent",
@@ -18,8 +18,8 @@
         },
         {
           "ComponentType": "AquaEditor.SceneViewCameraController, AquaScriptEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Speed": 2.0,
-          "SprintMultiplier": 5.0,
+          "Speed": 1.0,
+          "SprintMultiplier": 2.5,
           "MouseSensitivity": {
             "x": 1.0,
             "y": 1.0
@@ -29,15 +29,15 @@
         {
           "ComponentType": "AquaEngine.Transform",
           "Position": {
-            "x": -8.823192,
-            "y": 0.647006,
-            "z": -9.062772
+            "x": -7.32293224,
+            "y": 1.85501969,
+            "z": -11.1296015
           },
           "Rotation": {
-            "x": 0.9803121,
-            "y": -0.008212118,
-            "z": -0.197276518,
-            "w": 0.00165259431
+            "x": 0.9751271,
+            "y": -0.04391042,
+            "z": -0.21703358,
+            "w": 0.009773121
           },
           "Scale": {
             "x": 1.0,

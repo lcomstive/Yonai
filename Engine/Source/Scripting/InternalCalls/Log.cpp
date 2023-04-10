@@ -18,11 +18,12 @@ ADD_MANAGED_METHOD(Log, NativeLog, void, (MonoString* rawMsg, int level))
 	char* msg = mono_string_to_utf8(rawMsg);
 	switch (level)
 	{
-	default: spdlog::debug(msg);	break;
-	case 1: spdlog::info(msg);		break;
-	case 2: spdlog::warn(msg);		break;
-	case 3: spdlog::error(msg);		break;
-	case 4: spdlog::critical(msg);	break;
+	default: spdlog::trace(msg);	break;
+	case 1: spdlog::debug(msg);	break;
+	case 2: spdlog::info(msg);		break;
+	case 3: spdlog::warn(msg);		break;
+	case 4: spdlog::error(msg);		break;
+	case 5: spdlog::critical(msg);	break;
 	}
 	mono_free(msg);
 }

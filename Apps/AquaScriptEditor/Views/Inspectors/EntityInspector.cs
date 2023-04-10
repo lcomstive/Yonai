@@ -23,6 +23,13 @@ namespace AquaEditor
 		{
 			Entity entity = (Entity)target;
 
+			// Make sure entity still exists in world, hasn't been deleted
+			if(!entity.World.HasEntity(entity.ID))
+			{
+				InspectorView.Target = null;
+				return;
+			}
+
 			NameComponent nameComponent;
 			if(!entity.TryGetComponent(out nameComponent))
 			{

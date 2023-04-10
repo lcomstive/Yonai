@@ -34,6 +34,8 @@ namespace AquaEngine.Graphics
 			);
 		}
 
+		protected override void OnNativeLoad() => OnLoad();
+
 		protected override void OnImported()
 		{
 			if(!TryGetImportSettings(out ShaderImportSettings importSettings))

@@ -56,13 +56,15 @@ Shader* Material::PrepareShader()
 
 #pragma region Internal Calls
 // _Load(string path, out uint resourceID, out IntPtr handle);
-ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, uint64_t* resourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, Load, void, (MonoString* pathRaw, uint64_t* resourceID, void** outHandle), AquaEngine.Graphics)
 {
 	if (*resourceID == InvalidResourceID)
 		*resourceID = ResourceID(); // Assign resource ID
 	
-	Resource::Load<Material>(*resourceID, mono_string_to_utf8(path));
+	char* path = mono_string_to_utf8(pathRaw);
+	Resource::Load<Material>(*resourceID, path);
 	*outHandle = Resource::Get<Material>(*resourceID);
+	mono_free(path);
 }
 
 ADD_MANAGED_GET_SET(Material, Shader, uint64_t, AquaEngine.Graphics)

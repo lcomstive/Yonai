@@ -86,6 +86,8 @@ void Mesh::SetVertices(vector<Vertex>& vertices)
 void Mesh::SetIndices(vector<unsigned int>& indices)
 {
 	m_Indices = indices;
+	if (m_Indices.empty())
+		return;
 
 	glBindVertexArray(m_VAO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
@@ -96,9 +98,9 @@ ResourceID QuadID = InvalidResourceID;
 ResourceID CubeID = InvalidResourceID;
 ResourceID SphereID = InvalidResourceID;
 
-const string QuadMeshName   = "Meshes/Primitive/Quad";
-const string CubeMeshName   = "Meshes/Primitive/Cube";
-const string SphereMeshName = "Meshes/Primitive/Sphere";
+const string QuadMeshName   = "_Internal/ManagedMeshes/Primitive/Quad";
+const string CubeMeshName   = "_Internal/ManagedMeshes/Primitive/Cube";
+const string SphereMeshName = "_Internal/ManagedMeshes/Primitive/Sphere";
 
 ResourceID Mesh::Quad()
 {
@@ -281,10 +283,6 @@ ADD_MANAGED_METHOD(Mesh, Import, void,
 	((Mesh*)handle)->Import(vertices, indices, (Mesh::DrawMode)drawMode);
 }
 
-ADD_MANAGED_METHOD(Mesh, GetQuadID, uint64_t, (), AquaEngine.Graphics) { return QuadID; }
-ADD_MANAGED_METHOD(Mesh, GetCubeID, uint64_t, (), AquaEngine.Graphics) { return CubeID; }
-ADD_MANAGED_METHOD(Mesh, GetSphereID, uint64_t, (), AquaEngine.Graphics) { return SphereID; }
-
 #define GET_CLASS(name) Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", #name)
 
 ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositions, MonoArray** outNormals, MonoArray** outTexCoords), AquaEngine.Graphics)
@@ -292,6 +290,7 @@ ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositi
 	MonoClass* v3Class = GET_CLASS(Vector3);
 	MonoClass* v2Class = GET_CLASS(Vector2);
 
+	Mesh* mesh = (Mesh*)handle;
 	vector<Mesh::Vertex> vertices = ((Mesh*)handle)->GetVertices();
 	if(vertices.empty())
 		return;

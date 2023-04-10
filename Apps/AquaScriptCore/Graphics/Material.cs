@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -22,7 +24,7 @@ namespace AquaEngine.Graphics
 		}
 	}
 
-	public class Material : NativeResourceBase
+	public class Material : NativeResourceBase, ISerializable
 	{
 		private MaterialImportSettings m_Settings;
 
@@ -103,6 +105,29 @@ namespace AquaEngine.Graphics
 
 			m_Shader = Resource.Get<Shader>(m_Settings.Shader);
 			m_AlbedoMap = Resource.Get<Texture>(m_Settings.AlbedoMap);
+		}
+
+		public JObject OnSerialize() =>
+			new JObject(
+					new JProperty("Shader", m_Settings.Shader.ToString()),
+					new JProperty("Albedo", m_Settings.Albedo.OnSerialize()),
+					new JProperty("AlbedoMap", m_Settings.AlbedoMap.ToString()),
+					new JProperty("AlphaClipping", m_Settings.AlphaClipping),
+					new JProperty("AlphaThreshold", m_Settings.AlphaThreshold)
+				);
+
+		public void OnDeserialize(JObject json)
+		{
+			MaterialImportSettings settings = new MaterialImportSettings()
+			{
+				Shader = ulong.Parse(json["Shader"].Value<string>()),
+				AlbedoMap = ulong.Parse(json["AlbedoMap"].Value<string>()),
+				AlphaClipping = json["AlphaClipping"].Value<bool>(),
+				AlphaThreshold = json["AlphaThreshold"].Value<float>()
+			};
+			settings.Albedo.OnDeserialize(json["Albedo"].Value<JObject>());
+
+			Import(settings);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);

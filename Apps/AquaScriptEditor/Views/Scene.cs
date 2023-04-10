@@ -32,7 +32,6 @@ namespace AquaEditor.Views
 			// Transform
 			Transform transform = entity.AddComponent<Transform>();
 			transform.Position = new Vector3(0, 2, -15);
-			transform.Rotation = Quaternion.FromEuler(-45, 0, 0);
 
 			SceneManager.Load(m_World, SceneAddType.Additive);
 			m_World.Deserialized += GetCamera;

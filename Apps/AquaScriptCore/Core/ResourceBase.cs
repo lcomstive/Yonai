@@ -67,7 +67,7 @@ namespace AquaEngine
 		}
 
 		public static implicit operator bool(ResourceBase resourceBase) => resourceBase != null;
-		public static implicit operator UUID(ResourceBase resourceBase) => resourceBase.ResourceID;
+		public static implicit operator UUID(ResourceBase resourceBase) => resourceBase?.ResourceID ?? UUID.Invalid;
 	}
 
 	public abstract class NativeResourceBase : ResourceBase
@@ -76,7 +76,14 @@ namespace AquaEngine
 
 		internal void SetHandle(IntPtr handle) => Handle = handle;
 
+		/// <summary>
+		/// Called instead of <see cref="ResourceBase.OnLoad"/> when loaded from an existing native resource
+		/// </summary>
+		protected virtual void OnNativeLoad() { }
+
 		protected override void OnCloned(ResourceBase original) =>
 			Handle = ((NativeResourceBase)original).Handle;
+
+		internal void _OnNativeLoad() => OnNativeLoad();
 	}
 }

@@ -85,12 +85,8 @@ namespace AquaEngine
 		/// </summary>
 		public void Destroy()
 		{
-			if (World.Exists(ID))
-			{
-				// Calls this function again, but updates the World as well
-				World.DestroyEntity(ID);
-				return;
-			}
+			if (World.HasEntity(ID))
+				World.RemoveEntity(ID);
 
 			// Handle behaviour
 			Type behaviourType = typeof(IBehaviour);

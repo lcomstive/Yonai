@@ -166,11 +166,20 @@ namespace AquaEngine
 
 		public void DestroyEntity(UUID entityID)
 		{
+			Entity entity = m_Entities[entityID];
+			RemoveEntity(entityID);
+			entity?.Destroy();
+		}
+
+		/// <summary>
+		/// Removes an entity without calling <see cref="Entity.Destroy"/>
+		/// </summary>
+		/// <param name="entityID"></param>
+		internal void RemoveEntity(UUID entityID)
+		{
 			if (m_Entities.ContainsKey(entityID))
-			{
-				m_Entities.Remove(entityID);
-				m_Entities[entityID].Destroy();
-			}
+				m_Entities.Remove(entityID);	
+				
 			_DestroyEntity(ID, entityID);
 		}
 

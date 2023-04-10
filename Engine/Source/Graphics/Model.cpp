@@ -206,7 +206,7 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			indices.emplace_back(mesh->mFaces[i].mIndices[j]);
 
 	return Resource::Load<Mesh>(
-		m_Path + "_MESH_" + mesh->mName.C_Str(),
+		m_Path + "/Mesh/" + mesh->mName.C_Str(),
 		vertices, indices);
 }
 

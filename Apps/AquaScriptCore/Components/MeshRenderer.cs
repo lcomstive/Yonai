@@ -5,8 +5,8 @@ namespace AquaEngine
 {
 	public class MeshRenderer : Component
 	{
-		private uint m_Mesh = uint.MaxValue;
-		public uint Mesh
+		private UUID m_Mesh = uint.MaxValue;
+		public UUID Mesh
 		{
 			get => m_Mesh;
 			set
@@ -16,8 +16,8 @@ namespace AquaEngine
 			}
 		}
 
-		private uint m_Material = uint.MaxValue;
-		public uint Material
+		private UUID m_Material = UUID.Invalid;
+		public UUID Material
 		{
 			get => m_Material;
 			set
@@ -29,10 +29,10 @@ namespace AquaEngine
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetMesh(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMesh(IntPtr handle, uint mesh);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMesh(IntPtr handle, ulong mesh);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetMaterial(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMaterial(IntPtr handle, uint mesh);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMaterial(IntPtr handle, ulong material);
 		#endregion
 	}
 }

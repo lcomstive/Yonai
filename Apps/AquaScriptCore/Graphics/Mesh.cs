@@ -10,6 +10,7 @@ namespace AquaEngine.Graphics
 		public Mesh.Vertex[] Vertices;
 	}
 
+	[ShouldSerialize(false)]
 	public class Mesh : NativeResourceBase
 	{
 		public struct Vertex
@@ -55,7 +56,8 @@ namespace AquaEngine.Graphics
 
 		public DrawMode DrawMode => m_Settings.DrawMode;
 
-		protected override void OnLoad()
+		// Loaded from existing unmanaged resource
+		protected override void OnNativeLoad()
 		{
 			ulong resourceID = ResourceID;
 			_Load(ResourcePath, out resourceID, out IntPtr handle);
@@ -77,6 +79,15 @@ namespace AquaEngine.Graphics
 
 			// Get existing indices
 			_GetIndices(Handle, out m_Settings.Indices);
+		}
+
+		// Loaded new from managed code
+		protected override void OnLoad()
+		{
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
+			ResourceID = resourceID;
+			Handle = handle;
 		}
 
 		protected override void OnImported()
@@ -111,13 +122,31 @@ namespace AquaEngine.Graphics
 		/// </summary>
 		public void UpdateIndices() => _SetIndices(Handle, m_Settings.Indices);
 
-		public static UUID QuadID => _GetQuadID();
-		public static UUID CubeID => _GetCubeID();
-		public static UUID SphereID => _GetSphereID();
+		public static UUID QuadID => Quad.ResourceID;
+		public static UUID CubeID => Cube.ResourceID;
+		public static UUID SphereID => Sphere.ResourceID;
 
-		public static Mesh Quad => Resource.Get<Mesh>(QuadID);
-		public static Mesh Cube => Resource.Get<Mesh>(CubeID);
-		public static Mesh Sphere => Resource.Get<Mesh>(SphereID);
+		public static Mesh Quad { get; private set; }
+		public static Mesh Cube { get; private set; }
+		public static Mesh Sphere { get; private set; }
+
+		private static Mesh LoadPrimitive(string name)
+		{
+			Model model = Resource.Load<Model>($"_Internal/PrimitiveModels/{name}", new ModelImportSettings($"assets://Models/{name}.fbx"));
+			return Resource.Load<Mesh>($"Meshes/{name}", new MeshImportSettings()
+			{
+				DrawMode = DrawMode.Triangles,
+				Vertices = model.Meshes[0].Mesh.Vertices,
+				Indices = model.Meshes[0].Mesh.Indices
+			});
+		}
+
+		internal static void LoadPrimitives()
+		{
+			Quad	= LoadPrimitive("Quad");
+			Cube	= LoadPrimitive("Cube");
+			Sphere	= LoadPrimitive("Sphere");
+		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
@@ -128,10 +157,6 @@ namespace AquaEngine.Graphics
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetIndices(IntPtr handle, uint[] indices);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetIndices(IntPtr handle, out uint[] indices);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetQuadID();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetCubeID();
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSphereID();
 		#endregion
 	}
 }

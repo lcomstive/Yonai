@@ -1,7 +1,133 @@
 [
   {
-    "ID": "2752277415421139505",
-    "Path": "Textures/UI_Testing",
+    "ID": "10108099560100404321",
+    "Path": "Materials/Quad.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "12914454804162203141",
+    "Path": "_Internal/PrimitiveModels/Quad",
+    "Type": "AquaEngine.Graphics.Model",
+    "Properties": {
+      "FilePath": "assets://Models/Quad.fbx"
+    }
+  },
+  {
+    "ID": "529499673375303674",
+    "Path": "Materials/Quad.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "12058201492268561630",
+    "Path": "Materials/Cube.fbx/Material",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "12126104730768026293",
+    "Path": "_Internal/PrimitiveModels/Cube",
+    "Type": "AquaEngine.Graphics.Model",
+    "Properties": {
+      "FilePath": "assets://Models/Cube.fbx"
+    }
+  },
+  {
+    "ID": "16418647029945986254",
+    "Path": "Materials/Cube.fbx/Material",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "14438689516571256861",
+    "Path": "Materials/Sphere.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "7282711980692918085",
+    "Path": "_Internal/PrimitiveModels/Sphere",
+    "Type": "AquaEngine.Graphics.Model",
+    "Properties": {
+      "FilePath": "assets://Models/Sphere.fbx"
+    }
+  },
+  {
+    "ID": "15592588757952525191",
+    "Path": "Materials/Sphere.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "1993330891075617589",
+    "Path": "Textures/DefaultSprite",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
       "FilePath": "assets://Textures/Test.png",
@@ -9,7 +135,7 @@
     }
   },
   {
-    "ID": "7728150875853156462",
+    "ID": "16101936798615613384",
     "Path": "Textures/Missing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -18,7 +144,63 @@
     }
   },
   {
-    "ID": "5233419978503333005",
+    "ID": "10374435580144007786",
+    "Path": "Shaders/3D/Default",
+    "Type": "AquaEngine.Graphics.Shader",
+    "Properties": {
+      "Vertex": "assets://Shaders/Lit.vert",
+      "Fragment": "assets://Shaders/Lit.frag",
+      "Compute": null,
+      "Geometry": null
+    }
+  },
+  {
+    "ID": "18051850530480185953",
+    "Path": "Materials/Default3D",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "10374435580144007786",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "6727492159095149105",
+    "Path": "Shaders/2D/Default",
+    "Type": "AquaEngine.Graphics.Shader",
+    "Properties": {
+      "Vertex": "assets://Shaders/Sprite.vert",
+      "Fragment": "assets://Shaders/Sprite.frag",
+      "Compute": null,
+      "Geometry": null
+    }
+  },
+  {
+    "ID": "15278209588585800908",
+    "Path": "Materials/Default2D",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "6727492159095149105",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "7260024886868231009",
     "Path": "Textures/Texture/Test_Texture09",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -27,7 +209,7 @@
     }
   },
   {
-    "ID": "8854165795897580542",
+    "ID": "1653069313449572323",
     "Path": "Shaders/NewSpriteShader",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -35,24 +217,6 @@
       "Fragment": "assets://Shaders/NewSprite.frag",
       "Compute": null,
       "Geometry": null
-    }
-  },
-  {
-    "ID": "123456789",
-    "Path": "Textures/Grid",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "assets://Textures/Grid.png",
-      "HDR": false
-    }
-  },
-  {
-    "ID": "696969",
-    "Path": "Textures/Splash",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "assets://Textures/Splash.png",
-      "HDR": false
     }
   }
 ]

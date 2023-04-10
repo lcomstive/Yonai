@@ -23,9 +23,10 @@ namespace AquaEditor
 					CreateWindow();
 				}
 
+				Resource.LoadDatabase();
+
 				Add<ImGUISystem>();
 
-				Resource.LoadDatabase();
 				Add<EditorUIService>();
 
 				Add<BehaviourSystem>();

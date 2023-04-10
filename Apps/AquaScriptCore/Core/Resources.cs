@@ -1,9 +1,11 @@
+using AquaEngine.Graphics;
 using AquaEngine.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
@@ -117,6 +119,8 @@ namespace AquaEngine
 			// Check for existing cached instance 
 			if(resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return s_Instances[resourceID];
+			if (s_Paths.ContainsKey(path))
+				return s_Instances[s_Paths[path]];
 
 			ResourceBase instance = (ResourceBase)Activator.CreateInstance(type);
 			instance.ResourcePath = path;
@@ -183,7 +187,9 @@ namespace AquaEngine
 
 			// Create new instance
 			T instance = new T();
-			Log.Debug($"Get<{typeof(T).Name}>({resourceID}) not cached, trying a native resource");
+			instance.ResourceID = resourceID;
+			instance.ResourcePath = _GetPath(resourceID);
+			Log.Trace($"Get<{typeof(T).Name}>({resourceID}) not cached, trying a native resource at '{instance.ResourcePath}'");
 			LoadExistingUnmanagedResource(instance, resourceID);
 			return instance;
 		}
@@ -207,6 +213,10 @@ namespace AquaEngine
 			JArray resources = new JArray();
 			foreach(var pair in s_Instances)
 			{
+				// Check if should serialize
+				if (!pair.Value.GetType().GetCustomAttribute<ShouldSerializeAttribute>()?.ShouldSerialize ?? false)
+					continue;
+
 				JObject resource = new JObject();
 				resource["ID"] = pair.Key.ToString();
 				resource["Path"] = pair.Value.ResourcePath;
@@ -232,8 +242,13 @@ namespace AquaEngine
 		public static void LoadDatabase()
 		{
 			// Check that file exists
-			if(!VFS.Exists(DatabaseFilePath))
+			if (!VFS.Exists(DatabaseFilePath))
+			{
+				// Database does not exist, create it
+				Mesh.LoadPrimitives();
+				SaveDatabase();
 				return;
+			}
 
 			JArray root = JsonConvert.DeserializeObject<JArray>(VFS.ReadText(DatabaseFilePath));
 			foreach(JObject resource in root)
@@ -249,17 +264,25 @@ namespace AquaEngine
 				if(typeof(ISerializable).IsAssignableFrom(type))
 					((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
 			}
+
+			Mesh.LoadPrimitives();
 		}
 
 		private static void LoadExistingUnmanagedResource(ResourceBase instance, UUID resourceID)
 		{
 			// Check if resource is a native (C++) interop resource
 			NativeResourceBase nativeResource = instance as NativeResourceBase;
-			nativeResource?.SetHandle(_GetInstance(resourceID));
+
+			if (nativeResource)
+			{
+				nativeResource.ResourceID = resourceID;
+				nativeResource.SetHandle(_GetInstance(resourceID));
+				nativeResource._OnNativeLoad();
+			}
+			else
+				instance._Load();
 
 			s_Instances.Add(resourceID, instance);
-
-			instance._Load();
 		}
 
 		#region Internal Calls
