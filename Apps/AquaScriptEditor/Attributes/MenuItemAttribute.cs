@@ -9,6 +9,8 @@ namespace AquaEditor
 
 		public string Shortcut { get; set; }
 
+		public bool PrependSeparator { get; set; } = false;
+
 		public MenuItemAttribute(string path) => Path = path;
 	}
 }

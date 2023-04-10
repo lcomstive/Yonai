@@ -23,6 +23,8 @@ namespace AquaEditor.EditorUI
 
 		public void Render()
 		{
+			if (Attribute?.PrependSeparator ?? false)
+				ImGUI.Separator();
 			if (IsDirectory)
 				RenderDirectory();
 			else if (ImGUI.MenuItem(Name, Attribute.Shortcut))

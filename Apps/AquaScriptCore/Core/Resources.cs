@@ -246,6 +246,7 @@ namespace AquaEngine
 			{
 				// Database does not exist, create it
 				Mesh.LoadPrimitives();
+				CreateDefaultResources();
 				SaveDatabase();
 				return;
 			}
@@ -265,6 +266,7 @@ namespace AquaEngine
 					((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
 			}
 
+			CreateDefaultResources();
 			Mesh.LoadPrimitives();
 		}
 
@@ -283,6 +285,30 @@ namespace AquaEngine
 				instance._Load();
 
 			s_Instances.Add(resourceID, instance);
+		}
+
+		private static void CreateDefaultResources()
+		{
+			// Textures //
+			Load<Texture>("Textures/Missing", new TextureImportSettings("assets://Textures/Grid.png"));
+
+			// Materials //
+			Load<Material>("Materials/Default3D", new MaterialImportSettings()
+			{
+				Shader = Load<Shader>("Shaders/3D/Default", new ShaderImportSettings()
+				{
+					VertexPath = "assets://Shaders/Lit.vert",
+					FragmentPath = "assets://Shaders/Lit.frag"
+				})
+			});
+			Load<Material>("Materials/Default2D", new MaterialImportSettings()
+			{
+				Shader = Load<Shader>("Shaders/2D/Default", new ShaderImportSettings()
+				{
+					VertexPath = "assets://Shaders/Sprite.vert",
+					FragmentPath = "assets://Shaders/Sprite.frag"
+				})
+			});
 		}
 
 		#region Internal Calls
