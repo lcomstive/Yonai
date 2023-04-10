@@ -475,6 +475,15 @@ ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
 	return output;
 }
 
+ADD_MANAGED_METHOD(ImGUI, _Selectable, bool, (MonoString* labelRaw, bool selected, int flags, glm::vec2* size), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImVec2 imSize(size->x, size->y);
+	bool output = ImGui::Selectable(label, selected, flags, imSize);
+	mono_free(label);
+	return output;
+}
+
 ADD_MANAGED_METHOD(ImGUI, Checkbox, bool, (MonoString* labelRaw, bool* checkState), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
@@ -508,6 +517,22 @@ ADD_MANAGED_METHOD(ImGUI, SetTooltip, void, (MonoString* textRaw), AquaEditor)
 
 ADD_MANAGED_METHOD(ImGUI, BeginTooltip, bool, (), AquaEditor) { return ImGui::BeginTooltip(); }
 ADD_MANAGED_METHOD(ImGUI, EndTooltip, void, (), AquaEditor) { ImGui::EndTooltip(); }
+
+ADD_MANAGED_METHOD(ImGUI, _BeginPopupContextItem, bool, (MonoString* idRaw, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	bool output = ImGui::BeginPopupContextItem(id, flags);
+	mono_free(id);
+	return output;
+}
+ADD_MANAGED_METHOD(ImGUI, _BeginPopup, bool, (MonoString* idRaw, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	bool output = ImGui::BeginPopup(id, flags);
+	mono_free(id);
+	return output;
+}
+ADD_MANAGED_METHOD(ImGUI, EndPopup, void, (), AquaEditor) { ImGui::EndPopup(); }
 
 ADD_MANAGED_METHOD(ImGUI, Separator, void, (), AquaEditor) { ImGui::Separator(); }
 

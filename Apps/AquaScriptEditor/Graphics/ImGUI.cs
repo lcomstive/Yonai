@@ -724,6 +724,80 @@ namespace AquaEditor
 
 		}
 
+		[Flags]
+		public enum SelectableFlags : int
+		{
+			None = 0,
+
+			/// <summary>
+			/// Clicking this doesn't close parent popup window
+			/// </summary>
+			DontClosePopups		= 1 << 0,
+
+			/// <summary>
+			/// Selectable frame can span all columns (text will still fit in current column)
+			/// </summary>
+			SpanAllColumns		= 1 << 1,
+
+			/// <summary>
+			/// Generate press events on double clicks too
+			/// </summary>
+			AllowDoubleClick	= 1 << 2,
+
+			/// <summary>
+			/// Cannot be selected, display grayed out text
+			/// </summary>
+			Disabled			= 1 << 3,
+
+			/// <summary>
+			/// (WIP) Hit testing to allow subsequent widgets to overlap this one
+			/// </summary>
+			AllowItemOverlap	= 1 << 4
+		};
+
+		[Flags]
+		public enum PopupFlags : int
+		{
+			None = 0,
+
+			/// <summary>
+			/// For BeginPopupContext*(): open on Left Mouse release. Guaranteed to always be == 0 (same as ImGuiMouseButton_Left)
+			/// </summary>
+			MouseButtonLeft			= 0,
+
+			/// <summary>
+			/// For BeginPopupContext*(): open on Right Mouse release. Guaranteed to always be == 1 (same as ImGuiMouseButton_Right)
+			/// </summary>
+			MouseButtonRight		= 1,
+
+			/// <summary>
+			/// For BeginPopupContext*(): open on Middle Mouse release. Guaranteed to always be == 2 (same as ImGuiMouseButton_Middle)
+			/// </summary>
+			MouseButtonMiddle		= 2,
+
+			/// <summary>
+			/// For OpenPopup*(), BeginPopupContext*(): don't open if there's already a popup at the same level of the popup stack
+			/// </summary>
+			NoOpenOverExistingPopup = 1 << 5,
+
+			/// <summary>
+			/// For BeginPopupContextWindow(): don't return true when hovering items, only when hovering empty space
+			/// </summary>
+			NoOpenOverItems			= 1 << 6,
+
+			/// <summary>
+			/// For IsPopupOpen(): ignore the ImGuiID parameter and test for any popup.
+			/// </summary>
+			AnyPopupId				= 1 << 7,
+
+			/// <summary>
+			/// For IsPopupOpen(): search/test at any level of the popup stack (default test in the current level)
+			/// </summary>
+			AnyPopupLevel			= 1 << 8,
+
+			AnyPopup = AnyPopupId | AnyPopupLevel
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -827,6 +901,14 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Button(string label);
+
+		public static bool Selectable(string label, bool selected = false, SelectableFlags flags = SelectableFlags.None) =>
+			Selectable(label, Vector2.Zero, selected, flags);
+		public static bool Selectable(string label, Vector2 size, bool selected = false, SelectableFlags flags = SelectableFlags.None) =>
+			_Selectable(label, selected, (int)flags, ref size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _Selectable(string label, bool selected, int flags, ref Vector2 size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Checkbox(string label, ref bool checkState);
@@ -1135,6 +1217,23 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndTooltip();
+		#endregion
+
+		#region Popups
+		public static bool BeginPopup(string id, WindowFlags flags = WindowFlags.None) =>
+			_BeginPopup(id, (int)flags);
+
+		public static bool BeginPopupContextItem(string id, PopupFlags flags = PopupFlags.None) =>
+			_BeginPopupContextItem(id, (int)flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _BeginPopupContextItem(string id, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _BeginPopup(string id, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EndPopup();
 		#endregion
 
 		#region Viewport
