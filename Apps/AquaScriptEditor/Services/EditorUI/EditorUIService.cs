@@ -1,14 +1,13 @@
 using System;
 using AquaEngine;
 using System.Linq;
+using Newtonsoft.Json;
 using AquaEditor.Views;
 using System.Reflection;
 using AquaEditor.EditorUI;
 using AquaEngine.Graphics;
-using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace AquaEditor
 {
@@ -36,6 +35,7 @@ namespace AquaEditor
 				Open<SceneView>();
 				Open<HierarchyView>();
 				Open<InspectorView>();
+				Open<ResourcesView>();
 
 				// CreateTestScene();
 				LoadTestScene();

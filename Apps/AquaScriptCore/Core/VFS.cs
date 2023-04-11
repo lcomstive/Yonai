@@ -1,8 +1,50 @@
-using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
+	public struct VFSFile
+	{
+		/// <summary>
+		/// Name of file (including extension) or directory
+		/// </summary>
+		public string FileName { get; private set; }
+
+		/// <summary>
+		/// Extension of the file, or <see cref="string.Empty"/> if directory
+		/// </summary>
+		public string Extension { get; private set; }
+
+		/// <summary>
+		/// True when file is directory
+		/// </summary>
+		public bool IsDirectory { get; private set; }
+
+		/// <summary>
+		/// Path to directory containing this file
+		/// </summary>
+		public string ParentDirectory { get; private set; }
+
+		public VFSFile(string filepath)
+		{
+			IsDirectory = filepath.EndsWith("/");
+			filepath = filepath.TrimEnd('/');
+			if (!IsDirectory)
+			{
+				FileName = Path.GetFileName(filepath);
+				Extension = Path.GetExtension(filepath);
+			}
+			else
+			{
+				Extension = string.Empty;
+				FileName = filepath.Substring(filepath.LastIndexOf("/") + 1);
+			}
+			ParentDirectory = filepath.Substring(0, filepath.LastIndexOf('/') + 1);
+		}
+
+		public string FullPath => ParentDirectory + FileName;
+	}
+
 	public static class VFS
 	{
 		public static bool Exists(string path) => _Exists(path);
@@ -35,6 +77,15 @@ namespace AquaEngine
 
 		public static bool CreateDirectory(string path) => _CreateDirectory(path);
 		public static bool DeleteDirectory(string path) => _DeleteDirectory(path);
+
+		public static VFSFile[] GetFiles(string directory, bool recursive = false)
+		{
+			string[] filepaths = _GetFiles(directory, recursive);
+			VFSFile[] files = new VFSFile[filepaths.Length];
+			for(int i = 0; i < filepaths.Length; i++)
+				files[i] = new VFSFile(filepaths[i]);
+			return files;
+		}
 		#endregion
 
 		#region Internal Calls
@@ -59,6 +110,8 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Remove(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Move(string source, string target);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Copy(string source, string target);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string[] _GetFiles(string directory, bool recursive);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _CreateDirectory(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _DeleteDirectory(string path);

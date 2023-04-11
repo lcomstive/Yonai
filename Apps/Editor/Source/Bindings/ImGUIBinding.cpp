@@ -76,6 +76,20 @@ ADD_MANAGED_METHOD(ImGUI, Indent, void, (float width), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, Unindent, void, (float width), AquaEditor)
 { ImGui::Unindent(); }
 
+ADD_MANAGED_METHOD(ImGUI, GetCursorPosX, float, (), AquaEditor) { return ImGui::GetCursorPosX(); }
+ADD_MANAGED_METHOD(ImGUI, GetCursorPosY, float, (), AquaEditor) { return ImGui::GetCursorPosY(); }
+ADD_MANAGED_METHOD(ImGUI, GetCursorPos, void, (glm::vec2* output), AquaEditor)
+{
+	ImVec2 cursorPos = ImGui::GetCursorPos();
+	*output = glm::vec2(cursorPos.x, cursorPos.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, SetCursorPos, void, (glm::vec2* input), AquaEditor) { ImGui::SetCursorPos(ImVec2(input->x, input->y)); }
+ADD_MANAGED_METHOD(ImGUI, SetCursorPosX, void, (float value), AquaEditor) { ImGui::SetCursorPosX(value); }
+ADD_MANAGED_METHOD(ImGUI, SetCursorPosY, void, (float value), AquaEditor) { ImGui::SetCursorPosY(value); }
+
+ADD_MANAGED_METHOD(ImGUI, SetMouseCursor, void, (int type), AquaEditor) { ImGui::SetCursorPosY(value); }
+
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 {

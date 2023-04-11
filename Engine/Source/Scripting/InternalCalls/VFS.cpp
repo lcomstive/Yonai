@@ -76,3 +76,21 @@ ADD_MANAGED_METHOD(VFS, GetAbsolutePath, MonoString*, (MonoString* path, bool re
 
 ADD_MANAGED_METHOD(VFS, Exists, bool, (MonoString* path))
 { return VFS::Exists(mono_string_to_utf8(path)); }
+
+ADD_MANAGED_METHOD(VFS, GetFiles, MonoArray*, (MonoString* directoryRaw, bool recursive))
+{
+	char* directory = mono_string_to_utf8(directoryRaw);
+	vector<VFSFile> files = VFS::GetFiles(directory, recursive);
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_string_class(), (uintptr_t)files.size());
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		string path = files[i].FullPath();
+		if (files[i].Directory)
+			path += "/";
+		mono_array_set(output, MonoString*, i, mono_string_new(mono_domain_get(), path.c_str()));
+	}
+
+	mono_free(directory);
+	return output;
+}
