@@ -4,10 +4,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
+using System.Timers;
 
 namespace AquaEngine
 {
@@ -107,6 +109,7 @@ namespace AquaEngine
 				LoadExistingUnmanagedResource(instance, resourceID);
 				s_Paths.Add(path, resourceID);
 			}
+
 			return instance;
 		}
 

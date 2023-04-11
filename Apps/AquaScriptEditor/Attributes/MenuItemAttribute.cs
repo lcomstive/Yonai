@@ -11,6 +11,11 @@ namespace AquaEditor
 
 		public bool PrependSeparator { get; set; } = false;
 
+		/// <summary>
+		/// Resource path to icon image
+		/// </summary>
+		public string Icon { get; set; }
+
 		public MenuItemAttribute(string path) => Path = path;
 	}
 }

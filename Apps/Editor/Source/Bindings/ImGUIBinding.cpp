@@ -91,6 +91,9 @@ ADD_MANAGED_METHOD(ImGUI, SetCursorPosY, void, (float value), AquaEditor) { ImGu
 ADD_MANAGED_METHOD(ImGUI, _GetMouseCursor, int, (), AquaEditor) { return (int)ImGui::GetMouseCursor(); }
 ADD_MANAGED_METHOD(ImGUI, _SetMouseCursor, void, (int type), AquaEditor) { ImGui::SetMouseCursor(type); }
 
+ADD_MANAGED_METHOD(ImGUI, BeginGroup, void, (), AquaEditor) { ImGui::BeginGroup(); }
+ADD_MANAGED_METHOD(ImGUI, EndGroup, void, (), AquaEditor) { ImGui::EndGroup(); }
+
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 {
@@ -107,7 +110,7 @@ ADD_MANAGED_METHOD(ImGUI, _TextColoured, void, (MonoString* labelRaw, glm::vec4*
 	mono_free(label);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _Image, void, (unsigned int textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _Image, void, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), AquaEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
@@ -141,7 +144,7 @@ ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* s
 	);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (unsigned int textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol), AquaEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
@@ -748,3 +751,15 @@ ADD_MANAGED_METHOD(ImGUI, _TableSetupColumn, void, (MonoString* labelRaw, int fl
 	ImGui::TableSetupColumn(label, flags, size);
 	mono_free(label);
 }
+
+// Column API //
+ADD_MANAGED_METHOD(ImGUI, Columns, void, (int count, MonoString* idRaw, bool border), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	ImGui::Columns(count, id, border);
+	mono_free(id);
+}
+
+ADD_MANAGED_METHOD(ImGUI, NextColumn, void, (), AquaEditor) { ImGui::NextColumn(); }
+ADD_MANAGED_METHOD(ImGUI, SetColumnWidth, void, (int index, float value), AquaEditor) { ImGui::SetColumnWidth(index, value); }
+ADD_MANAGED_METHOD(ImGUI, SetColumnOffset, void, (int index, float value), AquaEditor) { ImGui::SetColumnOffset(index, value); }

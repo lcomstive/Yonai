@@ -950,6 +950,9 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosX();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosY();
+		
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void BeginGroup();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndGroup();
 		#endregion
 
 		#region Controls
@@ -961,6 +964,15 @@ namespace AquaEditor
 
 		public static void Text(string label) => _Text(label);
 		public static void Text(string label, Colour colour) => _TextColoured(label, ref colour);
+
+		public static void Text(string label, Texture icon) => Text(label, icon, Colour.White);
+		public static void Text(string label, Texture icon, Colour colour, bool tintIcon = true)
+		{
+			float size = TextLineHeight * 1.25f;
+			Image(icon, new Vector2(size, size), tintIcon ? colour : Colour.White);
+			SameLine();
+			Text(label, colour);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Text(string label);
@@ -1478,6 +1490,15 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _TableGetColumnFlags(int column);
+		#endregion
+
+		#region Columns
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Columns(int count, string id = "", bool border = true);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void NextColumn();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetColumnWidth(int column, float width);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetColumnOffset(int column, float offset);
 		#endregion
 	}
 }

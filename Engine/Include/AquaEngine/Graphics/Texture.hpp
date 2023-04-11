@@ -11,6 +11,7 @@ namespace AquaEngine::Graphics
 		unsigned int m_ID;
 		std::string m_Path;
 		glm::ivec2 m_Resolution;
+		int m_Filter = 0x2601;
 
 		void GenerateImage();
 
@@ -26,7 +27,7 @@ namespace AquaEngine::Graphics
 		
 		AquaAPI void Bind(unsigned int index = 0);
 
-		AquaAPI void Import(const char* path, bool hdr = false);
-		AquaAPI void Import(std::string path, bool hdr = false);
+		AquaAPI void Import(const char* path, bool hdr = false, int filter = 0x2601);
+		AquaAPI void Import(std::string path, bool hdr = false, int filter = 0x2601);
 	};
 }

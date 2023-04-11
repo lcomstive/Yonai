@@ -26,8 +26,8 @@ Texture::~Texture()
 		glDeleteTextures(1, &m_ID);
 }
 
-void Texture::Import(const char* path, bool hdr) { Import(string(path), hdr); }
-void Texture::Import(std::string path, bool hdr)
+void Texture::Import(const char* path, bool hdr, int filter) { Import(string(path), hdr, filter); }
+void Texture::Import(std::string path, bool hdr, int filter)
 {
 	if (m_Path == path && hdr == m_HDR)
 		return; // No change
@@ -97,8 +97,8 @@ void Texture::GenerateImage()
 	// Set texture parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_Filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_Filter);
 
 	// Get texture format based on channels
 	GLenum internalFormat = GL_INVALID_ENUM, textureFormat = GL_INVALID_ENUM;
@@ -164,10 +164,10 @@ ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResou
 		mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr, int filter), AquaEngine.Graphics)
 {
 	char* path = mono_string_to_utf8(filepath);
-	((Texture*)instance)->Import(path, hdr);
+	((Texture*)instance)->Import(path, hdr, filter);
 	if(filepath)
 		mono_free(path);
 }

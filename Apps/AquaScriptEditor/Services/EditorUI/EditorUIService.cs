@@ -11,6 +11,43 @@ using System.Collections.Generic;
 
 namespace AquaEditor
 {
+	public static class Icons
+	{
+		public const string IconDirectory = "assets://Textures/Icons";
+		
+		public const string SavePath = "Kenney/save";
+		public static Texture Save { get; private set; }
+
+		public const string SettingsPath = "Kenney/gear";
+		public static Texture Settings { get; private set; }
+
+		public const string FolderPath = "Folder";
+		public static Texture Folder { get; private set; }
+
+		internal static void Load()
+		{
+			Log.Trace("Loading icons...");
+			VFSFile[] files = VFS.GetFiles(IconDirectory, true);
+			foreach (VFSFile file in files)
+			{
+				if (!file.Extension.Equals(".png"))
+					continue;
+
+				// Get file path without root directory
+				string path = file.FullPath.Replace(IconDirectory, "").TrimStart('/');
+				// Remove file extension
+				path = path.Substring(0, path.Length - file.Extension.Length);
+
+				// Load texture
+				Resource.Load<Texture>(path, new TextureImportSettings(file.FullPath) { Filtering = TextureFiltering.Nearest });
+			}
+
+			Save		= Resource.Get<Texture>(SavePath);
+			Settings	= Resource.Get<Texture>(SettingsPath);
+			Folder		= Resource.Get<Texture>(FolderPath);
+		}
+	}
+
 	public class EditorUIService : AquaSystem
 	{
 		public static Texture MissingTexture { get; private set; }
@@ -29,6 +66,7 @@ namespace AquaEditor
 
 			try
 			{
+				Icons.Load();
 				CompileMenuItems();
 				InspectorView.GetCustomInspectors();
 
@@ -57,7 +95,7 @@ namespace AquaEditor
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S")]
+		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = Icons.SavePath)]
 		private static void SaveScene()
 		{
 			if (!VFS.Exists(SceneDir))
@@ -84,7 +122,7 @@ namespace AquaEditor
 					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
 					SceneManager.Load(scene, SceneAddType.Additive);
 				}
-				catch(Exception e) { Log.Exception(e); }
+				catch (Exception e) { Log.Exception(e); }
 			}
 		}
 
@@ -92,7 +130,7 @@ namespace AquaEditor
 		private static void RecreateTestScene()
 		{
 			EditorUIService uiService = Get<EditorUIService>();
-			if(uiService.m_TestWorld)
+			if (uiService.m_TestWorld)
 			{
 				SceneManager.Unload(uiService.m_TestWorld);
 				uiService.m_TestWorld.Destroy();
@@ -106,7 +144,6 @@ namespace AquaEditor
 
 		[MenuItem("File/Resources/Load")]
 		private static void LoadResources() => Resource.LoadDatabase();
-
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
 		{
