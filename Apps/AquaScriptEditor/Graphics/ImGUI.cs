@@ -798,6 +798,53 @@ namespace AquaEditor
 			AnyPopup = AnyPopupId | AnyPopupLevel
 		};
 
+		public enum MouseCursor : int
+		{
+			None = -1,
+
+			Arrow = 0,
+
+			/// <summary>
+			/// When hovering over InputText, etc.
+			/// </summary>
+			TextInput,         
+
+			/// <summary>
+			/// (Unused by Dear ImGui functions)
+			/// </summary>
+			ResizeAll,         
+
+			/// <summary>
+			/// When hovering over a horizontal border
+			/// </summary>
+			ResizeNS,
+
+			/// <summary>
+			/// When hovering over a vertical border or a column
+			/// </summary>
+			ResizeEW,
+
+			/// <summary>
+			/// When hovering over the bottom-left corner of a window
+			/// </summary>
+			ResizeNESW,
+
+			/// <summary>
+			/// When hovering over the bottom-right corner of a window
+			/// </summary>
+			ResizeNWSE,
+
+			/// <summary>
+			/// (Unused by Dear ImGui functions. Use for e.g. hyperlinks)
+			/// </summary>
+			Hand,
+
+			/// <summary>
+			/// When hovering something with disallowed interaction. Usually a crossed circle.
+			/// </summary>
+			NotAllowed
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -881,11 +928,33 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetNextItemWidth(float width);
+
+		public static void SetMouseCursor(MouseCursor cursor) => _SetMouseCursor((int)cursor);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMouseCursor(int type);
+
+		public static MouseCursor GetMouseCursor() => (MouseCursor)_GetMouseCursor();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetMouseCursor();
+
+		public static Vector2 GetCursorPos()
+		{
+			_GetCursorPos(out Vector2 pos);
+			return pos;
+		}
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetCursorPos(out Vector2 value);
+
+		public static void SetCursorPos(Vector2 value) => _SetCursorPos(ref value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetCursorPos(ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetCursorPosX(float value);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetCursorPosY(float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosX();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosY();
 		#endregion
 
 		#region Controls
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SameLine();
+		public static extern void SameLine(float offset = 0, float spacing = -1);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Space();

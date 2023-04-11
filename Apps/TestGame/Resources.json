@@ -1,6 +1,6 @@
 [
   {
-    "ID": "10108099560100404321",
+    "ID": "16524409083079604187",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -17,7 +17,7 @@
     }
   },
   {
-    "ID": "12914454804162203141",
+    "ID": "14252284407051900719",
     "Path": "_Internal/PrimitiveModels/Quad",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -25,7 +25,7 @@
     }
   },
   {
-    "ID": "529499673375303674",
+    "ID": "14059270100186751625",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -42,7 +42,7 @@
     }
   },
   {
-    "ID": "12058201492268561630",
+    "ID": "12273457045335449988",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -59,7 +59,7 @@
     }
   },
   {
-    "ID": "12126104730768026293",
+    "ID": "7358540278010996367",
     "Path": "_Internal/PrimitiveModels/Cube",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -67,7 +67,7 @@
     }
   },
   {
-    "ID": "16418647029945986254",
+    "ID": "11065465069857087033",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -84,7 +84,7 @@
     }
   },
   {
-    "ID": "14438689516571256861",
+    "ID": "4668960956394927146",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -101,7 +101,7 @@
     }
   },
   {
-    "ID": "7282711980692918085",
+    "ID": "2028222093798640499",
     "Path": "_Internal/PrimitiveModels/Sphere",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -109,7 +109,7 @@
     }
   },
   {
-    "ID": "15592588757952525191",
+    "ID": "3054373072049810317",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -126,25 +126,16 @@
     }
   },
   {
-    "ID": "1993330891075617589",
-    "Path": "Textures/DefaultSprite",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "assets://Textures/Test.png",
-      "HDR": false
-    }
-  },
-  {
-    "ID": "16101936798615613384",
+    "ID": "6495035422304035479",
     "Path": "Textures/Missing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
-      "FilePath": "assets://Textures/Black.jpg",
+      "FilePath": "assets://Textures/Grid.png",
       "HDR": false
     }
   },
   {
-    "ID": "10374435580144007786",
+    "ID": "4890888886774514410",
     "Path": "Shaders/3D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -155,11 +146,11 @@
     }
   },
   {
-    "ID": "18051850530480185953",
+    "ID": "14516172272101091419",
     "Path": "Materials/Default3D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "10374435580144007786",
+      "Shader": "4890888886774514410",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -172,7 +163,7 @@
     }
   },
   {
-    "ID": "6727492159095149105",
+    "ID": "10662885343424953155",
     "Path": "Shaders/2D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -183,11 +174,11 @@
     }
   },
   {
-    "ID": "15278209588585800908",
+    "ID": "6483251040009218974",
     "Path": "Materials/Default2D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "6727492159095149105",
+      "Shader": "10662885343424953155",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -200,7 +191,7 @@
     }
   },
   {
-    "ID": "7260024886868231009",
+    "ID": "1087670530583491356",
     "Path": "Textures/Texture/Test_Texture09",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -209,7 +200,7 @@
     }
   },
   {
-    "ID": "1653069313449572323",
+    "ID": "2951179167609542459",
     "Path": "Shaders/NewSpriteShader",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {

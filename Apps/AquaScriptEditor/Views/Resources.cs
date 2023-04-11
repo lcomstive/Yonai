@@ -56,9 +56,9 @@ namespace AquaEditor.Views
 			{
 				if (string.IsNullOrEmpty(directories[i]))
 					continue;
-				ImGUI.SameLine();
+				ImGUI.SameLine(0, 0);
 				ImGUI.Text("/", Colour.Grey);
-				ImGUI.SameLine();
+				ImGUI.SameLine(0, 0);
 				if (ImGUI.Button(directories[i]) && i != directories.Length - 1)
 					OpenDirectory(RootDirectory + "/" + string.Join("/", directories.Take(i + 1).ToArray()));
 			}

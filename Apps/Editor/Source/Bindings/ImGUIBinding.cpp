@@ -78,17 +78,18 @@ ADD_MANAGED_METHOD(ImGUI, Unindent, void, (float width), AquaEditor)
 
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosX, float, (), AquaEditor) { return ImGui::GetCursorPosX(); }
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosY, float, (), AquaEditor) { return ImGui::GetCursorPosY(); }
-ADD_MANAGED_METHOD(ImGUI, GetCursorPos, void, (glm::vec2* output), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetCursorPos, void, (glm::vec2* output), AquaEditor)
 {
 	ImVec2 cursorPos = ImGui::GetCursorPos();
 	*output = glm::vec2(cursorPos.x, cursorPos.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, SetCursorPos, void, (glm::vec2* input), AquaEditor) { ImGui::SetCursorPos(ImVec2(input->x, input->y)); }
+ADD_MANAGED_METHOD(ImGUI, _SetCursorPos, void, (glm::vec2* input), AquaEditor) { ImGui::SetCursorPos(ImVec2(input->x, input->y)); }
 ADD_MANAGED_METHOD(ImGUI, SetCursorPosX, void, (float value), AquaEditor) { ImGui::SetCursorPosX(value); }
 ADD_MANAGED_METHOD(ImGUI, SetCursorPosY, void, (float value), AquaEditor) { ImGui::SetCursorPosY(value); }
 
-ADD_MANAGED_METHOD(ImGUI, SetMouseCursor, void, (int type), AquaEditor) { ImGui::SetCursorPosY(value); }
+ADD_MANAGED_METHOD(ImGUI, _GetMouseCursor, int, (), AquaEditor) { return (int)ImGui::GetMouseCursor(); }
+ADD_MANAGED_METHOD(ImGUI, _SetMouseCursor, void, (int type), AquaEditor) { ImGui::SetMouseCursor(type); }
 
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
@@ -472,8 +473,8 @@ ADD_MANAGED_METHOD(ImGUI, _SliderInt3, bool, (MonoString* labelRaw, glm::ivec3* 
 }
 
 // Other 
-ADD_MANAGED_METHOD(ImGUI, SameLine, void, (), AquaEditor)
-{ return ImGui::SameLine(); }
+ADD_MANAGED_METHOD(ImGUI, SameLine, void, (float offset, float spacing), AquaEditor)
+{ return ImGui::SameLine(offset, spacing); }
 
 ADD_MANAGED_METHOD(ImGUI, Space, void, (), AquaEditor)
 { return ImGui::Spacing(); }
