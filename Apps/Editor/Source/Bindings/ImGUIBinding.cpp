@@ -49,6 +49,18 @@ ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor)
 { return ImGui::IsItemClicked(); }
 
+ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), AquaEditor)
+{ return ImGui::IsMouseClicked(button); }
+
+ADD_MANAGED_METHOD(ImGUI, _IsMouseDoubleClicked, bool, (int button), AquaEditor)
+{ return ImGui::IsMouseDoubleClicked(button); }
+
+ADD_MANAGED_METHOD(ImGUI, _IsMouseDragging, bool, (int button), AquaEditor)
+{ return ImGui::IsMouseDragging(button); }
+
+ADD_MANAGED_METHOD(ImGUI, _IsMouseReleased, bool, (int button), AquaEditor)
+{ return ImGui::IsMouseReleased(button); }
+
 ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor)
 { return ImGui::IsItemEdited(); }
 

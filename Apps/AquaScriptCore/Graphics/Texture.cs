@@ -74,14 +74,16 @@ namespace AquaEngine.Graphics
 		public JObject OnSerialize() =>
 			new JObject(
 				new JProperty("FilePath", FilePath),
-				new JProperty("HDR", HDR)
+				new JProperty("HDR", HDR),
+				new JProperty("Filtering", (int)Filter)
 			);
 
 		public void OnDeserialize(JObject json) =>
 			Import(new TextureImportSettings()
 			{
-				HDR		 = json["HDR"].Value<bool>(),
-				FilePath = json["FilePath"].Value<string>()
+				HDR		  = json["HDR"].Value<bool>(),
+				FilePath  = json["FilePath"].Value<string>(),
+				Filtering = (TextureFiltering)json["Filtering"].Value<int>()
 			});
 			
 

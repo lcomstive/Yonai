@@ -887,20 +887,22 @@ namespace AquaEditor
 		#endregion
 
 		#region State
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsItemHovered();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemHovered();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemClicked();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsItemClicked();
+		public static bool IsMouseClicked(MouseButton button) => _IsMouseClicked((int)button);
+		public static bool IsMouseDoubleClicked(MouseButton button) => _IsMouseDoubleClicked((int)button);
+		public static bool IsMouseDragging(MouseButton button) => _IsMouseDragging((int)button);
+		public static bool IsMouseReleased(MouseButton button) => _IsMouseReleased((int)button);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsItemEdited();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseClicked(int button);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseDoubleClicked(int button);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseDragging(int button);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseReleased(int button);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void BeginDisabled();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void EndDisabled();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void BeginDisabled();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndDisabled();
 
 		public static void DockSpace(string id) => DockSpace(id, Vector2.Zero);
 		public static void DockSpace(string id, Vector2 size) => _DockSpace(id, ref size);

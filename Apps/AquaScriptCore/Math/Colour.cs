@@ -22,6 +22,8 @@ namespace AquaEngine
 		public static readonly Colour Orange = new Colour(1, .5f, 1);
 		public static readonly Colour Turqoise = new Colour(0, 1, 1);
 
+		public static readonly Colour None = new Colour(0, 0, 0, 0);
+
 		public Colour(float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f)
 		{
 			this.r = r;

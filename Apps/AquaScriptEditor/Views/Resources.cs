@@ -6,14 +6,15 @@ namespace AquaEditor.Views
 {
 	public class ResourcesView : View
 	{
-		private float m_Padding = 16.0f;
-		private float m_ThumbnailSize = 32;
+		private float m_Padding = 12;
+		private float m_ThumbnailSize = ThumbnailSizeRange.y;
 
 		private VFSFile[] m_Files;
+		private string m_SelectedPath;
 		private string m_CurrentDirectory = RootDirectory;
 
 		private const string RootDirectory = "project://Assets";
-		private static readonly IVector2 ThumbnailSizeRange = new IVector2(24, 64);
+		private static readonly IVector2 ThumbnailSizeRange = new IVector2(32, 96);
 
 		[MenuItem("Window/Resources")]
 		private static void MenuCallback() => EditorUIService.Open<ResourcesView>();
@@ -69,13 +70,25 @@ namespace AquaEditor.Views
 			ImGUI.Separator();
 		}
 
-		private Texture ChooseImage(string extension) => null;
+		private Texture ChooseImage(string vfsPath, string extension)
+		{
+			if (extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg") || extension.Equals(".dds"))
+			{
+				if (!Resource.Exists(vfsPath))
+					return Resource.Load<Texture>(vfsPath, new TextureImportSettings(vfsPath));
+				return Resource.Get<Texture>(vfsPath);
+			}
+
+			return null;
+		}
 
 		private void DrawContents()
 		{
 			Vector2 size = ImGUI.ContentRegionAvailable;
 			size.y -= 30;
 			ImGUI.BeginChild("##ResourceContents", size);
+
+			ImGUI.PushStyleColour(ImGUI.StyleColour.Button, Colour.None);
 
 			float cellsize = m_ThumbnailSize + m_Padding;
 			float panelWidth = ImGUI.ContentRegionAvailable.x;
@@ -85,32 +98,41 @@ namespace AquaEditor.Views
 
 			foreach (VFSFile file in m_Files)
 			{
-				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file.Extension);
+				bool selected = file.FullPath.Equals(m_SelectedPath);
+				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file.FullPath, file.Extension);
 				if (m_ThumbnailSize > ThumbnailSizeRange.x)
 				{
+					if (selected) ImGUI.PopStyleColour();
+
 					ImGUI.BeginGroup();
 					ImGUI.ButtonImage(texture, new Vector2(m_ThumbnailSize, m_ThumbnailSize));
 					ImGUI.Text(file.FileName);
 					ImGUI.EndGroup();
+
+					if (selected) ImGUI.PushStyleColour(ImGUI.StyleColour.Button, Colour.None);
 				}
 				else
 				{
-					float textureSize = ImGUI.TextLineHeight;
-					ImGUI.Image(texture, new Vector2(textureSize, textureSize));
+					ImGUI.Image(texture, new Vector2(ImGUI.TextLineHeight, ImGUI.TextLineHeight));
 					ImGUI.SameLine();
-					ImGUI.Selectable(file.FileName);
+					ImGUI.Selectable(file.FileName, selected);
 				}
 				if (ImGUI.IsItemClicked())
 				{
-					if(file.IsDirectory)
+					m_SelectedPath = file.FullPath;
+					if(file.IsDirectory && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 						OpenDirectory($"{m_CurrentDirectory}/{file.FileName}");
 					// else handle inspector for file type
 				}
 				ImGUI.NextColumn();
 			}
 
+			ImGUI.PopStyleColour();
 			ImGUI.Columns(1);
 			ImGUI.EndChild();
+
+			if(ImGUI.IsItemClicked())
+				m_SelectedPath = string.Empty;
 		}
 
 		private void DrawSizeSlider()

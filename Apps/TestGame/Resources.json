@@ -1,6 +1,6 @@
 [
   {
-    "ID": "15453656866409735037",
+    "ID": "7017954018758342678",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -17,7 +17,7 @@
     }
   },
   {
-    "ID": "8371657152728136741",
+    "ID": "9954065908068441092",
     "Path": "_Internal/PrimitiveModels/Quad",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -25,7 +25,7 @@
     }
   },
   {
-    "ID": "7330377723115968904",
+    "ID": "12597370575389966382",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -42,7 +42,7 @@
     }
   },
   {
-    "ID": "15693260019547141703",
+    "ID": "17045091600978736333",
     "Path": "_Internal/PrimitiveModels/Cube",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -50,7 +50,7 @@
     }
   },
   {
-    "ID": "18318995530004406963",
+    "ID": "3144819928286434738",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -67,7 +67,7 @@
     }
   },
   {
-    "ID": "16962138748161654375",
+    "ID": "2522344648500585175",
     "Path": "_Internal/PrimitiveModels/Sphere",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -75,16 +75,17 @@
     }
   },
   {
-    "ID": "4890510937606626610",
+    "ID": "10121307959264177706",
     "Path": "Textures/Missing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
       "FilePath": "assets://Textures/Grid.png",
-      "HDR": false
+      "HDR": false,
+      "Filtering": 9729
     }
   },
   {
-    "ID": "11446778187865790135",
+    "ID": "12740884818121143892",
     "Path": "Shaders/3D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -95,11 +96,11 @@
     }
   },
   {
-    "ID": "3391034137696735869",
+    "ID": "11337244604221927022",
     "Path": "Materials/Default3D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "11446778187865790135",
+      "Shader": "12740884818121143892",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -112,7 +113,7 @@
     }
   },
   {
-    "ID": "12679806381408906807",
+    "ID": "18265258344889574232",
     "Path": "Shaders/2D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -123,11 +124,11 @@
     }
   },
   {
-    "ID": "17476450240236223099",
+    "ID": "17452563539585698654",
     "Path": "Materials/Default2D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "12679806381408906807",
+      "Shader": "18265258344889574232",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -137,6 +138,137 @@
       "AlbedoMap": "0",
       "AlphaClipping": false,
       "AlphaThreshold": 0.0
+    }
+  },
+  {
+    "ID": "17947597349711903181",
+    "Path": "Folder",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Icons/Folder.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "7900527659883124115",
+    "Path": "Kenney/gear",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Icons/Kenney/gear.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "12940824914931632759",
+    "Path": "Kenney/larger",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Icons/Kenney/larger.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "10273413919355332349",
+    "Path": "Kenney/power",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Icons/Kenney/power.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "17581194969999274024",
+    "Path": "Kenney/save",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/Icons/Kenney/save.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "2806975259398877615",
+    "Path": "Textures/Texture/Test_Texture09",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "assets://Textures/texture_09.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "6685810460470861109",
+    "Path": "Shaders/NewSpriteShader",
+    "Type": "AquaEngine.Graphics.Shader",
+    "Properties": {
+      "Vertex": "assets://Shaders/Sprite.vert",
+      "Fragment": "assets://Shaders/NewSprite.frag",
+      "Compute": null,
+      "Geometry": null
+    }
+  },
+  {
+    "ID": "17971304626736925851",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "15829790528965696159",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_AO.jpg",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "10145198931862252055",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_metallic.jpg",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "1563596894429158729",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "11490490004134962294",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_roughness.jpg",
+      "HDR": false,
+      "Filtering": 9728
+    }
+  },
+  {
+    "ID": "9444867689695587868",
+    "Path": "project://Assets/Textures/texture_09.png",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Textures/texture_09.png",
+      "HDR": false,
+      "Filtering": 9729
     }
   }
 ]
