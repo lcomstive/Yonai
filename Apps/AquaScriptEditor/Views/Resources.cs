@@ -105,7 +105,7 @@ namespace AquaEditor.Views
 					if (selected) ImGUI.PopStyleColour();
 
 					ImGUI.BeginGroup();
-					ImGUI.ButtonImage(texture, new Vector2(m_ThumbnailSize, m_ThumbnailSize));
+					ImGUI.ButtonImage(texture, new Vector2(m_ThumbnailSize, m_ThumbnailSize), -2);
 					ImGUI.Text(file.FileName);
 					ImGUI.EndGroup();
 

@@ -196,6 +196,15 @@ namespace AquaEngine
 			LoadExistingUnmanagedResource(instance, resourceID);
 			return instance;
 		}
+		
+		public static ResourceBase Get(UUID resourceID)
+		{
+			// Check for cached instance
+			if (s_Instances.ContainsKey(resourceID))
+				return s_Instances[resourceID];
+			else
+				return null;
+		}
 
 		/// <summary>
 		/// Gets the type of a resource, or null if not found

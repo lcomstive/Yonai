@@ -2,7 +2,6 @@
 using AquaEngine.IO;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
@@ -70,12 +69,15 @@ namespace AquaEngine
 			var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
+			Type serializableType = typeof(ISerializable);
+			Type resourceBaseType = typeof(ResourceBase);
+
 			foreach (var field in fields)
 			{
 				if (!ShouldSerializeField(field))
 					continue;
 
-				if(typeof(ISerializable).IsAssignableFrom(field.FieldType))
+				if(serializableType.IsAssignableFrom(field.FieldType) && !resourceBaseType.IsAssignableFrom(field.FieldType))
 				{
 					ISerializable serializable = (ISerializable)field.GetValue(this);
 					serializable.OnDeserialize(json[field.Name].Value<JObject>());
@@ -94,7 +96,7 @@ namespace AquaEngine
 				if (!ShouldSerializeProperty(property))
 					continue;
 
-				if (!typeof(ISerializable).IsAssignableFrom(property.PropertyType))
+				if (!serializableType.IsAssignableFrom(property.PropertyType) || resourceBaseType.IsAssignableFrom(property.PropertyType))
 				{
 					object value = DeserializeObject(
 							json,
@@ -159,7 +161,10 @@ namespace AquaEngine
 
 		private void SerializeObject(JObject json, string label, Type t, object value)
 		{
-			if (typeof(ISerializable).IsAssignableFrom(t))
+			// Check if resource, if so then serialize as UUID
+			if(typeof(ResourceBase).IsAssignableFrom(t))
+				json[label] = ((ResourceBase)value).ResourceID.ToString();
+			else if (typeof(ISerializable).IsAssignableFrom(t))
 			{
 				try { json[label] = ((ISerializable)value).OnSerialize(); }
 				catch(Exception e)
@@ -180,6 +185,7 @@ namespace AquaEngine
 		
 		private object DeserializeObject(JObject json, string label, Type t)
 		{
+			if (typeof(ResourceBase).IsAssignableFrom(t)) return Resource.Get(ulong.Parse(json[label].Value<string>()));
 			if (t == typeof(int))			return json[label].Value<int>();
 			else if (t == typeof(uint))		return json[label].Value<uint>();
 			else if (t == typeof(bool))		return json[label].Value<bool>();

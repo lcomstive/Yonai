@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using AquaEngine.Graphics;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
@@ -7,10 +9,10 @@ namespace AquaEngine
 		/// <summary>
 		/// Texture to draw
 		/// </summary>
-		public UUID Sprite
+		public Texture Sprite
 		{
-			get => _GetSprite(World.ID, Entity.ID);
-			set => _SetSprite(World.ID, Entity.ID, value);
+			get => Resource.Get<Texture>(_GetSprite(Handle));
+			set => _SetSprite(Handle, value.ResourceID);
 		}
 
 		/// <summary>
@@ -20,28 +22,28 @@ namespace AquaEngine
 		{
 			get
 			{
-				_GetColour(World.ID, Entity.ID, out Colour colour);
+				_GetColour(Handle, out Colour colour);
 				return colour;
 			}
-			set => _SetColour(World.ID, Entity.ID, ref value);
+			set => _SetColour(Handle, ref value);
 		}
 
 		/// <summary>
 		/// Shader program to draw sprite
 		/// </summary>
-		public UUID Shader
+		public Shader Shader
 		{
-			get => _GetShader(World.ID, Entity.ID);
-			set => _SetShader(World.ID, Entity.ID, value);
+			get => Resource.Get<Shader>(_GetShader(Handle));
+			set => _SetShader(Handle, value.ResourceID);
 		}
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSprite(ulong worldID, ulong entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSprite(ulong worldID, ulong entityID, ulong position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetColour(ulong worldID, ulong entityID, out Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetColour(ulong worldID, ulong entityID, ref Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(ulong worldID, ulong entityID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(ulong worldID, ulong entityID, ulong shader);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSprite(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetSprite(IntPtr handle, ulong position);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _GetColour(IntPtr handle, out Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetColour(IntPtr handle, ref Colour colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetShader(IntPtr handle, ulong shader);
 		#endregion
 	}
 }

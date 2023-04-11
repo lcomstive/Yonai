@@ -1,6 +1,6 @@
 [
   {
-    "ID": "7017954018758342678",
+    "ID": "4141491299581062743",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -17,7 +17,7 @@
     }
   },
   {
-    "ID": "9954065908068441092",
+    "ID": "16639689307276073144",
     "Path": "_Internal/PrimitiveModels/Quad",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -25,7 +25,7 @@
     }
   },
   {
-    "ID": "12597370575389966382",
+    "ID": "4703241629601149887",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -42,7 +42,7 @@
     }
   },
   {
-    "ID": "17045091600978736333",
+    "ID": "9271989671163696065",
     "Path": "_Internal/PrimitiveModels/Cube",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -50,7 +50,7 @@
     }
   },
   {
-    "ID": "3144819928286434738",
+    "ID": "13025477543692575382",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -67,7 +67,7 @@
     }
   },
   {
-    "ID": "2522344648500585175",
+    "ID": "7716433955797005828",
     "Path": "_Internal/PrimitiveModels/Sphere",
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
@@ -75,7 +75,7 @@
     }
   },
   {
-    "ID": "10121307959264177706",
+    "ID": "14694496366970983158",
     "Path": "Textures/Missing",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -85,7 +85,7 @@
     }
   },
   {
-    "ID": "12740884818121143892",
+    "ID": "1768520120880747513",
     "Path": "Shaders/3D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -96,11 +96,11 @@
     }
   },
   {
-    "ID": "11337244604221927022",
+    "ID": "13069159167067755443",
     "Path": "Materials/Default3D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "12740884818121143892",
+      "Shader": "1768520120880747513",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -113,7 +113,7 @@
     }
   },
   {
-    "ID": "18265258344889574232",
+    "ID": "14665201252930169797",
     "Path": "Shaders/2D/Default",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -124,11 +124,11 @@
     }
   },
   {
-    "ID": "17452563539585698654",
+    "ID": "16309868608834357653",
     "Path": "Materials/Default2D",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
-      "Shader": "18265258344889574232",
+      "Shader": "14665201252930169797",
       "Albedo": {
         "r": 0.0,
         "g": 0.0,
@@ -141,7 +141,7 @@
     }
   },
   {
-    "ID": "17947597349711903181",
+    "ID": "10638440742077625726",
     "Path": "Folder",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -151,7 +151,7 @@
     }
   },
   {
-    "ID": "7900527659883124115",
+    "ID": "4837213727335769930",
     "Path": "Kenney/gear",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -161,7 +161,7 @@
     }
   },
   {
-    "ID": "12940824914931632759",
+    "ID": "11988438927991344186",
     "Path": "Kenney/larger",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -171,7 +171,7 @@
     }
   },
   {
-    "ID": "10273413919355332349",
+    "ID": "8363185224840526115",
     "Path": "Kenney/power",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -181,7 +181,7 @@
     }
   },
   {
-    "ID": "17581194969999274024",
+    "ID": "18369178386348269521",
     "Path": "Kenney/save",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -191,7 +191,7 @@
     }
   },
   {
-    "ID": "2806975259398877615",
+    "ID": "6448241375022659189",
     "Path": "Textures/Texture/Test_Texture09",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
@@ -201,7 +201,7 @@
     }
   },
   {
-    "ID": "6685810460470861109",
+    "ID": "4933251495035378840",
     "Path": "Shaders/NewSpriteShader",
     "Type": "AquaEngine.Graphics.Shader",
     "Properties": {
@@ -212,57 +212,7 @@
     }
   },
   {
-    "ID": "17971304626736925851",
-    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
-      "HDR": false,
-      "Filtering": 9728
-    }
-  },
-  {
-    "ID": "15829790528965696159",
-    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "project://Assets/Models/Backpack/1001_AO.jpg",
-      "HDR": false,
-      "Filtering": 9728
-    }
-  },
-  {
-    "ID": "10145198931862252055",
-    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "project://Assets/Models/Backpack/1001_metallic.jpg",
-      "HDR": false,
-      "Filtering": 9728
-    }
-  },
-  {
-    "ID": "1563596894429158729",
-    "Path": "project://Assets/Models/Backpack/1001_normal.png",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
-      "HDR": false,
-      "Filtering": 9728
-    }
-  },
-  {
-    "ID": "11490490004134962294",
-    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
-    "Type": "AquaEngine.Graphics.Texture",
-    "Properties": {
-      "FilePath": "project://Assets/Models/Backpack/1001_roughness.jpg",
-      "HDR": false,
-      "Filtering": 9728
-    }
-  },
-  {
-    "ID": "9444867689695587868",
+    "ID": "14586881245901726254",
     "Path": "project://Assets/Textures/texture_09.png",
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
