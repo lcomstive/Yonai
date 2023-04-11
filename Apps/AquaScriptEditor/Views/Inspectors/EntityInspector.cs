@@ -83,7 +83,8 @@ namespace AquaEditor.Inspectors
 						field.FieldType,
 						field.GetValue(component),
 						component,
-						field.SetValue
+						field.SetValue,
+						field.GetCustomAttribute<RangeAttribute>()
 					);
 			}
 			foreach (var property in properties)
@@ -100,14 +101,15 @@ namespace AquaEditor.Inspectors
 				if (accessors.Length > 1 && accessors[1].GetCustomAttribute<ShowInInspectorAttribute>() != null)
 					canWrite = true;
 
-				if(canRead)
+				if (canRead)
 					DrawObject(
-						property.Name,
-						property.PropertyType,
-						property.GetValue(component),
-						component,
-						canWrite ? property.SetValue : (Action<object, object>)null
-					);
+							property.Name,
+							property.PropertyType,
+							property.GetValue(component),
+							component,
+							canWrite ? property.SetValue : (Action<object, object>)null,
+							property.GetCustomAttribute<RangeAttribute>()
+						);
 			}
 
 			ImGUI.EndTable();
@@ -120,15 +122,19 @@ namespace AquaEditor.Inspectors
 				setValue.Invoke(instance, value);
 		}
 		
-		private void Draw(string label, float value, object instance, Action<object, object> setValue)
+		private void Draw(string label, float value, object instance, Action<object, object> setValue, object additionalInfo)
 		{
-			if (ImGUI.Drag($"##{label}", ref value))
+			RangeAttribute range = additionalInfo as RangeAttribute;
+			if ((range != null && ImGUI.Slider($"##{label}", ref value, range.Range.x, range.Range.y)) ||
+				(range == null && ImGUI.Drag($"##{label}", ref value)))
 				setValue.Invoke(instance, value);
-		}	
-		
-		private void Draw(string label, int value, object instance, Action<object, object> setValue)
+		}
+
+		private void Draw(string label, int value, object instance, Action<object, object> setValue, object additionalInfo)
 		{
-			if (ImGUI.Drag($"##{label}", ref value))
+			RangeAttribute range = additionalInfo as RangeAttribute;
+			if ((range != null && ImGUI.Slider($"##{label}", ref value, (int)range.Range.x, (int)range.Range.y)) ||
+				(range == null && ImGUI.Drag($"##{label}", ref value)))
 				setValue.Invoke(instance, value);
 		}
 		
@@ -203,12 +209,11 @@ namespace AquaEditor.Inspectors
 
 		private void DrawEnum(string label, Type type, object value, object instance, Action<object, object> setValue)
 		{
-			// TODO: ImGUI combo box
-			// string[] values = Enum.GetNames(type);
-			ImGUI.Text(Enum.GetName(type, value) ?? string.Empty);
+			if (ImGUI.EnumCombo(label, type, ref value))
+				setValue.Invoke(instance, value);
 		}
 
-		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue)
+		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue, object additionalInfo)
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
 
@@ -221,9 +226,9 @@ namespace AquaEditor.Inspectors
 
 			ImGUI.TableSetColumnIndex(1);
 			ImGUI.SetNextItemWidth(region.x);
-			if (t	   == typeof(int))				Draw(label, (int)value,				instance, setValue);
+			if (t	   == typeof(int))				Draw(label, (int)value,				instance, setValue, additionalInfo);
 			else if (t == typeof(bool))				Draw(label, (bool)value,			instance, setValue);
-			else if (t == typeof(float))			Draw(label, (float)value,			instance, setValue);
+			else if (t == typeof(float))			Draw(label, (float)value,			instance, setValue, additionalInfo);
 			else if (t == typeof(string))			Draw(label, (string)value,			instance, setValue);
 			else if (t == typeof(Colour))			Draw(label, (Colour)value,			instance, setValue);
 			else if (t == typeof(Vector2))			Draw(label, (Vector2)value,			instance, setValue);

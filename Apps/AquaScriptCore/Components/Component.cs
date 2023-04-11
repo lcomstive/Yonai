@@ -117,7 +117,7 @@ namespace AquaEngine
 
 		private bool ShouldSerializeField(FieldInfo field)
 		{
-			ShouldSerializeAttribute shouldSerializeAttr = field.GetCustomAttribute<ShouldSerializeAttribute>();
+			SerializeAttribute shouldSerializeAttr = field.GetCustomAttribute<SerializeAttribute>();
 			if (shouldSerializeAttr != null && !shouldSerializeAttr.ShouldSerialize)
 				return false;
 			if (shouldSerializeAttr == null && field.IsPublic && field.GetCustomAttribute<HideInInspectorAttribute>() != null)
@@ -132,7 +132,7 @@ namespace AquaEngine
 
 		private bool ShouldSerializeProperty(PropertyInfo property)
 		{
-			ShouldSerializeAttribute shouldSerializeAttr = property.GetCustomAttribute<ShouldSerializeAttribute>();
+			SerializeAttribute shouldSerializeAttr = property.GetCustomAttribute<SerializeAttribute>();
 			if (shouldSerializeAttr != null && !shouldSerializeAttr.ShouldSerialize)
 				return false;
 			else if (shouldSerializeAttr?.ShouldSerialize ?? false)

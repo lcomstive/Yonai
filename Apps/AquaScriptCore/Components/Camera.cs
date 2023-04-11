@@ -52,7 +52,7 @@ namespace AquaEngine
 		}
 
 		private RenderTexture m_RenderTarget = null;
-		[ShouldSerialize(false)]
+		[Serialize(false)]
 		public RenderTexture RenderTarget
 		{
 			get

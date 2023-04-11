@@ -226,7 +226,7 @@ namespace AquaEngine
 			foreach(var pair in s_Instances)
 			{
 				// Check if should serialize
-				if (!pair.Value.GetType().GetCustomAttribute<ShouldSerializeAttribute>()?.ShouldSerialize ?? false)
+				if (!pair.Value.GetType().GetCustomAttribute<SerializeAttribute>()?.ShouldSerialize ?? false)
 					continue;
 
 				JObject resource = new JObject();

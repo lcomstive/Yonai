@@ -24,7 +24,7 @@ namespace AquaEngine
 			set => _SetMixer(Handle, value);
 		}
 
-		[ShouldSerialize(false)]
+		[Serialize(false)]
 		public SoundMixer Mixer
 		{
 			get
@@ -58,6 +58,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Sets output of audio to left and right, ranging [-1, 1.0] respectively
 		/// </summary>
+		[Range(-1, 1)]
 		public float Panning
 		{
 			get => _GetPanning(Handle);

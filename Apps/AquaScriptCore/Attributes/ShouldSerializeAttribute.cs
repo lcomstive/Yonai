@@ -6,10 +6,10 @@ namespace AquaEngine
 	/// Overrides default serialize behaviour
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class)]
-	public class ShouldSerializeAttribute : Attribute
+	public class SerializeAttribute : Attribute
 	{
 		public bool ShouldSerialize = true;
 
-		public ShouldSerializeAttribute(bool serialize = true) => ShouldSerialize = serialize;
+		public SerializeAttribute(bool serialize = true) => ShouldSerialize = serialize;
 	}
 }

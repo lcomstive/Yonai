@@ -10,7 +10,7 @@ namespace AquaEngine.Graphics
 		public Mesh.Vertex[] Vertices;
 	}
 
-	[ShouldSerialize(false)]
+	[Serialize(false)]
 	public class Mesh : NativeResourceBase
 	{
 		public struct Vertex
