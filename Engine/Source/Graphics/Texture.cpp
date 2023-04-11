@@ -32,8 +32,9 @@ void Texture::Import(std::string path, bool hdr, int filter)
 	if (m_Path == path && hdr == m_HDR)
 		return; // No change
 
-	m_Path = path;
 	m_HDR = hdr;
+	m_Path = path;
+	m_Filter = filter;
 
 	// Destroy any previous texture
 	if (m_ID != GL_INVALID_VALUE)
@@ -136,6 +137,7 @@ void Texture::GenerateImage()
 }
 
 bool Texture::GetHDR() { return m_HDR; }
+int Texture::GetFilter() { return m_Filter; }
 string Texture::GetPath() { return m_Path; }
 unsigned int Texture::GetID() { return m_ID; }
 glm::ivec2& Texture::GetResolution() { return m_Resolution; }
@@ -180,6 +182,9 @@ ADD_MANAGED_METHOD(Texture, GetResolution, void, (void* instance, glm::ivec2* ou
 
 ADD_MANAGED_METHOD(Texture, GetHDR, bool, (void* instance), AquaEngine.Graphics)
 { return ((Texture*)instance)->GetHDR(); }
+
+ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), AquaEngine.Graphics)
+{ return ((Texture*)instance)->GetFilter(); }
 
 ADD_MANAGED_METHOD(Texture, GetPath, MonoString*, (void* instance), AquaEngine.Graphics)
 {

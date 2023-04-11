@@ -1,7 +1,6 @@
+using System;
 using AquaEngine;
 using AquaEngine.Graphics;
-using System;
-using System.Diagnostics.Eventing.Reader;
 
 namespace AquaEditor.Inspectors
 {
@@ -26,7 +25,7 @@ namespace AquaEditor.Inspectors
 		}
 
 		private const float Padding = 20;
-		private const float MinSettingsHeight = 75;
+		private const float MinSettingsHeight = 125;
 
 		public override void DrawInspector()
 		{
@@ -38,7 +37,7 @@ namespace AquaEditor.Inspectors
 			ImGUI.BeginChild("TextureInspectorSettings",
 						new Vector2(0, Math.Max(region.y - textureSize.y - Padding, MinSettingsHeight)));
 			ImGUI.Checkbox("HDR", ref m_Settings.HDR);
-			ImGUI.Text("Filtering: " + Enum.GetName(typeof(TextureFiltering), m_Settings.Filtering));
+			m_Settings.Filtering = ImGUI.EnumCombo("Filtering", m_Settings.Filtering);
 
 			if(PendingChanges())
 			{
@@ -49,6 +48,13 @@ namespace AquaEditor.Inspectors
 					m_Target.Import(m_Settings);
 			}
 			ImGUI.EndChild();
+
+			string resolutionText = $"({m_Target.Resolution.x}x{m_Target.Resolution.y})";
+			Vector2 resolutionTextSize = ImGUI.CalculateTextWidth(resolutionText);
+			ImGUI.SetCursorPos(
+				(region.x / 2.0f) - resolutionTextSize.x / 2.0f + Padding / 2,
+				ImGUI.WindowContentRegionMax.y - textureSize.y - Padding / 2 - resolutionTextSize.y * 1.25f);
+			ImGUI.Text(resolutionText, Colour.Grey);
 
 			ImGUI.SetCursorPos(
 				(region.x / 2.0f) - (textureSize.x / 2.0f) + Padding / 2,

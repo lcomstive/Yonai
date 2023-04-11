@@ -70,6 +70,17 @@ ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
 { return ImGui::EndDisabled(); }
 
+ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), AquaEditor)
+{ ImGui::SetItemDefaultFocus(); }
+
+ADD_MANAGED_METHOD(ImGUI, _CalculateTextWidth, void, (MonoString* textRaw, glm::vec2* output), AquaEditor)
+{
+	char* text = mono_string_to_utf8(textRaw);
+	ImVec2 size = ImGui::CalcTextSize(text, 0, true);
+	*output = glm::vec2(size.x, size.y);
+	mono_free(text);
+}
+
 ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw, bool openByDefault), AquaEditor)
 {
 	int flags = 0;
@@ -775,3 +786,15 @@ ADD_MANAGED_METHOD(ImGUI, Columns, void, (int count, MonoString* idRaw, bool bor
 ADD_MANAGED_METHOD(ImGUI, NextColumn, void, (), AquaEditor) { ImGui::NextColumn(); }
 ADD_MANAGED_METHOD(ImGUI, SetColumnWidth, void, (int index, float value), AquaEditor) { ImGui::SetColumnWidth(index, value); }
 ADD_MANAGED_METHOD(ImGUI, SetColumnOffset, void, (int index, float value), AquaEditor) { ImGui::SetColumnOffset(index, value); }
+
+// COMBO //
+ADD_MANAGED_METHOD(ImGUI, _BeginCombo, bool, (MonoString* labelRaw, MonoString* previewRaw, int flags), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	char* preview = mono_string_to_utf8(previewRaw);
+	bool output = ImGui::BeginCombo(label, preview, flags);
+	mono_free(label);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, EndCombo, void, (), AquaEditor) { ImGui::EndCombo(); }

@@ -25,7 +25,7 @@
     }
   },
   {
-    "ID": "1016048050514700307",
+    "ID": "11588705999856883830",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -67,7 +67,7 @@
     }
   },
   {
-    "ID": "2194120341339892453",
+    "ID": "5534558139679961790",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -109,7 +109,7 @@
     }
   },
   {
-    "ID": "4448345373550454632",
+    "ID": "5745883004031335422",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -369,7 +369,7 @@
     "Properties": {
       "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
       "HDR": false,
-      "Filtering": 9729
+      "Filtering": 9728
     }
   },
   {

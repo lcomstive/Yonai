@@ -109,7 +109,7 @@ void EditorApp::OnUpdate()
 void EditorApp::LaunchEditorService()
 {
 	// Test C# component
-	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll");
+	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll", true);
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
 	SystemManager::Global()->Add(editorService);
 }

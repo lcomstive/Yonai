@@ -21,6 +21,7 @@ namespace AquaEngine::Graphics
 		AquaAPI ~Texture();
 
 		AquaAPI bool GetHDR();
+		AquaAPI int GetFilter();
 		AquaAPI unsigned int GetID();
 		AquaAPI std::string GetPath();
 		AquaAPI glm::ivec2& GetResolution();

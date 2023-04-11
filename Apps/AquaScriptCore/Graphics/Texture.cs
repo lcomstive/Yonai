@@ -56,7 +56,8 @@ namespace AquaEngine.Graphics
 			m_ImportSettings = new TextureImportSettings()
 			{
 				FilePath = _GetPath(Handle),
-				HDR = _GetHDR(Handle)
+				HDR = _GetHDR(Handle),
+				Filtering = (TextureFiltering)_GetFilter(Handle)
 			};
 		}
 
@@ -94,6 +95,7 @@ namespace AquaEngine.Graphics
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetHDR(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFilter(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		#endregion
 	}

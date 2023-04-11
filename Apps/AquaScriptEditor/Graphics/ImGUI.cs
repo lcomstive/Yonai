@@ -1,5 +1,6 @@
 using AquaEngine;
 using AquaEngine.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -845,6 +846,45 @@ namespace AquaEditor
 			NotAllowed
 		};
 
+		[Flags]
+		public enum ComboFlags : int
+		{
+			None = 0,
+
+			/// <summary>
+			/// Align the popup toward the left by default
+			/// </summary>
+			PopupAlignLeft = 1 << 0,
+			
+			/// <summary>
+			/// Max ~4 items visible. Tip: If you want your combo popup to be a specific size you can use SetNextWindowSizeConstraints() prior to calling BeginCombo()
+			/// </summary>
+			HeightSmall = 1 << 1,
+
+			/// <summary>
+			/// Max ~8 items visible (default)
+			/// </summary>
+			HeightRegular = 1 << 2,
+
+			/// <summary>
+			/// Max ~20 items visible
+			/// </summary>
+			HeightLarge = 1 << 3,
+			/// <summary>
+			/// As many fitting items as possible
+			/// </summary>
+			HeightLargest = 1 << 4,
+			/// <summary>
+			/// Display on the preview box without the square arrow button
+			/// </summary>
+			NoArrowButton = 1 << 5,
+
+			/// <summary>
+			/// Display only a square arrow button
+			/// </summary>
+			NoPreview = 1 << 6
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -903,6 +943,8 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void BeginDisabled();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndDisabled();
+		
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
 
 		public static void DockSpace(string id) => DockSpace(id, Vector2.Zero);
 		public static void DockSpace(string id, Vector2 size) => _DockSpace(id, ref size);
@@ -930,6 +972,15 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetNextItemWidth(float width);
+
+		public static Vector2 CalculateTextWidth(string text)
+		{
+			_CalculateTextWidth(text, out Vector2 output);
+			return output;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _CalculateTextWidth(string text, out Vector2 output);
 
 		public static void SetMouseCursor(MouseCursor cursor) => _SetMouseCursor((int)cursor);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMouseCursor(int type);
@@ -1502,6 +1553,52 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void NextColumn();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetColumnWidth(int column, float width);
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetColumnOffset(int column, float offset);
+		#endregion
+
+		#region Combos
+		public static bool BeginCombo(string label, string preview = "", ComboFlags flags = ComboFlags.None) => _BeginCombo(label, preview, (int)flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _BeginCombo(string label, string preview, int flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndCombo();
+
+		public static T EnumCombo<T>(string label, T currentValue, ComboFlags flags = ComboFlags.None) where T : Enum
+		{
+			Type type = typeof(T);
+			string currentValueStr = Enum.GetName(type, currentValue);
+			if (!BeginCombo(label, currentValueStr, flags))
+				return currentValue;
+			string[] values = Enum.GetNames(type);
+			for(int i = 0; i < values.Length; i++)
+			{
+				if (Selectable(values[i], values[i].Equals(currentValueStr)))
+					currentValue = (T)Enum.GetValues(type).GetValue(i);
+			}
+			EndCombo();
+
+			return currentValue;
+		}
+		
+		public static bool EnumCombo(string label, Type enumType, ref object currentValue, ComboFlags flags = ComboFlags.None)
+		{
+			string currentValueStr = Enum.GetName(enumType, currentValue);
+			if (!BeginCombo(label, currentValueStr, flags))
+				return false;
+			string[] values = Enum.GetNames(enumType);
+			bool changedValue = false;
+			for(int i = 0; i < values.Length; i++)
+			{
+				bool selected = values[i] == currentValueStr;
+				if (!Selectable(values[i], selected))
+					continue;
+				currentValue = Enum.GetValues(enumType).GetValue(i);
+				changedValue = true;
+
+				if (selected)
+					SetItemDefaultFocus();
+			}
+			EndCombo();
+			return changedValue;
+		}
 		#endregion
 	}
 }
