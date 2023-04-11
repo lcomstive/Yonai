@@ -1,5 +1,6 @@
 using AquaEngine;
 using AquaEngine.Graphics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AquaEditor.Views
@@ -70,13 +71,18 @@ namespace AquaEditor.Views
 			ImGUI.Separator();
 		}
 
-		private Texture ChooseImage(string vfsPath, string extension)
+		private List<string> ValidTextureExtensions = new List<string>() { ".png", ".jpg", ".jpeg", ".dds" };
+
+		private Texture ChooseImage(VFSFile file)
 		{
-			if (extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg") || extension.Equals(".dds"))
+			if (ValidTextureExtensions.Contains(file.Extension.ToLower()))
 			{
-				if (!Resource.Exists(vfsPath))
-					return Resource.Load<Texture>(vfsPath, new TextureImportSettings(vfsPath));
-				return Resource.Get<Texture>(vfsPath);
+				string resourcePath = file.FullPath
+										.Replace("project://Assets/", "Textures/")
+										.Replace(file.Extension, "");
+				if (!Resource.Exists(resourcePath))
+					return Resource.Load<Texture>(resourcePath, new TextureImportSettings(file.FullPath));
+				return Resource.Get<Texture>(resourcePath);
 			}
 
 			return null;
@@ -99,7 +105,7 @@ namespace AquaEditor.Views
 			foreach (VFSFile file in m_Files)
 			{
 				bool selected = file.FullPath.Equals(m_SelectedPath);
-				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file.FullPath, file.Extension);
+				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file);
 				if (m_ThumbnailSize > ThumbnailSizeRange.x)
 				{
 					if (selected) ImGUI.PopStyleColour();
@@ -120,6 +126,8 @@ namespace AquaEditor.Views
 				if (ImGUI.IsItemClicked())
 				{
 					m_SelectedPath = file.FullPath;
+					InspectorView.Target = file;
+
 					if(file.IsDirectory && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 						OpenDirectory($"{m_CurrentDirectory}/{file.FileName}");
 					// else handle inspector for file type

@@ -3,6 +3,8 @@ namespace AquaEditor
 {
 	public abstract class CustomInspector
 	{
+		public object Target { get; internal set; }
+
 		/// <summary>
 		/// Called when this inspector is opened
 		/// </summary>
@@ -14,8 +16,13 @@ namespace AquaEditor
 		public virtual void Closed() { }
 
 		/// <summary>
+		/// Called whenever <see cref="Target"/> gets set
+		/// </summary>
+		public virtual void OnTargetChanged() { }
+
+		/// <summary>
 		/// Called once per frame
 		/// </summary>
-		public abstract void DrawInspector(object target);
+		public abstract void DrawInspector();
 	}
 }

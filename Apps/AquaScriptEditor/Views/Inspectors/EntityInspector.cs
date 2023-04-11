@@ -3,15 +3,18 @@ using AquaEngine;
 using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
-using Newtonsoft.Json.Linq;
 
-namespace AquaEditor
+namespace AquaEditor.Inspectors
 {
 	[CustomInspector(typeof(Entity))]
 	public class EntityInspector : CustomInspector
 	{
+		private Entity m_Target;
+
 		public override void Opened() => SceneManager.WorldChanged += OnWorldChanged;
 		public override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
+
+		public override void OnTargetChanged() => m_Target = Target as Entity;
 
 		private void OnWorldChanged(World world, bool added)
 		{
@@ -20,21 +23,19 @@ namespace AquaEditor
 				InspectorView.Target = null;
 		}
 
-		public override void DrawInspector(object target)
+		public override void DrawInspector()
 		{
-			Entity entity = (Entity)target;
-
 			// Make sure entity still exists in world, hasn't been deleted
-			if(!entity.World.HasEntity(entity.ID))
+			if(!m_Target.World.HasEntity(m_Target.ID))
 			{
 				InspectorView.Target = null;
 				return;
 			}
 
 			NameComponent nameComponent;
-			if(!entity.TryGetComponent(out nameComponent))
+			if(!m_Target.TryGetComponent(out nameComponent))
 			{
-				nameComponent = entity.AddComponent<NameComponent>();
+				nameComponent = m_Target.AddComponent<NameComponent>();
 				nameComponent.Name = "Entity";
 			}
 
@@ -42,7 +43,7 @@ namespace AquaEditor
 			if (ImGUI.Input("##nameComponent", ref name))
 				nameComponent.Name = name;
 
-			Component[] components = entity.GetComponents();
+			Component[] components = m_Target.GetComponents();
 			foreach(Component component in components)
 				DrawComponentInspector(component);
 		}

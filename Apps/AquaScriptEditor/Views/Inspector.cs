@@ -28,33 +28,37 @@ namespace AquaEditor.Views
 				m_Target = value;
 
 				// Check for inspector type changes
-				if (previousType == newType)
+				if (previousType == newType && newType != typeof(VFSFile))
+				{
+					if(s_CurrentInspector != null)
+					{
+						s_CurrentInspector.Target = m_Target;
+						s_CurrentInspector.OnTargetChanged();
+					}
 					return; // Nothing further needs to be done
+				}
 
 				// Inform existing inspector of closure
 				s_CurrentInspector?.Closed();
 
-				while (newType != null)
+				if (newType == typeof(VFSFile))
 				{
-					if (s_Inspectors.ContainsKey(newType))
-					{
-						Log.Debug("Found valid inspector");
-						s_CurrentInspector = s_Inspectors[newType];
-						s_CurrentInspector.Opened();
-						break;
-					}
-					else
-					{
-						Log.Debug("No inspector found for this type");
-						s_CurrentInspector = null;
-					}
+					VFSFile vfsFile = (VFSFile)value;
+					s_CurrentInspector = FindInspector(vfsFile);
+				}
+				else
+					s_CurrentInspector = FindInspector(newType);
 
-					newType = newType.BaseType;
+				if(s_CurrentInspector != null)
+				{
+					s_CurrentInspector.Target = m_Target;
+					s_CurrentInspector.OnTargetChanged();
 				}
 			}
 		}
 
 		private static Dictionary<Type, CustomInspector> s_Inspectors = new Dictionary<Type, CustomInspector>();
+		private static Dictionary<string, CustomInspector> s_FileExtensions = new Dictionary<string, CustomInspector>();
 
 		[MenuItem("Window/Inspector")]
 		private static void MenuCallback() => EditorUIService.Open<InspectorView>();
@@ -65,7 +69,7 @@ namespace AquaEditor.Views
 			if (ImGUI.Begin("Inspector", ref isOpen))
 			{
 				if (Target != null && s_CurrentInspector != null)
-					s_CurrentInspector.DrawInspector(Target);
+					s_CurrentInspector.DrawInspector();
 				else
 					ImGUI.Text("No inspector found", Colour.Grey);
 			}
@@ -85,6 +89,8 @@ namespace AquaEditor.Views
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			foreach (Assembly assembly in assemblies)
 			{
+				if (assembly.Location.Contains("Mono"))
+					continue; // Don't check mono, system libs, and additional dependencies
 				try
 				{
 					Type[] types = assembly.GetTypes();
@@ -96,10 +102,7 @@ namespace AquaEditor.Views
 
 						CustomInspector instance = Activator.CreateInstance(type) as CustomInspector;
 						if (instance != null)
-						{
-							s_Inspectors.Add(attribute.TargetType, instance);
-							Log.Info($"Inspector added for '{type.Name}' -> '{attribute.TargetType.Name}'");
-						}
+							AddCustomInspector(attribute, instance);
 						else
 							Log.Warning($"CustomInspector attribute is on class '{type.Name}', but this class does not inherit AquaEditor.CustomInspector");
 					}
@@ -107,5 +110,39 @@ namespace AquaEditor.Views
 				catch { }
 			}
 		}
+
+		private static void AddCustomInspector(CustomInspectorAttribute attribute, CustomInspector inspector)
+		{
+			if (attribute.TargetType != null)
+				s_Inspectors.Add(attribute.TargetType, inspector);
+
+			if (attribute.FileExtensions == null)
+				return;
+
+			foreach(string extension in attribute.FileExtensions)
+			{
+				if(string.IsNullOrEmpty(extension)) continue;
+				string finalExtension = extension.ToLower();
+				if (finalExtension[0] != '.')
+					finalExtension = $".{finalExtension}";
+				s_FileExtensions.Add(finalExtension, inspector);
+			}
+		}
+
+		/// <summary>
+		/// Checks for valid inspector in <see cref="s_Inspectors"/> by type.
+		/// Searches recursively down inheritance tree, from topmost down to base type
+		/// </summary>
+		private static CustomInspector FindInspector(Type type)
+		{
+			if(type == null) return null;
+			if(s_Inspectors.ContainsKey(type))
+				return s_Inspectors[type];
+			return FindInspector(type.BaseType);
+		}
+
+		private static CustomInspector FindInspector(VFSFile file) =>
+			string.IsNullOrEmpty(file.Extension) || !s_FileExtensions.ContainsKey(file.Extension) ?
+				null : s_FileExtensions[file.Extension.ToLower()];
 	}
 }

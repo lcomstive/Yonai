@@ -66,8 +66,6 @@ namespace AquaEditor.Views
 
 				if (Application.Configuration == Application.BuildType.Debug)
 					ImGUI.Text("Debug Mode");
-				else
-					ImGUI.Text("Release mode");
 			}
 			ImGUI.End();
 

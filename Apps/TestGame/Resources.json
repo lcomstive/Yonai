@@ -25,6 +25,23 @@
     }
   },
   {
+    "ID": "2779618724205194954",
+    "Path": "Materials/Quad.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
     "ID": "4703241629601149887",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
@@ -50,6 +67,23 @@
     }
   },
   {
+    "ID": "3670077518237805139",
+    "Path": "Materials/Cube.fbx/Material",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
+    }
+  },
+  {
     "ID": "13025477543692575382",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
@@ -72,6 +106,23 @@
     "Type": "AquaEngine.Graphics.Model",
     "Properties": {
       "FilePath": "assets://Models/Sphere.fbx"
+    }
+  },
+  {
+    "ID": "11271616635690753222",
+    "Path": "Materials/Sphere.fbx/DefaultMaterial",
+    "Type": "AquaEngine.Graphics.Material",
+    "Properties": {
+      "Shader": "0",
+      "Albedo": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "AlbedoMap": "0",
+      "AlphaClipping": false,
+      "AlphaThreshold": 0.0
     }
   },
   {
@@ -217,6 +268,86 @@
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
       "FilePath": "project://Assets/Textures/texture_09.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "13244662237487838346",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "10420921694559561107",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_AO.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "6600924316434142067",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_metallic.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "12004197242399868836",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "12611372809424994724",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_roughness.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "9724062467198106251",
+    "Path": "project://Assets/Models/Backpack/1001_albedo",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "6320364132258043083",
+    "Path": "project://Assets/Models/Backpack/1001_AO",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_AO.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "11888693762898530147",
+    "Path": "project://Assets/Models/Backpack/1001_normal",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
       "HDR": false,
       "Filtering": 9729
     }
