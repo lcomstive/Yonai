@@ -876,8 +876,8 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SetNextWindowPos(ref Vector2 position);
 
-		public static void SetNextWindowSize(Vector2 position)
-			=> _SetNextWindowSize(ref position);
+		public static void SetNextWindowSize(Vector2 size)
+			=> _SetNextWindowSize(ref size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SetNextWindowSize(ref Vector2 position);
@@ -945,6 +945,7 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetCursorPos(out Vector2 value);
 
 		public static void SetCursorPos(Vector2 value) => _SetCursorPos(ref value);
+		public static void SetCursorPos(float x, float y) => SetCursorPos(new Vector2(x, y));
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetCursorPos(ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetCursorPosX(float value);

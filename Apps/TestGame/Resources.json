@@ -25,7 +25,7 @@
     }
   },
   {
-    "ID": "2779618724205194954",
+    "ID": "1016048050514700307",
     "Path": "Materials/Quad.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -67,7 +67,7 @@
     }
   },
   {
-    "ID": "3670077518237805139",
+    "ID": "2194120341339892453",
     "Path": "Materials/Cube.fbx/Material",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -109,7 +109,7 @@
     }
   },
   {
-    "ID": "11271616635690753222",
+    "ID": "4448345373550454632",
     "Path": "Materials/Sphere.fbx/DefaultMaterial",
     "Type": "AquaEngine.Graphics.Material",
     "Properties": {
@@ -348,6 +348,66 @@
     "Type": "AquaEngine.Graphics.Texture",
     "Properties": {
       "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "14294604170156252100",
+    "Path": "Textures/Textures/texture_09",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Textures/texture_09.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "15641546392252173802",
+    "Path": "Textures/Models/Backpack/1001_albedo",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_albedo.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "14391703339799532989",
+    "Path": "Textures/Models/Backpack/1001_AO",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_AO.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "14862132142598826002",
+    "Path": "Textures/Models/Backpack/1001_metallic",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_metallic.jpg",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "11572637606484521936",
+    "Path": "Textures/Models/Backpack/1001_normal",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_normal.png",
+      "HDR": false,
+      "Filtering": 9729
+    }
+  },
+  {
+    "ID": "3716911355606366642",
+    "Path": "Textures/Models/Backpack/1001_roughness",
+    "Type": "AquaEngine.Graphics.Texture",
+    "Properties": {
+      "FilePath": "project://Assets/Models/Backpack/1001_roughness.jpg",
       "HDR": false,
       "Filtering": 9729
     }

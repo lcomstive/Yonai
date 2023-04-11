@@ -1,5 +1,7 @@
 using AquaEngine;
 using AquaEngine.Graphics;
+using System;
+using System.Diagnostics.Eventing.Reader;
 
 namespace AquaEditor.Inspectors
 {
@@ -23,9 +25,42 @@ namespace AquaEditor.Inspectors
 			m_Settings = (TextureImportSettings)m_Target.ImportSettings;
 		}
 
+		private const float Padding = 20;
+		private const float MinSettingsHeight = 75;
+
 		public override void DrawInspector()
 		{
-			ImGUI.Image(m_Target, ImGUI.ContentRegionAvailable);
+			float aspectRatio = m_Target.Resolution.y / (float)m_Target.Resolution.x;
+			IVector2 region = ImGUI.ContentRegionAvailable;
+			float width = Math.Min(region.x, region.y - MinSettingsHeight);
+			Vector2 textureSize = new Vector2(width - Padding, (width - Padding) * aspectRatio);
+
+			ImGUI.BeginChild("TextureInspectorSettings",
+						new Vector2(0, Math.Max(region.y - textureSize.y - Padding, MinSettingsHeight)));
+			ImGUI.Checkbox("HDR", ref m_Settings.HDR);
+			ImGUI.Text("Filtering: " + Enum.GetName(typeof(TextureFiltering), m_Settings.Filtering));
+
+			if(PendingChanges())
+			{
+				if (ImGUI.Button("Revert"))
+					m_Settings = (TextureImportSettings)m_Target.ImportSettings;
+				ImGUI.SameLine();
+				if (ImGUI.Button("Apply"))
+					m_Target.Import(m_Settings);
+			}
+			ImGUI.EndChild();
+
+			ImGUI.SetCursorPos(
+				(region.x / 2.0f) - (textureSize.x / 2.0f) + Padding / 2,
+				ImGUI.WindowContentRegionMax.y - textureSize.y - Padding / 2);
+			ImGUI.Image(m_Target, textureSize);
+		}
+
+		private bool PendingChanges()
+		{
+			if (m_Settings.HDR != m_Target.HDR) return true;
+			if (m_Settings.Filtering != m_Target.Filter) return true;
+			return false;
 		}
 	}
 }

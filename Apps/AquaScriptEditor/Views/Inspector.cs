@@ -70,7 +70,7 @@ namespace AquaEditor.Views
 			{
 				if (Target != null && s_CurrentInspector != null)
 					s_CurrentInspector.DrawInspector();
-				else
+				else if(Target != null)
 					ImGUI.Text("No inspector found", Colour.Grey);
 			}
 

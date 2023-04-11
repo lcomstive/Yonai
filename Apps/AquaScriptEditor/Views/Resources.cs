@@ -1,7 +1,8 @@
+using System;
 using AquaEngine;
+using System.Linq;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AquaEditor.Views
 {
@@ -99,8 +100,8 @@ namespace AquaEditor.Views
 			float cellsize = m_ThumbnailSize + m_Padding;
 			float panelWidth = ImGUI.ContentRegionAvailable.x;
 
-			if(m_ThumbnailSize > ThumbnailSizeRange.x)
-				ImGUI.Columns((int)(panelWidth / cellsize), string.Empty, false);
+			if (m_ThumbnailSize > ThumbnailSizeRange.x)
+				ImGUI.Columns(Math.Max((int)(panelWidth / cellsize), 1), string.Empty, false);
 
 			foreach (VFSFile file in m_Files)
 			{
@@ -139,8 +140,14 @@ namespace AquaEditor.Views
 			ImGUI.Columns(1);
 			ImGUI.EndChild();
 
-			if(ImGUI.IsItemClicked())
+			if (ImGUI.IsItemClicked())
+			{
 				m_SelectedPath = string.Empty;
+
+				// Check if inspector target is resource from this view
+				if(InspectorView.Target != null && InspectorView.Target is VFSFile)
+					InspectorView.Target = null; // Clear
+			}
 		}
 
 		private void DrawSizeSlider()
