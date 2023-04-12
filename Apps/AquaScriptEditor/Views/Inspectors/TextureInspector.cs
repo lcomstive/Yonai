@@ -24,42 +24,57 @@ namespace AquaEditor.Inspectors
 			m_Settings = (TextureImportSettings)m_Target.ImportSettings;
 		}
 
-		private const float Padding = 20;
-		private const float MinSettingsHeight = 125;
-
+		private float m_TexturePreviewHeight = -1;
+		private const float TexturePreviewMinHeight = 10;
+		private const float SplitterWidth = 7.5f;
 		public override void DrawInspector()
 		{
-			float aspectRatio = m_Target.Resolution.y / (float)m_Target.Resolution.x;
 			IVector2 region = ImGUI.ContentRegionAvailable;
-			float width = Math.Min(region.x, region.y - MinSettingsHeight);
-			Vector2 textureSize = new Vector2(width - Padding, (width - Padding) * aspectRatio);
 
-			ImGUI.BeginChild("TextureInspectorSettings",
-						new Vector2(0, Math.Max(region.y - textureSize.y - Padding, MinSettingsHeight)));
-			ImGUI.Checkbox("HDR", ref m_Settings.HDR);
-			m_Settings.Filtering = ImGUI.EnumCombo("Filtering", m_Settings.Filtering);
+			if (m_TexturePreviewHeight < 0)
+				m_TexturePreviewHeight = region.y * 0.4f;
 
-			if(PendingChanges())
+			// Import settings //
+			ImGUI.BeginChild("TextureInspectorSettings", new Vector2(0, region.y - m_TexturePreviewHeight - SplitterWidth * 2));
 			{
-				if (ImGUI.Button("Revert"))
-					m_Settings = (TextureImportSettings)m_Target.ImportSettings;
+				ImGUI.Text(m_Target.FilePath.Replace("project://Assets/", ""));
 				ImGUI.SameLine();
-				if (ImGUI.Button("Apply"))
-					m_Target.Import(m_Settings);
+				ImGUI.Text($"({m_Target.Resolution.x}x{m_Target.Resolution.y})", Colour.Grey);
+
+				ImGUI.Space();
+				ImGUI.Separator();
+				ImGUI.Space();
+
+				ImGUI.Checkbox("HDR", ref m_Settings.HDR);
+				m_Settings.Filtering = ImGUI.EnumCombo("Filtering", m_Settings.Filtering);
+
+				if (PendingChanges())
+				{
+					if (ImGUI.Button("Revert"))
+						m_Settings = (TextureImportSettings)m_Target.ImportSettings;
+					ImGUI.SameLine();
+					if (ImGUI.Button("Apply"))
+						m_Target.Import(m_Settings);
+				}
 			}
 			ImGUI.EndChild();
 
-			string resolutionText = $"({m_Target.Resolution.x}x{m_Target.Resolution.y})";
-			Vector2 resolutionTextSize = ImGUI.CalculateTextWidth(resolutionText);
-			ImGUI.SetCursorPos(
-				(region.x / 2.0f) - resolutionTextSize.x / 2.0f + Padding / 2,
-				ImGUI.WindowContentRegionMax.y - textureSize.y - Padding / 2 - resolutionTextSize.y * 1.25f);
-			ImGUI.Text(resolutionText, Colour.Grey);
+			ImGUI.InvisibleButton("TextureInspectorTextureSplitter", new Vector2(-1, SplitterWidth));
+			if (ImGUI.IsItemHovered()) ImGUI.SetMouseCursor(ImGUI.MouseCursor.ResizeNS);
+			if (ImGUI.IsItemActive()) m_TexturePreviewHeight = MathUtils.Clamp(m_TexturePreviewHeight - ImGUI.GetMouseDeltaY(), TexturePreviewMinHeight, region.y - TexturePreviewMinHeight);
 
-			ImGUI.SetCursorPos(
-				(region.x / 2.0f) - (textureSize.x / 2.0f) + Padding / 2,
-				ImGUI.WindowContentRegionMax.y - textureSize.y - Padding / 2);
-			ImGUI.Image(m_Target, textureSize);
+			ImGUI.PushStyleVar(ImGUI.StyleVar.FramePadding, Vector2.Zero);
+			ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, Colour.Black);
+			ImGUI.BeginChild("TextureInspectorPreview", new Vector2(0, m_TexturePreviewHeight));
+			{
+				float aspectRatio = m_Target.Resolution.y / (float)m_Target.Resolution.x;
+				float width = Math.Min(region.x, m_TexturePreviewHeight);
+				ImGUI.SetCursorPos(region.x / 2.0f - width / 2, 0);
+				ImGUI.Image(m_Target, new Vector2(width, width * aspectRatio));
+			}
+			ImGUI.EndChild();
+			ImGUI.PopStyleVar();
+			ImGUI.PopStyleColour();
 		}
 
 		private bool PendingChanges()

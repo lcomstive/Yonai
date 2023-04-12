@@ -49,6 +49,9 @@ ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor)
 { return ImGui::IsItemClicked(); }
 
+ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), AquaEditor)
+{ return ImGui::IsItemActive(); }
+
 ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), AquaEditor)
 { return ImGui::IsMouseClicked(button); }
 
@@ -516,6 +519,14 @@ ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
 	return output;
 }
 
+ADD_MANAGED_METHOD(ImGUI, _InvisibleButton, bool, (MonoString* labelRaw, glm::vec2* size), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	bool output = ImGui::InvisibleButton(label, ImVec2(size->x, size->y));
+	mono_free(label);
+	return output;
+}
+
 ADD_MANAGED_METHOD(ImGUI, _Selectable, bool, (MonoString* labelRaw, bool selected, int flags, glm::vec2* size), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
@@ -612,6 +623,15 @@ ADD_MANAGED_METHOD(ImGUI, _DockSpace, void, (MonoString* idRaw, glm::vec2* size)
 	ImGui::DockSpace(ImGui::GetID(id), ImVec2(size->x, size->y));
 	mono_free(id);
 }
+
+ADD_MANAGED_METHOD(ImGUI, _GetMouseDelta, void, (glm::vec2* output), AquaEditor)
+{
+	ImVec2 delta = ImGui::GetIO().MouseDelta;
+	*output = glm::vec2(delta.x, delta.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, GetMouseDeltaX, float, (), AquaEditor) { return ImGui::GetIO().MouseDelta.x; }
+ADD_MANAGED_METHOD(ImGUI, GetMouseDeltaY, float, (), AquaEditor) { return ImGui::GetIO().MouseDelta.y; }
 
 // VIEWPORT //
 ADD_MANAGED_METHOD(ImGUI, _GetViewport, void,

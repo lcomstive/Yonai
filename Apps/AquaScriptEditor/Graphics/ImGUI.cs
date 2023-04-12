@@ -930,6 +930,7 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemHovered();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemClicked();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActive();
 
 		public static bool IsMouseClicked(MouseButton button) => _IsMouseClicked((int)button);
 		public static bool IsMouseDoubleClicked(MouseButton button) => _IsMouseDoubleClicked((int)button);
@@ -1007,6 +1008,16 @@ namespace AquaEditor
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void BeginGroup();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndGroup();
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetMouseDeltaX();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetMouseDeltaY();
+
+		public static Vector2 GetMouseDelta()
+		{
+			_GetMouseDelta(out Vector2 output);
+			return output;
+		}
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void _GetMouseDelta(out Vector2 output);
 		#endregion
 
 		#region Controls
@@ -1036,6 +1047,9 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Button(string label);
+
+		public static bool InvisibleButton(string label, Vector2 size) => _InvisibleButton(label, ref size);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _InvisibleButton(string label, ref Vector2 size);
 
 		public static bool Selectable(string label, bool selected = false, SelectableFlags flags = SelectableFlags.None) =>
 			Selectable(label, Vector2.Zero, selected, flags);
