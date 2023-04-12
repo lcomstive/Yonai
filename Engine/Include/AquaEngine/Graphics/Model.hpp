@@ -22,6 +22,7 @@ namespace AquaEngine::Graphics
 
 		MeshData m_Root;
 		std::string m_Path;
+		bool m_ImportMaterials;
 		std::vector<ResourceID> m_MeshIDs;
 
 		void Load();
@@ -35,8 +36,13 @@ namespace AquaEngine::Graphics
 		Model();
 		Model(std::string& path);
 
-		void Import(const char* path);
-		void Import(std::string path);
+		void Import(const char* path, bool importMaterials = true);
+		void Import(std::string path, bool importMaterials = true);
+
+		/// <summary>
+		/// When true, materials are imported
+		/// </summary>
+		bool ImportMaterials();
 
 		std::vector<ResourceID> GetMeshes();
 

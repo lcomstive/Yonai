@@ -15,37 +15,32 @@ namespace AquaEditor
 	{
 		public const string IconDirectory = "assets://Textures/Icons";
 		
-		public const string SavePath = "Kenney/save";
+		public const string SavePath = "assets://Textures/Icons/Kenney/save.png";
 		public static Texture Save { get; private set; }
 
-		public const string SettingsPath = "Kenney/gear";
+		public const string SettingsPath = "assets://Textures/Icons/Kenney/gear.png";
 		public static Texture Settings { get; private set; }
 
-		public const string FolderPath = "Folder";
+		public const string FolderPath = "assets://Textures/Icons/Folder.png";
 		public static Texture Folder { get; private set; }
 
-		public const string UpPath = "Kenney/up";
+		public const string UpPath = "assets://Textures/Icons/Kenney/up.png";
 		public static Texture Up { get; private set; }
 
-		public const string DownPath = "Kenney/down";
+		public const string DownPath = "assets://Textures/Icons/Kenney/down.png";
 		public static Texture Down { get; private set; }
 
 		internal static void Load()
 		{
-			Log.Trace("Loading icons...");
+			Log.Info("Loading icons...");
 			VFSFile[] files = VFS.GetFiles(IconDirectory, true);
 			foreach (VFSFile file in files)
 			{
 				if (!file.Extension.Equals(".png"))
 					continue;
 
-				// Get file path without root directory
-				string path = file.FullPath.Replace(IconDirectory, "").TrimStart('/');
-				// Remove file extension
-				path = path.Substring(0, path.Length - file.Extension.Length);
-
 				// Load texture
-				Resource.Load<Texture>(path, new TextureImportSettings(file.FullPath) { Filtering = TextureFiltering.Nearest });
+				Resource.Load<Texture>(file.FullPath, new TextureImportSettings() { Filtering = TextureFiltering.Nearest });
 			}
 
 			Save		= Resource.Get<Texture>(SavePath);
@@ -99,8 +94,16 @@ namespace AquaEditor
 
 		protected override void Update()
 		{
-			foreach (var pair in m_ActiveViews)
-				pair.Value._Update();
+			View[] views = m_ActiveViews.Values.ToArray();
+			foreach (View view in views)
+			{
+				try { view._Update(); }
+				catch (Exception e)
+				{
+					Log.Exception(e, $"View '{view.GetType().Name}' failed");
+					m_ActiveViews.Remove(view.GetType());
+				}
+			}
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
@@ -343,11 +346,8 @@ namespace AquaEditor
 				nameComponent.Name = "Entity";
 
 				SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
-				renderer.Sprite = Resource.Load<Texture>(
-					"Textures/Texture/Test_Texture09",
-					new TextureImportSettings("assets://Textures/texture_09.png")
-				);
-				renderer.Shader = Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderImportSettings()
+				renderer.Sprite = Resource.Load<Texture>("assets://Textures/texture_09.png");
+				renderer.Shader = Resource.Load<Shader>("assets://Shaders/NewSprite.shader", new ShaderImportSettings()
 				{
 					VertexPath = "assets://Shaders/Sprite.vert",
 					FragmentPath = "assets://Shaders/NewSprite.frag"
@@ -359,11 +359,8 @@ namespace AquaEditor
 
 		private void LoadTestScene()
 		{
-			Resource.Load<Texture>(
-				"Textures/Texture/Test_Texture09",
-				new TextureImportSettings("assets://Textures/texture_09.png")
-			);
-			Resource.Load<Shader>("Shaders/NewSpriteShader", new ShaderImportSettings()
+			Resource.Load<Texture>("assets://Textures/texture_09.png");
+			Resource.Load<Shader>("assets://Shaders/NewSprite.shader", new ShaderImportSettings()
 			{
 				VertexPath = "assets://Shaders/Sprite.vert",
 				FragmentPath = "assets://Shaders/NewSprite.frag"

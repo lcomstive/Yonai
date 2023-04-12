@@ -73,10 +73,10 @@ namespace AquaEngine
 		/// If resource at virtual path already exists, returns existing resource.
 		/// When resource is not found at virtual path, creates new one with given args.
 		/// </summary>
-		/// <param name="path">Virtual path to give loaded resource. This is a name used only for loading resources and does not represent a filepath.</param>
+		/// <param name="path">Asset filepath, usable from VFS</param>
 		/// <param name="args">Arguments to pass to resource during creation</param>
 		/// <returns>Found or created instance of resource</returns>
-		public static T Load<T>(string path, IImportSettings importSettings) where T : ResourceBase, new()
+		public static T Load<T>(string path, IImportSettings importSettings = null) where T : ResourceBase, new()
 		{
 			// Check for existing cached instance 
 			UUID resourceID = GetID(path);
@@ -86,6 +86,8 @@ namespace AquaEngine
 			T instance = new T();
 			instance.ResourcePath = path;
 			instance.ResourceID = resourceID;
+
+			Log.Trace($"Loading '{path}' ({typeof(T).Name})");
 
 			// Check if native instance exists
 			if(resourceID == UUID.Invalid)
@@ -109,6 +111,8 @@ namespace AquaEngine
 				LoadExistingUnmanagedResource(instance, resourceID);
 				s_Paths.Add(path, resourceID);
 			}
+
+			SaveToDisk(instance, true);
 
 			return instance;
 		}
@@ -238,10 +242,6 @@ namespace AquaEngine
 				if(!resourceType.Namespace.StartsWith("AquaEngine"))
 					resource["Type"] += ", " + resourceType.Assembly.GetName();
 
-				ISerializable serializable = pair.Value as ISerializable;
-				if(serializable != null)
-					resource["Properties"] = serializable.OnSerialize();
-
 				resources.Add(resource);
 			}
 
@@ -273,9 +273,7 @@ namespace AquaEngine
 				Type type = Type.GetType(typeName);
 
 				ResourceBase instance = Load(id, resourcePath, type);
-
-				if(typeof(ISerializable).IsAssignableFrom(type))
-					((ISerializable)instance).OnDeserialize(resource["Properties"].Value<JObject>());
+				LoadFromDisk(instance, true);
 			}
 
 			CreateDefaultResources();
@@ -302,25 +300,90 @@ namespace AquaEngine
 		private static void CreateDefaultResources()
 		{
 			// Textures //
-			Load<Texture>("Textures/Missing", new TextureImportSettings("assets://Textures/Grid.png"));
+			Load<Texture>("assets://Textures/Grid.png");
 
 			// Materials //
-			Load<Material>("Materials/Default3D", new MaterialImportSettings()
+			Load<Material>("assets://Materials/Default3D.material", new MaterialImportSettings()
 			{
-				Shader = Load<Shader>("Shaders/3D/Default", new ShaderImportSettings()
+				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings()
 				{
 					VertexPath = "assets://Shaders/Lit.vert",
 					FragmentPath = "assets://Shaders/Lit.frag"
 				})
 			});
-			Load<Material>("Materials/Default2D", new MaterialImportSettings()
+			Load<Material>("assets://Materials/Default2D.material", new MaterialImportSettings()
 			{
-				Shader = Load<Shader>("Shaders/2D/Default", new ShaderImportSettings()
+				Shader = Load<Shader>("assets://Shaders/Default2D.shader", new ShaderImportSettings()
 				{
 					VertexPath = "assets://Shaders/Sprite.vert",
 					FragmentPath = "assets://Shaders/Sprite.frag"
 				})
 			});
+		}
+
+		public static void SaveToDisk(ResourceBase resource, bool suppressWarnings = false)
+		{
+			if (resource == null) return;
+
+			ISerializable serializable = resource as ISerializable;
+			if(serializable == null)
+			{
+				if(!suppressWarnings)
+					Log.Warning($"Failed to serialize '{resource.ResourcePath}' - Not a serializable type");
+				return;
+			}
+
+			SerializeFileOptionsAttribute serializeFileOptions = resource.GetType().GetCustomAttribute<SerializeFileOptionsAttribute>();
+			string path = resource.ResourcePath;
+			if (serializeFileOptions != null)
+				path += ".cache";
+			path = VFS.GetAbsolutePath(path);
+
+			string directory = resource.ResourcePath.Substring(0, resource.ResourcePath.LastIndexOf('/'));
+			Log.Debug($"Checking directory {directory}..."); 
+			VFS.CreateDirectory(directory);
+
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Formatting = Formatting.Indented;
+
+			using (StreamWriter streamWriter = new StreamWriter(path))
+			using (JsonWriter writer = new JsonTextWriter(streamWriter))
+				serializer.Serialize(writer, serializable.OnSerialize());
+		}
+
+		public static void LoadFromDisk(ResourceBase resource, bool suppressWarnings = false)
+		{
+			if(resource == null) return;
+
+			ISerializable serializable = resource as ISerializable;
+			if (serializable == null)
+			{
+				if (!suppressWarnings)
+					Log.Warning($"Failed to serialize '{resource.ResourcePath}' - Not a serializable type");
+				return;
+			}
+
+			SerializeFileOptionsAttribute serializeFileOptions = resource.GetType().GetCustomAttribute<SerializeFileOptionsAttribute>();
+			string path = resource.ResourcePath;
+			if (serializeFileOptions != null)
+				path += ".cache";
+
+			if (!VFS.Exists(path))
+			{
+				if (!suppressWarnings)
+					Log.Warning($"Failed to serialize '{resource.ResourcePath}' - VFS could not get path");
+				return;
+			}
+			path = VFS.GetAbsolutePath(path, true);
+
+			Log.Trace($"Loading resource '{path}'...");
+
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Formatting = Formatting.Indented;
+
+			using (StreamReader streamReader = new StreamReader(path))
+			using (JsonReader reader = new JsonTextReader(streamReader))
+				serializable.OnDeserialize(serializer.Deserialize<JObject>(reader));
 		}
 
 		#region Internal Calls

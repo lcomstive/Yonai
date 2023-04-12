@@ -15,21 +15,19 @@ namespace AquaEngine.Graphics
 	public struct TextureImportSettings : IImportSettings
 	{
 		public bool HDR;
-		public string FilePath;
 		public TextureFiltering Filtering;
 
-		public TextureImportSettings(string filePath, bool hdr = false, TextureFiltering filtering = TextureFiltering.Linear)
+		public TextureImportSettings(bool hdr = false, TextureFiltering filtering = TextureFiltering.Linear)
 		{
 			HDR = hdr;
-			FilePath = filePath;
 			Filtering = filtering;
 		}
 	}
 
+	[SerializeFileOptions(SaveSeparateFile = true)]
 	public class Texture : NativeResourceBase, ISerializable
 	{
 		public bool HDR => m_ImportSettings.HDR;
-		public string FilePath => m_ImportSettings.FilePath;
 
 		public IVector2 Resolution
 		{
@@ -42,7 +40,7 @@ namespace AquaEngine.Graphics
 
 		public TextureFiltering Filter => m_ImportSettings.Filtering;
 
-		private TextureImportSettings m_ImportSettings;
+		private TextureImportSettings m_ImportSettings => (TextureImportSettings)ImportSettings;
 
 		protected override void OnLoad()
 		{
@@ -53,9 +51,8 @@ namespace AquaEngine.Graphics
 			ResourceID = resourceID;
 			Handle = handle;
 
-			m_ImportSettings = new TextureImportSettings()
+			ImportSettings = new TextureImportSettings()
 			{
-				FilePath = _GetPath(Handle),
 				HDR = _GetHDR(Handle),
 				Filtering = (TextureFiltering)_GetFilter(Handle)
 			};
@@ -65,16 +62,15 @@ namespace AquaEngine.Graphics
 
 		protected override void OnImported()
 		{
-			if (!TryGetImportSettings(out m_ImportSettings))
-				Log.Warning("Texture.OnImport invalid import settings?");
-			_Import(Handle, FilePath, HDR, (int)Filter);
+			TryGetImportSettings(out TextureImportSettings importSettings);
+			ImportSettings = importSettings;
+			_Import(Handle, ResourcePath, HDR, (int)Filter);
 		}
 
 		public void Bind(uint index = 0) => _Bind(Handle, index);
 
 		public JObject OnSerialize() =>
 			new JObject(
-				new JProperty("FilePath", FilePath),
 				new JProperty("HDR", HDR),
 				new JProperty("Filtering", (int)Filter)
 			);
@@ -83,14 +79,13 @@ namespace AquaEngine.Graphics
 			Import(new TextureImportSettings()
 			{
 				HDR		  = json["HDR"].Value<bool>(),
-				FilePath  = json["FilePath"].Value<string>(),
 				Filtering = (TextureFiltering)json["Filtering"].Value<int>()
 			});
 			
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filePath, bool hdr, int filter);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, bool hdr, int filter);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(IntPtr handle);

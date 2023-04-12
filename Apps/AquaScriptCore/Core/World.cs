@@ -8,7 +8,7 @@ using System.Linq;
 namespace AquaEngine
 {
 	public class World : ISerializable
-	{
+	{		
 		public string Name { get; private set; }
 		public UUID ID { get; private set; }
 

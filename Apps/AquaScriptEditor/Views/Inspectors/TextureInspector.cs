@@ -16,12 +16,11 @@ namespace AquaEditor.Inspectors
 			if(Target is VFSFile)
 			{
 				VFSFile file = (VFSFile)Target;
-				string resourcePath = file.FullPath.Replace("project://Assets/", "Textures/").Replace(file.Extension, "");
-				m_Target = Resource.Load<Texture>(resourcePath, new TextureImportSettings(file.FullPath));
+				m_Target = Resource.Load<Texture>(file.FullPath);
 			}
 			else // Is Texture object
 				m_Target = Target as Texture;
-			m_Settings = (TextureImportSettings)m_Target.ImportSettings;
+			m_Settings = (TextureImportSettings)m_Target?.ImportSettings;
 		}
 
 		private float m_TexturePreviewHeight = -1;
@@ -37,7 +36,7 @@ namespace AquaEditor.Inspectors
 			// Import settings //
 			ImGUI.BeginChild("TextureInspectorSettings", new Vector2(0, region.y - m_TexturePreviewHeight - SplitterWidth * 2));
 			{
-				ImGUI.Text(m_Target.FilePath.Replace("project://Assets/", ""));
+				ImGUI.Text(m_Target.ResourcePath.Replace("project://Assets/", ""));
 				ImGUI.SameLine();
 				ImGUI.Text($"({m_Target.Resolution.x}x{m_Target.Resolution.y})", Colour.Grey);
 

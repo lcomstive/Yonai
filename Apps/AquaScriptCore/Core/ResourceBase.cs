@@ -1,4 +1,6 @@
+using Newtonsoft.Json;
 using System;
+using System.IO;
 
 namespace AquaEngine
 {
@@ -49,6 +51,11 @@ namespace AquaEngine
 		{
 			ImportSettings = settings;
 			OnImported();
+		}
+
+		public void LoadFromDisk()
+		{
+
 		}
 
 		/// <summary>

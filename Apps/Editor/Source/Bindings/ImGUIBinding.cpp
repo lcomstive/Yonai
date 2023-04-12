@@ -585,6 +585,40 @@ ADD_MANAGED_METHOD(ImGUI, _BeginPopup, bool, (MonoString* idRaw, int flags), Aqu
 }
 ADD_MANAGED_METHOD(ImGUI, EndPopup, void, (), AquaEditor) { ImGui::EndPopup(); }
 
+ADD_MANAGED_METHOD(ImGUI, IsPopupOpen, bool, (MonoString* idRaw), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	bool output = ImGui::IsPopupOpen(id);
+	mono_free(id);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, _BeginPopupModalOpen, bool, (MonoString* idRaw, bool* isOpen, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	bool output = ImGui::BeginPopupModal(id, isOpen, flags);
+	mono_free(id);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, _BeginPopupModal, bool, (MonoString* idRaw, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	bool output = ImGui::BeginPopupModal(id, nullptr, flags);
+	mono_free(id);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, _OpenPopup, void, (MonoString* idRaw, int flags), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	ImGui::OpenPopup(id, flags);
+	mono_free(id);
+}
+
+ADD_MANAGED_METHOD(ImGUI, CloseCurrentPopup, void, (), AquaEditor)
+{ ImGui::CloseCurrentPopup(); }
+
 ADD_MANAGED_METHOD(ImGUI, Separator, void, (), AquaEditor) { ImGui::Separator(); }
 
 ADD_MANAGED_METHOD(ImGUI, PushItemWidth, void, (float width), AquaEditor)

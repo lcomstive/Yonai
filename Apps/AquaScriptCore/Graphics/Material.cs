@@ -26,6 +26,8 @@ namespace AquaEngine.Graphics
 
 	public class Material : NativeResourceBase, ISerializable
 	{
+		public bool SerializeAsCache => false;
+		
 		private MaterialImportSettings m_Settings;
 
 		private Shader m_Shader = null;

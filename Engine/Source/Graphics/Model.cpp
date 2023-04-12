@@ -19,17 +19,19 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
-Model::Model() : m_Path(""), m_Root(), m_MeshIDs() { }
+Model::Model() : m_Path(""), m_Root(), m_MeshIDs(), m_ImportMaterials(true) { }
 Model::Model(string& path) : Model() { Import(path); }
 
-void Model::Import(const char* path) { Import(string(path)); }
-void Model::Import(string path)
+void Model::Import(const char* path, bool importMaterials) { Import(string(path), importMaterials); }
+void Model::Import(string path, bool importMaterials)
 {
 	if (!m_Path.empty())
 		// Release previous model
 		m_Root = {};
 
 	m_Path = path;
+	m_ImportMaterials = importMaterials;
+
 	Load();
 }
 
@@ -45,14 +47,20 @@ void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 	transform->Rotation = eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z });
 }
 
+bool Model::ImportMaterials() { return m_ImportMaterials; }
 vector<ResourceID> Model::GetMeshes() { return m_MeshIDs; }
 
 void Model::CreateMeshMaterialPair(const MeshData& data, vector<pair<ResourceID, ResourceID>>& output)
 {
-	size_t count = std::min(data.MeshIDs.size(), data.MaterialIDs.size());
-	output.reserve(count);
-	for(size_t i = 0; i < count; i++)
-		output.emplace_back(make_pair(m_MeshIDs[data.MeshIDs[i]], data.MaterialIDs[i]));
+	size_t meshCount = data.MeshIDs.size();
+	size_t materialCount = data.MaterialIDs.size();
+	size_t max = std::max(meshCount, materialCount);
+	output.reserve(max);
+	for(size_t i = 0; i < max; i++)
+		output.emplace_back(make_pair(
+			i < meshCount ? m_MeshIDs[data.MeshIDs[i]] : InvalidResourceID,
+			i < materialCount ? data.MaterialIDs[i] : InvalidResourceID
+		));
 
 	for(const MeshData& child : data.Children)
 		CreateMeshMaterialPair(child, output);
@@ -85,7 +93,7 @@ void Model::Load()
 		return;
 	}
 	string extension = filesystem::path(m_Path).extension().string();
-	// Log::Debug("TESTING EXTENSION '" + extension + "'");
+
 	scene = importer.ReadFileFromMemory(
 		modelData.data(),
 		modelData.size(),
@@ -164,6 +172,10 @@ void Model::ProcessNode(aiNode* node, MeshData* parent, const aiScene* scene)
 	{
 		meshData.MeshIDs.emplace_back(node->mMeshes[i]);
 
+		if (!m_ImportMaterials)
+			continue;
+
+		// Import material
 		aiMaterial* material = scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex];
 		meshData.MaterialIDs.emplace_back(CreateMaterial(material));
 	}
@@ -227,8 +239,8 @@ ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, voi
 	mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath), AquaEngine.Graphics)
-{ ((Model*)handle)->Import(mono_string_to_utf8(filepath)); }
+ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, bool importMaterials), AquaEngine.Graphics)
+{ ((Model*)handle)->Import(mono_string_to_utf8(filepath), importMaterials); }
 
 ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
 {

@@ -2,19 +2,23 @@
 using AquaEngine.IO;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
+using System.Net.Configuration;
 
 namespace AquaEngine.Graphics
 {
 	public struct ModelImportSettings : IImportSettings
 	{
-		public string FilePath;
+		public bool ImportMaterials;
 
-		public ModelImportSettings(string filePath) => FilePath = filePath;
+		public ModelImportSettings(bool importMaterials = true) => ImportMaterials = importMaterials;
 	}
 
+	[SerializeFileOptions(SaveSeparateFile = true)]
 	public class Model : NativeResourceBase, ISerializable
 	{
-		public string FilePath { get; private set; }
+		public bool SerializeAsCache => true;
+		
+		public bool ImportMaterials { get; private set; }
 
 		public struct MeshData
 		{
@@ -48,27 +52,26 @@ namespace AquaEngine.Graphics
 		{
 			// Load model
 			TryGetImportSettings(out ModelImportSettings settings);
-			_Import(Handle, FilePath = settings.FilePath);
+			_Import(Handle, ResourcePath, ImportMaterials = settings.ImportMaterials);
 
 			// Get meshes
 			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
 
 			Meshes = new MeshData[meshIDs.Length];
 			for (int i = 0; i < meshIDs.Length; i++)
-				// TODO: ERROR HERE. TRYING TO GET MATERIAL BUT MESH ID
 				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
 
 		}
 
 		public JObject OnSerialize() => new JObject(
-				new JProperty("FilePath", FilePath)
+				new JProperty("ImportMaterials", ImportMaterials)
 			);
 
-		public void OnDeserialize(JObject json) => Import(new ModelImportSettings() { FilePath = json["FilePath"].Value<string>() });
+		public void OnDeserialize(JObject json) => Import(new ModelImportSettings(json["ImportMaterials"].Value<bool>()));
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, bool importMaterials);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMeshes(IntPtr handle, out ulong[] meshIDs, out ulong[] materialIDs);
 		#endregion

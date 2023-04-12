@@ -1429,6 +1429,18 @@ namespace AquaEditor
 		public static bool BeginPopup(string id, WindowFlags flags = WindowFlags.None) =>
 			_BeginPopup(id, (int)flags);
 
+		public static void OpenPopup(string id, WindowFlags flags = WindowFlags.None) =>
+			_OpenPopup(id, (int)flags);
+
+		public static bool BeginPopupModal(string id, WindowFlags flags = WindowFlags.None) =>
+			_BeginPopupModal(id, (int)flags);
+
+		public static bool BeginPopupModal(string id, bool isOpen, WindowFlags flags = WindowFlags.None) =>
+			_BeginPopupModalOpen(id, ref isOpen, (int)flags);
+
+		public static bool BeginPopupModal(string id, ref bool isOpen, WindowFlags flags = WindowFlags.None) =>
+			_BeginPopupModalOpen(id, ref isOpen, (int)flags);
+
 		public static bool BeginPopupContextItem(string id, PopupFlags flags = PopupFlags.None) =>
 			_BeginPopupContextItem(id, (int)flags);
 
@@ -1436,10 +1448,25 @@ namespace AquaEditor
 		private static extern bool _BeginPopupContextItem(string id, int flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsPopupOpen(string id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _BeginPopup(string id, int flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _BeginPopupModal(string id, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _BeginPopupModalOpen(string id, ref bool isOpen, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _OpenPopup(string id, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndPopup();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void CloseCurrentPopup();
 		#endregion
 
 		#region Viewport

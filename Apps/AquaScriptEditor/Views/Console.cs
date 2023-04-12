@@ -95,11 +95,12 @@ namespace AquaEditor.Views
 					ImGUI.Space();
 				}
 				ImGUI.EndChild();
+				ImGUI.PopStyleVar();
 			}
 
 			ImGUI.End();
 			ImGUI.PopStyleColour();
-			ImGUI.PopStyleVar(2);
+			ImGUI.PopStyleVar();
 
 			// Check if window requested to be closed
 			if (!isOpen)

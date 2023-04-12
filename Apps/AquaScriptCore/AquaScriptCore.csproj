@@ -48,7 +48,8 @@
     <!-- Attributes -->
     <Compile Include="Attributes/HideInInspectorAttribute.cs" />
     <Compile Include="Attributes/RangeAttribute.cs" />
-    <Compile Include="Attributes/ShouldSerializeAttribute.cs" />
+    <Compile Include="Attributes/SerializeFileOptionsAttribute.cs" />
+    <Compile Include="Attributes/SerializeAttribute.cs" />
     <Compile Include="Attributes/ShowInInspectorAttribute.cs" />
  
     <!-- Audio -->

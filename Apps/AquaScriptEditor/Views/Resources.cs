@@ -15,6 +15,12 @@ namespace AquaEditor.Views
 		private string m_SelectedPath;
 		private string m_CurrentDirectory = RootDirectory;
 
+		// New name popup
+		private const string NewFilePopupName = "ResourcesNewFilePopup";
+		private string m_NewFileName = string.Empty;
+		private Action<string> m_NewNamePopupFinishAction = null;
+		private bool m_NewNameModalOpen = false;
+
 		private const string RootDirectory = "project://Assets";
 		private static readonly IVector2 ThumbnailSizeRange = new IVector2(32, 96);
 
@@ -33,6 +39,8 @@ namespace AquaEditor.Views
 				DrawSizeSlider();
 			}
 			ImGUI.End();
+			
+			NewFilePopup();
 
 			// Check if window requested to be closed
 			if (!isOpen)
@@ -78,12 +86,9 @@ namespace AquaEditor.Views
 		{
 			if (ValidTextureExtensions.Contains(file.Extension.ToLower()))
 			{
-				string resourcePath = file.FullPath
-										.Replace("project://Assets/", "Textures/")
-										.Replace(file.Extension, "");
-				if (!Resource.Exists(resourcePath))
-					return Resource.Load<Texture>(resourcePath, new TextureImportSettings(file.FullPath));
-				return Resource.Get<Texture>(resourcePath);
+				if (!Resource.Exists(file.FullPath))
+					return Resource.Load<Texture>(file.FullPath);
+				return Resource.Get<Texture>(file.FullPath);
 			}
 
 			return null;
@@ -124,6 +129,9 @@ namespace AquaEditor.Views
 					ImGUI.SameLine();
 					ImGUI.Selectable(file.FileName, selected);
 				}
+				
+				DrawContextMenu(file);
+			
 				if (ImGUI.IsItemClicked())
 				{
 					m_SelectedPath = file.FullPath;
@@ -148,6 +156,11 @@ namespace AquaEditor.Views
 				if(InspectorView.Target != null && InspectorView.Target is VFSFile)
 					InspectorView.Target = null; // Clear
 			}
+			if (ImGUI.IsItemHovered() &&
+				ImGUI.IsMouseClicked(MouseButton.Right) &&
+				!ImGUI.IsPopupOpen("ResourcesEdit"))
+				ImGUI.OpenPopup("ResourcesNew");
+			DrawContextMenu();
 		}
 
 		private void DrawSizeSlider()
@@ -174,7 +187,68 @@ namespace AquaEditor.Views
 
 			m_CurrentDirectory = directory;
 			m_Files = VFS.GetFiles(m_CurrentDirectory);
-			Log.Trace($"[Resource View] Opened directory '{m_CurrentDirectory}'");
+		}
+
+		private void DrawContextMenu()
+		{
+			if (!ImGUI.BeginPopup($"ResourcesNew"))
+				return;
+
+			if (ImGUI.Selectable("Refresh"))
+				OpenDirectory(m_CurrentDirectory);
+			ImGUI.Separator();
+			if (ImGUI.BeginMenu("New"))
+			{
+				if (ImGUI.Selectable("Directory"))
+				{
+					m_NewNamePopupFinishAction = (directoryName) => VFS.CreateDirectory($"{m_CurrentDirectory}/{directoryName}");
+					m_NewNameModalOpen = true;
+				}
+				ImGUI.Separator();
+				if (ImGUI.Selectable("Material"))
+				{
+					m_NewNamePopupFinishAction = (materialName) => Resource.Load<Material>($"{m_CurrentDirectory}/{materialName}.material", new MaterialImportSettings());
+					m_NewNameModalOpen = true;
+				}
+				ImGUI.EndMenu();
+			}
+
+			ImGUI.EndPopup();
+		}
+
+		private void DrawContextMenu(VFSFile file)
+		{
+			if (!ImGUI.BeginPopupContextItem($"ResourcesEdit", ImGUI.PopupFlags.MouseButtonRight))
+				return;
+
+			if (ImGUI.Selectable("Delete"))
+			{ }
+
+			ImGUI.EndPopup();
+		}
+		
+		private void NewFilePopup()
+		{
+			if (m_NewNameModalOpen)
+				ImGUI.OpenPopup(NewFilePopupName);
+
+			ImGUI.SetNextItemWidth(200);
+			if (!ImGUI.BeginPopupModal(NewFilePopupName, ref m_NewNameModalOpen))
+				return;
+
+			ImGUI.Input("##ResourcesNewFileInput", ref m_NewFileName, 64);
+			ImGUI.SameLine();
+			if(ImGUI.Button("Submit"))
+			{
+				if(!string.IsNullOrEmpty(m_NewFileName)) 
+					m_NewNamePopupFinishAction?.Invoke(m_NewFileName);
+				m_NewFileName = string.Empty;
+				m_NewNameModalOpen = false;
+				m_NewNamePopupFinishAction = null;
+				OpenDirectory(m_CurrentDirectory); // Refresh file list
+				ImGUI.CloseCurrentPopup();
+			}
+			ImGUI.EndPopup();
 		}
 	}
 }
