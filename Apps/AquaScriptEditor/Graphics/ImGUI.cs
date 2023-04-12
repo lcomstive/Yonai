@@ -885,6 +885,25 @@ namespace AquaEditor
 			NoPreview = 1 << 6
 		};
 
+		[Flags]
+		public enum DrawFlags : int
+		{
+			None = 0,
+			Closed = 1 << 0, // PathStroke(), AddPolyline(): specify that shape should be closed (Important: this is always == 1 for legacy reason)
+			RoundCornersTopLeft = 1 << 4, // AddRect(), AddRectFilled(), PathRect(): enable rounding top-left corner only (when rounding > 0.0f, we default to all corners). Was 0x01.
+			RoundCornersTopRight = 1 << 5, // AddRect(), AddRectFilled(), PathRect(): enable rounding top-right corner only (when rounding > 0.0f, we default to all corners). Was 0x02.
+			RoundCornersBottomLeft = 1 << 6, // AddRect(), AddRectFilled(), PathRect(): enable rounding bottom-left corner only (when rounding > 0.0f, we default to all corners). Was 0x04.
+			RoundCornersBottomRight = 1 << 7, // AddRect(), AddRectFilled(), PathRect(): enable rounding bottom-right corner only (when rounding > 0.0f, we default to all corners). Wax 0x08.
+			RoundCornersNone = 1 << 8, // AddRect(), AddRectFilled(), PathRect(): disable rounding on all corners (when rounding > 0.0f). This is NOT zero, NOT an implicit flag!
+			RoundCornersTop = RoundCornersTopLeft | RoundCornersTopRight,
+			RoundCornersBottom = RoundCornersBottomLeft | RoundCornersBottomRight,
+			RoundCornersLeft = RoundCornersBottomLeft | RoundCornersTopLeft,
+			RoundCornersRight = RoundCornersBottomRight | RoundCornersTopRight,
+			RoundCornersAll = RoundCornersTopLeft | RoundCornersTopRight | RoundCornersBottomLeft | RoundCornersBottomRight,
+			RoundCornersDefault_ = RoundCornersAll, // Default to ALL corners if none of the _RoundCornersXX flags are specified.
+			RoundCornersMask_ = RoundCornersAll | RoundCornersNone,
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -947,6 +966,9 @@ namespace AquaEditor
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
 
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PushID(string id);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PopID();
+
 		public static void DockSpace(string id) => DockSpace(id, Vector2.Zero);
 		public static void DockSpace(string id, Vector2 size) => _DockSpace(id, ref size);
 
@@ -996,15 +1018,28 @@ namespace AquaEditor
 		}
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetCursorPos(out Vector2 value);
 
+		public static Vector2 GetCursorScreenPos()
+		{
+			_GetCursorScreenPos(out Vector2 pos);
+			return pos;
+		}
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetCursorScreenPos(out Vector2 value);
+
 		public static void SetCursorPos(Vector2 value) => _SetCursorPos(ref value);
 		public static void SetCursorPos(float x, float y) => SetCursorPos(new Vector2(x, y));
+		public static void SetCursorScreenPos(Vector2 value) => _SetCursorScreenPos(ref value);
+		public static void SetCursorScreenPos(float x, float y) => SetCursorScreenPos(new Vector2(x, y));
+
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetCursorPos(ref Vector2 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetCursorScreenPos(ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetCursorPosX(float value);
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetCursorPosY(float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosX();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorPosY();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorScreenPosX();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetCursorScreenPosY();
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void BeginGroup();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndGroup();
@@ -1018,6 +1053,15 @@ namespace AquaEditor
 			return output;
 		}
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void _GetMouseDelta(out Vector2 output);
+
+		public static void PushClipRect(Vector2 min, Vector2 max, bool intersectWithCurrentClipRect) => _PushClipRect(ref min, ref max, intersectWithCurrentClipRect);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _PushClipRect(ref Vector2 min, ref Vector2 max, bool intersectWithCurrentClipRect);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PopClipRect();
+
+		public static void DrawListPushClipRect(Vector2 min, Vector2 max, bool intersectWithCurrentClipRect) => _DrawListPushClipRect(ref min, ref max, intersectWithCurrentClipRect);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DrawListPushClipRect(ref Vector2 min, ref Vector2 max, bool intersectWithCurrentClipRect);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void DrawListPushClipRectFullScreen();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void DrawListPopClipRect();
 		#endregion
 
 		#region Controls
@@ -1026,6 +1070,12 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Space();
+
+		public static void HorizontalSpace(float width)
+		{
+			ImGUI.Dummy(width, 0);
+			ImGUI.SameLine();
+		}
 
 		public static void Text(string label) => _Text(label);
 		public static void Text(string label, Colour colour) => _TextColoured(label, ref colour);
@@ -1076,6 +1126,10 @@ namespace AquaEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _PlotLines(string label, float[] points, string overlayText, ref Vector2 size);
+
+		public static void Dummy(float sizeX, float sizeY) => Dummy(new Vector2(sizeX, sizeY));
+		public static void Dummy(Vector2 size) => _Dummy(ref size);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Dummy(ref Vector2 size);
 		#endregion
 
 		#region Input
@@ -1083,7 +1137,10 @@ namespace AquaEditor
 			=> _InputText(label, ref value, maxCharacters, (int)flags);
 
 		public static bool InputTextMultiline(string label, ref string value, int maxCharacters = 2048, TextFlags flags = TextFlags.None)
-			=> _InputTextMultiline(label, ref value, maxCharacters, (int)flags);
+			=> InputTextMultiline(label, ref value, Vector2.Zero, maxCharacters, flags);
+
+		public static bool InputTextMultiline(string label, ref string value, Vector2 size, int maxCharacters = 2048, TextFlags flags = TextFlags.None)
+			=> _InputTextMultiline(label, ref value, maxCharacters, ref size, (int)flags);
 
 		public static bool InputPassword(string label, ref string value, int maxCharacters = 32, TextFlags flags = TextFlags.None)
 			=> _InputText(label, ref value, maxCharacters, (int)(flags | TextFlags.Password));
@@ -1107,7 +1164,7 @@ namespace AquaEditor
 		private static extern bool _InputText(string label, ref string value, int maxCharacters, int flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _InputTextMultiline(string label, ref string value, int maxCharacters, int flags);
+		private static extern bool _InputTextMultiline(string label, ref string value, int maxCharacters, ref Vector2 size, int flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _InputFloat(string label, ref float value, float step, float stepFast, string format);
@@ -1613,6 +1670,78 @@ namespace AquaEditor
 			EndCombo();
 			return changedValue;
 		}
+		#endregion
+
+		#region Draw List
+		public static void AddLine(Vector2 p1, Vector2 p2, Colour colour, float thickness = 1.0f) =>
+			_AddLine(ref p1, ref p2, ref colour, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddLine(ref Vector2 p1, ref Vector2 p2, ref Colour colour, float thickness);
+
+		public static void AddRect(Vector2 p1, Vector2 p2, Colour colour, float rounding = 0, float thickness = 1.0f, DrawFlags flags = DrawFlags.None) =>
+			_AddRect(ref p1, ref p2, ref colour, rounding, (int)flags, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddRect(ref Vector2 p1, ref Vector2 p2, ref Colour colour, float rounding, int flags, float thickness);
+
+		public static void AddRectFilled(Vector2 p1, Vector2 p2, Colour colour, float rounding = 0, DrawFlags flags = DrawFlags.None) =>
+			_AddRectFilled(ref p1, ref p2, ref colour, rounding, (int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddRectFilled(ref Vector2 p1, ref Vector2 p2, ref Colour colour, float rounding, int flags);
+
+		public static void AddQuad(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness) =>
+			_AddQuad(ref p1, ref p2, ref p3, ref p4, ref colour, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddQuad(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness);
+
+		public static void AddQuadFilled(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour) =>
+			_AddQuadFilled(ref p1, ref p2, ref p3, ref p4, ref colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddQuadFilled(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour);
+
+		public static void AddTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Colour colour, float thickness) =>
+			_AddTriangle(ref p1, ref p2, ref p3, ref colour, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddTriangle(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Colour colour, float thickness);
+
+		public static void AddTriangleFilled(Vector2 p1, Vector2 p2, Vector2 p3, Colour colour) =>
+			_AddTriangleFilled(ref p1, ref p2, ref p3, ref colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddTriangleFilled(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Colour colour);
+
+		public static void AddCircle(Vector2 center, float radius, Colour colour, float thickness = 1.0f, int numSegments = 0) =>
+			_AddCircle(ref center, radius, ref colour, numSegments, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddCircle(ref Vector2 center, float radius, ref Colour colour, int numSegments, float thickness);
+
+		public static void AddCircleFilled(Vector2 center, float radius, Colour colour, int numSegments = 0) =>
+			_AddCircleFilled(ref center, radius, ref colour, numSegments);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddCircleFilled(ref Vector2 center, float radius, ref Colour colour, int numSegments);
+
+		public static void AddNgon(Vector2 center, float radius, Colour colour, int numSegments, float thickness) =>
+			_AddNgon(ref center, radius, ref colour, numSegments, thickness);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddNgon(ref Vector2 center, float radius, ref Colour colour, int numSegments, float thickness);
+
+		public static void AddNgonFilled(Vector2 center, float radius, Colour colour, int numSegments) =>
+			_AddNgonFilled(ref center, radius, ref colour, numSegments);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddNgonFilled(ref Vector2 center, float radius, ref Colour colour, int numSegments);
+
+		public static void AddText(Vector2 position, string text, float fontSize = 16) =>
+			AddText(position, text, Colour.White, fontSize);
+		public static void AddText(Vector2 position, string text, Colour colour, float fontSize = 16) =>
+			_AddText(ref position, text, ref colour, fontSize);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddText(ref Vector2 position, string textRaw, ref Colour colour, float fontSize);
+		
+		public static void AddBezierCubic(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness = 1.0f, int segments = 0) =>
+			_AddBezierCubic(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCubic(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
+
+		public static void AddBezierCurve(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness = 1.0f, int segments = 0) =>
+			_AddBezierCurve(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCurve(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
+
+		public static void AddBezierQuadratic(Vector2 p1, Vector2 p2, Vector2 p3, Colour colour, float thickness = 1.0f, int segments = 0) =>
+			_AddBezierQuadratic(ref p1, ref p2, ref p3, ref colour, thickness, segments);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierQuadratic(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Colour colour, float thickness, int segments);
+
+		public static void AddImage(UUID textureID, Vector2 min, Vector2 max, Colour colour) =>
+			_AddImage(textureID, ref min, ref max, ref colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImage(ulong textureID, ref Vector2 min, ref Vector2 max, ref Colour colour);
+
+		public static void AddImageRounded(UUID textureID, Vector2 min, Vector2 max, Colour colour, float rounding, DrawFlags flags = DrawFlags.None) =>
+			_AddImageRounded(textureID, ref min, ref max, ref colour, rounding, (int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImageRounded(ulong textureID, ref Vector2 min, ref Vector2 max, ref Colour colour, float rounding, int flags);
 		#endregion
 	}
 }

@@ -73,6 +73,7 @@
     <Compile Include="Views/Inspectors/EntityInspector.cs" />
     <Compile Include="Views/Inspectors/TextInspector.cs" />
     <Compile Include="Views/Inspectors/TextureInspector.cs" />
+    <Compile Include="Views/Console.cs" />
     <Compile Include="Views/Game.cs" />
     <Compile Include="Views/Hierarchy.cs" />
     <Compile Include="Views/Inspector.cs" />

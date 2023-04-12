@@ -24,6 +24,12 @@ namespace AquaEditor
 		public const string FolderPath = "Folder";
 		public static Texture Folder { get; private set; }
 
+		public const string UpPath = "Kenney/up";
+		public static Texture Up { get; private set; }
+
+		public const string DownPath = "Kenney/down";
+		public static Texture Down { get; private set; }
+
 		internal static void Load()
 		{
 			Log.Trace("Loading icons...");
@@ -45,6 +51,8 @@ namespace AquaEditor
 			Save		= Resource.Get<Texture>(SavePath);
 			Settings	= Resource.Get<Texture>(SettingsPath);
 			Folder		= Resource.Get<Texture>(FolderPath);
+			Up			= Resource.Get<Texture>(UpPath);
+			Down		= Resource.Get<Texture>(DownPath);
 		}
 	}
 
@@ -71,6 +79,7 @@ namespace AquaEditor
 				InspectorView.GetCustomInspectors();
 
 				Open<SceneView>();
+				Open<ConsoleView>();
 				Open<HierarchyView>();
 				Open<InspectorView>();
 				Open<ResourcesView>();

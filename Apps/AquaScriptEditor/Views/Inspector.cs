@@ -1,9 +1,7 @@
-using AquaEngine;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using AquaEngine;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace AquaEditor.Views
 {

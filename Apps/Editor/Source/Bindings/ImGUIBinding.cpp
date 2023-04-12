@@ -8,6 +8,13 @@
 using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 
+// Helper Functions //
+ImU32 ToU32(glm::vec4* colour) { return ImGui::ColorConvertFloat4ToU32(ImVec4(colour->x, colour->y, colour->z, colour->w)); }
+ImVec2 ToVec2(glm::vec2* value) { return ImVec2(value->x, value->y); }
+ImVec2 ToVec2(glm::ivec2* value) { return ImVec2(value->x, value->y); }
+ImVec4 ToVec4(glm::vec4* value) { return ImVec4(value->x, value->y, value->z, value->w); }
+ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z, value->w); }
+
 /// Window Begin / End ///
 ADD_MANAGED_METHOD(ImGUI, _Begin, void, (MonoString* nameRaw, int flags), AquaEditor)
 {
@@ -43,38 +50,26 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), AquaEditor)
 }
 
 /// STATE ///
-ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor)
-{ return ImGui::IsItemHovered(); }
+ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor) { return ImGui::IsItemHovered(); }
+ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor) { return ImGui::IsItemClicked(); }
+ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), AquaEditor) { return ImGui::IsItemActive(); }
+ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), AquaEditor) { return ImGui::IsMouseClicked(button); }
+ADD_MANAGED_METHOD(ImGUI, _IsMouseDoubleClicked, bool, (int button), AquaEditor) { return ImGui::IsMouseDoubleClicked(button); }
+ADD_MANAGED_METHOD(ImGUI, _IsMouseDragging, bool, (int button), AquaEditor) { return ImGui::IsMouseDragging(button); }
+ADD_MANAGED_METHOD(ImGUI, _IsMouseReleased, bool, (int button), AquaEditor) { return ImGui::IsMouseReleased(button); }
+ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor) { return ImGui::IsItemEdited(); }
+ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor) { return ImGui::BeginDisabled(); }
+ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor) { return ImGui::EndDisabled(); }
+ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), AquaEditor) { ImGui::SetItemDefaultFocus(); }
 
-ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor)
-{ return ImGui::IsItemClicked(); }
+ADD_MANAGED_METHOD(ImGUI, PushID, void, (MonoString* idRaw), AquaEditor)
+{
+	char* id = mono_string_to_utf8(idRaw);
+	ImGui::PushID(id);
+	mono_free(id);
+}
 
-ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), AquaEditor)
-{ return ImGui::IsItemActive(); }
-
-ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), AquaEditor)
-{ return ImGui::IsMouseClicked(button); }
-
-ADD_MANAGED_METHOD(ImGUI, _IsMouseDoubleClicked, bool, (int button), AquaEditor)
-{ return ImGui::IsMouseDoubleClicked(button); }
-
-ADD_MANAGED_METHOD(ImGUI, _IsMouseDragging, bool, (int button), AquaEditor)
-{ return ImGui::IsMouseDragging(button); }
-
-ADD_MANAGED_METHOD(ImGUI, _IsMouseReleased, bool, (int button), AquaEditor)
-{ return ImGui::IsMouseReleased(button); }
-
-ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), AquaEditor)
-{ return ImGui::IsItemEdited(); }
-
-ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor)
-{ return ImGui::BeginDisabled(); }
-
-ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor)
-{ return ImGui::EndDisabled(); }
-
-ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), AquaEditor)
-{ ImGui::SetItemDefaultFocus(); }
+ADD_MANAGED_METHOD(ImGUI, PopID, void, (), AquaEditor) { ImGui::PopID(); }
 
 ADD_MANAGED_METHOD(ImGUI, _CalculateTextWidth, void, (MonoString* textRaw, glm::vec2* output), AquaEditor)
 {
@@ -110,7 +105,16 @@ ADD_MANAGED_METHOD(ImGUI, _GetCursorPos, void, (glm::vec2* output), AquaEditor)
 	*output = glm::vec2(cursorPos.x, cursorPos.y);
 }
 
+ADD_MANAGED_METHOD(ImGUI,  GetCursorScreenPosX, float, (), AquaEditor) { return ImGui::GetCursorScreenPos().x; }
+ADD_MANAGED_METHOD(ImGUI,  GetCursorScreenPosY, float, (), AquaEditor) { return ImGui::GetCursorScreenPos().y; }
+ADD_MANAGED_METHOD(ImGUI, _GetCursorScreenPos, void, (glm::vec2* output), AquaEditor)
+{
+	ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+	*output = glm::vec2(cursorPos.x, cursorPos.y);
+}
+
 ADD_MANAGED_METHOD(ImGUI, _SetCursorPos, void, (glm::vec2* input), AquaEditor) { ImGui::SetCursorPos(ImVec2(input->x, input->y)); }
+ADD_MANAGED_METHOD(ImGUI, _SetCursorScreenPos, void, (glm::vec2* input), AquaEditor) { ImGui::SetCursorScreenPos(ImVec2(input->x, input->y)); }
 ADD_MANAGED_METHOD(ImGUI, SetCursorPosX, void, (float value), AquaEditor) { ImGui::SetCursorPosX(value); }
 ADD_MANAGED_METHOD(ImGUI, SetCursorPosY, void, (float value), AquaEditor) { ImGui::SetCursorPosY(value); }
 
@@ -128,11 +132,10 @@ ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 	mono_free(label);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _TextColoured, void, (MonoString* labelRaw, glm::vec4* colourRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _TextColoured, void, (MonoString* labelRaw, glm::vec4* colour), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
-	ImVec4 colour(colourRaw->r, colourRaw->g, colourRaw->b, colourRaw->a);
-	ImGui::TextColored(colour, "%s", label);
+	ImGui::TextColored(ToVec4(colour), "%s", label);
 	mono_free(label);
 }
 
@@ -220,12 +223,12 @@ ADD_MANAGED_METHOD(ImGUI, _InputText, bool, (MonoString* labelRaw, MonoString** 
 	return change;
 }
 
-ADD_MANAGED_METHOD(ImGUI, _InputTextMultiline, bool, (MonoString* labelRaw, MonoString** valueRaw, int maxCharacters, int flags), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _InputTextMultiline, bool, (MonoString* labelRaw, MonoString** valueRaw, int maxCharacters, glm::vec2* size, int flags), AquaEditor)
 {
 	char* value = GetInput(*valueRaw, maxCharacters);
 	char* label = mono_string_to_utf8(labelRaw);
 
-	bool change = ImGui::InputTextMultiline(label, value, maxCharacters, ImVec2(0, 0), flags);
+	bool change = ImGui::InputTextMultiline(label, value, maxCharacters, ToVec2(size), flags);
 
 	// If text is edited, update valueRaw
 	if (change)
@@ -502,14 +505,10 @@ ADD_MANAGED_METHOD(ImGUI, _SliderInt3, bool, (MonoString* labelRaw, glm::ivec3* 
 }
 
 // Other 
-ADD_MANAGED_METHOD(ImGUI, SameLine, void, (float offset, float spacing), AquaEditor)
-{ return ImGui::SameLine(offset, spacing); }
-
-ADD_MANAGED_METHOD(ImGUI, Space, void, (), AquaEditor)
-{ return ImGui::Spacing(); }
-
-ADD_MANAGED_METHOD(ImGUI, _GetTextLineHeight, float, (), AquaEditor)
-{ return ImGui::GetTextLineHeight(); }
+ADD_MANAGED_METHOD(ImGUI, Space, void, (), AquaEditor) { return ImGui::Spacing(); }
+ADD_MANAGED_METHOD(ImGUI, _Dummy, void, (glm::vec2* size), AquaEditor) { ImGui::Dummy(ToVec2(size)); }
+ADD_MANAGED_METHOD(ImGUI, _GetTextLineHeight, float, (), AquaEditor) { return ImGui::GetTextLineHeight(); }
+ADD_MANAGED_METHOD(ImGUI, SameLine, void, (float offset, float spacing), AquaEditor) { return ImGui::SameLine(offset, spacing); }
 
 ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
 {
@@ -712,10 +711,7 @@ ADD_MANAGED_METHOD(ImGUI, PopStyleVar, void, (int amount), AquaEditor)
 { ImGui::PopStyleVar(amount); }
 
 ADD_MANAGED_METHOD(ImGUI, _PushStyleColour, void, (int var, glm::vec4* value), AquaEditor)
-{
-	const ImVec4 color(value->x, value->y, value->z, value->w);
-	ImGui::PushStyleColor(var, color);
-}
+{ ImGui::PushStyleColor(var, ToVec4(value)); }
 
 ADD_MANAGED_METHOD(ImGUI, PopStyleColour, void, (int amount), AquaEditor)
 { ImGui::PopStyleColor(amount); }
@@ -818,3 +814,82 @@ ADD_MANAGED_METHOD(ImGUI, _BeginCombo, bool, (MonoString* labelRaw, MonoString* 
 }
 
 ADD_MANAGED_METHOD(ImGUI, EndCombo, void, (), AquaEditor) { ImGui::EndCombo(); }
+
+// DRAW LIST //
+ImDrawList* GetDrawList() { return ImGui::GetWindowDrawList(); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddLine, void, (glm::vec2* p1, glm::vec2* p2, glm::vec4* colour, float thickness), AquaEditor)
+{ GetDrawList()->AddLine(ToVec2(p1), ToVec2(p2), ToU32(colour), thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddRect, void, (glm::vec2* p1, glm::vec2* p2, glm::vec4* colour, float rounding, int flags, float thickness), AquaEditor)
+{ GetDrawList()->AddRect(ToVec2(p1), ToVec2(p2), ToU32(colour), rounding, flags, thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddRectFilled, void, (glm::vec2* p1, glm::vec2* p2, glm::vec4* colour, float rounding, int flags), AquaEditor)
+{ GetDrawList()->AddRectFilled(ToVec2(p1), ToVec2(p2), ToU32(colour), rounding, flags); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddQuad, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec2* p4, glm::vec4* colour, float thickness), AquaEditor)
+{ GetDrawList()->AddQuad(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddQuadFilled, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec2* p4, glm::vec4* colour), AquaEditor)
+{ GetDrawList()->AddQuadFilled(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour)); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddTriangle, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec4* colour, float thickness), AquaEditor)
+{ GetDrawList()->AddTriangle(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToU32(colour), thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddTriangleFilled, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec4* colour), AquaEditor)
+{ GetDrawList()->AddTriangleFilled(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToU32(colour)); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddCircle, void, (glm::vec2* center, float radius, glm::vec4* colour, int numSegments, float thickness), AquaEditor)
+{ GetDrawList()->AddCircle(ToVec2(center), radius, ToU32(colour), numSegments, thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddCircleFilled, void, (glm::vec2* center, float radius, glm::vec4* colour, int numSegments), AquaEditor)
+{ GetDrawList()->AddCircleFilled(ToVec2(center), radius, ToU32(colour), numSegments); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddNgon, void, (glm::vec2* center, float radius, glm::vec4* colour, int numSegments, float thickness), AquaEditor)
+{ GetDrawList()->AddNgon(ToVec2(center), radius, ToU32(colour), numSegments, thickness); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddNgonFilled, void, (glm::vec2* center, float radius, glm::vec4* colour, int numSegments), AquaEditor)
+{ GetDrawList()->AddNgonFilled(ToVec2(center), radius, ToU32(colour), numSegments); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddText, void, (glm::vec2* position, MonoString* textRaw, glm::vec4* colour, float fontSize), AquaEditor)
+{
+	char* text = mono_string_to_utf8(textRaw);
+	GetDrawList()->AddText(nullptr, fontSize, ToVec2(position), ToU32(colour), text);
+	mono_free(text);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _AddBezierCubic, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec2* p4, glm::vec4* colour, float thickness, int segments), AquaEditor)
+{ GetDrawList()->AddBezierCubic(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness, segments); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddBezierCurve, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec2* p4, glm::vec4* colour, float thickness, int segments), AquaEditor)
+{ GetDrawList()->AddBezierCurve(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness, segments); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddBezierQuadratic, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec4* colour, float thickness, int segments), AquaEditor)
+{ GetDrawList()->AddBezierQuadratic(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToU32(colour), thickness, segments); }
+
+ADD_MANAGED_METHOD(ImGUI, _AddImage, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour), AquaEditor)
+{
+	Texture* texture = Resource::Get<Texture>(textureID);
+	GetDrawList()->AddImage((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour));
+}
+
+ADD_MANAGED_METHOD(ImGUI, _AddImageRounded, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour, float rounding, int flags), AquaEditor)
+{
+	Texture* texture = Resource::Get<Texture>(textureID);
+	GetDrawList()->AddImageRounded((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour), rounding, flags);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _PushClipRect, void, (glm::vec2* p1, glm::vec2* p2, bool intersectWithCurrentClipRect), AquaEditor)
+{ ImGui::PushClipRect(ToVec2(p1), ToVec2(p2), intersectWithCurrentClipRect); }
+
+ADD_MANAGED_METHOD(ImGUI, PopClipRect, void, (), AquaEditor)
+{ ImGui::PopClipRect(); }
+
+ADD_MANAGED_METHOD(ImGUI, _DrawListPushClipRect, void, (glm::vec2* p1, glm::vec2* p2, bool intersectWithCurrentClipRect), AquaEditor)
+{ GetDrawList()->PushClipRect(ToVec2(p1), ToVec2(p2), intersectWithCurrentClipRect); }
+
+ADD_MANAGED_METHOD(ImGUI, DrawListPushClipRectFullScreen, void, (), AquaEditor)
+{ GetDrawList()->PushClipRectFullScreen(); }
+
+ADD_MANAGED_METHOD(ImGUI, DrawListPopClipRect, void, (), AquaEditor)
+{ GetDrawList()->PopClipRect(); }

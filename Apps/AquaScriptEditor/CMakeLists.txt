@@ -16,7 +16,7 @@ if(MSVC)
 
     if(AQUA_GENERATE_MDBS)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND $<IF:$<CONFIG:Debug>,${MONO_MDB2PDB},echo> $<TARGET_FILE:${PROJECT_NAME}>
+            COMMAND $<IF:$<CONFIG:Release>,echo,${MONO_MDB2PDB}> $<TARGET_FILE:${PROJECT_NAME}>
         )
     endif()
 else()
