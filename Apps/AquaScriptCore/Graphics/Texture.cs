@@ -17,7 +17,8 @@ namespace AquaEngine.Graphics
 		public bool HDR;
 		public TextureFiltering Filtering;
 
-		public TextureImportSettings(bool hdr = false, TextureFiltering filtering = TextureFiltering.Linear)
+		public TextureImportSettings(TextureFiltering filtering) : this(false, filtering) { }
+		public TextureImportSettings(bool hdr, TextureFiltering filtering)
 		{
 			HDR = hdr;
 			Filtering = filtering;
@@ -62,8 +63,10 @@ namespace AquaEngine.Graphics
 
 		protected override void OnImported()
 		{
-			TryGetImportSettings(out TextureImportSettings importSettings);
-			ImportSettings = importSettings;
+			if (TryGetImportSettings(out TextureImportSettings importSettings))
+				ImportSettings = importSettings;
+			else
+				ImportSettings = new TextureImportSettings(TextureFiltering.Linear);
 			_Import(Handle, ResourcePath, HDR, (int)Filter);
 		}
 

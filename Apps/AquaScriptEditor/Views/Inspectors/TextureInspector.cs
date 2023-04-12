@@ -20,7 +20,7 @@ namespace AquaEditor.Inspectors
 			}
 			else // Is Texture object
 				m_Target = Target as Texture;
-			m_Settings = (TextureImportSettings)m_Target?.ImportSettings;
+			m_Settings = (TextureImportSettings)m_Target.ImportSettings;
 		}
 
 		private float m_TexturePreviewHeight = -1;
@@ -53,7 +53,10 @@ namespace AquaEditor.Inspectors
 						m_Settings = (TextureImportSettings)m_Target.ImportSettings;
 					ImGUI.SameLine();
 					if (ImGUI.Button("Apply"))
+					{
 						m_Target.Import(m_Settings);
+						Resource.SaveToDisk(m_Target);
+					}
 				}
 			}
 			ImGUI.EndChild();

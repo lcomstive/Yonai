@@ -53,11 +53,6 @@ namespace AquaEngine
 			OnImported();
 		}
 
-		public void LoadFromDisk()
-		{
-
-		}
-
 		/// <summary>
 		/// Tries casting <see cref="ImportSettings"/> to <typeparamref name="T"/>.
 		/// Returns default value if cannot cast, or if ImportSettings are null.
