@@ -2,6 +2,7 @@ using System;
 using AquaEngine;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace AquaEditor.Views
 {
@@ -20,7 +21,10 @@ namespace AquaEditor.Views
 				Level = level;
 				Message = message;
 				ShowTrace = false;
-				TimeStamp = DateTime.Now;
+				if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+					TimeStamp = DateTime.Now;
+				else
+					TimeStamp = new DateTime(0);
 				Trace = new StackTrace(4, true);
 			}
 		}

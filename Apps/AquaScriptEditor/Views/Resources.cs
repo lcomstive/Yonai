@@ -15,6 +15,16 @@ namespace AquaEditor.Views
 		private string m_SelectedPath;
 		private string m_CurrentDirectory = RootDirectory;
 
+		/// <summary>
+		/// Files with these extensions are not shown in the resource view
+		/// </summary>
+		private List<string> IgnoreFileExtensions = new List<string>() { ".cache", ".DS_Store" };
+
+		/// <summary>
+		/// These extensions will load as a texture and be previewed instead of an icon
+		/// </summary>
+		private List<string> ValidTextureExtensions = new List<string>() { ".png", ".jpg", ".jpeg", ".dds" };
+
 		// New name popup
 		private const string NewFilePopupName = "ResourcesNewFilePopup";
 		private string m_NewFileName = string.Empty;
@@ -80,8 +90,6 @@ namespace AquaEditor.Views
 			ImGUI.Separator();
 		}
 
-		private List<string> ValidTextureExtensions = new List<string>() { ".png", ".jpg", ".jpeg", ".dds" };
-
 		private Texture ChooseImage(VFSFile file)
 		{
 			if (ValidTextureExtensions.Contains(file.Extension.ToLower()))
@@ -110,6 +118,9 @@ namespace AquaEditor.Views
 
 			foreach (VFSFile file in m_Files)
 			{
+				if(IgnoreFileExtensions.Contains(file.Extension))
+					continue; // Ignore this file
+
 				bool selected = file.FullPath.Equals(m_SelectedPath);
 				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file);
 				if (m_ThumbnailSize > ThumbnailSizeRange.x)

@@ -158,6 +158,7 @@ namespace AquaEngine
 			if(s_Instances.ContainsKey(resourceID))
 			{
 				s_Instances[resourceID]._Unload();
+				Log.Trace($"Unloaded '{s_Instances[resourceID].ResourcePath}'");
 				s_Instances.Remove(resourceID);
 			}
 
@@ -273,7 +274,8 @@ namespace AquaEngine
 				Type type = Type.GetType(typeName);
 
 				ResourceBase instance = Load(id, resourcePath, type);
-				LoadFromDisk(instance, true);
+				if(!LoadFromDisk(instance))
+					Unload(id); // If failed to load from disk, *most* likely will be in a call to Load with the correct import settings
 			}
 
 			CreateDefaultResources();
@@ -337,30 +339,29 @@ namespace AquaEngine
 			string path = resource.ResourcePath;
 			if (serializeFileOptions != null)
 				path += ".cache";
-			path = VFS.GetAbsolutePath(path);
+
+			Log.Trace($"Saving resource '{resource.ResourcePath}' " + (serializeFileOptions == null ? string.Empty : "[cache]"));
 
 			string directory = resource.ResourcePath.Substring(0, resource.ResourcePath.LastIndexOf('/'));
-			Log.Debug($"Checking directory {directory}..."); 
-			VFS.CreateDirectory(directory);
+			if(!VFS.Exists(directory))
+			{
+				Log.Debug($"Creating directory '{directory}'");
+				VFS.CreateDirectory(directory);
+			}
 
-			JsonSerializer serializer = new JsonSerializer();
-			serializer.Formatting = Formatting.Indented;
-
-			using (StreamWriter streamWriter = new StreamWriter(path))
-			using (JsonWriter writer = new JsonTextWriter(streamWriter))
-				serializer.Serialize(writer, serializable.OnSerialize());
+			VFS.Write(path, JsonConvert.SerializeObject(serializable.OnSerialize(), Formatting.Indented));
 		}
 
-		public static void LoadFromDisk(ResourceBase resource, bool suppressWarnings = false)
+		public static bool LoadFromDisk(ResourceBase resource, bool suppressWarnings = false)
 		{
-			if(resource == null) return;
+			if(resource == null) return false;
 
 			ISerializable serializable = resource as ISerializable;
 			if (serializable == null)
 			{
 				if (!suppressWarnings)
 					Log.Warning($"Failed to serialize '{resource.ResourcePath}' - Not a serializable type");
-				return;
+				return false;
 			}
 
 			SerializeFileOptionsAttribute serializeFileOptions = resource.GetType().GetCustomAttribute<SerializeFileOptionsAttribute>();
@@ -371,19 +372,14 @@ namespace AquaEngine
 			if (!VFS.Exists(path))
 			{
 				if (!suppressWarnings)
-					Log.Warning($"Failed to serialize '{resource.ResourcePath}' - VFS could not get path");
-				return;
+					Log.Warning($"Failed to deserialize '{resource.ResourcePath}' " +
+						(serializeFileOptions == null ? string.Empty : "[cache]")  + " - VFS could not get path");
+				return false;
 			}
-			path = VFS.GetAbsolutePath(path, true);
 
 			Log.Trace($"Loading resource '{path}'...");
-
-			JsonSerializer serializer = new JsonSerializer();
-			serializer.Formatting = Formatting.Indented;
-
-			using (StreamReader streamReader = new StreamReader(path))
-			using (JsonReader reader = new JsonTextReader(streamReader))
-				serializable.OnDeserialize(serializer.Deserialize<JObject>(reader));
+			serializable.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText(path)));
+			return true;
 		}
 
 		#region Internal Calls
