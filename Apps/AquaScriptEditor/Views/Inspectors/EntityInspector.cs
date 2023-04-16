@@ -68,7 +68,6 @@ namespace AquaEditor.Inspectors
 
 			ImGUI.TableSetupColumn("Key", ImGUI.TableColumnFlags.WidthFixed, contentRegion.x * 0.3f);
 			ImGUI.TableSetupColumn("Value");
-			ImGUI.TableHeadersRow();
 
 			foreach (var field in fields)
 			{
