@@ -210,6 +210,15 @@ namespace AquaEditor.Inspectors
 				ImGUI.EndTooltip();
 			}
 
+			if (ImGUI.IsItemHovered() && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+			{
+				// Navigate resources view to resource.ResourcePath and highlight/select resource
+				ResourcesView resourceView = EditorUIService.GetView<ResourcesView>();
+				if (resourceView == null)
+					resourceView = EditorUIService.Open<ResourcesView>();
+				resourceView.HighlightPath(value.ResourcePath);
+			}
+
 			UUID dragDropID = HandleResourceDragDrop(value);
 			if (dragDropID != UUID.Invalid)
 				setValue.Invoke(instance, Resource.Get(dragDropID));
@@ -250,6 +259,10 @@ namespace AquaEditor.Inspectors
 			if(ImGUI.Button(resource.ResourcePath) && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 			{
 				// Navigate resources view to resource.ResourcePath and highlight/select resource
+				ResourcesView resourceView = EditorUIService.GetView<ResourcesView>();
+				if (resourceView == null)
+					resourceView = EditorUIService.Open<ResourcesView>();
+				resourceView.HighlightPath(resource.ResourcePath);
 			}
 
 			UUID dragDropID = HandleResourceDragDrop(resource);

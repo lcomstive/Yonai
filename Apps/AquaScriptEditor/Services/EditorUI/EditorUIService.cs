@@ -222,7 +222,7 @@ namespace AquaEditor
 		}
 
 		#region View Handling
-		public static void Open<T>() where T : View, new()
+		public static T Open<T>() where T : View, new()
 		{
 			Type type = typeof(T);
 
@@ -235,9 +235,11 @@ namespace AquaEditor
 					// Inform of opening
 					instance._Open();
 					m_ActiveViews.Add(type, instance);
+					return instance;
 				}
 				catch (Exception e) { Log.Exception(e); }
 			}
+			return null;
 		}
 
 		public static void Close<T>() where T : View
@@ -249,6 +251,12 @@ namespace AquaEditor
 				m_ActiveViews[type]._Close(); // Inform of closure
 				m_ActiveViews.Remove(type);
 			}
+		}
+
+		public static T GetView<T>() where T : View
+		{
+			Type type = typeof(T);
+			return m_ActiveViews.ContainsKey(type) ? (T)m_ActiveViews[type] : null;
 		}
 		#endregion
 

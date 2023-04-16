@@ -1,9 +1,11 @@
 using System;
 using AquaEngine;
 using System.Linq;
+using System.Diagnostics;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
-using System.IO;
+using Newtonsoft.Json.Serialization;
+using System.Runtime.InteropServices;
 
 namespace AquaEditor.Views
 {
@@ -39,6 +41,20 @@ namespace AquaEditor.Views
 		private static void MenuCallback() => EditorUIService.Open<ResourcesView>();
 
 		protected override void Opened() => OpenDirectory(RootDirectory);
+
+		/// <summary>
+		/// Scans current directory for files and refreshes any changes
+		/// </summary>
+		public void Refresh() => OpenDirectory(m_CurrentDirectory);
+
+		public void HighlightPath(string path)
+		{
+			if (!VFS.Exists(path) || !path.StartsWith(RootDirectory))
+				return; // Cannot navigate to path
+
+			OpenDirectory(path.Substring(0, path.LastIndexOf('/')));
+			m_SelectedPath = path;
+		}
 
 		protected override void Draw()
 		{
@@ -220,8 +236,12 @@ namespace AquaEditor.Views
 			ImGUI.Columns(1);
 			ImGUI.EndChild();
 
-			if (ImGUI.IsItemClicked() && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
-				InspectorView.Target = null;
+			if (ImGUI.IsItemClicked())
+			{
+				m_SelectedPath = string.Empty;
+				if(ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+					InspectorView.Target = null;
+			}
 
 			if (ImGUI.IsItemHovered() &&
 				ImGUI.IsMouseClicked(MouseButton.Right) &&
@@ -256,9 +276,19 @@ namespace AquaEditor.Views
 			m_Files = VFS.GetFiles(m_CurrentDirectory);
 		}
 
-		public void Refresh() => OpenDirectory(m_CurrentDirectory);
+		private void ShowInExplorer(string directory)
+		{
+			directory = VFS.GetAbsolutePath(directory);
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				directory = directory.Replace("/", "\\");
+				Process.Start(new ProcessStartInfo("explorer", directory));
+			}
+			else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				Process.Start("open", directory);
+		}
 
-		private void DrawContextMenu()
+			private void DrawContextMenu()
 		{
 			if (!ImGUI.BeginPopup($"ResourcesNew"))
 				return;
@@ -281,6 +311,11 @@ namespace AquaEditor.Views
 				}
 				ImGUI.EndMenu();
 			}
+			ImGUI.Separator();
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ImGUI.Selectable("Show in Explorer"))
+				ShowInExplorer(m_CurrentDirectory);
+			else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ImGUI.Selectable("Show in Finder"))
+				ShowInExplorer(m_CurrentDirectory);
 
 			ImGUI.EndPopup();
 		}
@@ -294,6 +329,15 @@ namespace AquaEditor.Views
 			{
 				VFS.Remove(file.FullPath);
 				Refresh();
+			}
+
+			if (file.IsDirectory)
+			{
+				ImGUI.Separator();
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ImGUI.Selectable("Show in Explorer"))
+					ShowInExplorer(file.FullPath);
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ImGUI.Selectable("Show in Finder"))
+					ShowInExplorer(file.FullPath);
 			}
 
 			ImGUI.EndPopup();
