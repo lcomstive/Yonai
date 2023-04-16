@@ -3,6 +3,7 @@ using AquaEngine;
 using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
+using System.Linq;
 
 namespace AquaEditor.Inspectors
 {
@@ -84,7 +85,7 @@ namespace AquaEditor.Inspectors
 						field.GetValue(component),
 						component,
 						field.SetValue,
-						field.GetCustomAttribute<RangeAttribute>()
+						field.GetCustomAttributes().ToArray()
 					);
 			}
 			foreach (var property in properties)
@@ -108,7 +109,7 @@ namespace AquaEditor.Inspectors
 							property.GetValue(component),
 							component,
 							canWrite ? property.SetValue : (Action<object, object>)null,
-							property.GetCustomAttribute<RangeAttribute>()
+							property.GetCustomAttributes().ToArray()
 						);
 			}
 
@@ -122,22 +123,42 @@ namespace AquaEditor.Inspectors
 				setValue.Invoke(instance, value);
 		}
 		
-		private void Draw(string label, float value, object instance, Action<object, object> setValue, object additionalInfo)
+		private void Draw(string label, float value, object instance, Action<object, object> setValue, Attribute[] attributes)
 		{
-			RangeAttribute range = additionalInfo as RangeAttribute;
-			if ((range != null && ImGUI.Slider($"##{label}", ref value, range.Range.x, range.Range.y)) ||
-				(range == null && ImGUI.Drag($"##{label}", ref value)))
+			// Check for modifying attributes
+			for(int i = 0; i < attributes.Length; i++)
+			{
+				if (attributes[i] is RangeAttribute)
+				{
+					RangeAttribute rangeAttribute = (RangeAttribute)attributes[i];
+					if(ImGUI.Slider($"##{label}", ref value, rangeAttribute.Range.x, rangeAttribute.Range.y))
+						setValue.Invoke(instance, value);
+					return;
+				}
+			}
+
+			if(ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
 
-		private void Draw(string label, int value, object instance, Action<object, object> setValue, object additionalInfo)
+		private void Draw(string label, int value, object instance, Action<object, object> setValue, Attribute[] attributes)
 		{
-			RangeAttribute range = additionalInfo as RangeAttribute;
-			if ((range != null && ImGUI.Slider($"##{label}", ref value, (int)range.Range.x, (int)range.Range.y)) ||
-				(range == null && ImGUI.Drag($"##{label}", ref value)))
+			// Check for modifying attributes
+			for (int i = 0; i < attributes.Length; i++)
+			{
+				if (attributes[i] is RangeAttribute)
+				{
+					RangeAttribute rangeAttribute = (RangeAttribute)attributes[i];
+					if (ImGUI.Slider($"##{label}", ref value, (int)rangeAttribute.Range.x, (int)rangeAttribute.Range.y))
+						setValue.Invoke(instance, value);
+					return;
+				}
+			}
+
+			if (ImGUI.Drag($"##{label}", ref value))
 				setValue.Invoke(instance, value);
 		}
-		
+
 		private void Draw(string label, bool value, object instance, Action<object, object> setValue)
 		{
 			if (ImGUI.Checkbox($"##{label}", ref value))
@@ -189,6 +210,10 @@ namespace AquaEditor.Inspectors
 					new Vector2(TexturePreviewSize * aspectRatio, TexturePreviewSize));
 				ImGUI.EndTooltip();
 			}
+
+			UUID dragDropID = HandleResourceDragDrop(value);
+			if (dragDropID != UUID.Invalid)
+				setValue.Invoke(instance, Resource.Get(dragDropID));
 		}
 
 		private void Draw(string label, RenderTexture value, object instance, Action<object, object> setValue)
@@ -213,7 +238,52 @@ namespace AquaEditor.Inspectors
 				setValue.Invoke(instance, value);
 		}
 
-		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue, object additionalInfo)
+		private void Draw(string label, UUID value, object instance, Action<object, object> setValue)
+		{
+			if (Resource.Exists(value))
+				ImGUI.Text(Resource.GetPath(value));
+			else
+				ImGUI.Text(value.ToString());
+		}
+
+		private void Draw(string label, ResourceBase resource, object instance, Action<object, object> setValue)
+		{
+			if(ImGUI.Button(resource.ResourcePath) && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+			{
+				// Navigate resources view to resource.ResourcePath and highlight/select resource
+			}
+
+			UUID dragDropID = HandleResourceDragDrop(resource);
+			if (dragDropID != UUID.Invalid)
+				setValue.Invoke(instance, Resource.Get(dragDropID));
+		}
+
+		private UUID HandleResourceDragDrop(ResourceBase resource)
+		{
+			if (ImGUI.BeginDragDropTarget())
+			{
+				object payload = ImGUI.AcceptDragDropPayload("ResourcePath", ImGUI.DragDropFlags.AcceptPeekOnly);
+				if (payload == null)
+					return UUID.Invalid;
+				VFSFile payloadFile = (VFSFile)payload;
+				if (!Resource.Exists(payloadFile.FullPath))
+					return UUID.Invalid;
+				UUID resourceID = Resource.GetID(payloadFile.FullPath);
+				Type payloadType = Resource.GetType(resourceID);
+
+				if (resource.GetType().IsAssignableFrom(payloadType))
+				{
+					ImGUI.AcceptDragDropPayload("ResourcePath");
+					if (ImGUI.DragDropPayloadIsDelivery())
+						return resourceID;
+				}
+
+				ImGUI.EndDragDropTarget();
+			}
+			return UUID.Invalid;
+		}
+
+		private void DrawObject(string label, Type t, object value, object instance, Action<object, object> setValue, Attribute[] attributes)
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
 
@@ -226,9 +296,9 @@ namespace AquaEditor.Inspectors
 
 			ImGUI.TableSetColumnIndex(1);
 			ImGUI.SetNextItemWidth(region.x);
-			if (t	   == typeof(int))				Draw(label, (int)value,				instance, setValue, additionalInfo);
+			if (t	   == typeof(int))				Draw(label, (int)value,				instance, setValue, attributes);
 			else if (t == typeof(bool))				Draw(label, (bool)value,			instance, setValue);
-			else if (t == typeof(float))			Draw(label, (float)value,			instance, setValue, additionalInfo);
+			else if (t == typeof(float))			Draw(label, (float)value,			instance, setValue, attributes);
 			else if (t == typeof(string))			Draw(label, (string)value,			instance, setValue);
 			else if (t == typeof(Colour))			Draw(label, (Colour)value,			instance, setValue);
 			else if (t == typeof(Vector2))			Draw(label, (Vector2)value,			instance, setValue);
@@ -237,12 +307,8 @@ namespace AquaEditor.Inspectors
 			else if (t == typeof(Texture))			Draw(label, (Texture)value,			instance, setValue);
 			else if (t == typeof(Quaternion))		Draw(label, (Quaternion)value,		instance, setValue);
 			else if (t == typeof(RenderTexture))	Draw(label, (RenderTexture)value,	instance, setValue);
-			else if (t == typeof(UUID))
-			{
-				UUID uuid = (UUID)value;
-				if (Resource.Exists(uuid))
-					ImGUI.Text("[Resource] " + Resource.GetPath(uuid));
-			}
+			else if (t == typeof(UUID))				Draw(label, (UUID)value,			instance, setValue);
+			else if (typeof(ResourceBase).IsAssignableFrom(t)) Draw(label, (ResourceBase)value, instance, setValue);
 			else if(t.IsEnum)
 				DrawEnum(label, t, value, instance, setValue);
 			else ImGUI.Text(t.Name);

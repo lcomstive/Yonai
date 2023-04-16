@@ -3,6 +3,7 @@ using AquaEngine;
 using System.Linq;
 using AquaEngine.Graphics;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AquaEditor.Views
 {
@@ -57,6 +58,33 @@ namespace AquaEditor.Views
 				EditorUIService.Close<ResourcesView>();
 		}
 
+		private string GetDirectoryPath(string[] directories, int index) =>
+			RootDirectory + "/" + string.Join("/", directories.Take(index + 1).ToArray());
+
+		private void BreadcrumbDragDropTarget(string directory)
+		{
+			if (!ImGUI.BeginDragDropTarget())
+				return;
+
+			object payload = ImGUI.AcceptDragDropPayload("ResourcePath", ImGUI.DragDropFlags.AcceptPeekOnly);
+			if(payload == null)
+				return;
+			VFSFile payloadFile = (VFSFile)payload;
+			if (payloadFile.ParentDirectory.Trim('/').CompareTo(directory) == 0)
+				return; // Don't drop into same directory
+			ImGUI.AcceptDragDropPayload("ResourcePath");
+			
+			if (ImGUI.DragDropPayloadIsDelivery())
+			{
+				VFS.Move(payloadFile.FullPath, $"{directory}/{payloadFile.FileName}");
+				// Move cache file as well
+				if (VFS.Exists($"{payloadFile.FullPath}.cache"))
+					VFS.Move($"{payloadFile.FullPath}.cache", $"{directory}/{payloadFile.FileName}.cache");
+				Refresh();
+			}
+			ImGUI.EndDragDropTarget();
+		}
+
 		private void DrawBreadcrumbs()
 		{
 			ImGUI.PushStyleVar(ImGUI.StyleVar.FramePadding, new Vector2(5, 3));
@@ -70,6 +98,7 @@ namespace AquaEditor.Views
 			// Root directory
 			if (ImGUI.Button("Assets"))
 				OpenDirectory(RootDirectory);
+			BreadcrumbDragDropTarget(RootDirectory);
 
 			// Subdirectories
 			for (int i = 0; i < directories.Length; i++)
@@ -80,7 +109,9 @@ namespace AquaEditor.Views
 				ImGUI.Text("/", Colour.Grey);
 				ImGUI.SameLine(0, 0);
 				if (ImGUI.Button(directories[i]) && i != directories.Length - 1)
-					OpenDirectory(RootDirectory + "/" + string.Join("/", directories.Take(i + 1).ToArray()));
+					OpenDirectory(GetDirectoryPath(directories, i));
+
+				BreadcrumbDragDropTarget(GetDirectoryPath(directories, i));
 			}
 			ImGUI.EndChild();
 
@@ -123,6 +154,7 @@ namespace AquaEditor.Views
 
 				bool selected = file.FullPath.Equals(m_SelectedPath);
 				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file);
+				ImGUI.PushID(file.FullPath);
 				if (m_ThumbnailSize > ThumbnailSizeRange.x)
 				{
 					if (selected) ImGUI.PopStyleColour();
@@ -140,18 +172,47 @@ namespace AquaEditor.Views
 					ImGUI.SameLine();
 					ImGUI.Selectable(file.FileName, selected);
 				}
-				
+
 				DrawContextMenu(file);
-			
+
+				if (ImGUI.BeginDragDropSource())
+				{
+					// Drag drop preview
+					ImGUI.Text(file.FileName);
+
+					// Set contents
+					ImGUI.SetDragDropPayload("ResourcePath", file);
+					ImGUI.EndDragDropSource();
+				}
+
+				if(file.IsDirectory && ImGUI.BeginDragDropTarget())
+				{
+					object payload = ImGUI.AcceptDragDropPayload("ResourcePath");
+					if (payload != null && ImGUI.DragDropPayloadIsDelivery())
+					{
+						VFSFile payloadFile = (VFSFile)payload;
+						VFS.Move(payloadFile.FullPath, $"{file.FullPath}/{payloadFile.FileName}");
+						// Move cache file as well
+						if (VFS.Exists($"{payloadFile.FullPath}.cache"))
+							VFS.Move($"{payloadFile.FullPath}.cache", $"{file.FullPath}/{payloadFile.FileName}.cache");
+						Refresh();
+					}
+					ImGUI.EndDragDropTarget();
+				}
+
 				if (ImGUI.IsItemClicked())
 				{
 					m_SelectedPath = file.FullPath;
-					InspectorView.Target = file;
-
-					if(file.IsDirectory && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
-						OpenDirectory($"{m_CurrentDirectory}/{file.FileName}");
-					// else handle inspector for file type
+					if (ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+					{
+						if (file.IsDirectory && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+							OpenDirectory($"{m_CurrentDirectory}/{file.FileName}");
+						else
+							// Handle inspector for file type
+							InspectorView.Target = file;
+					}
 				}
+				ImGUI.PopID();
 				ImGUI.NextColumn();
 			}
 
@@ -159,14 +220,9 @@ namespace AquaEditor.Views
 			ImGUI.Columns(1);
 			ImGUI.EndChild();
 
-			if (ImGUI.IsItemClicked())
-			{
-				m_SelectedPath = string.Empty;
+			if (ImGUI.IsItemClicked() && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+				InspectorView.Target = null;
 
-				// Check if inspector target is resource from this view
-				if(InspectorView.Target != null && InspectorView.Target is VFSFile)
-					InspectorView.Target = null; // Clear
-			}
 			if (ImGUI.IsItemHovered() &&
 				ImGUI.IsMouseClicked(MouseButton.Right) &&
 				!ImGUI.IsPopupOpen("ResourcesEdit"))
@@ -199,6 +255,8 @@ namespace AquaEditor.Views
 			m_CurrentDirectory = directory;
 			m_Files = VFS.GetFiles(m_CurrentDirectory);
 		}
+
+		public void Refresh() => OpenDirectory(m_CurrentDirectory);
 
 		private void DrawContextMenu()
 		{
@@ -233,7 +291,10 @@ namespace AquaEditor.Views
 				return;
 
 			if (ImGUI.Selectable("Delete"))
-			{ }
+			{
+				VFS.Remove(file.FullPath);
+				Refresh();
+			}
 
 			ImGUI.EndPopup();
 		}

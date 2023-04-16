@@ -124,6 +124,61 @@ ADD_MANAGED_METHOD(ImGUI, _SetMouseCursor, void, (int type), AquaEditor) { ImGui
 ADD_MANAGED_METHOD(ImGUI, BeginGroup, void, (), AquaEditor) { ImGui::BeginGroup(); }
 ADD_MANAGED_METHOD(ImGUI, EndGroup, void, (), AquaEditor) { ImGui::EndGroup(); }
 
+// DRAG & DROP ///
+ADD_MANAGED_METHOD(ImGUI, _BeginDragDropSource, bool, (int flags), AquaEditor)
+{ return ImGui::BeginDragDropSource(flags); }
+
+ADD_MANAGED_METHOD(ImGUI, EndDragDropSource, void, (), AquaEditor)
+{ return ImGui::EndDragDropSource(); }
+
+ADD_MANAGED_METHOD(ImGUI, BeginDragDropTarget, bool, (), AquaEditor)
+{ return ImGui::BeginDragDropTarget(); }
+
+ADD_MANAGED_METHOD(ImGUI, EndDragDropTarget, void, (), AquaEditor)
+{ return ImGui::EndDragDropTarget(); }
+
+ADD_MANAGED_METHOD(ImGUI, SetDragDropPayload, void, (MonoString* labelRaw, MonoObject* payload), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImGui::SetDragDropPayload(label, payload, mono_object_get_size(payload));
+	mono_free(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, GetDragDropPayload, MonoObject*, (MonoString* labelRaw, int flags), AquaEditor)
+{
+	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+	return payload ? (MonoObject*)payload->Data : nullptr;
+}
+
+ADD_MANAGED_METHOD(ImGUI, GetDragDropPayloadType, MonoString*, (), AquaEditor)
+{
+	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+	return payload ? mono_string_new(mono_domain_get(), payload->DataType) : nullptr;
+}
+
+ADD_MANAGED_METHOD(ImGUI, IsDragDropPayloadType, bool, (MonoString* labelRaw), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+	bool output = payload ? payload->IsDataType(label) : false;
+	mono_free(label);
+	return output;
+}
+
+ADD_MANAGED_METHOD(ImGUI, _AcceptDragDropPayload, MonoObject*, (MonoString* labelRaw, int flags), AquaEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(label, flags);
+	mono_free(label);
+	return payload ? (MonoObject*)payload->Data : nullptr;
+}
+
+ADD_MANAGED_METHOD(ImGUI, DragDropPayloadIsDelivery, bool, (), AquaEditor)
+{
+	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+	return payload ? (MonoObject*)payload->IsDelivery() : false;
+}
+
 /// CONTROLS ///
 ADD_MANAGED_METHOD(ImGUI, _Text, void, (MonoString* labelRaw), AquaEditor)
 {

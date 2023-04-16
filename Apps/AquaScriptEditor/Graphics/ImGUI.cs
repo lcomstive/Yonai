@@ -904,6 +904,66 @@ namespace AquaEditor
 			RoundCornersMask_ = RoundCornersAll | RoundCornersNone,
 		};
 
+		[Flags]
+		public enum DragDropFlags
+		{
+			None = 0,
+
+			// BeginDragDropSource() flags //
+
+			/// <summary>
+			/// Disable preview tooltip. By default, a successful call to BeginDragDropSource opens a tooltip so you can display a preview or description of the source contents. This flag disables this behavior.
+			/// </summary>
+			SourceNoPreviewTooltip = 1 << 0,  
+
+			/// <summary>
+			/// By default, when dragging we clear data so that IsItemHovered() will return false, to avoid subsequent user code submitting tooltips. This flag disables this behavior so you can still call IsItemHovered() on the source item.
+			/// </summary>
+			SourceNoDisableHover = 1 << 1,  
+
+			/// <summary>
+			/// Disable the behavior that allows to open tree nodes and collapsing header by holding over them while dragging a source item.
+			/// </summary>
+			SourceNoHoldToOpenOthers = 1 << 2,  
+
+			/// <summary>
+			/// Allow items such as Text(), Image() that have no unique identifier to be used as drag source, by manufacturing a temporary identifier based on their window-relative position. This is extremely unusual within the dear imgui ecosystem and so we made it explicit.
+			/// </summary>
+			SourceAllowNullID = 1 << 3,  
+
+			/// <summary>
+			/// External source (from outside of dear imgui), won't attempt to read current item/window info. Will always return true. Only one Extern source can be active simultaneously.
+			/// </summary>
+			SourceExtern = 1 << 4,  
+
+			/// <summary>
+			/// Automatically expire the payload if the source cease to be submitted (otherwise payloads are persisting while being dragged)
+			/// </summary>
+			SourceAutoExpirePayload = 1 << 5,  
+
+			// AcceptDragDropPayload() flags //
+
+			/// <summary>
+			/// AcceptDragDropPayload() will returns true even before the mouse button is released. You can then call IsDelivery() to test if the payload needs to be delivered.
+			/// </summary>
+			AcceptBeforeDelivery = 1 << 10, 
+
+			/// <summary>
+			/// Do not draw the default highlight rectangle when hovering over target.
+			/// </summary>
+			AcceptNoDrawDefaultRect = 1 << 11, 
+
+			/// <summary>
+			/// Request hiding the BeginDragDropSource tooltip from the BeginDragDropTarget site.
+			/// </summary>
+			AcceptNoPreviewTooltip = 1 << 12, 
+
+			/// <summary>
+			/// For peeking ahead and inspecting the payload before delivery.
+			/// </summary>
+			AcceptPeekOnly = AcceptBeforeDelivery | AcceptNoDrawDefaultRect
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -1769,6 +1829,25 @@ namespace AquaEditor
 		public static void AddImageRounded(UUID textureID, Vector2 min, Vector2 max, Colour colour, float rounding, DrawFlags flags = DrawFlags.None) =>
 			_AddImageRounded(textureID, ref min, ref max, ref colour, rounding, (int)flags);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImageRounded(ulong textureID, ref Vector2 min, ref Vector2 max, ref Colour colour, float rounding, int flags);
+		#endregion
+
+		#region Drag and Drop
+		public static bool BeginDragDropSource(DragDropFlags flags = DragDropFlags.None) => _BeginDragDropSource((int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _BeginDragDropSource(int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool EndDragDropSource();
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool BeginDragDropTarget();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool EndDragDropTarget();
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetDragDropPayload(string type, object value);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern object GetDragDropPayload();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern string GetDragDropPayloadType();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsDragDropPayloadType(string type);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool DragDropPayloadIsDelivery();
+
+		public static object AcceptDragDropPayload(string type, DragDropFlags flags = DragDropFlags.None) => _AcceptDragDropPayload(type, (int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AcceptDragDropPayload(string type, int flags);
 		#endregion
 	}
 }
