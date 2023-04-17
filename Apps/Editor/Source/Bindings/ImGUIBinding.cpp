@@ -176,7 +176,7 @@ ADD_MANAGED_METHOD(ImGUI, _AcceptDragDropPayload, MonoObject*, (MonoString* labe
 ADD_MANAGED_METHOD(ImGUI, DragDropPayloadIsDelivery, bool, (), AquaEditor)
 {
 	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
-	return payload ? (MonoObject*)payload->IsDelivery() : false;
+	return payload ? payload->IsDelivery() : false;
 }
 
 /// CONTROLS ///
