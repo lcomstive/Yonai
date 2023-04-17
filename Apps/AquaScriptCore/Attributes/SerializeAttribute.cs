@@ -10,6 +10,12 @@ namespace AquaEngine
 	{
 		public bool ShouldSerialize = true;
 
+		/// <summary>
+		/// Label to use when serializing and deserializing this data.
+		/// Set to empty string to use default.
+		/// </summary>
+		public string Label { get; set; } = string.Empty;
+
 		public SerializeAttribute(bool serialize = true) => ShouldSerialize = serialize;
 	}
 }

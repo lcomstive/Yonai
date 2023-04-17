@@ -77,9 +77,11 @@ namespace AquaEditor.Inspectors
 				if (field.GetCustomAttribute<ShowInInspectorAttribute>() != null)
 					show = true;
 
+				SerializeAttribute serializeAttribute = field.GetCustomAttribute<SerializeAttribute>();
+
 				if (show)
 					DrawObject(
-						field.Name,
+						string.IsNullOrEmpty(serializeAttribute?.Label) ? field.Name : serializeAttribute.Label,
 						field.FieldType,
 						field.GetValue(component),
 						component,
@@ -101,9 +103,11 @@ namespace AquaEditor.Inspectors
 				if (accessors.Length > 1 && accessors[1].GetCustomAttribute<ShowInInspectorAttribute>() != null)
 					canWrite = true;
 
+				SerializeAttribute serializeAttribute = property.GetCustomAttribute<SerializeAttribute>();
+			
 				if (canRead)
 					DrawObject(
-							property.Name,
+							string.IsNullOrEmpty(serializeAttribute?.Label) ? property.Name : serializeAttribute.Label,
 							property.PropertyType,
 							property.GetValue(component),
 							component,

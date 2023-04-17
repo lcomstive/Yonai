@@ -2,6 +2,7 @@
 using AquaEngine.IO;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Emit;
 
 namespace AquaEngine
 {
@@ -41,20 +42,20 @@ namespace AquaEngine
 
 			foreach (var field in fields)
 			{
-				if(ShouldSerializeField(field))
+				if(ShouldSerializeField(field, out string label))
 					SerializeObject(
 						json,
-						field.Name,
+						label,
 						field.FieldType,
 						field.GetValue(this)
 					);
 			}
 			foreach (var property in properties)
 			{
-				if (ShouldSerializeProperty(property))
+				if (ShouldSerializeProperty(property, out string label))
 					SerializeObject(
 						json,
-						property.Name,
+						label,
 						property.PropertyType,
 						property.GetValue(this)
 					);
@@ -74,33 +75,34 @@ namespace AquaEngine
 
 			foreach (var field in fields)
 			{
-				if (!ShouldSerializeField(field))
+				if (!ShouldSerializeField(field, out string label))
 					continue;
 
 				if(serializableType.IsAssignableFrom(field.FieldType) && !resourceBaseType.IsAssignableFrom(field.FieldType))
 				{
 					ISerializable serializable = (ISerializable)field.GetValue(this);
-					serializable.OnDeserialize(json[field.Name].Value<JObject>());
+					if (json[label] != null)
+						serializable.OnDeserialize(json[label].Value<JObject>());
 					field.SetValue(this, serializable);
 				}
 				else
 					field.SetValue(this,
 						DeserializeObject(
 							json,
-							field.Name,
+							label,
 							field.FieldType
 						));
 			}
 			foreach (var property in properties)
 			{
-				if (!ShouldSerializeProperty(property))
+				if (!ShouldSerializeProperty(property, out string label))
 					continue;
 
 				if (!serializableType.IsAssignableFrom(property.PropertyType) || resourceBaseType.IsAssignableFrom(property.PropertyType))
 				{
 					object value = DeserializeObject(
 							json,
-							property.Name,
+							label,
 							property.PropertyType
 						);
 					if (value != null)
@@ -109,30 +111,37 @@ namespace AquaEngine
 				else
 				{
 					ISerializable serializable = (ISerializable)property.GetValue(this);
-					serializable.OnDeserialize(json[property.Name].Value<JObject>());
+					if (json[label] != null)
+						serializable.OnDeserialize(json[label].Value<JObject>());
 					property.SetValue(this, serializable);
 				}
 			}
 		}
 
-		private bool ShouldSerializeField(FieldInfo field)
+		private bool ShouldSerializeField(FieldInfo field, out string label)
 		{
 			SerializeAttribute shouldSerializeAttr = field.GetCustomAttribute<SerializeAttribute>();
+			label = field.Name;
 			if (shouldSerializeAttr != null && !shouldSerializeAttr.ShouldSerialize)
 				return false;
 			if (shouldSerializeAttr == null && field.IsPublic && field.GetCustomAttribute<HideInInspectorAttribute>() != null)
 				return false;
 
-			bool save = field.IsPublic;
+			label = string.IsNullOrEmpty(shouldSerializeAttr?.Label) ? field.Name : shouldSerializeAttr.Label;
+
 			if (field.GetCustomAttribute<ShowInInspectorAttribute>() != null)
 				return true;
 
 			return field.IsPublic || shouldSerializeAttr != null;
 		}
 
-		private bool ShouldSerializeProperty(PropertyInfo property)
+		private bool ShouldSerializeProperty(PropertyInfo property, out string label)
 		{
+			label = property.Name;
 			SerializeAttribute shouldSerializeAttr = property.GetCustomAttribute<SerializeAttribute>();
+			if(shouldSerializeAttr != null)
+				label = string.IsNullOrEmpty(shouldSerializeAttr.Label) ? property.Name : shouldSerializeAttr.Label;
+
 			if (shouldSerializeAttr != null && !shouldSerializeAttr.ShouldSerialize)
 				return false;
 			else if (shouldSerializeAttr?.ShouldSerialize ?? false)
@@ -166,11 +175,21 @@ namespace AquaEngine
 				json[label] = ((ResourceBase)value).ResourceID.ToString();
 			else if (typeof(ISerializable).IsAssignableFrom(t))
 			{
-				try { json[label] = ((ISerializable)value).OnSerialize(); }
+				try { json[label] = ((ISerializable)value)?.OnSerialize(); }
 				catch(Exception e)
 				{
 					Log.Exception(e, $"{label} ({t.Name})");
 				}
+			}
+			// Reference to another component
+			else if(typeof(Component).IsAssignableFrom(t))
+			{
+				if (value == null)
+					return;
+				json[label] = new JObject(
+					new JProperty("Entity", ((Component)value).Entity.ID.ToString()),
+					new JProperty("Type", $"{t.FullName}, {t.Assembly.GetName()}")
+					);
 			}
 			else if (t == typeof(int))		json[label] = (int)value;
 			else if (t == typeof(uint))		json[label] = (uint)value;
@@ -185,14 +204,25 @@ namespace AquaEngine
 		
 		private object DeserializeObject(JObject json, string label, Type t)
 		{
+			if (json[label] == null) return null;
+
 			if (typeof(ResourceBase).IsAssignableFrom(t)) return Resource.Get(ulong.Parse(json[label].Value<string>()));
-			if (t == typeof(int))			return json[label].Value<int>();
+			else if (t == typeof(int))			return json[label].Value<int>();
 			else if (t == typeof(uint))		return json[label].Value<uint>();
 			else if (t == typeof(bool))		return json[label].Value<bool>();
 			else if (t == typeof(float))	return json[label].Value<float>();
 			else if (t == typeof(string))	return json[label].Value<string>();
 			else if (t == typeof(UUID))		return (UUID)ulong.Parse(json[label].Value<string>());
 			else if (t.IsEnum)				return Enum.Parse(t, json[label].Value<string>());
+			else if (typeof(Component).IsAssignableFrom(t))
+			{
+				// Reference to another component
+				JObject componentJSON = json[label].Value<JObject>();
+				UUID componentEntityID = ulong.Parse(componentJSON["Entity"].Value<string>());
+				Entity componentEntity = World.GetEntity(componentEntityID);
+				Type componentType = Type.GetType(componentJSON["Type"].Value<string>());
+				return componentEntity.GetComponent(componentType);
+			}
 			else
 				Log.Debug($"Type '{t.Name}' has no method to be deserialized");
 			return null;

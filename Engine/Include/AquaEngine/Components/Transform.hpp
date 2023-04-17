@@ -12,11 +12,20 @@ namespace AquaEngine::Components
 	struct Transform : public Component
 	{
 		Transform* Parent = nullptr;
-		std::vector<Transform*> Children = {};
+		std::unordered_map<UUID, Transform*> Children = {};
 		
 		glm::vec3 Position = { 0, 0, 0 };
 		glm::quat Rotation = glm::identity<glm::quat>();
 		glm::vec3 Scale = { 1, 1, 1 };
+
+		/// <summary>
+		/// Sets the parent and handles changes in
+		/// previous and new parent's children
+		/// </summary>
+		void SetParent(Transform* parent);
+
+		void AddChild(Transform* child);
+		void RemoveChild(Transform* child);
 
 #pragma region Getters
 		glm::mat4 GetModelMatrix();

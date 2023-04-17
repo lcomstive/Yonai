@@ -78,13 +78,26 @@ namespace AquaEngine
 					continue;
 				}
 
-				try
-				{
-					component.OnDeserialize(componentJSON);
-					m_Components.Add(type, component);
-				}
-				catch(Exception e)
-				{ Log.Exception(e); }
+				// component.OnDeserialize(componentJSON);
+				m_Components.Add(type, component);
+			}
+		}
+
+		/// <summary>
+		/// Call each component's OnDeserialize.<br></br>
+		/// This is done after initial serialization so references to components on other entities are valid
+		/// </summary>
+		internal void OnPostDeserialize(JObject json)
+		{
+			JArray componentsArray = json["Components"].Value<JArray>();
+			foreach (JObject componentJSON in componentsArray)
+			{
+				Type type = Type.GetType(componentJSON["ComponentType"].Value<string>());
+				if (type == null)
+					continue;
+
+				Component component = GetComponent(type);
+				component.OnDeserialize(componentJSON);
 			}
 		}
 

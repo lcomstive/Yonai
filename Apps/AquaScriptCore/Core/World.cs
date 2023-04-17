@@ -78,6 +78,7 @@ namespace AquaEngine
 
 			Name = json["Name"].Value<string>();
 
+			// Create entities and their components
 			JArray entities = json["Entities"].Value<JArray>();
 			foreach(JObject entityJSON in entities)
 			{
@@ -92,6 +93,14 @@ namespace AquaEngine
 				Entity entity = new Entity(this, entityID);
 				entity.OnDeserialize(entityJSON);
 				m_Entities.Add(entityID, entity);
+			}
+
+			// Deserialize components in entities.
+			// This is done afterwards to keep references to components in other entities
+			foreach (JObject entityJSON in entities)
+			{
+				UUID entityID = new UUID(ulong.Parse(entityJSON["ID"].Value<string>()));
+				m_Entities[entityID].OnPostDeserialize(entityJSON);
 			}
 
 			// If enabled in SceneManager, enable and start all components
