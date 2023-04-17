@@ -1,127 +1,127 @@
-[
-  {
-    "ID": "2192208595069571440",
-    "Path": "assets://Models/Quad.fbx",
-    "Type": "AquaEngine.Graphics.Model"
-  },
-  {
-    "ID": "2602680297077690801",
-    "Path": "assets://Models/Cube.fbx",
-    "Type": "AquaEngine.Graphics.Model"
-  },
-  {
-    "ID": "14648913944093758151",
-    "Path": "assets://Models/Sphere.fbx",
-    "Type": "AquaEngine.Graphics.Model"
-  },
-  {
-    "ID": "2063758824007042466",
-    "Path": "assets://Textures/Grid.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "6779611211466819370",
-    "Path": "assets://Shaders/Default3D.shader",
-    "Type": "AquaEngine.Graphics.Shader"
-  },
-  {
-    "ID": "16395505420949311857",
-    "Path": "assets://Materials/Default3D.material",
-    "Type": "AquaEngine.Graphics.Material"
-  },
-  {
-    "ID": "15769060408119038293",
-    "Path": "assets://Shaders/Default2D.shader",
-    "Type": "AquaEngine.Graphics.Shader"
-  },
-  {
-    "ID": "6390438237626730770",
-    "Path": "assets://Materials/Default2D.material",
-    "Type": "AquaEngine.Graphics.Material"
-  },
-  {
-    "ID": "15205820339877265536",
-    "Path": "assets://Textures/Icons/Folder.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "1558939981498604886",
-    "Path": "assets://Textures/Icons/Kenney/down.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "180903874644081999",
-    "Path": "assets://Textures/Icons/Kenney/gear.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "4138545476931334866",
-    "Path": "assets://Textures/Icons/Kenney/larger.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "17032209305653912973",
-    "Path": "assets://Textures/Icons/Kenney/power.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "13784486783167574660",
-    "Path": "assets://Textures/Icons/Kenney/save.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "8706201080435106095",
-    "Path": "assets://Textures/Icons/Kenney/up.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "5953939257442262790",
-    "Path": "assets://Shaders/NewSprite.shader",
-    "Type": "AquaEngine.Graphics.Shader"
-  },
-  {
-    "ID": "4740142775366728599",
-    "Path": "project://Assets/TestMaterial.material",
-    "Type": "AquaEngine.Graphics.Material"
-  },
-  {
-    "ID": "10876181119480238457",
-    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "1703371008641297390",
-    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3683148736297131420",
-    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "914614816986255884",
-    "Path": "project://Assets/Models/Backpack/1001_normal.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "16432474944345516457",
-    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3709196398890155700",
-    "Path": "assets://Textures/texture_09.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "12186665987650416156",
-    "Path": "project://Assets/Textures/Aqua.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "7670656770908261766",
-    "Path": "project://Assets/Textures/texture_09.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  }
+[
+  {
+    "ID": "2192208595069571440",
+    "Path": "assets://Models/Quad.fbx",
+    "Type": "AquaEngine.Graphics.Model"
+  },
+  {
+    "ID": "2602680297077690801",
+    "Path": "assets://Models/Cube.fbx",
+    "Type": "AquaEngine.Graphics.Model"
+  },
+  {
+    "ID": "14648913944093758151",
+    "Path": "assets://Models/Sphere.fbx",
+    "Type": "AquaEngine.Graphics.Model"
+  },
+  {
+    "ID": "2063758824007042466",
+    "Path": "assets://Textures/Grid.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "6779611211466819370",
+    "Path": "assets://Shaders/Default3D.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "16395505420949311857",
+    "Path": "assets://Materials/Default3D.material",
+    "Type": "AquaEngine.Graphics.Material"
+  },
+  {
+    "ID": "15769060408119038293",
+    "Path": "assets://Shaders/Default2D.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "6390438237626730770",
+    "Path": "assets://Materials/Default2D.material",
+    "Type": "AquaEngine.Graphics.Material"
+  },
+  {
+    "ID": "15205820339877265536",
+    "Path": "assets://Textures/Icons/Folder.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "1558939981498604886",
+    "Path": "assets://Textures/Icons/Kenney/down.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "180903874644081999",
+    "Path": "assets://Textures/Icons/Kenney/gear.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "4138545476931334866",
+    "Path": "assets://Textures/Icons/Kenney/larger.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "17032209305653912973",
+    "Path": "assets://Textures/Icons/Kenney/power.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "13784486783167574660",
+    "Path": "assets://Textures/Icons/Kenney/save.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "8706201080435106095",
+    "Path": "assets://Textures/Icons/Kenney/up.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "5953939257442262790",
+    "Path": "assets://Shaders/NewSprite.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "4740142775366728599",
+    "Path": "project://Assets/TestMaterial.material",
+    "Type": "AquaEngine.Graphics.Material"
+  },
+  {
+    "ID": "10876181119480238457",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "1703371008641297390",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "3683148736297131420",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "914614816986255884",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "16432474944345516457",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "3709196398890155700",
+    "Path": "assets://Textures/texture_09.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "12186665987650416156",
+    "Path": "project://Assets/Textures/Aqua.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "7670656770908261766",
+    "Path": "project://Assets/Textures/texture_09.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  }
 ]

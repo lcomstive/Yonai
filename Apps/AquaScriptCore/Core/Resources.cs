@@ -246,7 +246,8 @@ namespace AquaEngine
 				resources.Add(resource);
 			}
 
-			VFS.Write(DatabaseFilePath, JsonConvert.SerializeObject(resources, Formatting.Indented));
+			string json = JsonConvert.SerializeObject(resources, Formatting.Indented);
+			VFS.Write(DatabaseFilePath, json.Replace("\r\n", "\n"));
 		}
 
 		/// <summary>

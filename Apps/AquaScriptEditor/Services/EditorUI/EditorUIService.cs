@@ -115,7 +115,10 @@ namespace AquaEditor
 
 			World[] activeScenes = SceneManager.GetActiveScenes();
 			foreach (World scene in activeScenes)
-				VFS.Write($"{SceneDir}{scene.Name}.json", JsonConvert.SerializeObject(scene.OnSerialize(), Formatting.Indented));
+			{
+				string json = JsonConvert.SerializeObject(scene.OnSerialize(), Formatting.Indented);
+				VFS.Write($"{SceneDir}{scene.Name}.json", json.Replace("\r\n", "\n"));
+			}
 		}
 
 		[MenuItem("File/Scene/Load")]
