@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
@@ -28,8 +28,15 @@ namespace AquaEngine
 			}
 			set
 			{
-				// Vector3 delta = Position - 
-				_SetPosition(Handle, ref value);
+				if(Parent == null)
+				{
+					_SetPosition(Handle, ref value);
+					return;
+				}
+
+				// TODO: Test this
+				Vector3 delta = value - Parent.Position;
+				_SetPosition(Handle, ref delta);
 			}
 		}
 
@@ -52,7 +59,7 @@ namespace AquaEngine
 				_GetGlobalRotation(Handle, out Quaternion rotation);
 				return rotation;
 			}
-			set => _SetRotation(Handle, ref value);
+			// set => _SetRotation(Handle, ref value);
 		}
 
 		[Serialize(Label = "Scale")]
@@ -74,7 +81,7 @@ namespace AquaEngine
 				_GetGlobalScale(Handle, out Vector3 scale);
 				return scale;
 			}
-			set => _SetScale(Handle, ref value);
+			// set => _SetScale(Handle, ref value);
 		}
 
 		[Serialize(false), HideInInspector]

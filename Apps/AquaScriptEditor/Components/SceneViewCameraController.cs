@@ -1,5 +1,4 @@
 using AquaEngine;
-using System;
 
 namespace AquaEditor
 {
@@ -26,7 +25,7 @@ namespace AquaEditor
 			else
 				Log.Warning("Transform found");
 
-			Vector3 euler = m_Transform.Rotation.Euler;
+			Vector3 euler = m_Transform.LocalRotation.Euler;
 			yRot = MathUtils.Deg2Rad(euler.y);
 			xRot = MathUtils.Deg2Rad(euler.x);
 		}
@@ -42,8 +41,8 @@ namespace AquaEditor
 			else
 				movement *= Speed;
 
-			m_Transform.Position += m_Transform.Rotation.Inverted * movement;
-			m_Transform.Rotation = rotation;
+			m_Transform.LocalPosition += m_Transform.LocalRotation.Inverted * movement;
+			m_Transform.LocalRotation = rotation;
 		}
 
 		private Vector3 GetMovement()
@@ -73,7 +72,7 @@ namespace AquaEditor
 
 		private Quaternion GetRotation()
 		{
-			Vector3 euler = m_Transform.Rotation.Euler;
+			Vector3 euler = m_Transform.LocalRotation.Euler;
 
 			Input.MouseState = Input.IsMouseDown(MouseButton.Right) ? MouseState.Disabled : MouseState.Normal;
 			if(Input.IsMouseDown(MouseButton.Right))

@@ -8,6 +8,7 @@ namespace AquaEditor.Views
 		private static World m_World = null;
 		private static Camera m_Camera = null;
 		private static RenderTexture m_Target = null;
+		private SceneViewCameraController m_Controller = null;
 
 		[MenuItem("Window/Scene")]
 		private static void MenuCallback() => EditorUIService.Open<SceneView>();
@@ -26,42 +27,24 @@ namespace AquaEditor.Views
 			m_Camera = entity.AddComponent<Camera>();
 			m_Camera.RenderTarget = m_Target;
 
-			// Camera controller
-			entity.AddComponent<SceneViewCameraController>();
-
 			// Transform
 			Transform transform = entity.AddComponent<Transform>();
 			transform.Position = new Vector3(0, 2, -15);
 
-			SceneManager.Load(m_World, SceneAddType.Additive);
-			m_World.Deserialized += GetCamera;
+			// Camera controller
+			m_Controller = entity.AddComponent<SceneViewCameraController>();
+			m_Controller.Start();
 		}
 
 		protected override void Closed()
 		{
-			if(InspectorView.Target?.Equals(m_Camera.Entity) ?? false)
-				InspectorView.Target = null;
-
 			m_Target.Dispose();
 			m_Camera.RenderTarget = null;
 
-			SceneManager.Unload(m_World);
 			m_World.Destroy();
 
 			m_World = null;
 			m_Camera = null;
-		}
-
-		private void GetCamera()
-		{
-			Camera[] cameras = m_World.GetComponents<Camera>();
-			bool updateInspector = InspectorView.Target == m_Camera;
-
-			m_Camera = cameras.Length > 0 ? cameras[0] : null;
-			m_Camera.RenderTarget = m_Target;
-
-			if(updateInspector)
-				InspectorView.Target = m_Camera?.Entity ?? null;
 		}
 
 		protected override void Draw()
@@ -71,6 +54,8 @@ namespace AquaEditor.Views
 			ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, Colour.Black);
 			if (ImGUI.Begin("Scene", ref isOpen))
 			{
+				m_Controller.Update();
+
 				Vector2 offset = ImGUI.WindowPosition;
 
 				Vector2[] viewportBounds = new Vector2[]
