@@ -9,44 +9,20 @@ using namespace AquaEngine::Components;
 
 vec3 Transform::GetGlobalPosition()
 {
-	vec3 position = Position;
-
-	Transform* parentTransform = Parent;
-	while (parentTransform)
-	{
-		position += parentTransform->Position;
-		parentTransform = parentTransform->Parent;
-	}
-
-	return position;
+	return Position + (Parent ? Parent->GetGlobalPosition() : vec3(0));
 }
 
 quat Transform::GetGlobalRotation()
 {
-	quat rotation = Rotation;
-
-	Transform* parentTransform = Parent;
-	while (parentTransform)
-	{
-		rotation = parentTransform->Rotation * rotation;
-		parentTransform = parentTransform->Parent;
-	}
-
-	return rotation;
+	if (Parent)
+		return Parent->GetGlobalRotation() * Rotation;
+	else
+		return Rotation;
 }
 
 vec3 Transform::GetGlobalScale()
 {
-	vec3 scale = Scale;
-
-	Transform* parentTransform = Parent;
-	while (parentTransform)
-	{
-		scale *= parentTransform->Scale;
-		parentTransform = parentTransform->Parent;
-	}
-
-	return scale;
+	return Scale * (Parent ? Parent->GetGlobalScale() : vec3(1.0f));
 }
 
 vec3 Transform::Up()	  { return vec3(0, 1, 0) * Rotation; }
@@ -56,13 +32,15 @@ vec3 Transform::Forward() { return vec3(0, 0, 1) * Rotation; }
 mat4 Transform::GetModelMatrix()
 {
 	// Generate model matrix
-	quat globalRot = GetGlobalRotation();
-
-	mat4 translationMatrix = translate(mat4(1.0f), GetGlobalPosition());
-	mat4 scaleMatrix = scale(mat4(1.0f), GetGlobalScale());
-	mat4 rotationMatrix = toMat4(globalRot);
+	mat4 translationMatrix = translate(mat4(1.0f), Position);
+	mat4 scaleMatrix = scale(mat4(1.0f), Scale);
+	mat4 rotationMatrix = toMat4(Rotation);
 	
-	return translationMatrix * scaleMatrix * rotationMatrix;
+	mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	if (Parent)
+		modelMatrix = Parent->GetModelMatrix() * modelMatrix;
+
+	return modelMatrix;
 }
 
 void Transform::SetParent(Transform* parent)
