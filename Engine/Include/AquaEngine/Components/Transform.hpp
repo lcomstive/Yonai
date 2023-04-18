@@ -40,11 +40,11 @@ namespace AquaEngine::Components
 		template<typename T>
 		T* GetComponentInChildren()
 		{
-			for (Transform* child : Children)
+			for (auto pair : Children)
 			{
-				T* component = child->Entity.GetComponent<T>();
+				T* component = pair.second->Entity.GetComponent<T>();
 				if (!component)
-					component = child->GetComponentInChildren<T>();
+					component = pair.second->GetComponentInChildren<T>();
 				if (component)
 					return component;
 			}
@@ -54,12 +54,12 @@ namespace AquaEngine::Components
 		template<typename T>
 		void GetComponentsInChildren(std::vector<T*>& output)
 		{
-			for (Transform* child : Children)
+			for (auto pair : Children)
 			{
-				T* component = child->Entity.GetComponent<T>();
+				T* component = pair.second->Entity.GetComponent<T>();
 				if (component)
 					output.emplace_back(component);
-				child->GetComponentsInChildren<T>(output);
+				pair.second->GetComponentsInChildren<T>(output);
 			}
 		}
 
