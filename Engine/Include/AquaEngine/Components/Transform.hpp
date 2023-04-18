@@ -28,7 +28,7 @@ namespace AquaEngine::Components
 		void RemoveChild(Transform* child);
 
 #pragma region Getters
-		glm::mat4 GetModelMatrix();
+		glm::mat4 GetModelMatrix(bool global = true);
 		glm::vec3 GetGlobalScale();
 		glm::vec3 GetGlobalPosition();
 		glm::quat GetGlobalRotation();

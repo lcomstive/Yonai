@@ -27,6 +27,7 @@ namespace AquaEngine
 
 		public override string ToString() => $"({x}, {y})";
 
+		public static explicit operator IVector2(Vector2 v) => new IVector2((int)Math.Floor(v.x), (int)Math.Floor(v.y));
 		public static implicit operator string(IVector2 v) => v.ToString();
 
 		public JObject OnSerialize() =>

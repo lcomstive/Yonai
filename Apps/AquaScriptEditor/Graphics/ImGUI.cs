@@ -964,6 +964,36 @@ namespace AquaEditor
 			AcceptPeekOnly = AcceptBeforeDelivery | AcceptNoDrawDefaultRect
 		};
 
+		[Flags]
+		public enum ManipulateOperation : uint
+		{
+			TranslateX		= (1u << 0),
+			TranslateY		= (1u << 1),
+			TranslateZ		= (1u << 2),
+
+			RotateX			= (1u << 3),
+			RotateY			= (1u << 4),
+			RotateZ			= (1u << 5),
+
+			RotateScreen	= (1u << 6),
+
+			ScaleX			= (1u << 7),
+			ScaleY			= (1u << 8),
+			ScaleZ			= (1u << 9),
+
+			Bounds			= (1u << 10),
+
+			ScaleXU			= (1u << 11),
+			ScaleYU			= (1u << 12),
+			ScaleZU			= (1u << 13),
+
+			Translate		= TranslateX | TranslateY | TranslateZ,
+			Rotate			= RotateX | RotateY | RotateZ | RotateScreen,
+			Scale			= ScaleX | ScaleY | ScaleZ,
+			ScaleU			= ScaleXU | ScaleYU | ScaleZU, // universal
+			Universal		= Translate | Rotate | ScaleU
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -1015,6 +1045,15 @@ namespace AquaEditor
 		public static bool IsMouseDoubleClicked(MouseButton button) => _IsMouseDoubleClicked((int)button);
 		public static bool IsMouseDragging(MouseButton button) => _IsMouseDragging((int)button);
 		public static bool IsMouseReleased(MouseButton button) => _IsMouseReleased((int)button);
+
+		public static bool IsAnyMouseClicked() =>
+			IsMouseClicked(MouseButton.Left) || IsMouseClicked(MouseButton.Right) || IsMouseClicked(MouseButton.Middle);
+		public static bool IsAnyMouseDoubleClicked() =>
+			IsMouseDoubleClicked(MouseButton.Left) || IsMouseDoubleClicked(MouseButton.Right) || IsMouseDoubleClicked(MouseButton.Middle);
+		public static bool IsAnyMouseDragging() =>
+			IsMouseDragging(MouseButton.Left) || IsMouseDragging(MouseButton.Right) || IsMouseDragging(MouseButton.Middle);
+		public static bool IsAnyMouseReleased() =>
+			IsMouseReleased(MouseButton.Left) || IsMouseReleased(MouseButton.Right) || IsMouseReleased(MouseButton.Middle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseClicked(int button);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsMouseDoubleClicked(int button);
@@ -1534,17 +1573,20 @@ namespace AquaEditor
 		public static bool IsWindowHovered => _IsWindowHovered();
 		public static bool IsWindowCollapsed => _IsWindowCollapsed();
 
-		public static IVector2 WindowContentRegionMin
-		{ get { _GetWindowContentRegionMin(out IVector2 output); return output; } }
+		public static Vector2 WindowContentRegionMin
+		{ get { _GetWindowContentRegionMin(out Vector2 output); return output; } }
 
-		public static IVector2 WindowContentRegionMax
-		{ get { _GetWindowContentRegionMax(out IVector2 output); return output; } }
+		public static Vector2 WindowContentRegionMax
+		{ get { _GetWindowContentRegionMax(out Vector2 output); return output; } }
 
-		public static IVector2 ContentRegionAvailable
-		{ get { _GetContentRegionAvail(out IVector2 output); return output; } }
+		public static Vector2 ContentRegionAvailable
+		{ get { _GetContentRegionAvail(out Vector2 output); return output; } }
 
-		public static IVector2 WindowPosition
-		{ get { _GetWindowPosition(out IVector2 output); return output; } }
+		public static Vector2 WindowPosition
+		{ get { _GetWindowPosition(out Vector2 output); return output; } }
+		
+		public static Vector2 WindowSize
+		{ get { _GetWindowSize(out Vector2 output); return output; } }
 
 		public static Viewport GetViewport(ulong ID)
 		{
@@ -1576,24 +1618,15 @@ namespace AquaEditor
 			out ulong parentID
 			);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern ulong GetMainViewportID();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern ulong GetMainViewportID();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern ulong GetWindowViewportID();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern ulong GetWindowViewportID();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetWindowContentRegionMin(out Vector2 output);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetWindowContentRegionMax(out Vector2 output);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetContentRegionAvail(out Vector2 output);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowContentRegionMin(out IVector2 output);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowContentRegionMax(out IVector2 output);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetContentRegionAvail(out IVector2 output);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _GetWindowPosition(out IVector2 output);
-
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetWindowPosition(out Vector2 output);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetWindowSize(out Vector2 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool _IsWindowFocused();
@@ -1848,6 +1881,29 @@ namespace AquaEditor
 
 		public static object AcceptDragDropPayload(string type, DragDropFlags flags = DragDropFlags.None) => _AcceptDragDropPayload(type, (int)flags);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern object _AcceptDragDropPayload(string type, int flags);
+		#endregion
+
+		#region Gizmos
+		public static class Gizmo
+		{
+			public static void SetRect(float x, float y, float width, float height) => Gizmo_SetRect(x, y, width, height);
+			public static void SetRect(Vector2 position, Vector2 size) => Gizmo_SetRect(position.x, position.y, size.x, size.y);
+
+			public static void SetDrawList() => Gizmo_SetDrawList();
+
+			public static void Enable(bool enable = true) => Gizmo_Enable(enable);
+
+			public static void Manipulate(Camera viewPoint, Transform target, Vector2 drawRegion, ManipulateOperation operation, bool isLocalSpace = true, float snapping = 0)
+			{
+				if (viewPoint != null && target != null)
+					_Gizmo_Manipulate(viewPoint.Handle, target.Handle, ref drawRegion, (uint)operation, isLocalSpace, snapping);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_SetRect(float x, float y, float width, float height);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_SetDrawList();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_Enable(bool enable);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Gizmo_Manipulate(IntPtr cameraHandle, IntPtr transformHandle, ref Vector2 drawRegion, uint operation, bool localSpace, float snapping);
 		#endregion
 	}
 }

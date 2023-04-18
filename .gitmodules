@@ -29,3 +29,6 @@
 [submodule "Engine/Vendor/miniaudio"]
 	path = Engine/Vendor/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "Engine/Vendor/ImGuizmo"]
+	path = Engine/Vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

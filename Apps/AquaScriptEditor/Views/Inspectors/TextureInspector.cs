@@ -28,7 +28,7 @@ namespace AquaEditor.Inspectors
 		private const float SplitterWidth = 7.5f;
 		public override void DrawInspector()
 		{
-			IVector2 region = ImGUI.ContentRegionAvailable;
+			Vector2 region = ImGUI.ContentRegionAvailable;
 
 			if (m_TexturePreviewHeight < 0)
 				m_TexturePreviewHeight = region.y * 0.4f;

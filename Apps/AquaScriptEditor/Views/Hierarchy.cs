@@ -42,19 +42,25 @@ namespace AquaEditor.Views
 							nameComponent.Name = $"Entity {entity.ID}";
 						}
 
-						ImGUI.Text(nameComponent.Name);
+						ImGUI.Selectable(nameComponent.Name);
 
-						if(isSelected)
+						if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
+							InspectorView.Target = entity;
+
+						if (isSelected)
 							ImGUI.PopStyleColour();
 
 						ImGUI.EndChild();
-						DrawContextMenu(entity);
 
-						if(ImGUI.IsItemClicked())
-							InspectorView.Target = entity;
+						DrawContextMenu(entity);
 					}
 
 					ImGUI.EndChild();
+
+					// If selected empty space and entity is currently selected, deselect it
+					if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
+						InspectorView.Target = null;
+
 					DrawContextMenu(world);
 				}
 			}
@@ -69,6 +75,7 @@ namespace AquaEditor.Views
 		{
 			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{entity.World.ID}:{entity.ID}", ImGUI.PopupFlags.MouseButtonRight))
 				return;
+			InspectorView.Target = entity;
 
 			if (ImGUI.Selectable("Delete"))
 				entity.Destroy();

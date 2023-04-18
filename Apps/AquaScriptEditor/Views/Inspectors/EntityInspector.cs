@@ -62,7 +62,7 @@ namespace AquaEditor.Inspectors
 				return;
 			ImGUI.Indent();
 
-			IVector2 contentRegion = ImGUI.ContentRegionAvailable;
+			IVector2 contentRegion = (IVector2)ImGUI.ContentRegionAvailable;
 			if (!ImGUI.BeginTable(type.Name, 2))
 				return;
 
@@ -303,7 +303,7 @@ namespace AquaEditor.Inspectors
 		{
 			if (setValue == null) ImGUI.BeginDisabled();
 
-			IVector2 region = ImGUI.ContentRegionAvailable;
+			Vector2 region = ImGUI.ContentRegionAvailable;
 
 			ImGUI.TableNextRow();
 			ImGUI.TableSetColumnIndex(0);

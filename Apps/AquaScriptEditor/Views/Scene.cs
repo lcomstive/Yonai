@@ -10,6 +10,15 @@ namespace AquaEditor.Views
 		private static RenderTexture m_Target = null;
 		private SceneViewCameraController m_Controller = null;
 
+		// Gizmo Settings //
+		private bool m_Snapping = false;
+		private float m_SnappingAmount = 0.5f;
+		private float m_SnappingAmountDegrees = 15.0f;
+		private bool m_GizmoModeLocal = true;
+		private ImGUI.ManipulateOperation m_GizmoMode = ImGUI.ManipulateOperation.Translate;
+
+		private const float HeaderHeight = 30;
+
 		[MenuItem("Window/Scene")]
 		private static void MenuCallback() => EditorUIService.Open<SceneView>();
 
@@ -54,20 +63,14 @@ namespace AquaEditor.Views
 			ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, Colour.Black);
 			if (ImGUI.Begin("Scene", ref isOpen))
 			{
+				DrawHeader();
+				
 				m_Controller.Update();
-
-				Vector2 offset = ImGUI.WindowPosition;
-
-				Vector2[] viewportBounds = new Vector2[]
-				{
-					ImGUI.WindowContentRegionMin + offset,
-					ImGUI.WindowContentRegionMax + offset
-				};
 
 				// Disable input system to game content unless this view is focused
 				Input.Enabled = ImGUI.IsWindowFocused;
 
-				IVector2 viewportSize = ImGUI.ContentRegionAvailable;
+				IVector2 viewportSize = (IVector2)ImGUI.ContentRegionAvailable;
 
 				// Draw to camera render target
 				IRenderPipeline pipeline = Renderer.Pipeline;
@@ -77,6 +80,8 @@ namespace AquaEditor.Views
 				pipeline.Draw(m_Camera);
 
 				ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
+
+				DrawTransformGizmo();
 			}
 			ImGUI.End();
 			ImGUI.PopStyleVar();
@@ -85,6 +90,76 @@ namespace AquaEditor.Views
 			// Check if window requested to be closed
 			if (!isOpen)
 				EditorUIService.Close<SceneView>();
+		}
+
+		protected override void Update()
+		{
+			if (Input.IsKeyPressed(Key.G)) m_GizmoModeLocal = !m_GizmoModeLocal;
+
+			if (Input.IsKeyPressed(Key.Z)) m_GizmoMode = ImGUI.ManipulateOperation.Translate;
+			if (Input.IsKeyPressed(Key.X)) m_GizmoMode = ImGUI.ManipulateOperation.Rotate;
+			if (Input.IsKeyPressed(Key.C)) m_GizmoMode = ImGUI.ManipulateOperation.Scale;
+			if (Input.IsKeyPressed(Key.V)) m_GizmoMode = ImGUI.ManipulateOperation.Universal;
+		}
+
+		private void DrawTransformGizmo()
+		{
+			Transform target = (InspectorView.Target as Entity)?.GetComponent<Transform>();
+			if (target == null) return;
+
+			Vector2 pos = ImGUI.WindowPosition;
+			Vector2 size = ImGUI.WindowContentRegionMax;
+			ImGUI.Gizmo.SetDrawList();
+			ImGUI.Gizmo.SetRect(pos, size);
+
+			float snapping = 0;
+			if (m_Snapping && m_GizmoMode == ImGUI.ManipulateOperation.Rotate)
+				snapping = m_SnappingAmountDegrees;
+			else if(m_Snapping)
+				snapping = m_SnappingAmount;
+			ImGUI.Gizmo.Manipulate(m_Camera, target, size, m_GizmoMode, m_GizmoModeLocal, snapping);
+		}
+
+		private void DrawHeaderOperationSelector(string label, ImGUI.ManipulateOperation operation)
+		{
+			if (m_GizmoMode == operation)
+				ImGUI.BeginDisabled();
+
+			if (ImGUI.Button(label))
+				m_GizmoMode = operation;
+
+			if (m_GizmoMode == operation)
+				ImGUI.EndDisabled();
+
+			ImGUI.SameLine();
+		}
+
+		private void DrawHeader()
+		{
+			ImGUI.PushStyleVar(ImGUI.StyleVar.ChildRounding, 0);
+			ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, new Colour(0, 0, 0, 0.2f));
+			ImGUI.BeginChild("SceneViewHeader", new Vector2(0, HeaderHeight));
+			{
+				DrawHeaderOperationSelector("T", ImGUI.ManipulateOperation.Translate);
+				DrawHeaderOperationSelector("R", ImGUI.ManipulateOperation.Rotate);
+				DrawHeaderOperationSelector("S", ImGUI.ManipulateOperation.Scale);
+				DrawHeaderOperationSelector("U", ImGUI.ManipulateOperation.Universal);
+
+				ImGUI.HorizontalSpace(10);
+
+				if (ImGUI.Button(m_GizmoModeLocal ? "Local" : "Global"))
+					m_GizmoModeLocal = !m_GizmoModeLocal;
+				ImGUI.SameLine();
+
+				ImGUI.HorizontalSpace(10);
+
+				ImGUI.Checkbox("Snapping", ref m_Snapping);
+			}
+			ImGUI.EndChild();
+			ImGUI.PopStyleColour();
+			ImGUI.PopStyleVar();
+
+			ImGUI.SetCursorPos(Vector2.Zero);
 		}
 	}
 }

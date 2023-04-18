@@ -29,7 +29,7 @@ vec3 Transform::Up()	  { return vec3(0, 1, 0) * Rotation; }
 vec3 Transform::Right()	  { return vec3(1, 0, 0) * Rotation; }
 vec3 Transform::Forward() { return vec3(0, 0, 1) * Rotation; }
 
-mat4 Transform::GetModelMatrix()
+mat4 Transform::GetModelMatrix(bool global)
 {
 	// Generate model matrix
 	mat4 translationMatrix = translate(mat4(1.0f), Position);
@@ -37,10 +37,19 @@ mat4 Transform::GetModelMatrix()
 	mat4 rotationMatrix = toMat4(Rotation);
 	
 	mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-	if (Parent)
+	if (Parent && global)
 		modelMatrix = Parent->GetModelMatrix() * modelMatrix;
 
 	return modelMatrix;
+	
+	/*
+	// Generate model matrix
+	mat4 translationMatrix = translate(mat4(1.0f), global ? GetGlobalPosition() : Position);
+	mat4 scaleMatrix = scale(mat4(1.0f), global ? GetGlobalScale() : Scale);
+	mat4 rotationMatrix = toMat4(global ? GetGlobalRotation() : Rotation);
+	
+	return translationMatrix * rotationMatrix * scaleMatrix;
+	*/
 }
 
 void Transform::SetParent(Transform* parent)

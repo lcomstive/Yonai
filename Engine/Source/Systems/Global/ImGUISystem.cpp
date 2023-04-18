@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <spdlog/spdlog.h>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Window.hpp>
@@ -38,6 +39,8 @@ void ImGUISystem::OnEnabled()
 	std::string fontPath = IO::VFS::GetAbsolutePath("assets://Fonts/OpenSans-Regular.ttf", true);
 	m_IO->FontDefault = m_IO->Fonts->AddFontFromFileTTF(fontPath.c_str(), 18);
 
+	ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
+
 	StartFrame();
 }
 
@@ -65,6 +68,7 @@ void ImGUISystem::StartFrame()
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 }
 
 void ImGUISystem::EndFrame()

@@ -1,10 +1,14 @@
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
+#include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Graphics/RenderTexture.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
+using namespace glm;
 using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 
@@ -756,27 +760,33 @@ ADD_MANAGED_METHOD(ImGUI, _SetNextWindowSize, void, (glm::vec2* position), AquaE
 ADD_MANAGED_METHOD(ImGUI, SetNextWindowViewport, void, (unsigned int viewportID), AquaEditor)
 { ImGui::SetNextWindowViewport(viewportID); }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::ivec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::vec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetWindowContentRegionMin();
 	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMax, void, (glm::ivec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMax, void, (glm::vec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetWindowContentRegionMax();
 	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetContentRegionAvail, void, (glm::ivec2* outRegion), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetContentRegionAvail, void, (glm::vec2* outRegion), AquaEditor)
 {
 	ImVec2 region = ImGui::GetContentRegionAvail();
 	*outRegion = glm::ivec2(region.x, region.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _GetWindowPosition, void, (glm::ivec2* outPos), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _GetWindowPosition, void, (glm::vec2* outPos), AquaEditor)
 {
 	ImVec2 pos = ImGui::GetWindowPos();
+	*outPos= glm::ivec2(pos.x, pos.y);
+}
+
+ADD_MANAGED_METHOD(ImGUI, _GetWindowSize, void, (glm::vec2* outPos), AquaEditor)
+{
+	ImVec2 pos = ImGui::GetWindowSize();
 	*outPos= glm::ivec2(pos.x, pos.y);
 }
 
@@ -982,3 +992,49 @@ ADD_MANAGED_METHOD(ImGUI, DrawListPushClipRectFullScreen, void, (), AquaEditor)
 
 ADD_MANAGED_METHOD(ImGUI, DrawListPopClipRect, void, (), AquaEditor)
 { GetDrawList()->PopClipRect(); }
+
+// ImGuizmo //
+ADD_MANAGED_METHOD(ImGUI, Gizmo_SetRect, void, (float x, float y, float width, float height), AquaEditor)
+{ ImGuizmo::SetRect(x, y, width, height); }
+
+ADD_MANAGED_METHOD(ImGUI, Gizmo_SetDrawList, void, (), AquaEditor)
+{ ImGuizmo::SetDrawlist(); }
+
+ADD_MANAGED_METHOD(ImGUI, Gizmo_Enable, void, (bool enable), AquaEditor)
+{ ImGuizmo::Enable(enable); }
+
+ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (void* cameraHandle, void* transformHandle, glm::vec2* drawRegion, unsigned int operation, bool local, float snapping), AquaEditor)
+{
+	Components::Camera* camera = (Components::Camera*)cameraHandle;
+	Components::Transform* transform = (Components::Transform*)transformHandle;
+
+	ImGuizmo::SetOrthographic(camera->Orthographic);
+
+	mat4 viewMatrix = camera->GetViewMatrix();
+	mat4 projectionMatrix = camera->GetProjectionMatrix(drawRegion->x, drawRegion->y);
+
+	mat4 modelMatrix = transform->GetModelMatrix(false);
+
+	float snapValues[3] = { snapping, snapping, snapping };
+
+	ImGuizmo::Manipulate(
+		&viewMatrix[0][0],
+		&projectionMatrix[0][0],
+		(ImGuizmo::OPERATION)operation,
+		local ? ImGuizmo::LOCAL : ImGuizmo::WORLD,
+		&modelMatrix[0][0],
+		nullptr,
+		snapping > 0 ? snapValues : nullptr
+	);
+
+	// Extract modified matrix back into position, rotation and scale
+	vec3 euler;
+	ImGuizmo::DecomposeMatrixToComponents(
+		&modelMatrix[0][0],
+		&transform->Position[0],
+		&euler[0],
+		&transform->Scale[0]
+	);
+	
+	transform->Rotation = glm::quat(glm::radians(euler));
+}
