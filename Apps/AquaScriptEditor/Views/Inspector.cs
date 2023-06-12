@@ -131,7 +131,7 @@ namespace AquaEditor.Views
 		/// Checks for valid inspector in <see cref="s_Inspectors"/> by type.
 		/// Searches recursively down inheritance tree, from topmost down to base type
 		/// </summary>
-		private static CustomInspector FindInspector(Type type)
+		internal static CustomInspector FindInspector(Type type)
 		{
 			if(type == null) return null;
 			if(s_Inspectors.ContainsKey(type))
@@ -139,7 +139,7 @@ namespace AquaEditor.Views
 			return FindInspector(type.BaseType);
 		}
 
-		private static CustomInspector FindInspector(VFSFile file) =>
+		internal static CustomInspector FindInspector(VFSFile file) =>
 			string.IsNullOrEmpty(file.Extension) || !s_FileExtensions.ContainsKey(file.Extension) ?
 				null : s_FileExtensions[file.Extension.ToLower()];
 	}

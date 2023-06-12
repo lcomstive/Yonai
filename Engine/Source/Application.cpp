@@ -59,11 +59,15 @@ void Application::InitLogger()
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	consoleSink->set_pattern("%^[%=8n][%7l]%$ %v");
 
+	auto logLevel = (spdlog::level::level_enum)stoi(GetArg("LogLevel",
 #if !defined(NDEBUG) // Debug
-	consoleSink->set_level(spdlog::level::trace);
+		"0" // Trace
 #else // Release
-	consoleSink->set_level(spdlog::level::info);
+		"2" // Info
 #endif
+	));
+
+	consoleSink->set_level(logLevel);
 
 	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDir() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
@@ -110,6 +114,16 @@ void Application::InitVFS()
 
 Application::Application()
 {
+	InitLogger();
+	InitVFS();
+
+	s_Instance = this;
+}
+
+Application::Application(int argc, char** argv)
+{
+	ProcessArgs(argc, argv);
+
 	InitLogger();
 	InitVFS();
 

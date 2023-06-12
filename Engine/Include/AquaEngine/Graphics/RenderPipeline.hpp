@@ -10,8 +10,6 @@ namespace AquaEngine::Graphics
 		glm::ivec2 m_Resolution = { 0, 0 };
 
 	protected:
-		void DrawSkybox(ResourceID skyboxTextureID);
-
 		virtual void OnResized(glm::ivec2 resolution) {}
 
 	public:

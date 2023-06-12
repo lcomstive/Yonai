@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.SymbolStore;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("AquaScriptEditor")]
@@ -79,6 +80,8 @@ namespace AquaEngine.Graphics
 			if (destination != null)
 				_CopyTo(Handle, destination.Handle);
 		}
+
+		public static implicit operator bool(RenderTexture target) => target != null;
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private extern static IntPtr _Load(ref IVector2 resolution, byte textureFormat, uint samples);

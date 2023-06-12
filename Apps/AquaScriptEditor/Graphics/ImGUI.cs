@@ -994,6 +994,117 @@ namespace AquaEditor
 			Universal		= Translate | Rotate | ScaleU
 		};
 
+		[Flags]
+		public enum FocusedFlags : int
+		{
+			None				= 0,
+			
+			/// <summary>
+			/// Return true if any children of the window is focused
+			/// </summary>
+			ChildWindows		= 1 << 0,
+			
+			/// <summary>
+			/// Test from root window (top most parent of the current hierarchy)
+			/// </summary>
+			RootWindow			= 1 << 1,
+			
+			/// <summary>
+			/// Return true if any window is focused. Important: If you are trying to tell how to dispatch your low-level inputs, do NOT use this. Use 'io.WantCaptureMouse' instead! Please read the FAQ!
+			/// </summary>
+			AnyWindow			= 1 << 2,
+			
+			/// <summary>
+			/// Do not consider popup hierarchy (do not treat popup emitter as parent of popup) (when used with _ChildWindows or _RootWindow)
+			/// </summary>
+			NoPopupHierarchy	= 1 << 3,
+			
+			/// <summary>
+			/// Consider docking hierarchy (treat dockspace host as parent of docked window) (when used with _ChildWindows or _RootWindow)
+			/// </summary>
+			DockHierarchy		= 1 << 4,
+			RootAndChildWindows = RootWindow | ChildWindows,
+		};
+
+		[Flags]
+		public enum HoveredFlags : int
+		{
+			/// <summary>
+			/// Return true if directly over the item/window, not obstructed by another window, not obstructed by an active popup or modal blocking inputs under them.
+			/// </summary>
+			None						 = 0,     
+
+			/// <summary>
+			/// IsWindowHovered() only: Return true if any children of the window is hovered
+			/// </summary>
+			ChildWindows				 = 1 << 0,
+			
+			/// <summary>
+			/// IsWindowHovered() only: Test from root window (top most parent of the current hierarchy)
+			/// </summary>
+			RootWindow					 = 1 << 1,
+			
+			/// <summary>
+			/// IsWindowHovered() only: Return true if any window is hovered
+			/// </summary>
+			AnyWindow					 = 1 << 2,
+			
+			/// <summary>
+			/// IsWindowHovered() only: Do not consider popup hierarchy (do not treat popup emitter as parent of popup) (when used with _ChildWindows or _RootWindow)
+			/// </summary>
+			NoPopupHierarchy			 = 1 << 3,
+			
+			/// <summary>
+			/// IsWindowHovered() only: Consider docking hierarchy (treat dockspace host as parent of docked window) (when used with _ChildWindows or _RootWindow)
+			/// </summary>
+			DockHierarchy				 = 1 << 4,
+			
+			/// <summary>
+			/// Return true even if a popup window is normally blocking access to this item/window
+			/// </summary>
+			AllowWhenBlockedByPopup		 = 1 << 5,
+
+			/// <summary>
+			/// Return true even if an active item is blocking access to this item/window. Useful for Drag and Drop patterns.
+			/// </summary>
+			AllowWhenBlockedByActiveItem = 1 << 7,   
+			
+			/// <summary>
+			/// IsItemHovered() only: Return true even if the position is obstructed or overlapped by another window
+			/// </summary>
+			AllowWhenOverlapped			 = 1 << 8,   
+			
+			/// <summary>
+			/// IsItemHovered() only: Return true even if the item is disabled
+			/// </summary>
+			AllowWhenDisabled			 = 1 << 9,   
+			
+			/// <summary>
+			/// Disable using gamepad/keyboard navigation state when active, always query mouse.
+			/// </summary>
+			NoNavOverride				 = 1 << 10,  
+
+			RectOnly = AllowWhenBlockedByPopup | AllowWhenBlockedByActiveItem | AllowWhenOverlapped,
+
+			RootAndChildWindows			 = RootWindow | ChildWindows,
+
+			// Hovering delays (for tooltips) //
+			/// <summary>
+			/// Return true after io.HoverDelayNormal elapsed (~0.30 sec)
+			/// </summary>
+			DelayNormal					 = 1 << 11,
+			
+			/// <summary>
+			/// Return true after io.HoverDelayShort elapsed (~0.10 sec)
+			/// </summary>
+			DelayShort					 = 1 << 12,
+			
+			/// <summary>
+			/// Disable shared delay system where moving from one item to the next keeps the previous timer for a short time (standard for tooltips with long delays)
+			/// </summary>
+			NoSharedDelay				 = 1 << 13,
+		};
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
@@ -1569,9 +1680,12 @@ namespace AquaEditor
 		#endregion
 
 		#region Viewport
-		public static bool IsWindowFocused => _IsWindowFocused();
-		public static bool IsWindowHovered => _IsWindowHovered();
-		public static bool IsWindowCollapsed => _IsWindowCollapsed();
+		public static bool WindowFocused => IsWindowFocused();
+		public static bool WindowHovered => IsWindowHovered();
+		public static bool WindowCollapsed => _IsWindowCollapsed();
+
+		public static bool IsWindowFocused(FocusedFlags flags = FocusedFlags.None) => _IsWindowFocused((int)flags);
+		public static bool IsWindowHovered(HoveredFlags flags = HoveredFlags.None) => _IsWindowHovered((int)flags);
 
 		public static Vector2 WindowContentRegionMin
 		{ get { _GetWindowContentRegionMin(out Vector2 output); return output; } }
@@ -1629,10 +1743,10 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetWindowSize(out Vector2 output);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool _IsWindowFocused();
+		public static extern bool _IsWindowFocused(int flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool _IsWindowHovered();
+		public static extern bool _IsWindowHovered(int flags);
 
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

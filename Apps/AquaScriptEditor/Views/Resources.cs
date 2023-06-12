@@ -196,7 +196,7 @@ namespace AquaEditor.Views
 
 				DrawContextMenu(file);
 
-				if (ImGUI.BeginDragDropSource())
+				if (ImGUI.BeginDragDropSource(ImGUI.DragDropFlags.SourceAllowNullID))
 				{
 					// Drag drop preview
 					ImGUI.Text(file.FileName);

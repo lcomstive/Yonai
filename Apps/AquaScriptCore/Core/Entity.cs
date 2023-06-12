@@ -198,9 +198,16 @@ namespace AquaEngine
 			if (World.IsActive)
 			{
 				Type behaviourType = typeof(IBehaviour);
+				Type disposableType = typeof(IDisposable);
 				foreach (var pair in m_Components)
+				{
+					// Check if inherits from IBehaviour
 					if (behaviourType.IsAssignableFrom(pair.Key))
 						((IBehaviour)pair.Value).Destroyed();
+					// Check if inherits from IDisposable
+					if (behaviourType.IsAssignableFrom(disposableType))
+						((IDisposable)pair.Value).Dispose();
+				}
 			}
 
 			return _RemoveComponent(World.ID, ID, type);

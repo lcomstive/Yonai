@@ -15,8 +15,7 @@ int main(int argc, char** argv)
 #endif
 	
 	// Launch editor
-	AquaEditor::EditorApp app;
-	app.ProcessArgs(argc, argv);
+	AquaEditor::EditorApp app(argc, argv);
 	
 	app.Run(); // Application loop
 

@@ -2,7 +2,7 @@ using AquaEngine;
 
 namespace AquaEditor
 {
-	public class SceneViewCameraController : Behaviour
+	public class SceneViewCameraController : Component
 	{
 		public float Speed = 1.0f;
 		public float SprintMultiplier = 2.5f;
@@ -13,7 +13,7 @@ namespace AquaEditor
 
 		private const float ControllerDeadzone = 0.1f;
 
-		public override void Start()
+		public void Start()
 		{
 			m_Transform = GetComponent<Transform>();
 
@@ -30,7 +30,7 @@ namespace AquaEditor
 			xRot = MathUtils.Deg2Rad(euler.x);
 		}
 
-		public override void Update()
+		public void Update()
 		{
 			Vector3 movement = GetMovement();
 			Quaternion rotation = GetRotation();

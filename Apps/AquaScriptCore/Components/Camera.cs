@@ -4,8 +4,13 @@ using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public class Camera : Component
+	public class Camera : Component, IDisposable
 	{
+		/// <summary>
+		/// The camera that is targeted for rendering to the display
+		/// </summary>
+		public static Camera Main { get; set; } = null;
+
 		/// <summary>
 		/// Field of view
 		/// </summary>
@@ -75,19 +80,6 @@ namespace AquaEngine
 			set => _SetRenderTarget(Handle, (m_RenderTarget = value)?.Handle ?? IntPtr.Zero);
 		}
 
-		public static Camera Main
-		{
-			get
-			{
-				_GetMainCamera(out uint worldID, out uint entityID);
-				if (worldID == UUID.Invalid || entityID == UUID.Invalid)
-					return null;
-				return World.Get(worldID).GetEntity(entityID).GetComponent<Camera>();
-			}
-		}
-
-		public void SetMain() => _SetMainCamera(Handle);
-
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
@@ -107,8 +99,11 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMainCamera(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMainCamera(out uint worldID, out uint entityID);
+		public void Dispose()
+		{
+			if (Main == this)
+				Main = null;
+		}
 		#endregion
 	}
 }

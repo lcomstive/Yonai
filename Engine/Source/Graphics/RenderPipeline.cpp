@@ -12,35 +12,6 @@ using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
-void RenderPipeline::DrawSkybox(ResourceID skyboxTextureID)
-{
-	Shader* skyboxShader = Resource::Get<Shader>(Resource::Load<Shader>("Shaders/Skybox", ShaderStageInfo
-		{
-			"/Assets/Shaders/Skybox.vs",
-			"/Assets/Shaders/Skybox.fs"
-		}));
-	skyboxShader->Bind();
-
-	Texture* skyboxTexture = Resource::Get<Texture>(skyboxTextureID);
-	if (!skyboxTexture)
-		return;
-
-	glDepthFunc(GL_LEQUAL);
-	
-	if (skyboxTexture)
-		skyboxTexture->Bind(5);
-	skyboxShader->Set("environmentMap", 5);
-	
-	Camera* camera = Camera::GetMainCamera();
-	skyboxShader->Set("view", camera->GetViewMatrix());
-	skyboxShader->Set("projection", camera->GetProjectionMatrix(Window::GetResolution()));
-
-	Resource::Get<Mesh>(Mesh::Cube())->Draw();
-
-	skyboxShader->Unbind();
-	glDepthFunc(GL_LESS);
-}
-
 void RenderPipeline::SetResolution(ivec2 resolution)
 {
 	if(m_Resolution == resolution)
@@ -56,11 +27,10 @@ ivec2 RenderPipeline::GetResolution() { return m_Resolution; }
 #pragma region Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, uint64_t cameraWorldID, uint64_t cameraEntityID), AquaEngine.Graphics.Pipelines)
+ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, void* cameraHandle), AquaEngine.Graphics.Pipelines)
 {
-	Camera* camera = World::GetWorld(cameraWorldID)->GetEntity(cameraEntityID).GetComponent<Camera>();
-	if(camera)
-		((RenderPipeline*)handle)->Draw(camera);
+	if(cameraHandle)
+		((RenderPipeline*)handle)->Draw((Camera*)cameraHandle);
 }
 
 ADD_MANAGED_METHOD(NativeRenderPipeline, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics.Pipelines)

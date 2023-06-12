@@ -23,9 +23,6 @@ namespace AquaEngine::Components
 
 		AquaAPI void FillShader(Graphics::Shader* shader, glm::ivec2 resolution);
 
-		AquaAPI void SetMainCamera();
-		static Camera* GetMainCamera();
-
 	private:
 		static Camera* s_MainCamera;
 	};

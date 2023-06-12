@@ -52,6 +52,18 @@ namespace AquaEngine
 
 		public static World[] GetActiveScenes() => m_ActiveWorlds.Values.ToArray();
 
+		/// <summary>
+		/// Reloads all currently active scenes from disk
+		/// </summary>
+		public static void ReloadScenes()
+		{
+			foreach(var pair in m_ActiveWorlds)
+			{
+				_Unload(pair.Key);
+				_Load(pair.Key);
+			}
+		}
+
 		public delegate void OnWorldChanged(World world, bool added);
 
 		/// <summary>
@@ -81,7 +93,7 @@ namespace AquaEngine
 				WorldChanged?.Invoke(world, true);
 			}
 
-			Log.Debug($"Found {worldIDs.Length} active worlds during startup");
+			Log.Trace($"Found {worldIDs.Length} active worlds during startup");
 		}
 		#endregion
 	}

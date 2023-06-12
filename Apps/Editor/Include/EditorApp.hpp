@@ -21,7 +21,6 @@ namespace AquaEditor
 		AquaEngine::Systems::RenderSystem* m_RenderSystem = nullptr;
 
 		void Draw();
-		void DrawUI();
 
 		void InitialiseScripting();
 
@@ -29,6 +28,10 @@ namespace AquaEditor
 		/// Loads editor script and loads the initial editor service
 		/// </summary>
 		void LaunchEditorService();
+
+	public:
+		EditorApp() : AquaEngine::Application() {}
+		EditorApp(int argc, char** argv) : AquaEngine::Application(argc, argv) {}
 
 	protected:
 		void Setup() override;

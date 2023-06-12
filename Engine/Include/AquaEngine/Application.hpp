@@ -43,6 +43,7 @@ namespace AquaEngine
 
 	public:
 		AquaAPI Application();
+		AquaAPI Application(int argc, char** argv);
 		AquaAPI virtual ~Application();
 
 		/// <summary>

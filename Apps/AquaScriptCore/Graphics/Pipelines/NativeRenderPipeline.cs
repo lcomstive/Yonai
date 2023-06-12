@@ -41,14 +41,17 @@ namespace AquaEngine.Graphics.Pipelines
 
 		internal NativeRenderPipeline(IntPtr handle) => Handle = handle;
 
-		public void Draw(Camera camera) =>
-			_Draw(Handle, camera.World.ID, camera.Entity.ID);
+		public void Draw(Camera camera)
+		{
+			if(camera)
+				_Draw(Handle, camera.Handle);
+		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetResolution(IntPtr handle, ref IVector2 resolution);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, ulong cameraWorldID, ulong cameraEntityID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, IntPtr cameraHandle);
 
 		// Returns handle to framebuffer
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetOutput(IntPtr handle);

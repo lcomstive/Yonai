@@ -790,11 +790,11 @@ ADD_MANAGED_METHOD(ImGUI, _GetWindowSize, void, (glm::vec2* outPos), AquaEditor)
 	*outPos= glm::ivec2(pos.x, pos.y);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _IsWindowFocused, bool, (), AquaEditor)
-{ return ImGui::IsWindowFocused(); }
+ADD_MANAGED_METHOD(ImGUI, _IsWindowFocused, bool, (int flags), AquaEditor)
+{ return ImGui::IsWindowFocused(flags); }
 
-ADD_MANAGED_METHOD(ImGUI, _IsWindowHovered, bool, (), AquaEditor)
-{ return ImGui::IsWindowHovered(); }
+ADD_MANAGED_METHOD(ImGUI, _IsWindowHovered, bool, (int flags), AquaEditor)
+{ return ImGui::IsWindowHovered(flags); }
 
 ADD_MANAGED_METHOD(ImGUI, _IsWindowCollapsed, bool, (), AquaEditor)
 { return ImGui::IsWindowCollapsed(); }

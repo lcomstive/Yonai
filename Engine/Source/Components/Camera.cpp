@@ -9,8 +9,6 @@ using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
-Camera* Camera::s_MainCamera = nullptr;
-
 const vec3 WorldUp = { 0, 1, 0 };
 
 mat4 Camera::GetViewMatrix()
@@ -46,11 +44,10 @@ void Camera::FillShader(Shader* shader, ivec2 resolution)
 		return;
 	shader->Set("camera.ViewMatrix", GetViewMatrix());
 	shader->Set("camera.ProjectionMatrix", GetProjectionMatrix(resolution));
-	shader->Set("camera.Position", Entity.GetComponent<Transform>()->GetGlobalPosition());
-}
 
-void Camera::SetMainCamera() { s_MainCamera = this; }
-Camera* Camera::GetMainCamera() { return s_MainCamera; }
+	Transform* transform = Entity.GetComponent<Transform>();
+	shader->Set("camera.Position", transform ? transform->GetGlobalPosition() : vec3(0, 0, 0));
+}
 
 #pragma region Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
@@ -61,18 +58,6 @@ ADD_MANAGED_GET(Camera, RenderTarget, void*)
 ADD_MANAGED_GET_SET(Camera, FieldOfView, float)
 ADD_MANAGED_GET_SET(Camera, Orthographic, bool)
 ADD_MANAGED_GET_SET(Camera, OrthographicSize, float)
-
-ADD_MANAGED_METHOD(Camera, SetMainCamera, void, (void* handle))
-{
-	((Camera*)handle)->SetMainCamera();
-}
-
-ADD_MANAGED_METHOD(Camera, GetMainCamera, void, (uint64_t* worldID, uint64_t* entityID))
-{
-	Camera* mainCamera = Camera::GetMainCamera();
-	*worldID = mainCamera ? mainCamera->Entity.GetWorld()->ID() : InvalidEntityID;
-	*entityID = mainCamera ? mainCamera->Entity.ID() : InvalidEntityID;
-}
 
 ADD_MANAGED_METHOD(Camera, SetRenderTarget, void, (void* handle, void* renderTarget))
 {

@@ -8,6 +8,8 @@ namespace AquaEditor.Views
 		private static World m_World = null;
 		private static Camera m_Camera = null;
 		private static RenderTexture m_Target = null;
+
+		private bool m_IsFocused = false;
 		private SceneViewCameraController m_Controller = null;
 
 		// Gizmo Settings //
@@ -39,6 +41,7 @@ namespace AquaEditor.Views
 			// Transform
 			Transform transform = entity.AddComponent<Transform>();
 			transform.Position = new Vector3(0, 2, -15);
+			// transform.Rotation = Quaternion.FromEuler(0, 180, 0);
 
 			// Camera controller
 			m_Controller = entity.AddComponent<SceneViewCameraController>();
@@ -64,22 +67,21 @@ namespace AquaEditor.Views
 			if (ImGUI.Begin("Scene", ref isOpen))
 			{
 				DrawHeader();
-				
-				m_Controller.Update();
 
-				// Disable input system to game content unless this view is focused
-				Input.Enabled = ImGUI.IsWindowFocused;
+				// Store focus state. Update() exits early if this window not focused
+				m_IsFocused = ImGUI.IsWindowFocused(ImGUI.FocusedFlags.RootAndChildWindows);
 
 				IVector2 viewportSize = (IVector2)ImGUI.ContentRegionAvailable;
 
 				// Draw to camera render target
 				IRenderPipeline pipeline = Renderer.Pipeline;
 				pipeline.Resolution = viewportSize;
-
 				m_Target.Resolution = viewportSize;
+
 				pipeline.Draw(m_Camera);
 
-				ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
+				// ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
+				ImGUI.Image(m_Target, viewportSize);
 
 				DrawTransformGizmo();
 			}
@@ -94,6 +96,11 @@ namespace AquaEditor.Views
 
 		protected override void Update()
 		{
+			if (!m_IsFocused)
+				return;
+
+			m_Controller.Update();
+
 			if (Input.IsKeyPressed(Key.G)) m_GizmoModeLocal = !m_GizmoModeLocal;
 
 			if (Input.IsKeyPressed(Key.Z)) m_GizmoMode = ImGUI.ManipulateOperation.Translate;

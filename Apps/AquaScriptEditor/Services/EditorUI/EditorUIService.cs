@@ -33,6 +33,7 @@ namespace AquaEditor
 				CompileMenuItems();
 				InspectorView.GetCustomInspectors();
 
+				Open<GameView>();
 				Open<SceneView>();
 				Open<ConsoleView>();
 				Open<HierarchyView>();
