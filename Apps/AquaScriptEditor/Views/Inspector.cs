@@ -71,9 +71,20 @@ namespace AquaEditor.Views
 				return;
 
 			// If targeting an entity in the world, clear target
-			// TODO: Re-target matching entity
 			if (Target is Entity)
-				Target = null;
+			{
+				// Check active scenes for entity with matching ID, retarget if found
+				UUID targetID = ((Entity)Target).ID;
+				Target = null; // Clear target, incase not found
+
+				foreach(World world in SceneManager.GetActiveScenes())
+				{
+					if (!world.HasEntity(targetID))
+						continue;
+					Target = world.GetEntity(targetID);
+					break;
+				}
+			}
 		}
 
 		protected override void Draw()
