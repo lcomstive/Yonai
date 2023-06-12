@@ -27,9 +27,13 @@ namespace AquaEditor.EditorUI
 				ImGUI.Separator();
 			if (IsDirectory)
 				RenderDirectory();
-			else if (ImGUI.MenuItem(Name, Attribute.Shortcut))
-					try { Callback?.Invoke(null, null); }
-					catch (System.Exception e) { Log.Exception(e); }
+			else
+			{
+				// ImGUI.Image(Icons.Get(Attribute.Icon), new Vector2(20, 20));
+				// ImGUI.SameLine();
+				if (ImGUI.MenuItem(Name, Attribute.Shortcut))
+					Callback?.Invoke(null, null);
+			}
 		}
 
 		private void RenderDirectory()

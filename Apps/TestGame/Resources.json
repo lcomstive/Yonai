@@ -123,5 +123,70 @@
     "ID": "7670656770908261766",
     "Path": "project://Assets/Textures/texture_09.png",
     "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "16217471971352016396",
+    "Path": "assets://Textures/Icons/Folder.png.cache",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "17142732739300603209",
+    "Path": "assets://Textures/Icons/Kenney/Down.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "13567587369370808977",
+    "Path": "assets://Textures/Icons/Kenney/Gear.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "7973797276010773274",
+    "Path": "assets://Textures/Icons/Kenney/Info.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "12524745163416697539",
+    "Path": "assets://Textures/Icons/Kenney/Larger.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "18211389431792238259",
+    "Path": "assets://Textures/Icons/Kenney/Next.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "5801719814281915132",
+    "Path": "assets://Textures/Icons/Kenney/Power.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "6430543431236295006",
+    "Path": "assets://Textures/Icons/Kenney/Return.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "9692662954773951375",
+    "Path": "assets://Textures/Icons/Kenney/Right.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "10422252848179629613",
+    "Path": "assets://Textures/Icons/Kenney/Save.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "4861008774437318267",
+    "Path": "assets://Textures/Icons/Kenney/Smaller.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "12974530345828722786",
+    "Path": "assets://Textures/Icons/Kenney/Stop.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "1835804590404811410",
+    "Path": "assets://Textures/Icons/Kenney/Up.png",
+    "Type": "AquaEngine.Graphics.Texture"
   }
 ]

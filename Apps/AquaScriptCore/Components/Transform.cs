@@ -144,10 +144,9 @@ namespace AquaEngine
 			if (!string.IsNullOrEmpty(parentIDStr))
 			{
 				UUID parentID = ulong.Parse(parentIDStr);
-				Log.Warning($"Setting entity parent to {parentID}...");
 				Parent = World.GetEntity(parentID)?.GetComponent<Transform>();
 				if(Parent == null)
-					Log.Warning("Parent transform not found");
+					Log.Warning("Parent transform not found while deserialising transform component");
 			}
 		}
 

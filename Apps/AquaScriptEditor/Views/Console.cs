@@ -1,6 +1,7 @@
 using System;
 using AquaEngine;
 using System.Diagnostics;
+using AquaEngine.Graphics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -29,6 +30,8 @@ namespace AquaEditor.Views
 			}
 		}
 
+		private Texture m_IconUp, m_IconDown;
+
 		private const float IndicatorPadding = 2;
 		private const float IndicatorThickness = 2.5f;
 		private const float StacktraceDropdownSize = 17.5f;
@@ -44,6 +47,9 @@ namespace AquaEditor.Views
 
 			Log.Trace("This is\na test\nMulti\n\tline\n\nmessage");
 			// Log.Warning("And this message is a very, very, very long message that should fill up the entire length of the window because it just keeps on going and going and going...");
+
+			m_IconUp = Icons.Get("Up");
+			m_IconDown = Icons.Get("Down");
 		}
 
 		protected override void Closed() => Log.Message -= OnLogMessage;
@@ -81,7 +87,7 @@ namespace AquaEditor.Views
 					ImGUI.SetCursorPos(IndicatorPadding + IndicatorThickness + 5, ImGUI.GetCursorPosY() + size.y - StacktraceDropdownSize);
 					ImGUI.PushID($"ConsoleStackDropdown[{i}]");
 					if (ImGUI.ButtonImage(
-						message.ShowTrace ? Icons.Up : Icons.Down,
+						message.ShowTrace ? m_IconUp : m_IconDown,
 						new Vector2(StacktraceDropdownSize, StacktraceDropdownSize)))
 						m_Messages[i].ShowTrace = !message.ShowTrace;
 					ImGUI.PopID();

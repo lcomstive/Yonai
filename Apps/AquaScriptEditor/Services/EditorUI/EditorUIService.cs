@@ -11,46 +11,6 @@ using System.Collections.Generic;
 
 namespace AquaEditor
 {
-	public static class Icons
-	{
-		public const string IconDirectory = "assets://Textures/Icons";
-		
-		public const string SavePath = "assets://Textures/Icons/Kenney/save.png";
-		public static Texture Save { get; private set; }
-
-		public const string SettingsPath = "assets://Textures/Icons/Kenney/gear.png";
-		public static Texture Settings { get; private set; }
-
-		public const string FolderPath = "assets://Textures/Icons/Folder.png";
-		public static Texture Folder { get; private set; }
-
-		public const string UpPath = "assets://Textures/Icons/Kenney/up.png";
-		public static Texture Up { get; private set; }
-
-		public const string DownPath = "assets://Textures/Icons/Kenney/down.png";
-		public static Texture Down { get; private set; }
-
-		internal static void Load()
-		{
-			Log.Info("Loading icons...");
-			VFSFile[] files = VFS.GetFiles(IconDirectory, true);
-			foreach (VFSFile file in files)
-			{
-				if (!file.Extension.Equals(".png"))
-					continue;
-
-				// Load texture
-				Resource.Load<Texture>(file.FullPath, new TextureImportSettings() { Filtering = TextureFiltering.Nearest });
-			}
-
-			Save		= Resource.Get<Texture>(SavePath);
-			Settings	= Resource.Get<Texture>(SettingsPath);
-			Folder		= Resource.Get<Texture>(FolderPath);
-			Up			= Resource.Get<Texture>(UpPath);
-			Down		= Resource.Get<Texture>(DownPath);
-		}
-	}
-
 	public class EditorUIService : AquaSystem
 	{
 		public static Texture MissingTexture { get; private set; }
@@ -107,7 +67,7 @@ namespace AquaEditor
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = Icons.SavePath)]
+		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = "Save")]
 		private static void SaveScene()
 		{
 			if (!VFS.Exists(SceneDir))
@@ -154,7 +114,7 @@ namespace AquaEditor
 			uiService.CreateTestScene();
 		}
 
-		[MenuItem("File/Resources/Save")]
+		[MenuItem("File/Resources/Save", Icon = "Save")]
 		private static void SaveResources() => Resource.SaveDatabase();
 
 		[MenuItem("File/Resources/Load")]
@@ -296,12 +256,18 @@ namespace AquaEditor
 			if (!ImGUI.BeginMenuBar())
 				return;
 
+			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowPadding, new Vector2(10, 10));
 			ImGUI.PushStyleVar(ImGUI.StyleVar.ItemSpacing, new Vector2(10, 7.5f));
+			ImGUI.PushStyleColour(ImGUI.StyleColour.Button, Colour.None);
 
 			foreach (MenuItemData menuItem in m_RootMenuItem.Children)
 				menuItem.Render();
 
-			ImGUI.PopStyleVar();
+			ImGUI.SetCursorPos(ImGUI.WindowSize.x / 2.0f, 2.5f);
+			ImGUI.ButtonImage(Icons.Get("Right"), new Vector2(15, 15));
+
+			ImGUI.PopStyleVar(2);
+			ImGUI.PopStyleColour();
 			ImGUI.EndMenuBar();
 		}
 

@@ -12,6 +12,7 @@ namespace AquaEditor.Views
 	public class ResourcesView : View
 	{
 		private float m_Padding = 12;
+		private Texture m_IconFolder;
 		private float m_ThumbnailSize = ThumbnailSizeRange.y;
 
 		private VFSFile[] m_Files;
@@ -40,7 +41,11 @@ namespace AquaEditor.Views
 		[MenuItem("Window/Resources")]
 		private static void MenuCallback() => EditorUIService.Open<ResourcesView>();
 
-		protected override void Opened() => OpenDirectory(RootDirectory);
+		protected override void Opened()
+		{
+			m_IconFolder = Icons.Get("Folder");
+			OpenDirectory(RootDirectory);
+		}
 
 		/// <summary>
 		/// Scans current directory for files and refreshes any changes
@@ -169,7 +174,7 @@ namespace AquaEditor.Views
 					continue; // Ignore this file
 
 				bool selected = file.FullPath.Equals(m_SelectedPath);
-				Texture texture = file.IsDirectory ? Icons.Folder : ChooseImage(file);
+				Texture texture = file.IsDirectory ? m_IconFolder : ChooseImage(file);
 				ImGUI.PushID(file.FullPath);
 				if (m_ThumbnailSize > ThumbnailSizeRange.x)
 				{

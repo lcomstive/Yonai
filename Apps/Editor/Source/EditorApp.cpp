@@ -108,8 +108,6 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-	// Test C# component
-
 #if defined(AQUA_PLATFORM_MAC)
 	Assembly* assembly = ScriptEngine::LoadAssembly(
 		string("app://../../../../../Apps/AquaScriptEditor/bin/") +
