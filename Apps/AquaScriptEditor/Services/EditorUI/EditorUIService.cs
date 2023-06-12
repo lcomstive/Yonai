@@ -22,6 +22,12 @@ namespace AquaEditor
 		/// </summary>
 		private static Dictionary<Type, View> m_ActiveViews = new Dictionary<Type, View>();
 
+		private EditorState State
+		{
+			get => Get<EditorService>().State;
+			set => Get<EditorService>().State = value;
+		}
+
 		protected override void Enabled()
 		{
 			SceneManager.WorldChanged += (world, added) =>
@@ -264,12 +270,30 @@ namespace AquaEditor
 			foreach (MenuItemData menuItem in m_RootMenuItem.Children)
 				menuItem.Render();
 
-			ImGUI.SetCursorPos(ImGUI.WindowSize.x / 2.0f, 2.5f);
-			ImGUI.ButtonImage(Icons.Get("Right"), new Vector2(15, 15));
+			DrawPlayButton();
 
 			ImGUI.PopStyleVar(2);
 			ImGUI.PopStyleColour();
 			ImGUI.EndMenuBar();
+		}
+
+		private void DrawPlayButton()
+		{
+			EditorState state = State;
+			Vector2 iconSize = new Vector2(12.5f, 12.5f);
+
+			ImGUI.SetCursorPosX(ImGUI.WindowSize.x / 2.0f - (iconSize.x + 2.5f) * (state == EditorState.Edit ? 1 : 3));
+
+			string icon = "Right";
+			if (state == EditorState.Play)
+				icon = "Pause";
+
+			if (state != EditorState.Edit && ImGUI.ButtonImage(Icons.Get("Stop"), iconSize))
+				State = EditorState.Edit;
+			if (ImGUI.ButtonImage(Icons.Get(icon), iconSize))
+				State = State == EditorState.Play ? EditorState.Pause : EditorState.Play;
+			if (state != EditorState.Edit && ImGUI.ButtonImage(Icons.Get("Next"), iconSize))
+				State = EditorState.Step;
 		}
 
 		private void CompileMenuItems()
@@ -348,7 +372,7 @@ namespace AquaEditor
 				return; // Not found
 
 			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
-			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
+			SceneManager.Load(m_TestWorld);
 		}
 		#endregion
 	}

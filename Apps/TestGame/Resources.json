@@ -188,5 +188,25 @@
     "ID": "1835804590404811410",
     "Path": "assets://Textures/Icons/Kenney/Up.png",
     "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "11892235965107489402",
+    "Path": "assets://Textures/Icons/Kenney/BarsHorizontal.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "10462738531539245598",
+    "Path": "assets://Textures/Icons/Kenney/Grid.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "11395017325578376449",
+    "Path": "assets://Textures/Icons/Kenney/Left.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "14333456754775330900",
+    "Path": "assets://Textures/Icons/Kenney/Pause.png",
+    "Type": "AquaEngine.Graphics.Texture"
   }
 ]

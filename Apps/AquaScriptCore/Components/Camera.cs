@@ -80,6 +80,27 @@ namespace AquaEngine
 			set => _SetRenderTarget(Handle, (m_RenderTarget = value)?.Handle ?? IntPtr.Zero);
 		}
 
+		public Camera() => World.StateChanged += OnWorldStateChanged;
+
+		public void Dispose()
+		{
+			// If this is the main camera, clear
+			if (Main == this)
+				Main = null;
+
+			World.StateChanged -= OnWorldStateChanged;
+		}
+
+		private void OnWorldStateChanged(bool active)
+		{
+			// If world becomes active and no camera set to main, this becomes main
+			if (active && !Main)
+				Main = this;
+			// If this is the main camera but world is deactivating, clear main
+			else if (!active && Main == this)
+				Main = null;
+		}
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
@@ -98,12 +119,6 @@ namespace AquaEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
-
-		public void Dispose()
-		{
-			if (Main == this)
-				Main = null;
-		}
 		#endregion
 	}
 }

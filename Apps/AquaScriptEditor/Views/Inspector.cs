@@ -61,6 +61,21 @@ namespace AquaEditor.Views
 		[MenuItem("Window/Inspector")]
 		private static void MenuCallback() => EditorUIService.Open<InspectorView>();
 
+		protected override void Opened() => AquaSystem.Get<EditorService>().StateChanged += OnEditorStateChanged;
+		protected override void Closed() => AquaSystem.Get<EditorService>().StateChanged -= OnEditorStateChanged;
+
+		private void OnEditorStateChanged(EditorState oldState, EditorState newState)
+		{
+			if (oldState != EditorState.Edit && newState != EditorState.Edit)
+				// Not entering or exiting play mode, don't need to deselect anything as world isn't changed
+				return;
+
+			// If targeting an entity in the world, clear target
+			// TODO: Re-target matching entity
+			if (Target is Entity)
+				Target = null;
+		}
+
 		protected override void Draw()
 		{
 			bool isOpen = true;

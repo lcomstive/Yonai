@@ -77,6 +77,15 @@ ADD_MANAGED_METHOD(World, Create, uint64_t, (MonoString* nameRaw))
 	return world->ID();
 }
 
+ADD_MANAGED_METHOD(World, SetName, void, (uint64_t worldID, MonoString* nameRaw))
+{
+	char* name = mono_string_to_utf8(nameRaw);
+	World* world = World::GetWorld(worldID);
+	if (world)
+		world->Name(string(name));
+	mono_free(name);
+}
+
 ADD_MANAGED_METHOD(World, CreateEntity, uint64_t, (uint64_t worldID))
 {
 	World* world = World::GetWorld(worldID);

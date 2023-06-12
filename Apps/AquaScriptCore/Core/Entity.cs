@@ -111,8 +111,12 @@ namespace AquaEngine
 
 			// Handle behaviour
 			Type behaviourType = typeof(IBehaviour);
+			Type disposableType = typeof(IDisposable);
 			foreach (var pair in m_Components)
 			{
+				if(disposableType.IsAssignableFrom(pair.Key))
+					((IDisposable)pair.Value).Dispose();
+
 				if (!behaviourType.IsAssignableFrom(pair.Key))
 					continue;
 

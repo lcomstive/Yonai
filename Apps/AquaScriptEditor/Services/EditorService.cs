@@ -25,6 +25,11 @@ namespace AquaEditor
 		/// </summary>
 		private UUID[] m_EditModeSceneIDs;
 
+		/// <summary>
+		/// IDs of scenes cloned to enter play mode
+		/// </summary>
+		private World[] m_ClonedWorlds;
+
 		protected override void Destroyed()
 		{
 			EditorWindow.Destroy();
@@ -90,7 +95,6 @@ namespace AquaEditor
 			else if (state == EditorState.Edit)
 				ExitPlayMode();
 
-			m_State = state;
 			switch (state)
 			{
 				default:
@@ -105,23 +109,40 @@ namespace AquaEditor
 					Get<BehaviourSystem>().Enable(true);
 					break;
 			}
+
+			StateChanged?.Invoke(m_State, m_State = state);
 		}
 
 		private void EnterPlayMode()
 		{
 			World[] activeScenes = SceneManager.GetActiveScenes();
+			SceneManager.UnloadAll();
 
 			m_EditModeSceneIDs = new UUID[activeScenes.Length];
+			m_ClonedWorlds = new World[activeScenes.Length];
 			for (int i = 0; i < activeScenes.Length; i++)
+			{
 				m_EditModeSceneIDs[i] = activeScenes[i].ID;
+				m_ClonedWorlds[i] = activeScenes[i].Clone();
+				m_ClonedWorlds[i].Name += " (Clone)";
+				SceneManager.Load(m_ClonedWorlds[i], SceneAddType.Additive);
+			}
 		}
 
 		private void ExitPlayMode()
 		{
 			SceneManager.UnloadAll();
 
+			// Destroy cloned worlds
+			foreach (World world in m_ClonedWorlds)
+				world.Destroy();
+
+			// Re-load all scenes that were active when entering play mode
 			foreach (UUID worldID in m_EditModeSceneIDs)
 				SceneManager.Load(World.Get(worldID), SceneAddType.Additive);
 		}
+
+		public delegate void OnStateChanged(EditorState oldState, EditorState newState);
+		public event OnStateChanged StateChanged;
 	}
 }

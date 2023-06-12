@@ -8,8 +8,14 @@ using System.Linq;
 namespace AquaEngine
 {
 	public class World : ISerializable
-	{		
-		public string Name { get; private set; }
+	{
+		private string m_Name;
+		public string Name
+		{
+			get => m_Name;
+			set => _SetName(ID, m_Name = value);
+		}
+
 		public UUID ID { get; private set; }
 
 		private bool m_IsActive = false;
@@ -33,7 +39,7 @@ namespace AquaEngine
 		internal World(UUID id, string name)
 		{
 			ID = id;
-			Name = name;
+			m_Name = name;
 
 			if (!s_Instances.ContainsKey(ID))
 				s_Instances.Add(ID, this);
@@ -45,10 +51,17 @@ namespace AquaEngine
 		/// <returns>Success state of destruction. Only fails if already destroyed.</returns>
 		public bool Destroy()
 		{
+			UUID[] keys = m_Entities.Keys.ToArray();
+			foreach (UUID entity in keys)
+				DestroyEntity(entity);
+
 			if (s_Instances.ContainsKey(ID))
 				s_Instances.Remove(ID);
+
 			return _Destroy(ID);
 		}
+
+		public World Clone() => Create(OnSerialize());
 
 		public JObject OnSerialize()
 		{
@@ -112,6 +125,8 @@ namespace AquaEngine
 
 		internal void SetActive(bool active)
 		{
+			if(m_IsActive == active) return; // No change
+
 			m_IsActive = active;
 
 			Entity[] entities = m_Entities.Values.ToArray();
@@ -132,6 +147,8 @@ namespace AquaEngine
 						behaviour.Destroyed();
 				}
 			}
+
+			StateChanged?.Invoke(m_IsActive);
 		}
 
 		public override bool Equals(object obj)
@@ -176,6 +193,18 @@ namespace AquaEngine
 		public void DestroyEntity(UUID entityID)
 		{
 			Entity entity = m_Entities[entityID];
+
+			if(entity.TryGetComponent(out Transform transform))
+			{
+				// Destroy all childr entities before destroying this entity
+				Transform[] children = transform.GetChildren();
+				foreach (Transform child in children)
+					DestroyEntity(child.Entity.ID);
+
+				// Inform parent of removal
+				transform.Parent?.RemoveChild(transform);
+			}
+
 			RemoveEntity(entityID);
 			entity?.Destroy();
 		}
@@ -357,6 +386,9 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Get(ulong worldID, out string name);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAll(out ulong[] worldIDs);
 
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetName(ulong worldID, string name);
+
+
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetEntities(ulong worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types);
@@ -380,5 +412,8 @@ namespace AquaEngine
 
 		public delegate void OnDeserialized();
 		public event OnDeserialized Deserialized;
+
+		public delegate void OnStateChanged(bool active);
+		public event OnStateChanged StateChanged;
 	}
 }
