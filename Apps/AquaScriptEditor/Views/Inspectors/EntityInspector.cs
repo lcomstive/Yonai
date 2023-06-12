@@ -41,6 +41,7 @@ namespace AquaEditor.Inspectors
 			}
 
 			string name = nameComponent.Name;
+			ImGUI.SetNextItemWidth(ImGUI.ContentRegionAvailable.x);
 			if (ImGUI.Input("##nameComponent", ref name))
 				nameComponent.Name = name;
 

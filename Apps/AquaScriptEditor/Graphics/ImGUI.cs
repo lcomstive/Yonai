@@ -1147,7 +1147,9 @@ namespace AquaEditor
 		#endregion
 
 		#region State
-		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemHovered();
+		public static bool IsItemHovered(HoveredFlags flags = HoveredFlags.None) => _IsItemHovered((int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsItemHovered(int flags);
+
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemClicked();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActive();

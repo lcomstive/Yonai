@@ -23,7 +23,7 @@ namespace AquaEditor.Inspectors
 				return;
 
 			ImGUI.TableSetupColumn("Key", ImGUI.TableColumnFlags.WidthFixed, contentRegion.x * 0.3f);
-			ImGUI.TableSetupColumn("Value");
+			ImGUI.TableSetupColumn("Value", ImGUI.TableColumnFlags.WidthStretch);
 
 			foreach (var field in fields)
 			{

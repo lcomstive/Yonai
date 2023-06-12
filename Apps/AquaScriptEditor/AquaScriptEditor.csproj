@@ -69,11 +69,15 @@
     <Compile Include="Services/EditorUI/EditorUIService.cs" />
     <Compile Include="Services/EditorUI/MenuItemData.cs" />
 
-    <!-- Views -->
+    <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />
     <Compile Include="Views/Inspectors/EntityInspector.cs" />
-    <Compile Include="Views/Inspectors/TextInspector.cs" />
-    <Compile Include="Views/Inspectors/TextureInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/CameraInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/ComponentInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
+
+    <!-- Views -->
     <Compile Include="Views/Console.cs" />
     <Compile Include="Views/Game.cs" />
     <Compile Include="Views/Hierarchy.cs" />

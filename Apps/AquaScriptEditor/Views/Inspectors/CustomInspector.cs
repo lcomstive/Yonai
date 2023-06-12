@@ -87,7 +87,7 @@ namespace AquaEditor
 
 		protected void Draw(string label, Vector3 value, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Drag($"##{label}", ref value))
+			if (ImGUI.Drag($"##{label}", ref value, 1, 0, 0, "%.2f"))
 				setValue.Invoke(instance, value);
 		}
 
@@ -220,9 +220,11 @@ namespace AquaEditor
 			ImGUI.TableSetColumnIndex(0);
 
 			ImGUI.Text(label);
+			if(ImGUI.IsItemHovered(ImGUI.HoveredFlags.DelayNormal | ImGUI.HoveredFlags.NoSharedDelay))
+				ImGUI.SetTooltip(label);
 
 			ImGUI.TableSetColumnIndex(1);
-			ImGUI.SetNextItemWidth(region.x);
+			// ImGUI.SetNextItemWidth(region.x);
 			if (t == typeof(int)) Draw(label, (int)value, instance, setValue, attributes);
 			else if (t == typeof(bool)) Draw(label, (bool)value, instance, setValue);
 			else if (t == typeof(float)) Draw(label, (float)value, instance, setValue, attributes);

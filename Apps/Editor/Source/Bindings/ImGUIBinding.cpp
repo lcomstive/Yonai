@@ -54,7 +54,7 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), AquaEditor)
 }
 
 /// STATE ///
-ADD_MANAGED_METHOD(ImGUI, IsItemHovered, bool, (), AquaEditor) { return ImGui::IsItemHovered(); }
+ADD_MANAGED_METHOD(ImGUI, _IsItemHovered, bool, (int flags), AquaEditor) { return ImGui::IsItemHovered(flags); }
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), AquaEditor) { return ImGui::IsItemClicked(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), AquaEditor) { return ImGui::IsItemActive(); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), AquaEditor) { return ImGui::IsMouseClicked(button); }
