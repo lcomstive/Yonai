@@ -203,6 +203,7 @@ ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t en
 
 	size_t type = _GetComponentType(componentType);
 	Components::Component* component = (Components::Component*)world->GetComponentManager()->Get(entityID, type);
+	/*
 	if (component && component->ManagedData.IsValid())
 	{
 		// Call Disabled() and then Destroyed()
@@ -211,6 +212,7 @@ ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t en
 		ComponentMethodEnabled(instance, false, &exception);
 		ComponentMethodDestroyed(instance, &exception);
 	}
+	*/
 
 	return world->GetComponentManager()->Remove(entityID, type);
 }

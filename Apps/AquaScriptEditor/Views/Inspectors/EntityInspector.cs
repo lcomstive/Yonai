@@ -91,6 +91,18 @@ namespace AquaEditor.Inspectors
 
 			if (!ImGUI.Foldout(type.Name, true))
 				return;
+
+			if (ImGUI.BeginPopupContextItem($"Inspector:{m_Target.ID}:{type.FullName}", ImGUI.PopupFlags.MouseButtonRight))
+			{
+				// m_Target.RemoveComponent(component.GetType());
+				if(ImGUI.Selectable("Remove"))
+				{
+					m_Target.RemoveComponent(type);
+					return;
+				}
+				ImGUI.EndPopup();
+			}
+
 			ImGUI.Indent();
 
 			inspector.Target = component;

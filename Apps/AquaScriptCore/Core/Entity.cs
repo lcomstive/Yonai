@@ -153,10 +153,12 @@ namespace AquaEngine
 			// Handle behaviour
 			if (World.IsActive)
 			{
-				Type behaviourType = typeof(IBehaviour);
-				foreach (var pair in m_Components)
-					if (behaviourType.IsAssignableFrom(pair.Key))
-						((IBehaviour)pair.Value).Start();
+				if(componentType.IsAssignableFrom(typeof(IBehaviour)))
+				{
+					IBehaviour behaviour = (IBehaviour)component;
+					behaviour.Enabled = true;
+					behaviour.Start();
+				}
 			}
 
 			return component;
@@ -195,27 +197,30 @@ namespace AquaEngine
 		/// Removes a <see cref="Component"/> from this entity
 		/// </summary>
 		/// <returns>Success state of removal</returns>
-		public bool RemoveComponent<T>() where T : Component
-		{
-			Type type = typeof(T);
+		public bool RemoveComponent<T>() where T : Component => RemoveComponent(typeof(T));
 
-			if (m_Components.ContainsKey(type))
-				m_Components.Remove(type);
+		public bool RemoveComponent(Type type)
+		{
+			if (!type.IsSubclassOf(typeof(Component)))
+				throw new Exception("Cannot remove component of type that does not inherit AquaEngine.Component");
+
+			if (!m_Components.ContainsKey(type))
+				return false; // Not on entity
+
+			Component component = m_Components[type];
+			m_Components.Remove(type);
 
 			// Handle behaviour
 			if (World.IsActive)
 			{
-				Type behaviourType = typeof(IBehaviour);
-				Type disposableType = typeof(IDisposable);
-				foreach (var pair in m_Components)
+				if (typeof(IBehaviour).IsAssignableFrom(type))
 				{
-					// Check if inherits from IBehaviour
-					if (behaviourType.IsAssignableFrom(pair.Key))
-						((IBehaviour)pair.Value).Destroyed();
-					// Check if inherits from IDisposable
-					if (behaviourType.IsAssignableFrom(disposableType))
-						((IDisposable)pair.Value).Dispose();
+					IBehaviour behaviour = (IBehaviour)component;
+					behaviour.Enabled = false;
+					behaviour.Destroyed();
 				}
+				if(typeof(IDisposable).IsAssignableFrom(type))
+					((IDisposable)component).Dispose();
 			}
 
 			return _RemoveComponent(World.ID, ID, type);
