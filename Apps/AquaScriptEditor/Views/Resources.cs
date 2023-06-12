@@ -293,9 +293,9 @@ namespace AquaEditor.Views
 				Process.Start("open", directory);
 		}
 
-			private void DrawContextMenu()
+		private void DrawContextMenu()
 		{
-			if (!ImGUI.BeginPopup($"ResourcesNew"))
+			if (!ImGUI.BeginPopup("ResourcesNew"))
 				return;
 
 			if (ImGUI.Selectable("Refresh"))

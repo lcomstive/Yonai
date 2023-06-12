@@ -80,7 +80,11 @@ namespace AquaEngine
 			set => _SetRenderTarget(Handle, (m_RenderTarget = value)?.Handle ?? IntPtr.Zero);
 		}
 
-		public Camera() => World.StateChanged += OnWorldStateChanged;
+		public Camera()
+		{
+			World.StateChanged += OnWorldStateChanged;
+			OnWorldStateChanged(World.IsActive);
+		}
 
 		public void Dispose()
 		{

@@ -50,6 +50,7 @@ namespace AquaEditor.Views
 				if(s_CurrentInspector != null)
 				{
 					s_CurrentInspector.Target = m_Target;
+					s_CurrentInspector.Opened();
 					s_CurrentInspector.OnTargetChanged();
 				}
 			}

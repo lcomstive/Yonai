@@ -4,6 +4,7 @@ using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace AquaEditor.Inspectors
 {
@@ -12,7 +13,15 @@ namespace AquaEditor.Inspectors
 	{
 		private Entity m_Target;
 
-		public override void Opened() => SceneManager.WorldChanged += OnWorldChanged;
+		private static List<Type> s_ComponentTypes = new List<Type>();
+
+		public override void Opened()
+		{
+			SceneManager.WorldChanged += OnWorldChanged;
+			if(s_ComponentTypes.Count == 0)
+				CacheComponentTypes();
+		}
+
 		public override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
 
 		public override void OnTargetChanged() => m_Target = Target as Entity;
@@ -40,14 +49,34 @@ namespace AquaEditor.Inspectors
 				nameComponent.Name = "Entity";
 			}
 
+			float width = ImGUI.ContentRegionAvailable.x;
 			string name = nameComponent.Name;
-			ImGUI.SetNextItemWidth(ImGUI.ContentRegionAvailable.x);
+			ImGUI.SetNextItemWidth(width);
 			if (ImGUI.Input("##nameComponent", ref name))
 				nameComponent.Name = name;
 
 			Component[] components = m_Target.GetComponents();
 			foreach(Component component in components)
 				DrawComponentInspector(component);
+
+			if (ImGUI.Button("Add Component", new Vector2(width, 0)))
+				ImGUI.OpenPopup("ComponentMenu");
+
+			DrawAddComponentMenu();
+		}
+
+		private void DrawAddComponentMenu()
+		{
+			ImGUI.SetNextWindowPos(ImGUI.GetCursorScreenPos());
+			ImGUI.SetNextWindowSize(new Vector2(ImGUI.ContentRegionAvailable.x, 250));
+			if (!ImGUI.BeginPopup("ComponentMenu"))
+				return;
+
+			foreach (Type type in s_ComponentTypes)
+				if (ImGUI.Selectable(type.Name))
+					m_Target.AddComponent(type);
+
+			ImGUI.EndPopup();
 		}
 
 		private void DrawComponentInspector(Component component)
@@ -69,6 +98,26 @@ namespace AquaEditor.Inspectors
 			inspector.DrawInspector();
 
 			ImGUI.Unindent();
+		}
+
+		/// <summary>
+		/// Searches assembly for all types that inherit from <see cref="Component"/>
+		/// </summary>
+		private void CacheComponentTypes()
+		{
+			Log.Debug("Caching component types for entity inspector");
+			Type componentType = typeof(Component);
+			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			foreach (Assembly assembly in assemblies)
+			{
+				try
+				{
+					// Get all types in assembly that derive from Component
+					foreach (Type type in assembly.GetTypes().Where(x => x.IsSubclassOf(componentType) && x.IsClass && !x.IsAbstract))
+						s_ComponentTypes.Add(type);
+				} catch { }
+			}
+			Log.Debug($"Found {s_ComponentTypes.Count} components");
 		}
 	}
 }

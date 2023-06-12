@@ -569,10 +569,11 @@ ADD_MANAGED_METHOD(ImGUI, _Dummy, void, (glm::vec2* size), AquaEditor) { ImGui::
 ADD_MANAGED_METHOD(ImGUI, _GetTextLineHeight, float, (), AquaEditor) { return ImGui::GetTextLineHeight(); }
 ADD_MANAGED_METHOD(ImGUI, SameLine, void, (float offset, float spacing), AquaEditor) { return ImGui::SameLine(offset, spacing); }
 
-ADD_MANAGED_METHOD(ImGUI, Button, bool, (MonoString* labelRaw), AquaEditor)
+ADD_MANAGED_METHOD(ImGUI, _Button, bool, (MonoString* labelRaw, glm::vec2* sizeRaw), AquaEditor)
 {
 	char* label = mono_string_to_utf8(labelRaw);
-	bool output = ImGui::Button(label);
+	ImVec2 size(sizeRaw->x, sizeRaw->y);
+	bool output = ImGui::Button(label, size);
 	mono_free(label);
 	return output;
 }

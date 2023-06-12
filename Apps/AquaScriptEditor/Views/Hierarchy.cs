@@ -42,7 +42,7 @@ namespace AquaEditor.Views
 							nameComponent.Name = $"Entity {entity.ID}";
 						}
 
-						ImGUI.Selectable($"{nameComponent.Name} [{entity.ID}]");
+						ImGUI.Selectable(nameComponent.Name);
 
 						if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
 							InspectorView.Target = entity;

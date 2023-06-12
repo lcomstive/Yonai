@@ -1307,8 +1307,11 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _TextColoured(string label, ref Colour colour);
 
+		public static bool Button(string label) => Button(label, Vector2.Zero);
+		public static bool Button(string label, Vector2 size) => _Button(label, ref size);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool Button(string label);
+		private static extern bool _Button(string label, ref Vector2 size);
 
 		public static bool InvisibleButton(string label, Vector2 size) => _InvisibleButton(label, ref size);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _InvisibleButton(string label, ref Vector2 size);

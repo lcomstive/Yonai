@@ -134,17 +134,21 @@ namespace AquaEngine
 		public bool HasComponent<T>() where T : Component => HasComponent(typeof(T));
 
 		/// <returns>New instance of <see cref="Component"/>, or existing instance if already on this entity</returns>
-		public T AddComponent<T>() where T : Component
-		{
-			Type type = typeof(T);
-			if (HasComponent<T>())
-				return (T)m_Components[type];
+		public T AddComponent<T>() where T : Component => (T)AddComponent(typeof(T));
 
-			T component = (T)_AddComponent(World.ID, ID, type, out IntPtr handle);
+		public Component AddComponent(Type componentType)
+		{
+			if (!componentType.IsSubclassOf(typeof(Component)))
+				throw new Exception("AddComponent but componentType does not inherit from AquaEngine.Component");
+
+			if (HasComponent(componentType))
+				return m_Components[componentType];
+
+			Component component = (Component)_AddComponent(World.ID, ID, componentType, out IntPtr handle);
 			if (component == null)
 				return null;
 			component.Handle = handle;
-			m_Components.Add(type, component);
+			m_Components.Add(componentType, component);
 
 			// Handle behaviour
 			if (World.IsActive)
