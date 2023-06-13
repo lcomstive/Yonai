@@ -36,23 +36,24 @@ namespace AquaEngine.Graphics
 			get => m_Shader;
 			set
 			{
-				// Check for change
-				if(m_Shader != value)
-					_SetShader(Handle, (m_Shader = value)?.ResourceID ?? UUID.Invalid);
+				if (m_Shader == value)
+					return; // No change
+
+				m_Settings.Shader = value?.ResourceID ?? 0;
+				_SetShader(Handle, (m_Shader = value)?.ResourceID ?? UUID.Invalid);
 			}
 		}
 
-		public Vector4 Albedo
+		public Colour Albedo
 		{
 			get => m_Settings.Albedo;
 			set
 			{
 				// Check for change
-				if(m_Settings.Albedo != value)
-				{
-					m_Settings.Albedo = value;
-					_SetAlbedo(Handle, ref value);
-				}
+				if (m_Settings.Albedo == value)
+					return;
+				m_Settings.Albedo = value;
+				_SetAlbedo(Handle, ref m_Settings.Albedo);
 			}
 		}
 
@@ -62,9 +63,11 @@ namespace AquaEngine.Graphics
 			get => m_AlbedoMap;
 			set
 			{
-				// Check for change
-				if(m_AlbedoMap != value)
-					_SetAlbedoMap(Handle, (m_AlbedoMap = value)?.ResourceID ?? UUID.Invalid);
+				if (m_AlbedoMap == value)
+					return; // No change
+
+				m_Settings.AlbedoMap = value?.ResourceID ?? 0;
+				_SetAlbedoMap(Handle, (m_AlbedoMap = value)?.ResourceID ?? UUID.Invalid);
 			}
 		}
 
@@ -137,8 +140,8 @@ namespace AquaEngine.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(IntPtr handle, ulong value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAlbedo(IntPtr handle, out Vector4 value);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedo(IntPtr handle, ref Vector4 value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAlbedo(IntPtr handle, out Colour value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedo(IntPtr handle, ref Colour value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetAlbedoMap(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedoMap(IntPtr handle, ulong value);

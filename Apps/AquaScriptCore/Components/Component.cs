@@ -6,7 +6,8 @@ using Newtonsoft.Json.Linq;
 namespace AquaEngine
 {
 	public abstract class Component : ISerializable
-	{		
+	{
+		[Serialize(false)]
 		internal IntPtr Handle { get; set; }
 
 		/// <summary>

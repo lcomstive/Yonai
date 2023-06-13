@@ -83,6 +83,13 @@ namespace AquaEngine
 			a = json["a"].Value<float>();
 		}
 
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Colour) && !(obj is Vector4))
+				return false;
+			return this == (Colour)obj;
+		}
+
 		public override string ToString() => $"({r}, {g}, {b}, {a})";
 
 		public static implicit operator string(Colour v) => v.ToString();
@@ -95,6 +102,9 @@ namespace AquaEngine
 		public static Colour operator *(Colour a, float b) => new Colour(a.r * b, a.g * b, a.b * b, a.a * b);
 		public static Colour operator /(Colour a, float b) => new Colour(a.r / b, a.g / b, a.b / b, a.a / b);
 
+		public static bool operator ==(Colour a, Colour b) => a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+		public static bool operator !=(Colour a, Colour b) => a.r != b.r || a.g != b.g || a.b != b.b || a.a != b.a;
+		
 		public static implicit operator Vector4(Colour a) => new Vector4(a.r, a.g, a.b, a.a);
 		public static implicit operator Colour(Vector4 a) => new Colour(a.x, a.y, a.z, a.w);
 	}

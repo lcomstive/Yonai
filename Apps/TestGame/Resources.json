@@ -80,11 +80,6 @@
     "Type": "AquaEngine.Graphics.Shader"
   },
   {
-    "ID": "4740142775366728599",
-    "Path": "project://Assets/TestMaterial.material",
-    "Type": "AquaEngine.Graphics.Material"
-  },
-  {
     "ID": "10876181119480238457",
     "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
     "Type": "AquaEngine.Graphics.Texture"
@@ -122,11 +117,6 @@
   {
     "ID": "7670656770908261766",
     "Path": "project://Assets/Textures/texture_09.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "16217471971352016396",
-    "Path": "assets://Textures/Icons/Folder.png.cache",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
@@ -190,22 +180,32 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
-    "ID": "11892235965107489402",
+    "ID": "14450950994906134724",
+    "Path": "project://Assets/Shaders/TestShader.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "10043051166291253484",
+    "Path": "project://Assets/TestMaterial.material",
+    "Type": "AquaEngine.Graphics.Material"
+  },
+  {
+    "ID": "14906907806139841935",
     "Path": "assets://Textures/Icons/Kenney/BarsHorizontal.png",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
-    "ID": "10462738531539245598",
+    "ID": "4954067558202216075",
     "Path": "assets://Textures/Icons/Kenney/Grid.png",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
-    "ID": "11395017325578376449",
+    "ID": "3650515654663949066",
     "Path": "assets://Textures/Icons/Kenney/Left.png",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
-    "ID": "14333456754775330900",
+    "ID": "6186556962621876187",
     "Path": "assets://Textures/Icons/Kenney/Pause.png",
     "Type": "AquaEngine.Graphics.Texture"
   }

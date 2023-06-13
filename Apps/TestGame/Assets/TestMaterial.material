@@ -1,12 +1,12 @@
-{
-  "Shader": "0",
-  "Albedo": {
-    "r": 0.0,
-    "g": 0.0,
-    "b": 0.0,
-    "a": 0.0
-  },
-  "AlbedoMap": "0",
-  "AlphaClipping": false,
-  "AlphaThreshold": 0.0
+{
+  "Shader": "0",
+  "Albedo": {
+    "r": 0.357142866,
+    "g": 1.0,
+    "b": 0.5755652,
+    "a": 1.0
+  },
+  "AlbedoMap": "7670656770908261766",
+  "AlphaClipping": true,
+  "AlphaThreshold": 0.701
 }

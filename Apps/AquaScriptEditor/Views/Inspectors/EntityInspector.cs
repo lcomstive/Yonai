@@ -89,10 +89,11 @@ namespace AquaEditor.Inspectors
 			if (inspector == null)
 				return; // Nothing to draw
 
-			if (!ImGUI.Foldout(type.Name, true))
-				return;
-
+			bool foldout = ImGUI.Foldout(type.Name, true);
 			DrawComponentContextMenu(type, component);
+    
+			if (!foldout)
+	           return;
 
 			ImGUI.Indent();
 

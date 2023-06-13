@@ -56,6 +56,7 @@ namespace AquaEditor.Views
 			}
 		}
 
+		private static CustomInspector s_DefaultInspector = new CustomInspector();
 		private static Dictionary<Type, CustomInspector> s_Inspectors = new Dictionary<Type, CustomInspector>();
 		private static Dictionary<string, CustomInspector> s_FileExtensions = new Dictionary<string, CustomInspector>();
 
@@ -95,7 +96,7 @@ namespace AquaEditor.Views
 			{
 				if (Target != null && s_CurrentInspector != null)
 					s_CurrentInspector.DrawInspector();
-				else if(Target != null)
+				else if (Target != null)
 					ImGUI.Text("No inspector found", Colour.Grey);
 			}
 
@@ -160,7 +161,7 @@ namespace AquaEditor.Views
 		/// </summary>
 		internal static CustomInspector FindInspector(Type type)
 		{
-			if(type == null) return null;
+			if (type == null) return s_DefaultInspector;
 			if(s_Inspectors.ContainsKey(type))
 				return s_Inspectors[type];
 			return FindInspector(type.BaseType);

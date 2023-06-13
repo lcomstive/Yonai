@@ -73,7 +73,8 @@
     <Compile Include="Views/Inspectors/CustomInspector.cs" />
     <Compile Include="Views/Inspectors/EntityInspector.cs" />
     <Compile Include="Views/Inspectors/Components/CameraInspector.cs" />
-    <Compile Include="Views/Inspectors/Components/ComponentInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/MaterialInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/ShaderInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
 

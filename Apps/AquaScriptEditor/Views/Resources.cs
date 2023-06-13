@@ -82,6 +82,10 @@ namespace AquaEditor.Views
 		private string GetDirectoryPath(string[] directories, int index) =>
 			RootDirectory + "/" + string.Join("/", directories.Take(index + 1).ToArray());
 
+		/// <summary>
+		/// Handle moving files up directories via breadcrumbs
+		/// </summary>
+		/// <param name="directory"></param>
 		private void BreadcrumbDragDropTarget(string directory)
 		{
 			if (!ImGUI.BeginDragDropTarget())
@@ -106,6 +110,10 @@ namespace AquaEditor.Views
 			ImGUI.EndDragDropTarget();
 		}
 
+		/// <summary>
+		/// Draw current directory structure
+		/// e.g. Assets / Models / Backpack / Textures
+		/// </summary>
 		private void DrawBreadcrumbs()
 		{
 			ImGUI.PushStyleVar(ImGUI.StyleVar.FramePadding, new Vector2(5, 3));
@@ -144,14 +152,11 @@ namespace AquaEditor.Views
 
 		private Texture ChooseImage(VFSFile file)
 		{
-			if (ValidTextureExtensions.Contains(file.Extension.ToLower()))
-			{
-				if (!Resource.Exists(file.FullPath))
-					return Resource.Load<Texture>(file.FullPath);
-				return Resource.Get<Texture>(file.FullPath);
-			}
-
-			return null;
+			if (!ValidTextureExtensions.Contains(file.Extension.ToLower()))
+				return null;
+			if (!Resource.Exists(file.FullPath))
+				return Resource.Load<Texture>(file.FullPath);
+			return Resource.Get<Texture>(file.FullPath);
 		}
 
 		private void DrawContents()
@@ -312,6 +317,11 @@ namespace AquaEditor.Views
 				if (ImGUI.Selectable("Material"))
 				{
 					m_NewNamePopupFinishAction = (materialName) => Resource.Load<Material>($"{m_CurrentDirectory}/{materialName}.material", new MaterialImportSettings());
+					m_NewNameModalOpen = true;
+				}
+				if(ImGUI.Selectable("Shader"))
+				{
+					m_NewNamePopupFinishAction = (shaderName) => Resource.Load<Shader>($"{m_CurrentDirectory}/{shaderName}.shader", new ShaderImportSettings());
 					m_NewNameModalOpen = true;
 				}
 				ImGUI.EndMenu();
