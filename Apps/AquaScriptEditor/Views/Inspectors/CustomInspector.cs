@@ -134,7 +134,7 @@ namespace AquaEditor
 				resourceView.HighlightPath(value.ResourcePath);
 			}
 
-			UUID dragDropID = HandleResourceDragDrop(value);
+			UUID dragDropID = HandleResourceDragDrop(typeof(Texture));
 			if (dragDropID != UUID.Invalid)
 				setValue.Invoke(instance, Resource.Get(dragDropID));
 		}
@@ -169,9 +169,10 @@ namespace AquaEditor
 				ImGUI.Text(value.ToString());
 		}
 
-		protected void Draw(string label, ResourceBase resource, object instance, Action<object, object> setValue)
+		protected void Draw(string label, Type type, ResourceBase resource, object instance, Action<object, object> setValue)
 		{
-			if (ImGUI.Button(resource.ResourcePath) && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+			if (ImGUI.Button(resource?.ResourcePath ?? string.Empty, new Vector2(ImGUI.ContentRegionAvailable.x, 0))
+					&& resource != null && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 			{
 				// Navigate resources view to resource.ResourcePath and highlight/select resource
 				ResourcesView resourceView = EditorUIService.GetView<ResourcesView>();
@@ -180,12 +181,12 @@ namespace AquaEditor
 				resourceView.HighlightPath(resource.ResourcePath);
 			}
 
-			UUID dragDropID = HandleResourceDragDrop(resource);
+			UUID dragDropID = HandleResourceDragDrop(type);
 			if (dragDropID != UUID.Invalid)
 				setValue.Invoke(instance, Resource.Get(dragDropID));
 		}
 
-		protected UUID HandleResourceDragDrop(ResourceBase resource)
+		protected UUID HandleResourceDragDrop(Type type)
 		{
 			if (ImGUI.BeginDragDropTarget())
 			{
@@ -198,7 +199,7 @@ namespace AquaEditor
 				UUID resourceID = Resource.GetID(payloadFile.FullPath);
 				Type payloadType = Resource.GetType(resourceID);
 
-				if (resource.GetType().IsAssignableFrom(payloadType))
+				if (type.IsAssignableFrom(payloadType))
 				{
 					ImGUI.AcceptDragDropPayload("ResourcePath");
 					if (ImGUI.DragDropPayloadIsDelivery())
@@ -237,7 +238,7 @@ namespace AquaEditor
 			else if (t == typeof(Quaternion)) Draw(label, (Quaternion)value, instance, setValue);
 			else if (t == typeof(RenderTexture)) Draw(label, (RenderTexture)value, instance, setValue);
 			else if (t == typeof(UUID)) Draw(label, (UUID)value, instance, setValue);
-			else if (typeof(ResourceBase).IsAssignableFrom(t)) Draw(label, (ResourceBase)value, instance, setValue);
+			else if (typeof(ResourceBase).IsAssignableFrom(t)) Draw(label, t, (ResourceBase)value, instance, setValue);
 			else if (t.IsEnum)
 				DrawEnum(label, t, value, instance, setValue);
 			else ImGUI.Text(t.Name);
