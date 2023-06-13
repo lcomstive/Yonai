@@ -218,6 +218,21 @@ namespace AquaEditor
 				resourceView.HighlightPath(value.ResourcePath);
 			}
 
+			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
+			{
+				if (value != null && ImGUI.Selectable("Clear"))
+					value = null;
+				if (value != null && ImGUI.Selectable("Copy Path"))
+					Clipboard.SetText(value.ResourcePath);
+				if (ImGUI.Selectable("Paste Path"))
+				{
+					string path = Clipboard.GetText();
+					if (!string.IsNullOrEmpty(path) && (Resource.Exists(path) || VFS.Exists(path)))
+						value = Resource.Load<Texture>(path);
+				}
+				ImGUI.EndPopup();
+			}
+
 			UUID dragDropID = HandleResourceDragDrop(typeof(Texture));
 			if (dragDropID != UUID.Invalid)
 				return Resource.Get<Texture>(dragDropID);
@@ -277,7 +292,7 @@ namespace AquaEditor
 
 			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
 			{
-				if (ImGUI.Selectable("Clear"))
+				if (resource != null && ImGUI.Selectable("Clear"))
 					resource = null;
 				if(resource != null && ImGUI.Selectable("Copy Path"))
 					Clipboard.SetText(resource.ResourcePath);
@@ -353,7 +368,7 @@ namespace AquaEditor
 			bool clear = false;
 			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
 			{
-				if (ImGUI.Selectable("Clear"))
+				if (filepath.IsValid && ImGUI.Selectable("Clear"))
 					clear = true;
 				if (filepath.IsValid && ImGUI.Selectable("Copy Path"))
 					Clipboard.SetText(filepath.FullPath);
