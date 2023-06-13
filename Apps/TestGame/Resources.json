@@ -208,5 +208,10 @@
     "ID": "6186556962621876187",
     "Path": "assets://Textures/Icons/Kenney/Pause.png",
     "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "9550400839931268906",
+    "Path": "\t\t\tUUID dragDropID = HandleResourceDragDrop(type);\r\n\t\t\tif (dragDropID != UUID.Invalid)\r\n\t\t\t\treturn Resource.Get(dragDropID);",
+    "Type": "AquaEngine.Graphics.Shader"
   }
 ]

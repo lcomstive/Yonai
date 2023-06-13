@@ -284,7 +284,7 @@ namespace AquaEditor
 				if(ImGUI.Selectable("Paste Path"))
 				{
 					string path = Clipboard.GetText();
-					if (!string.IsNullOrEmpty(path))
+					if (!string.IsNullOrEmpty(path) && (Resource.Exists(path) || VFS.Exists(path)))
 						resource = Resource.Load(Resource.GetID(path), path, type);
 				}
 				ImGUI.EndPopup();
