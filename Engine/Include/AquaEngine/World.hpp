@@ -114,6 +114,7 @@ namespace AquaEngine
 
 		AquaAPI UUID& ID();
 		AquaAPI std::string& Name();
+		AquaAPI void Name(char* name);
 		AquaAPI void Name(std::string& name);
 
 		AquaAPI void Destroy();

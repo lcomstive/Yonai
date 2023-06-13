@@ -22,6 +22,7 @@ World::World(string name) : m_Name(name)
 UUID& World::ID() { return m_ID; }
 string& World::Name() { return m_Name; }
 void World::Name(string& name) { m_Name = name; }
+void World::Name(char* name) { m_Name = string(name); }
 
 void World::Destroy()
 {
