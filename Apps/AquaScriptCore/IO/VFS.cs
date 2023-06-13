@@ -1,7 +1,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace AquaEngine
+namespace AquaEngine.IO
 {
 	public struct VFSFile
 	{

@@ -12,7 +12,7 @@ namespace AquaEngine
 		public Texture Sprite
 		{
 			get => Resource.Get<Texture>(_GetSprite(Handle));
-			set => _SetSprite(Handle, value.ResourceID);
+			set => _SetSprite(Handle, value?.ResourceID ?? UUID.Invalid);
 		}
 
 		/// <summary>
@@ -34,7 +34,7 @@ namespace AquaEngine
 		public Shader Shader
 		{
 			get => Resource.Get<Shader>(_GetShader(Handle));
-			set => _SetShader(Handle, value.ResourceID);
+			set => _SetShader(Handle, value?.ResourceID ?? UUID.Invalid);
 		}
 
 		#region Internal Calls

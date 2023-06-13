@@ -1,6 +1,7 @@
 using System;
 using AquaEngine;
 using System.Linq;
+using AquaEngine.IO;
 using AquaEditor.Views;
 using System.Reflection;
 using AquaEngine.Graphics;
@@ -270,16 +271,24 @@ namespace AquaEditor
 				resourceView.HighlightPath(resource.ResourcePath);
 			}
 
-			if(ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
-			{
-				if (ImGUI.Selectable("Clear"))
-					resource = null;
-				ImGUI.EndPopup();
-			}
-
 			UUID dragDropID = HandleResourceDragDrop(type);
 			if (dragDropID != UUID.Invalid)
 				return Resource.Get(dragDropID);
+
+			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
+			{
+				if (ImGUI.Selectable("Clear"))
+					resource = null;
+				if(resource != null && ImGUI.Selectable("Copy Path"))
+					Clipboard.SetText(resource.ResourcePath);
+				if(ImGUI.Selectable("Paste Path"))
+				{
+					string path = Clipboard.GetText();
+					if (!string.IsNullOrEmpty(path))
+						resource = Resource.Load(Resource.GetID(path), path, type);
+				}
+				ImGUI.EndPopup();
+			}
 
 			return resource;
 		}
@@ -352,7 +361,7 @@ namespace AquaEditor
 			{
 				UUID uuid = (UUID)value;
 				if (Resource.Exists(uuid))
-					return DrawResource(label, uuid);
+					return DrawResource(label, uuid)?.ResourceID ?? UUID.Invalid;
 			
 				Draw(label, (UUID)value);
 				return value;
