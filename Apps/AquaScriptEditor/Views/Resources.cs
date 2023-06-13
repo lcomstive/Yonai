@@ -340,20 +340,20 @@ namespace AquaEditor.Views
 			if (!ImGUI.BeginPopupContextItem($"ResourcesEdit", ImGUI.PopupFlags.MouseButtonRight))
 				return;
 
+			if (ImGUI.Selectable("Copy Path"))
+				Clipboard.SetText(file.FullPath);
+
 			if (ImGUI.Selectable("Delete"))
 			{
 				VFS.Remove(file.FullPath);
 				Refresh();
 			}
 
-			if (file.IsDirectory)
-			{
-				ImGUI.Separator();
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ImGUI.Selectable("Show in Explorer"))
-					ShowInExplorer(file.FullPath);
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ImGUI.Selectable("Show in Finder"))
-					ShowInExplorer(file.FullPath);
-			}
+			ImGUI.Separator();
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ImGUI.Selectable("Show in Explorer"))
+				ShowInExplorer(file.IsDirectory ? file.FullPath : file.ParentDirectory);
+			else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ImGUI.Selectable("Show in Finder"))
+				ShowInExplorer(file.IsDirectory ? file.FullPath : file.ParentDirectory);
 
 			ImGUI.EndPopup();
 		}
