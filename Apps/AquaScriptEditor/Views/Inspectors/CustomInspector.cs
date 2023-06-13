@@ -330,6 +330,77 @@ namespace AquaEditor
 		protected UUID DrawResource<T>(string label, UUID resourceID) where T : ResourceBase => ((T)DrawObject(label, typeof(T), Resource.Get(resourceID)))?.ResourceID ?? 0;
 
 		/// <summary>
+		/// Draws a space for files to be dropped or pasted
+		/// </summary>
+		/// <param name="label">Label to display on left side</param>
+		/// <param name="filepath">Contents of element</param>
+		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
+		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, params string[] allowedFileTypes)
+		{
+			output = new VFSFile();
+			ImGUI.TableNextRow();
+			ImGUI.TableSetColumnIndex(0);
+
+			ImGUI.Text(label);
+			if (ImGUI.IsItemHovered(ImGUI.HoveredFlags.DelayNormal | ImGUI.HoveredFlags.NoSharedDelay))
+				ImGUI.SetTooltip(label);
+
+			ImGUI.TableSetColumnIndex(1);
+
+			ImGUI.Button(filepath.FullPath, new Vector2(ImGUI.ContentRegionAvailable.x, 0));
+
+			bool clear = false;
+			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
+			{
+				if (ImGUI.Selectable("Clear"))
+					clear = true;
+				if (filepath.IsValid && ImGUI.Selectable("Copy Path"))
+					Clipboard.SetText(filepath.FullPath);
+				if (ImGUI.Selectable("Paste Path"))
+				{
+					string path = Clipboard.GetText();
+					if (!string.IsNullOrEmpty(path) && (Resource.Exists(path) || VFS.Exists(path)))
+						output = new VFSFile(path);
+				}
+				ImGUI.EndPopup();
+
+				if (!string.IsNullOrEmpty(output.FullPath) || clear)
+					return true;
+			}
+
+			if (!ImGUI.BeginDragDropTarget())
+				return false;
+
+			object payload = ImGUI.AcceptDragDropPayload("ResourcePath", ImGUI.DragDropFlags.AcceptPeekOnly);
+
+			if (payload == null)
+				return false;
+
+			VFSFile payloadFile = (VFSFile)payload;
+			if (allowedFileTypes == null || allowedFileTypes.Length == 0)
+			{
+				ImGUI.AcceptDragDropPayload("ResourcePath");
+				if (ImGUI.DragDropPayloadIsDelivery())
+					output = payloadFile;
+			}
+
+			foreach (string extension in allowedFileTypes)
+			{
+				if (payloadFile.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase))
+				{
+					ImGUI.AcceptDragDropPayload("ResourcePath");
+					if (ImGUI.DragDropPayloadIsDelivery())
+						output = payloadFile;
+					break;
+				}
+			}
+
+			ImGUI.EndDragDropTarget();
+			return output.IsValid;
+		}
+
+		/// <summary>
 		/// Draws an object inspector
 		/// </summary>
 		/// <param name="label">Label shown to user</param>

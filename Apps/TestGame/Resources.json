@@ -25,7 +25,7 @@
     "Type": "AquaEngine.Graphics.Shader"
   },
   {
-    "ID": "16395505420949311857",
+    "ID": "6892102974587913750",
     "Path": "assets://Materials/Default3D.material",
     "Type": "AquaEngine.Graphics.Material"
   },
@@ -35,7 +35,7 @@
     "Type": "AquaEngine.Graphics.Shader"
   },
   {
-    "ID": "6390438237626730770",
+    "ID": "2616542742985839791",
     "Path": "assets://Materials/Default2D.material",
     "Type": "AquaEngine.Graphics.Material"
   },
@@ -45,78 +45,8 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
-    "ID": "1558939981498604886",
-    "Path": "assets://Textures/Icons/Kenney/down.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "180903874644081999",
-    "Path": "assets://Textures/Icons/Kenney/gear.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "4138545476931334866",
-    "Path": "assets://Textures/Icons/Kenney/larger.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "17032209305653912973",
-    "Path": "assets://Textures/Icons/Kenney/power.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "13784486783167574660",
-    "Path": "assets://Textures/Icons/Kenney/save.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "8706201080435106095",
-    "Path": "assets://Textures/Icons/Kenney/up.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "5953939257442262790",
-    "Path": "assets://Shaders/NewSprite.shader",
-    "Type": "AquaEngine.Graphics.Shader"
-  },
-  {
-    "ID": "10876181119480238457",
-    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "1703371008641297390",
-    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3683148736297131420",
-    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "914614816986255884",
-    "Path": "project://Assets/Models/Backpack/1001_normal.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "16432474944345516457",
-    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3709196398890155700",
-    "Path": "assets://Textures/texture_09.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "12186665987650416156",
-    "Path": "project://Assets/Textures/Aqua.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "7670656770908261766",
-    "Path": "project://Assets/Textures/texture_09.png",
+    "ID": "14906907806139841935",
+    "Path": "assets://Textures/Icons/Kenney/BarsHorizontal.png",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
@@ -130,6 +60,11 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
+    "ID": "4954067558202216075",
+    "Path": "assets://Textures/Icons/Kenney/Grid.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
     "ID": "7973797276010773274",
     "Path": "assets://Textures/Icons/Kenney/Info.png",
     "Type": "AquaEngine.Graphics.Texture"
@@ -140,8 +75,18 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
+    "ID": "3650515654663949066",
+    "Path": "assets://Textures/Icons/Kenney/Left.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
     "ID": "18211389431792238259",
     "Path": "assets://Textures/Icons/Kenney/Next.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "6186556962621876187",
+    "Path": "assets://Textures/Icons/Kenney/Pause.png",
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
@@ -180,38 +125,33 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
+    "ID": "3709196398890155700",
+    "Path": "assets://Textures/texture_09.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "5953939257442262790",
+    "Path": "assets://Shaders/NewSprite.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
     "ID": "14450950994906134724",
     "Path": "project://Assets/Shaders/TestShader.shader",
     "Type": "AquaEngine.Graphics.Shader"
   },
   {
-    "ID": "10043051166291253484",
+    "ID": "7865129692738326237",
+    "Path": "project://Assets/Textures/Aqua.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "14050086547935057365",
+    "Path": "project://Assets/Textures/texture_09.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "7279780428119495795",
     "Path": "project://Assets/TestMaterial.material",
     "Type": "AquaEngine.Graphics.Material"
-  },
-  {
-    "ID": "14906907806139841935",
-    "Path": "assets://Textures/Icons/Kenney/BarsHorizontal.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "4954067558202216075",
-    "Path": "assets://Textures/Icons/Kenney/Grid.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3650515654663949066",
-    "Path": "assets://Textures/Icons/Kenney/Left.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "6186556962621876187",
-    "Path": "assets://Textures/Icons/Kenney/Pause.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "9550400839931268906",
-    "Path": "\t\t\tUUID dragDropID = HandleResourceDragDrop(type);\r\n\t\t\tif (dragDropID != UUID.Invalid)\r\n\t\t\t\treturn Resource.Get(dragDropID);",
-    "Type": "AquaEngine.Graphics.Shader"
   }
 ]

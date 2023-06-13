@@ -67,6 +67,7 @@ namespace AquaEngine
 
 		/// <returns>True if resource path is found matching <paramref name="path"/></returns>
 		public static bool Exists(string path) => s_Paths.ContainsKey(path);
+		public static bool Exists(VFSFile file) => s_Paths.ContainsKey(file.FullPath);
 
 		/// <summary>
 		/// Loads a new resource with virtual path <paramref name="path"/>.

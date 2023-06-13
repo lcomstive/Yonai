@@ -97,7 +97,7 @@
     <Compile Include="Graphics\Texture.cs" />
     <Compile Include="Graphics\Window.cs" />
 
-    <-- IO -->
+    <!-- IO -->
     <Compile Include="IO\Clipboard.cs" />
     <Compile Include="IO\VFS.cs" />
     

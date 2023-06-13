@@ -25,8 +25,22 @@ namespace AquaEngine.IO
 		/// </summary>
 		public string ParentDirectory { get; private set; }
 
+		/// <summary>
+		/// Checks if a path is set
+		/// </summary>
+		public bool IsValid => !string.IsNullOrEmpty(FileName);
+
 		public VFSFile(string filepath)
 		{
+			if (string.IsNullOrEmpty(filepath))
+			{
+				IsDirectory = false;
+				FileName = string.Empty;
+				Extension = string.Empty;
+				ParentDirectory = string.Empty;
+				return;
+			}
+
 			IsDirectory = filepath.EndsWith("/");
 			filepath = filepath.TrimEnd('/');
 			if (!IsDirectory)
@@ -43,11 +57,25 @@ namespace AquaEngine.IO
 		}
 
 		public string FullPath => ParentDirectory + FileName;
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is VFSFile) && !(obj is string))
+				return false;
+			return ((string)obj).Equals(FullPath);
+		}
+
+		public static implicit operator VFSFile(string path) => new VFSFile(path);
+		public static implicit operator string(VFSFile vfsFile) => vfsFile.FullPath;
+
+		public static bool operator ==(VFSFile a, VFSFile b) => a.FullPath.Equals(b.FullPath);
+		public static bool operator !=(VFSFile a, VFSFile b) => !a.FullPath.Equals(b.FullPath);
 	}
 
 	public static class VFS
 	{
 		public static bool Exists(string path) => _Exists(path);
+		public static bool Exists(VFSFile file) => _Exists(file.FullPath);
 		public static string CurrentDirectory => _GetCurrentDirectory();
 		public static string GetAbsolutePath(string path, bool requireFileExists = false, bool suppressWarnings = false) =>
 			_GetAbsolutePath(path, requireFileExists, suppressWarnings);

@@ -7,15 +7,19 @@ namespace AquaEngine.Graphics
 {
 	public struct ShaderImportSettings : IImportSettings
 	{
-		public string VertexPath;
-		public string FragmentPath;
-		public string ComputePath;
-		public string GeometryPath;
+		public VFSFile VertexPath;
+		public VFSFile FragmentPath;
+		public VFSFile ComputePath;
+		public VFSFile GeometryPath;
 	}
 
 	public class Shader : NativeResourceBase, ISerializable
 	{
-		public ShaderImportSettings ShaderStages;
+		public ShaderImportSettings ShaderStages
+		{
+			get => (ShaderImportSettings)ImportSettings;
+			set => ImportSettings = value;
+		}
 
 		protected override void OnLoad()
 		{
@@ -27,11 +31,19 @@ namespace AquaEngine.Graphics
 			ShaderStages = new ShaderImportSettings();
 			_GetStages(
 				Handle,
-				out ShaderStages.VertexPath,
-				out ShaderStages.FragmentPath,
-				out ShaderStages.ComputePath,
-				out ShaderStages.GeometryPath
+				out string vertexPath,
+				out string fragmentPath,
+				out string computePath,
+				out string geometryPath
 			);
+
+			ShaderStages = new ShaderImportSettings()
+			{
+				VertexPath	 = new VFSFile(vertexPath),
+				FragmentPath = new VFSFile(fragmentPath),
+				ComputePath  = new VFSFile(computePath),
+				GeometryPath = new VFSFile(geometryPath)
+			};
 		}
 
 		protected override void OnNativeLoad() => OnLoad();
@@ -47,20 +59,20 @@ namespace AquaEngine.Graphics
 			ShaderStages = importSettings;
 			_UpdateStages(
 				Handle,
-				ShaderStages.VertexPath,
-				ShaderStages.FragmentPath,
-				ShaderStages.ComputePath,
-				ShaderStages.GeometryPath
+				ShaderStages.VertexPath.FullPath,
+				ShaderStages.FragmentPath.FullPath,
+				ShaderStages.ComputePath.FullPath,
+				ShaderStages.GeometryPath.FullPath
 			);
 		}
 
 		public JObject OnSerialize()
 		{
 			return new JObject(
-				new JProperty("Vertex",	  ShaderStages.VertexPath),
-				new JProperty("Fragment", ShaderStages.FragmentPath),
-				new JProperty("Compute",  ShaderStages.ComputePath),
-				new JProperty("Geometry", ShaderStages.GeometryPath)
+				new JProperty("Vertex",	  ShaderStages.VertexPath.FullPath),
+				new JProperty("Fragment", ShaderStages.FragmentPath.FullPath),
+				new JProperty("Compute",  ShaderStages.ComputePath.FullPath),
+				new JProperty("Geometry", ShaderStages.GeometryPath.FullPath)
 			);
 		}
 

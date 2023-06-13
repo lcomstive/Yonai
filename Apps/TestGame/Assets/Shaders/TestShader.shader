@@ -1,6 +1,6 @@
 {
-  "Vertex": null,
-  "Fragment": null,
-  "Compute": null,
-  "Geometry": null
+  "Vertex": "project://Assets/Shaders/Unlit.vert",
+  "Fragment": "project://Assets/Shaders/Unlit.frag",
+  "Compute": "",
+  "Geometry": ""
 }

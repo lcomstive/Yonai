@@ -28,13 +28,17 @@ namespace AquaEditor.Inspectors
 			if (!m_Target)
 				return;
 
+			ImGUI.SetNextItemWidth(ImGUI.ContentRegionAvailable.x);
+			ImGUI.Text(m_Target.ResourcePath, Colour.Grey);
+			ImGUI.Separator();
+
 			SetupTable();
 
 			m_Settings.Shader = DrawResource<Shader>("Shader", m_Settings.Shader);
 			m_Settings.Albedo = Draw("Colour", m_Settings.Albedo);
 			m_Settings.AlbedoMap = DrawResource<Texture>("Albedo", m_Settings.AlbedoMap);
 			m_Settings.AlphaClipping = Draw("Alpha Clip", m_Settings.AlphaClipping);
-			m_Settings.AlphaThreshold = Draw("Alpha Clip", m_Settings.AlphaThreshold, new RangeAttribute(0, 1));
+			m_Settings.AlphaThreshold = Draw("Alpha Threshold", m_Settings.AlphaThreshold, new RangeAttribute(0, 1));
 
 			ImGUI.EndTable();
 
@@ -55,9 +59,9 @@ namespace AquaEditor.Inspectors
 			}
 		}
 
-		private bool PendingChanges() => (m_Target.Shader && m_Settings.Shader != m_Target.Shader.ResourceID) ||
+		private bool PendingChanges() => m_Settings.Shader != (m_Target.Shader?.ResourceID ?? UUID.Invalid) ||
 										 m_Settings.Albedo != m_Target.Albedo ||
-										 (m_Target.AlbedoMap && m_Settings.AlbedoMap != m_Target.AlbedoMap?.ResourceID) ||
+										 m_Settings.AlbedoMap != (m_Target.AlbedoMap?.ResourceID ?? UUID.Invalid) ||
 										 m_Settings.AlphaClipping != m_Target.AlphaClipping ||
 										 m_Settings.AlphaThreshold != m_Target.AlphaThreshold;
 	}
