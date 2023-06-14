@@ -1,17 +1,15 @@
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/IO/Clipboard.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
 
 using namespace std;
 using namespace AquaEngine::IO;
 
+#if !defined(AQUA_PLATFORM_APPLE)
 #if defined(AQUA_PLATFORM_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #elif defined(AQUA_PLATFORM_APPLE)
-#include <AppKit/AppKit.h>
-#include <AppKit/NSPasteboard.h>
-#include <Foundation/Foundation.h>
+// Functionality placed in Clipboard.mm
 #elif defined(AQUA_PLATFORM_ANDROID)
 
 #elif defined(AQUA_PLATFORM_LINUX)
@@ -31,19 +29,6 @@ void Clipboard::SetText(string text)
 	EmptyClipboard();
 	SetClipboardData(CF_TEXT, hgl);
 	CloseClipboard();
-#elif defined(AQUA_PLATFORM_APPLE)
-	NSString* buffer = text.empty() ? @"" :
-						[NSString stringWithCString : text.c_str()
-							encoding : [NSString defaultCStringEncoding] ];
-
-#if defined(AQUA_PLATFORM_MAC) // Desktop
-	NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
-	[pasteboard clearContents] ;
-	[pasteboard setString:buffer forType:NSStringPboardType]
-#elif defined(AQUA_PLATFORM_iOS) // Mobile
-	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-	pasteboard.string = buffer;
-#endif
 #endif
 }
 
@@ -63,19 +48,15 @@ string Clipboard::GetText()
 	CloseClipboard();
 
 	return text;
-#elif defined(AQUA_PLATFORM_APPLE)
-#if defined(AQUA_PLATFORM_MAC) // Desktop
-	NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
-	return string([[pasteboard stringForType:NSPasteboardTypeString] UTF8String])
-#elif defined(AQUA_PLATFORM_iOS) // Mobile
-	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-	return string([pasteboard.string UTF8String]);
-#endif
+#else
 	return string();
 #endif
 }
+#endif
 
 #pragma region Internal Calls
+#include <AquaEngine/Scripting/InternalCalls.hpp>
+
 ADD_MANAGED_METHOD(Clipboard, SetText, void, (MonoString* value), AquaEngine.IO)
 {
 	char* contents = mono_string_to_utf8(value);
