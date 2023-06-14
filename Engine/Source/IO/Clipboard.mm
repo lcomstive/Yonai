@@ -11,16 +11,22 @@ using namespace AquaEngine::IO;
 #if defined(AQUA_PLATFORM_MAC) // Desktop
 #include <AppKit/NSPasteboard.h>
 #elif defined(AQUA_PLATFORM_iOS) // Mobile
-// TOOD: Test this
+#import <UIKit/UIPasteboard.h>
 #endif
 
 void Clipboard::SetText(char* text) { SetText(string(text)); }
 
 void Clipboard::SetText(string text)
 {
-	NSString* buffer = text.empty() ? @"" :
-						[NSString stringWithCString : text.c_str()
-							encoding : [NSString defaultCStringEncoding] ];
+	NSString* buffer = [NSString stringWithUTF8String: text.c_str()];
+
+#if defined(AQUA_PLATFORM_MAC) // Desktop
+	[[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSPasteboardTypeString] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:buffer forType: NSPasteboardTypeString];
+#elif defined(AQUA_PLATFORM_iOS) // Mobile
+	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+	pasteboard.string = buffer;
+#endif
 }
 
 string Clipboard::GetText()

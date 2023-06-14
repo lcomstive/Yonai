@@ -108,18 +108,7 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-#if defined(AQUA_PLATFORM_MAC)
-	Assembly* assembly = ScriptEngine::LoadAssembly(
-		string("app://../../../../../Apps/AquaScriptEditor/bin/") +
-		#ifndef NDEBUG
-		"Debug"
-		#else
-		"Release"
-		#endif
-		"/AquaScriptEditor.dll", true);
-#else
 	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll", true);
-#endif
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
 	SystemManager::Global()->Add(editorService);
 }
