@@ -155,5 +155,5 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Ven
 
 # Apple Frameworks
 if(APPLE)
-	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS "-framework AudioUnit -framework Foundation")
+	list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS "-framework AudioUnit -framework Foundation -framework AppKit")
 endif()
