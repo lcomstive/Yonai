@@ -70,8 +70,9 @@ int main(int argc, char** argv)
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{
 		fs::path path = it->path();
-		if (!path.has_extension() || path.extension().compare(".cpp") != 0)
-			continue; // Not a .cpp file
+		if (!path.has_extension() ||
+			(path.extension().compare(".cpp") != 0 && path.extension().compare(".mm") != 0))
+			continue; // Not a valid source file
 
 		string originalContent = ReadFile(path);
 

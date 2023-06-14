@@ -9,6 +9,11 @@ file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
 
 list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
 
+if(APPLE)
+	file(GLOB_RECURSE OBJC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.mm")
+	list(APPEND SOURCE_FILES ${OBJC_FILES})
+endif()
+
 if((NOT BUILD_SHARED_LIBS) OR WIN32)
 	# Windows currently only supports static linking with AquaEngine.
 	# This is because of dll-boundary issues with mono
