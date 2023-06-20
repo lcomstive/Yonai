@@ -1,8 +1,10 @@
 ﻿using System;
+using AquaEngine.IO;
+using Newtonsoft.Json.Linq;
 
 namespace AquaEngine
 {
-	public abstract class AquaSystem
+	public abstract class AquaSystem : ISerializable
 	{
 		/// <summary>
 		/// World that created this system
@@ -42,6 +44,10 @@ namespace AquaEngine
 		/// Called when the attached <see cref="Entity"/> is about to be destroyed (after <see cref="OnDisabled"/>)
 		/// </summary>
 		protected virtual void Destroyed() { }
+
+		public virtual JObject OnSerialize() => new JObject();
+
+		public virtual void OnDeserialize(JObject json) { }
 
 		public void Enable(bool enable = true) =>
 			World._EnableSystem(World?.ID ?? GlobalWorldID, GetType(), enable);

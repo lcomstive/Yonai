@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Linq;
 using AquaEngine.IO;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Linq;
 
 namespace AquaEngine
 {
@@ -68,6 +68,17 @@ namespace AquaEngine
 			JObject json = new JObject();
 			json["Name"] = Name;
 
+			// Systems //
+			JObject systemsJSON = new JObject();
+			AquaSystem[] systems = GetSystems();
+			foreach (AquaSystem system in systems)
+			{
+				Type type = system.GetType();
+				systemsJSON.Add(new JProperty($"{type.FullName}, {type.Assembly.GetName().Name}", system.OnSerialize()));
+			}
+			json.Add("Systems", systemsJSON);
+
+			// Entities //
 			JArray entityArray = new JArray();
 			Entity[] entities = GetEntities();
 			foreach (Entity entity in entities)
@@ -116,7 +127,28 @@ namespace AquaEngine
 				m_Entities[entityID].OnPostDeserialize(entityJSON);
 			}
 
-			// If enabled in SceneManager, enable and start all components
+			// Add all systems
+			if (json.ContainsKey("Systems"))
+			{
+				Type aquaSystemType = typeof(AquaSystem);
+				JObject systems = json["Systems"].Value<JObject>();
+				foreach (JToken token in systems.Children())
+				{
+					JProperty systemJSON = token.Value<JProperty>();
+					Log.Trace(systemJSON.Name);
+					Type systemType = Type.GetType(systemJSON.Name);
+					if (systemType != null && aquaSystemType.IsAssignableFrom(systemType))
+					{
+						AquaSystem system = AddSystem(systemType);
+						JObject value = systemJSON.Value.Value<JObject>();
+						system.OnDeserialize(value);
+					}
+					else
+						Log.Warning($"Could not find AquaSystem type '{systemJSON.Name}'");
+				}
+			}
+
+			// If enabled in SceneManager, enable and start all components & systems
 			if (m_IsActive)
 				SetActive(true);
 
@@ -316,15 +348,32 @@ namespace AquaEngine
 		#endregion
 
 		#region Systems
-		public bool HasSystem<T>() => _HasSystem(ID, typeof(T));
+		public bool HasSystem<T>() => HasSystem(typeof(T));
+		public bool HasSystem(Type type) => _HasSystem(ID, type);
 
 		public T AddSystem<T>() => (T)_AddSystem(ID, typeof(T));
+		public AquaSystem AddSystem(Type type) => (AquaSystem)_AddSystem(ID, type);
 
 		public T GetSystem<T>() => (T)_GetSystem(ID, typeof(T));
+		public AquaSystem GetSystem(Type type) => (AquaSystem)_GetSystem(ID, type);
 
 		public bool RemoveSystem<T>() => _RemoveSystem(ID, typeof(T));
+		public bool RemoveSystem(Type type) => _RemoveSystem(ID, type);
 
 		public void EnableSystem<T>(bool enable) => _EnableSystem(ID, typeof(T), enable);
+		public void EnableSystem(Type type, bool enable) => _EnableSystem(ID, type, enable);
+
+		/// <summary>
+		/// Gets all systems attached to world
+		/// </summary>
+		public AquaSystem[] GetSystems()
+		{
+			object[] objs = _GetSystems(ID);
+			AquaSystem[] systems = new AquaSystem[objs.Length];
+			for(int i = 0; i < objs.Length; i++)
+				systems[i] = (AquaSystem)objs[i];
+			return systems;
+		}
 		#endregion
 
 		#region Static getters
@@ -402,6 +451,7 @@ namespace AquaEngine
 		// Systems
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _HasSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _GetSystem(ulong worldID, Type type);
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object[] _GetSystems(ulong worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern object _AddSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _RemoveSystem(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern bool   _EnableSystem(ulong worldID, Type type, bool enable);

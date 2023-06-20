@@ -6,6 +6,7 @@
 #include <AquaEngine/ComponentManager.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 #include <AquaEngine/Systems/ScriptSystem.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>
 #include <AquaEngine/Components/ScriptComponent.hpp>
@@ -292,6 +293,19 @@ ADD_MANAGED_METHOD(World, GetSystem, MonoObject*, (uint64_t worldID, MonoReflect
 
 	Systems::System* instance = systemManager->Get(type);
 	return instance ? instance->ManagedData.GetInstance() : nullptr;
+}
+
+ADD_MANAGED_METHOD(World, GetSystems, MonoArray*, (uint64_t worldID))
+{
+	SystemManager* systemManager = GetSystemManager(worldID);
+	if (!systemManager)
+		return nullptr;
+
+	vector<Systems::System*> systems = systemManager->All();
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_object_class(), systems.size());
+	for (size_t i = 0; i < systems.size(); i++)
+		mono_array_set(output, MonoObject*, i, systems[i]->ManagedData.GetInstance());
+	return output;
 }
 
 ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (uint64_t worldID, MonoReflectionType* systemType))

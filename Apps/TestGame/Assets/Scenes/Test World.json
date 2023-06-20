@@ -1,8 +1,8 @@
 {
   "Name": "Test World",
-  "Systems": [
-    "TestGame.TestSystem, TestGame"
-  ],
+  "Systems": {
+    "TestGame.TestSystem, TestGame": {}
+  },
   "Entities": [
     {
       "ID": "2654914000653199596",
@@ -551,7 +551,8 @@
             "z": 0.0
           },
           "Speed": 1.0,
-          "PointsRelative": true,
+          "m_TotalTime": 0.0,
+          "m_DeltaTime": 0.0,
           "Enabled": true
         }
       ]

@@ -25,13 +25,21 @@ namespace AquaEngine
 		public static void Error(string msg) => ProcessMessage(msg, LogLevel.Error);
 		public static void Critical(string msg) => ProcessMessage(msg, LogLevel.Critical);
 
+		private static string FormatException(Exception e)
+		{
+			string msg = string.Empty;
+			if(e.InnerException != null)
+				msg = FormatException(e.InnerException);
+			msg += e.Message + "\n\n" + e.Source + "\n\t" + e.StackTrace;
+			return msg;
+		}
+
 		public static void Exception(Exception e, string additionalInfo = "")
 		{
 			string msg = string.Empty;
 			if (!string.IsNullOrEmpty(additionalInfo))
 				msg = additionalInfo + "\n";
-			msg += e.Message + "\n\n" + e.Source + "\n\t";
-			msg += e.StackTrace;
+			msg += FormatException(e);
 			ProcessMessage(msg, LogLevel.Critical);
 		}
 
