@@ -12,6 +12,10 @@ namespace AquaEditorLauncher
 {	
 	class EditorLauncherApp : public AquaEngine::WindowedApplication
 	{
+	public:
+		EditorLauncherApp() : WindowedApplication() { }
+		EditorLauncherApp(int argc, char** argv) : WindowedApplication(argc, argv) { }
+
 	protected:
 		void Setup() override;
 		void OnDraw() override;

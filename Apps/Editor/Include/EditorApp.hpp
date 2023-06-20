@@ -22,6 +22,7 @@ namespace AquaEditor
 
 		void Draw();
 
+		void InitialiseMounts();
 		void InitialiseScripting();
 
 		/// <summary>

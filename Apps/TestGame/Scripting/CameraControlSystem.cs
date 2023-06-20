@@ -45,11 +45,11 @@ namespace TestGame
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyPressed(Key.R))
 			{
 				m_Target.FOV = DefaultFOV;
-				m_Transform.Rotation = Quaternion.Identity;
+				m_Transform.LocalRotation = Quaternion.Identity;
 			}
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.G))
-				m_Transform.Rotation = Quaternion.FromEuler(Vector3.Forward);
+				m_Transform.LocalRotation = Quaternion.FromEuler(Vector3.Forward);
 		}
 	}
 }

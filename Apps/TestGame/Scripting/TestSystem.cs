@@ -14,18 +14,23 @@ namespace TestGame
 		private uint m_AudioDeviceIndex = 0;
 		private float m_Pitch = 1.0f;
 
-		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
+		protected override void Enabled()
+		{
+			Log.Debug(" ---- TestSystem Enabled()");
+			World.AddSystem<CameraControlSystem>();
+		}
+
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 		
 		protected override void Start()
 		{
-			// Load test texture
-			string vfsPath = "assets://Textures/texture_09.png";
+			Log.Debug(" ---- TestSystem Start()");
 
-			m_Texture = Resource.Load<Texture>("Texture/Test_Texture09", vfsPath);
+			// Load test texture
+			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");
 
 			// Load test sprite shader
-			ShaderStages shaderStages = new ShaderStages()
+			ShaderImportSettings shaderStages = new ShaderImportSettings()
 			{
 				VertexPath = "assets://Shaders/Sprite.vert",
 				FragmentPath = "assets://Shaders/NewSprite.frag",
@@ -38,12 +43,14 @@ namespace TestGame
 			Log.Debug(v);
 
 			m_AudioDeviceIndex = Audio.OutputDevice.Index;
-			m_Sound = Resource.Load<Sound>("Sounds/Fall", "assets://Audio/Fall.mp3");
+			m_Sound = Resource.Load<Sound>("assets://Audio/Fall.mp3");
 			m_SoundMixer = Resource.Get<SoundMixer>("Mixers/SFX2");
 		}
 
 		protected override void Update()
-		{			
+		{
+			Log.Debug(" ---- TestSystem Update()");
+			
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
@@ -82,7 +89,7 @@ namespace TestGame
 			
 			transform.Position = cameraTransform.Position + cameraTransform.Forward * 2.5f;
 			// transform.Scale = new Vector3(0.25f);
-			transform.Rotation = Quaternion.FromEuler(-cameraTransform.Rotation.Euler);
+			transform.LocalRotation = Quaternion.FromEuler(-cameraTransform.Rotation.Euler);
 
 			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
 			renderer.Shader = m_SpriteShader;
@@ -121,8 +128,8 @@ namespace TestGame
 			Entity e = World.CreateEntity();
 			Transform transform = e.AddComponent<Transform>();
 			transform.Position = cameraTransform.Position + cameraTransform.Forward;
-			transform.Scale = new Vector3(0.1f);
-			transform.Rotation = cameraTransform.Rotation;
+			transform.LocalScale = new Vector3(0.1f);
+			transform.LocalRotation = cameraTransform.Rotation;
 
 			SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
 			renderer.Shader = m_SpriteShader;

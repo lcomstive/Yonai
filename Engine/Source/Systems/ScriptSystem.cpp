@@ -28,10 +28,10 @@ char* GetTypeName(MonoType* type) { return mono_type_get_name_full(type, MonoTyp
 
 void ScriptSystem::Init()
 {
-	TRACE_SYSTEM("Initialising");
-
 	if (!ManagedData.IsValid())
 		return;
+
+	TRACE_SYSTEM("Initialising");
 
 	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
@@ -80,7 +80,11 @@ void ScriptSystem::Update()
 	MonoException* exception = nullptr;
 	SystemMethodUpdate(ManagedData.GetInstance(), &exception);
 	if (exception)
-		mono_raise_exception(exception);
+	{
+		TRACE_SYSTEM("Exception in Update() for");
+		mono_print_unhandled_exception((MonoObject*)exception);
+		Enable(false);
+	}
 }
 
 void ScriptSystem::Draw()

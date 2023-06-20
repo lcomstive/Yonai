@@ -15,7 +15,7 @@ namespace AquaEngine
 {
 	public static class Resource
 	{
-		private const string DatabaseFilePath = "project://Resources.json";
+		private const string DatabaseFilePath = "project://resources.json";
 		private static Dictionary<string, UUID> s_Paths = new Dictionary<string, UUID>();
 		private static Dictionary<UUID, ResourceBase> s_Instances = new Dictionary<UUID, ResourceBase>();
 

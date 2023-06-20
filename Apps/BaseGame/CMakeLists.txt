@@ -29,6 +29,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 	__STDC_FORMAT_MACROS
 )
 
+add_dependencies(${PROJECT_NAME} AquaScriptCore)
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	# Copy standard assets to output directory
 	COMMAND echo Copying standard assets to output directory

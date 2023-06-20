@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -30,6 +32,8 @@ namespace AquaEngine.IO
 		/// </summary>
 		public bool IsValid => !string.IsNullOrEmpty(FileName);
 
+		public string FullPath => ParentDirectory + FileName;
+
 		public VFSFile(string filepath)
 		{
 			if (string.IsNullOrEmpty(filepath))
@@ -56,14 +60,14 @@ namespace AquaEngine.IO
 			ParentDirectory = filepath.Substring(0, filepath.LastIndexOf('/') + 1);
 		}
 
-		public string FullPath => ParentDirectory + FileName;
-
 		public override bool Equals(object obj)
 		{
 			if (!(obj is VFSFile) && !(obj is string))
 				return false;
 			return ((string)obj).Equals(FullPath);
 		}
+
+		public override int GetHashCode() => FullPath.GetHashCode();
 
 		public static implicit operator VFSFile(string path) => new VFSFile(path);
 		public static implicit operator string(VFSFile vfsFile) => vfsFile.FullPath;
@@ -96,6 +100,35 @@ namespace AquaEngine.IO
 
 		public static void Write(string path, byte[] data) => _Write(path, data);
 		public static void Write(string path, string contents) => _WriteText(path, contents);
+
+		/// <summary>
+		/// Converts <paramref name="target"/> to JSON using <see cref="ISerializable.OnSerialize"/> and writes contents to <paramref name="path"/>
+		/// </summary>
+		public static void Write(string path, ISerializable target) => WriteJSON(path, target.OnSerialize());
+
+		/// <summary>
+		/// Reads <paramref name="path"/> as JSON and converts to type <typeparamref name="T"/>
+		/// </summary>
+		/// <param name="path">JSON file path</param>
+		/// <returns>New instance of <typeparamref name="T"/> with <see cref="ISerializable.OnDeserialize(JObject)"/> called using contents of file</returns>
+		public static T Read<T>(string path) where T : ISerializable, new()
+		{
+			T instance = new T();
+			instance.OnDeserialize(ReadJSON(path));
+			return instance;
+		}
+		
+		/// <summary>
+		/// Converts <paramref name="target"/> to JSON using <see cref="ISerializable.OnSerialize"/> and writes contents to <paramref name="path"/>
+		/// </summary>
+		public static void WriteJSON(string path, JObject contents) => Write(path, JsonConvert.SerializeObject(contents));
+
+		/// <summary>
+		/// Reads <paramref name="path"/> as JSON
+		/// </summary>
+		/// <param name="path">JSON file path</param>
+		/// <returns><see cref="JObject"/> with contents of file</returns>
+		public static JObject ReadJSON(string path) => JsonConvert.DeserializeObject<JObject>(ReadText(path));
 		#endregion
 
 		#region File Operations

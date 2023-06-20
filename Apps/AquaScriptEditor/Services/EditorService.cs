@@ -1,5 +1,10 @@
 using AquaEngine;
+using AquaEngine.IO;
 using AquaEngine.Systems;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Reflection;
 
 namespace AquaEditor
 {
@@ -13,6 +18,8 @@ namespace AquaEditor
 
 	public class EditorService : AquaSystem
 	{
+		public ProjectFile Project { get; private set; }
+
 		private EditorState m_State = EditorState.Edit;
 		public EditorState State
 		{
@@ -23,12 +30,14 @@ namespace AquaEditor
 		/// <summary>
 		/// IDs of scenes loaded before entering play mode
 		/// </summary>
-		private UUID[] m_EditModeSceneIDs;
+		private UUID[] m_EditModeSceneIDs = new UUID[0];
 
 		/// <summary>
 		/// IDs of scenes cloned to enter play mode
 		/// </summary>
-		private World[] m_ClonedWorlds;
+		private World[] m_ClonedWorlds = new World[0];
+
+		private const string ProjectFilePath = "project://project.json";
 
 		protected override void Destroyed()
 		{
@@ -38,23 +47,27 @@ namespace AquaEditor
 
 		protected override void Enabled()
 		{
-			try
+			Log.Debug("Launched editor service");
+
+			if (!EditorWindow.ContextIsInitialised())
 			{
-				Log.Debug("Launched editor service");
-
-				if (!EditorWindow.ContextIsInitialised())
-				{
-					EditorWindow.InitContext();
-					CreateWindow();
-				}
-
-				Resource.LoadDatabase();
-
-				Add<ImGUISystem>();
-				Add<EditorUIService>();
-				Add<BehaviourSystem>();
+				EditorWindow.InitContext();
+				CreateWindow();
 			}
-			catch (System.Exception e) { Log.Exception(e); }
+
+			Resource.LoadDatabase();
+
+			// Add base global systems
+			Add<ImGUISystem>();
+			Add<BehaviourSystem>().Enable(false); // Disabled during edit mode
+
+			Project = VFS.Read<ProjectFile>(ProjectFilePath);
+			foreach (string assembly in Project.Assemblies)
+				if (VFS.Exists(assembly) && !Scripting.IsAssemblyLoaded(assembly))
+					Scripting.LoadAssembly(assembly, true /* Should watch */);
+
+			// Launch editor UI
+			Add<EditorUIService>();
 		}
 
 		protected override void Disabled()
@@ -62,6 +75,9 @@ namespace AquaEditor
 			Log.Error("Disabled editor service");
 
 			Remove<EditorUIService>();
+			Remove<ImGUISystem>();
+			Remove<BehaviourSystem>();
+
 			Resource.SaveDatabase();
 		}
 
@@ -99,7 +115,7 @@ namespace AquaEditor
 			{
 				default:
 				case EditorState.Edit:
-
+					Get<BehaviourSystem>().Enable(false);
 					break;
 				case EditorState.Pause:
 					Get<BehaviourSystem>().Enable(false);
@@ -115,6 +131,8 @@ namespace AquaEditor
 
 		private void EnterPlayMode()
 		{
+			Log.Trace("Entering play mode");
+
 			World[] activeScenes = SceneManager.GetActiveScenes();
 			SceneManager.UnloadAll();
 
@@ -131,11 +149,13 @@ namespace AquaEditor
 
 		private void ExitPlayMode()
 		{
+			Log.Trace("Exiting play mode");
+			
 			SceneManager.UnloadAll();
 
 			// Destroy cloned worlds
 			foreach (World world in m_ClonedWorlds)
-				world.Destroy();
+				world?.Destroy();
 
 			// Re-load all scenes that were active when entering play mode
 			foreach (UUID worldID in m_EditModeSceneIDs)

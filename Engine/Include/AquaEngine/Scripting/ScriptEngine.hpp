@@ -69,7 +69,7 @@ namespace AquaEngine::Scripting
 		/// <summary>
 		/// Loads an assembly from disk
 		/// </summary>
-		/// <returns>Assembly from disk, located at <paramref name="path"/></returns>
+		/// <returns>Assembly from disk located at <paramref name="path"/>, or nullptr if failed to load</returns>
 		AquaAPI static Assembly* LoadAssembly(std::string path, bool shouldWatch =
 #ifndef NDEBUG
 			// Debug mode, watch files by default
@@ -118,5 +118,8 @@ namespace AquaEngine::Scripting
 		/// Submit a callback to be invoked before the script engine and assemblies get unloaded and reloaded
 		/// </summary>
 		AquaAPI static void AddPreReloadCallback(std::function<void()> callback);
+
+		/// <returns>True if the assembly has been loaded via LoadAssembly</returns>
+		AquaAPI static bool IsAssemblyLoaded(std::string path);
 	};
 }

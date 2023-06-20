@@ -110,10 +110,8 @@ target_include_directories(imgui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo>
     $<INSTALL_INTERFACE:include>)
-
+	
 list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui)
-
-# ImGuizmo
 
 # X11 on Linux
 if(LINUX)

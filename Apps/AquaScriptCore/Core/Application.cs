@@ -2,7 +2,6 @@
 
 namespace AquaEngine
 {
-
 	public static class Application
 	{
 		public enum BuildType { Debug, Release }

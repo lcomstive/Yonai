@@ -43,7 +43,15 @@ string AquaScriptCorePath = "app://AquaScriptCore.dll";
 void EditorApp::Setup()
 {
 	Application::Setup();
-	
+
+	if (!HasArg(ProjectPathArg))
+	{
+		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
+		Exit();
+		return;
+	}
+
+	InitialiseMounts();
 	InitialiseScripting();
 
 	// Add global systems
@@ -58,24 +66,6 @@ void EditorApp::Setup()
 	m_RenderSystem->Enable(false);
 
 	SystemManager::Global()->Add<SceneSystem>();
-
-	if(!HasArg(ProjectPathArg))
-	{
-		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
-		Exit();
-		return;
-	}
-	
-	m_ProjectPath = fs::path(GetArg(ProjectPathArg));
-	if (m_ProjectPath.empty())
-		spdlog::warn("Empty project path!");
-	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
-
-	string projectDir = m_ProjectPath.string();
-	VFS::Mount("project://", projectDir);
-	VFS::Mount("assets://", "app://Assets"); // Default assets
-	VFS::Mount("assets://", "project://Assets");
-	VFS::Mount("editor://", "project://.aqua");
 
 	// Set ImGUI layout file
 	ImGuiIO& io = ImGui::GetIO();
@@ -128,6 +118,26 @@ void EditorApp::InitialiseScripting()
 
 	// Add AquaScriptEditor internal methods
 	ScriptEngine::AddInternalCalls(_InternalMethods);
+}
+
+void EditorApp::InitialiseMounts()
+{
+	if (!HasArg(ProjectPathArg))
+	{
+		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
+		Exit();
+		return;
+	}
+
+	m_ProjectPath = fs::path(GetArg(ProjectPathArg));
+	if (m_ProjectPath.empty())
+		spdlog::warn("Empty project path!");
+	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
+
+	VFS::Mount("project://", m_ProjectPath.string());
+	VFS::Mount("assets://", "app://Assets"); // Default assets
+	VFS::Mount("assets://", "project://Assets");
+	VFS::Mount("editor://", "project://.aqua");
 }
 
 void EditorApp::Draw()

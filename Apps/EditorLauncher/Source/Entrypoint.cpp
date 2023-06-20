@@ -4,11 +4,7 @@ using namespace AquaEditorLauncher;
 
 int main(int argc, char** argv)
 {
-	EditorLauncherApp app;
-	app.ProcessArgs(argc, argv);
-	
-	app.Run(); // Application loop
-
+	EditorLauncherApp(argc, argv).Run();
 	return 0;
 }
 

@@ -10,7 +10,6 @@
 
 // Systems //
 #include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
 
@@ -263,7 +262,6 @@ void WindowedApplication::Setup()
 {
 	Application::Setup();
 	SystemManager::Global()->Add<SceneSystem>();
-	SystemManager::Global()->Add<ImGUISystem>();
 
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 	m_RenderSystem->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
@@ -273,7 +271,6 @@ void WindowedApplication::Cleanup()
 {
 	Application::Cleanup();
 	SystemManager::Global()->Remove<RenderSystem>();
-	SystemManager::Global()->Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<SceneSystem>();
 }
 

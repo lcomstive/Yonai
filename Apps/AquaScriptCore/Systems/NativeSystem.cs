@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace AquaEngine
+namespace AquaEngine.Systems
 {
 	public class NativeSystem : AquaSystem
 	{

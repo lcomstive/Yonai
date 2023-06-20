@@ -4,10 +4,11 @@
 
 class BaseGame : public AquaEngine::WindowedApplication
 {
-protected:
-	void OnUpdate() override;
-	void OnDraw() override;
+	void InitialiseScripting();
 
+public:
+	BaseGame(int argc, char** argv) : WindowedApplication(argc, argv) { }
+	
+protected:
 	void Setup() override;
-	void Cleanup() override;
 };

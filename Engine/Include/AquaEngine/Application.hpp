@@ -81,6 +81,10 @@ namespace AquaEngine
 	{
 		Systems::RenderSystem* m_RenderSystem = nullptr;
 
+	public:
+		WindowedApplication() : Application() { }
+		WindowedApplication(int argc, char** argv) : Application(argc, argv) { }
+
 	protected:
 		AquaAPI virtual void OnDraw() { }
 		AquaAPI Systems::RenderSystem* GetRenderSystem();

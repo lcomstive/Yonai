@@ -24,9 +24,10 @@ using namespace AquaEngine::Scripting;
 
 namespace fs = std::filesystem;
 
-const char* AssembliesPath = "app://Assets/Mono/";
-const char* MonoConfigPath = "app://Assets/Mono/Config";
+const char* AssembliesPath = "mono://";
+const char* MonoConfigPath = "mono://Config";
 const char* AppDomainName = "AquaEngineAppDomain";
+const char* MonoDefaultMountPath = "assets://Mono";
 
 string ScriptEngine::s_CoreDLLPath = "";
 bool ScriptEngine::s_AwaitingReload = false;
@@ -82,6 +83,9 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 		return; // Already initialised
 
 	s_DebuggingEnabled = allowDebugging;
+
+	if (!VFS::HasMount("mono://"))
+		VFS::Mount("mono://", MonoDefaultMountPath);
 
 	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
 	if (!VFS::Exists(assembliesPath))
@@ -347,4 +351,12 @@ void ScriptEngine::AddInternalCalls(const vector<pair<const char*, const void*>>
 {
 	for (auto pair : methods)
 		AddInternalCall(pair.first, pair.second);
+}
+
+bool ScriptEngine::IsAssemblyLoaded(string path)
+{
+	for (auto assembly : s_AssemblyPaths)
+		if (assembly.Path.compare(path) == 0)
+			return true;
+	return false;
 }

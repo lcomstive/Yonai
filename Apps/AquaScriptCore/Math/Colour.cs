@@ -90,6 +90,8 @@ namespace AquaEngine
 			return this == (Colour)obj;
 		}
 
+		public override int GetHashCode() => ToString().GetHashCode();
+
 		public override string ToString() => $"({r}, {g}, {b}, {a})";
 
 		public static implicit operator string(Colour v) => v.ToString();

@@ -9,14 +9,14 @@ namespace AquaEngine
 {
 	public class World : ISerializable
 	{
-		private string m_Name;
+		private string m_Name = string.Empty;
 		public string Name
 		{
 			get => m_Name;
 			set => _SetName(ID, m_Name = value);
 		}
 
-		public UUID ID { get; private set; }
+		public UUID ID { get; private set; } = UUID.Invalid;
 
 		private bool m_IsActive = false;
 		/// <summary>

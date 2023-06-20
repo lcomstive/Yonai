@@ -102,11 +102,19 @@ namespace AquaEngine::IO
 				s_Mappings.emplace(mountPoint, std::list<VFSMapping*>());
 
 			// Add the mounting
-			T* instance = new T(mountPoint, mountPath);
-			s_Mappings[mountPoint].emplace_back(instance);
+			try
+			{
+				T* instance = new T(mountPoint, mountPath);
+				s_Mappings[mountPoint].emplace_back(instance);
 
-			spdlog::debug("Mounted '{}' to '{}'", mountPoint, mountPath);
-			return instance;
+				spdlog::debug("Mounted '{}' to '{}'", mountPoint, mountPath);
+				return instance;
+			}
+			catch (std::exception& e)
+			{
+				spdlog::error("Failed to mount '{}' to '{}' - {}", mountPoint.c_str(), mountPath.c_str(), e.what());
+				return nullptr;
+			}
 		}
 
 		AquaAPI static std::string ReadText(const std::string& path);

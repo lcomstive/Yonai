@@ -2,11 +2,7 @@
 
 int main(int argc, char** argv)
 {
-	BaseGame baseGame;
-	baseGame.ProcessArgs(argc, argv);
-	
-	baseGame.Run(); // Game loop
-
+	BaseGame(argc, argv).Run();
 	return 0;
 }
 

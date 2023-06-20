@@ -6,6 +6,12 @@ namespace AquaEngine
 	{
 		public uint Index { get; internal set; }
 		public string Name { get; internal set; }
+
+		public override int GetHashCode() => Index.GetHashCode();
+		public override bool Equals(object obj) => obj is AudioDevice device && ((AudioDevice)obj).Index == Index;
+
+		public static bool operator ==(AudioDevice a, AudioDevice b) => a.Index == b.Index;
+		public static bool operator !=(AudioDevice a, AudioDevice b) => a.Index != b.Index;
 	}
 
 	public static class Audio
@@ -47,9 +53,16 @@ namespace AquaEngine
 		}
 
 		public delegate void OnDevicesChanged();
+		public delegate void OnDefaultDeviceChanged();
+
+		/// <summary>
+		/// Called when the device list has been refreshed
+		/// </summary>
 		public static event OnDevicesChanged DevicesChanged;
 
-		public delegate void OnDefaultDeviceChanged();
+		/// <summary>
+		/// Called when the output device has been changed
+		/// </summary>
 		public static event OnDefaultDeviceChanged OutputDeviceChanged;
 
 		#region Internal Calls

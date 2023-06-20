@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
@@ -56,9 +55,19 @@ namespace AquaEngine
 		public static bool Has<T>() => World._HasSystem(GlobalWorldID, typeof(T));
 
 		/// <summary>
+		/// Checks if a system exists globally
+		/// </summary>
+		public static bool Has(Type type) => World._HasSystem(GlobalWorldID, type);
+
+		/// <summary>
 		/// Adds a global system
 		/// </summary>
 		public static T Add<T>() => (T)World._AddSystem(GlobalWorldID, typeof(T));
+
+		/// <summary>
+		/// Adds a global system
+		/// </summary>
+		public static AquaSystem Add(Type type) => World._AddSystem(GlobalWorldID, type) as AquaSystem;
 
 		/// <summary>
 		/// Gets a global system
@@ -66,9 +75,19 @@ namespace AquaEngine
 		public static T Get<T>() => (T)World._GetSystem(GlobalWorldID, typeof(T));
 
 		/// <summary>
+		/// Gets a global system
+		/// </summary>
+		public static AquaSystem Get(Type type) => World._GetSystem(GlobalWorldID, type) as AquaSystem;
+
+		/// <summary>
 		/// Removes a global system
 		/// </summary>
 		public static bool Remove<T>() => World._RemoveSystem(GlobalWorldID, typeof(T));
+
+		/// <summary>
+		/// Removes a global system
+		/// </summary>
+		public static bool Remove(Type type) => World._RemoveSystem(GlobalWorldID, type);
 		#endregion
 
 		#region Unmanaged Calls
