@@ -16,12 +16,13 @@ void BaseGame::Setup()
 {
 	WindowedApplication::Setup();
 
-	// VFS::Mount("assets://", "app://Assets");
-	VFS::Mount("assets://", "./Assets"); // For testing
-	VFS::Mount("mono://", "assets://Mono");
-	VFS::Mount("project://", "assets://ProjectFiles");
-
+	VFS::Mount("build://", "./Assets");
+	VFS::Mount("mono://", "build://Mono");
+	VFS::Mount("project://", "build://ProjectFiles");
+	
 	InitialiseScripting();
+
+	auto systems = SystemManager::Global()->All();
 }
 
 void BaseGame::InitialiseScripting()

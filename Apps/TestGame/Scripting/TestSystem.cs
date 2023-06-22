@@ -13,12 +13,17 @@ namespace TestGame
 		private uint m_AudioDeviceIndex = 0;
 		private float m_Pitch = 1.0f;
 
-		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
-
-		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
-		
-		protected override void Start()
+		protected override void Enabled()
 		{
+			Camera[] cameras = World.GetComponents<Camera>();
+			if (cameras.Length > 0)
+			{
+				Camera.Main = cameras[0];
+				Log.Debug("Main camera set to " + Camera.Main.GetComponent<NameComponent>().Name);
+			}
+
+			World.AddSystem<CameraControlSystem>();
+
 			// Load test texture
 			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");
 
@@ -35,7 +40,12 @@ namespace TestGame
 			m_Sound = Resource.Load<Sound>("assets://Audio/Fall.mp3");
 
 			m_SoundMixer = Resource.Load<SoundMixer>("assets://Audio/Mixers/SFX.mixer");
+
+			foreach (Entity e in World.GetEntities())
+				Log.Trace(e.GetComponent<NameComponent>()?.Name ?? $"[{e.ID}]");
 		}
+
+		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 
 		protected override void Update()
 		{			
@@ -71,7 +81,6 @@ namespace TestGame
 		private void CreateQuad()
 		{
 			Transform cameraTransform = Camera.Main.GetComponent<Transform>();
-
 			Entity e = World.CreateEntity();
 			Transform transform = e.AddComponent<Transform>();
 			

@@ -12,35 +12,43 @@ namespace AquaEngine
 	{
 		private static JObject JSON = null;
 
-		private const string AssemblyDir = "assets://Assemblies/";
+		private const string AssemblyDir = "build://Assemblies/";
 
 		private static JObject LoadJSON(string path) => JsonConvert.DeserializeObject<JObject>(VFS.ReadText(path));
 
 		internal static void Launch()
 		{
-			VFS.Mount("assets://", "assets://Editor");
+			VFS.Mount("assets://", "build://Editor");
+			VFS.Mount("assets://", "build://ProjectFiles");
+			VFS.Mount("project://Assets/", "build://ProjectFiles");
 
-			JSON = LoadJSON("assets://launch.json");
+			JSON = LoadJSON("build://launch.json");
+
+			LoadBaseSystems();
 
 			if(JSON.ContainsKey("Assemblies"))
 				LoadAssemblies();
 
+			Resource.LoadDatabase("build://resources.json");
+
+			if (JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
+				LoadGlobalSystems();
+
 			if (JSON.ContainsKey("Scenes") && JSON["Scenes"].GetType() == typeof(JArray))
 				LoadInitialScene();
 
-			if(JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
-				LoadGlobalSystems();
-
-			AquaSystem.Add<BehaviourSystem>();
+			Log.Debug("Loaded Worlds:");
+			foreach (World world in World.GetAll())
+				Log.Debug(" - " + world.Name);
 		}
 
-		internal static void LoadAssemblies()
+		private static void LoadAssemblies()
 		{
 			foreach(string path in JSON["Assemblies"].Values<string>())
 				_LoadAssembly(AssemblyDir + path);
 		}
 
-		internal static void LoadInitialScene()
+		private static void LoadInitialScene()
 		{
 			string scenePath = JSON["Scenes"].Values<string>().FirstOrDefault();
 			World initialWorld = World.Create(VFS.ReadJSON(scenePath));
@@ -50,7 +58,13 @@ namespace AquaEngine
 				Log.Warning($"Failed to load initial scene '{scenePath}'");
 		}
 
-		internal static void LoadGlobalSystems()
+		private static void LoadBaseSystems()
+		{
+			AquaSystem.Add<AudioSystem>();
+			AquaSystem.Add<BehaviourSystem>();
+		}
+
+		private static void LoadGlobalSystems()
 		{
 			Type aquaSystemType = typeof(AquaSystem);
 			foreach(string className in JSON["GlobalSystems"])

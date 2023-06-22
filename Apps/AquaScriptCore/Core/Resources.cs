@@ -228,7 +228,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Saves all resources to a file
 		/// </summary>
-		public static void SaveDatabase()
+		public static void SaveDatabase(string database = DatabaseFilePath)
 		{
 			JArray resources = new JArray();
 			foreach(var pair in s_Instances)
@@ -250,16 +250,16 @@ namespace AquaEngine
 			}
 
 			string json = JsonConvert.SerializeObject(resources, Formatting.Indented);
-			VFS.Write(DatabaseFilePath, json.Replace("\r\n", "\n"));
+			VFS.Write(database, json.Replace("\r\n", "\n"));
 		}
 
 		/// <summary>
 		/// Loads resources from a file
 		/// </summary>
-		public static void LoadDatabase()
+		public static void LoadDatabase(string database = DatabaseFilePath)
 		{
 			// Check that file exists
-			if (!VFS.Exists(DatabaseFilePath))
+			if (!VFS.Exists(database))
 			{
 				// Database does not exist, create it
 				Mesh.LoadPrimitives();
@@ -268,7 +268,7 @@ namespace AquaEngine
 				return;
 			}
 
-			JArray root = JsonConvert.DeserializeObject<JArray>(VFS.ReadText(DatabaseFilePath));
+			JArray root = JsonConvert.DeserializeObject<JArray>(VFS.ReadText(database));
 			foreach(JObject resource in root)
 			{
 				UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());

@@ -84,7 +84,7 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 
 	s_DebuggingEnabled = allowDebugging;
 
-	if (!VFS::HasMount("mono://"))
+	if (!VFS::HasMount("mono:/"))
 		VFS::Mount("mono://", MonoDefaultMountPath);
 
 	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);

@@ -14,7 +14,7 @@
         },
         {
           "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "4665320753791157835",
+          "Sprite": "10522831733631266596",
           "Colour": {
             "r": 1.0,
             "g": 0.9843137,
@@ -85,6 +85,45 @@
       ]
     },
     {
+      "ID": "16765798305678760197",
+      "Components": [
+        {
+          "ComponentType": "AquaEngine.NameComponent",
+          "Name": "Second"
+        },
+        {
+          "ComponentType": "AquaEngine.SpriteRenderer",
+          "Sprite": "10522831733631266596",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "5953939257442262790"
+        },
+        {
+          "ComponentType": "AquaEngine.Transform",
+          "Position": {
+            "x": -2.5,
+            "y": 0.0,
+            "z": -5.00166436E-07
+          },
+          "Rotation": {
+            "x": 9.149798E-07,
+            "y": -0.00058902317,
+            "z": -8.51807454E-06,
+            "w": -0.9999998
+          },
+          "Scale": {
+            "x": 0.959733,
+            "y": 0.9599429,
+            "z": 0.9597214
+          }
+        }
+      ]
+    },
+    {
       "ID": "2432770377810913269",
       "Components": [
         {
@@ -106,84 +145,6 @@
           "ComponentType": "AquaEngine.Transform",
           "Position": {
             "x": -15.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 0.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "ID": "16765798305678760197",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Second"
-        },
-        {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "4665320753791157835",
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": "5953939257442262790"
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": -2.5,
-            "y": 0.0,
-            "z": -5.00166436E-07
-          },
-          "Rotation": {
-            "x": 9.14981058E-07,
-            "y": -0.0005890648,
-            "z": -8.519621E-06,
-            "w": -0.9999998
-          },
-          "Scale": {
-            "x": 0.95976156,
-            "y": 0.9599429,
-            "z": 0.959749937
-          }
-        }
-      ]
-    },
-    {
-      "ID": "5810792497182943223",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "3709196398890155700",
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": "5953939257442262790"
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": -17.5,
             "y": 0.0,
             "z": 0.0
           },
@@ -225,6 +186,45 @@
             "x": 0.999988556,
             "y": 0.999987662,
             "z": 0.999999344
+          }
+        }
+      ]
+    },
+    {
+      "ID": "5810792497182943223",
+      "Components": [
+        {
+          "ComponentType": "AquaEngine.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "AquaEngine.SpriteRenderer",
+          "Sprite": "3709196398890155700",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "5953939257442262790"
+        },
+        {
+          "ComponentType": "AquaEngine.Transform",
+          "Position": {
+            "x": -17.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
           }
         }
       ]
