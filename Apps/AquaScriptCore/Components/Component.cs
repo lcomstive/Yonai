@@ -8,7 +8,7 @@ namespace AquaEngine
 	public abstract class Component : ISerializable
 	{
 		[Serialize(false)]
-		internal IntPtr Handle { get; set; }
+		internal IntPtr Handle { get; private set; }
 
 		/// <summary>
 		/// The <see cref="World"/> this component exists within.
@@ -27,6 +27,17 @@ namespace AquaEngine
 		/// Returns true if object is not null
 		/// </summary>
 		public static implicit operator bool(Component component) => !ReferenceEquals(component, null);
+
+		/// <summary>
+		/// Called after <see cref="Handle"/> is assigned a value
+		/// </summary>
+		protected internal virtual void OnNativeHandleSet() { }
+
+		internal void SetHandle(IntPtr handle)
+		{
+			Handle = handle;
+			OnNativeHandleSet();
+		}
 
 		public virtual JObject OnSerialize()
 		{
@@ -52,13 +63,17 @@ namespace AquaEngine
 			}
 			foreach (var property in properties)
 			{
-				if (ShouldSerializeProperty(property, out string label))
-					SerializeObject(
-						json,
-						label,
-						property.PropertyType,
-						property.GetValue(this)
-					);
+				try
+				{
+					if (ShouldSerializeProperty(property, out string label))
+						SerializeObject(
+							json,
+							label,
+							property.PropertyType,
+							property.GetValue(this)
+						);
+				}
+				catch (Exception e) { Log.Exception(e, $"Serializing {type.Name}"); }
 			}
 
 			return json;
@@ -168,10 +183,11 @@ namespace AquaEngine
 			return canRead;
 		}
 
+		private static readonly Type ResourceBaseType = typeof(ResourceBase);
 		private void SerializeObject(JObject json, string label, Type t, object value)
 		{
 			// Check if resource, if so then serialize as UUID
-			if(typeof(ResourceBase).IsAssignableFrom(t))
+			if(ResourceBaseType.IsAssignableFrom(t))
 				json[label] = ((ResourceBase)value).ResourceID.ToString();
 			else if (typeof(ISerializable).IsAssignableFrom(t))
 			{

@@ -83,6 +83,8 @@ namespace AquaEngine
 			UUID resourceID = GetID(path);
 			if(resourceID != UUID.Invalid && s_Instances.ContainsKey(resourceID))
 				return (T)s_Instances[resourceID];
+			if (Exists(path))
+				return Get<T>(path);
 
 			T instance = new T();
 			instance.ResourcePath = path;
@@ -272,11 +274,14 @@ namespace AquaEngine
 				UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());
 				string resourcePath = resource["Path"].Value<string>();
 
+				if (Exists(id))
+					continue; // Already loaded
+
 				string typeName = resource["Type"].Value<string>();
 				Type type = Type.GetType(typeName);
 
 				ResourceBase instance = Load(id, resourcePath, type);
-				if(!LoadFromDisk(instance))
+				if(instance is ISerializable && !LoadFromDisk(instance))
 					Unload(id); // If failed to load from disk, *most* likely will be in a call to Load with the correct import settings
 			}
 
@@ -295,8 +300,8 @@ namespace AquaEngine
 				nativeResource.SetHandle(_GetInstance(resourceID));
 				nativeResource._OnNativeLoad();
 			}
-			else
-				instance._Load();
+
+			instance._Load();
 
 			s_Instances.Add(resourceID, instance);
 		}
@@ -351,7 +356,7 @@ namespace AquaEngine
 				VFS.CreateDirectory(directory);
 			}
 
-			VFS.Write(path, JsonConvert.SerializeObject(serializable.OnSerialize(), Formatting.Indented));
+			VFS.Write(path, serializable);
 		}
 
 		public static bool LoadFromDisk(ResourceBase resource, bool suppressWarnings = false)
@@ -379,8 +384,9 @@ namespace AquaEngine
 				return false;
 			}
 
-			Log.Trace($"Loading resource '{path}'...");
-			serializable.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText(path)));
+			Log.Trace($"Loading resource '{path}' from disk...");
+			resource._Load();
+			serializable.OnDeserialize(VFS.ReadJSON(path));
 			return true;
 		}
 
@@ -392,6 +398,8 @@ namespace AquaEngine
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _Duplicate(ulong resourceID, string newPath);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(ulong resourceID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetInstance(ulong resourceID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void _Print();
 		#endregion
 	}
 }

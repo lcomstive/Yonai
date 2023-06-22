@@ -128,7 +128,7 @@ namespace AquaEditor
 		private float Draw(string label, float value, Attribute[] attributes = null)
 		{
 			// Check for modifying attributes
-			for (int i = 0; i < attributes.Length; i++)
+			for (int i = 0; i < (attributes?.Length ?? 0); i++)
 			{
 				if (attributes[i] is RangeAttribute)
 				{
@@ -145,7 +145,7 @@ namespace AquaEditor
 		private int Draw(string label, int value, Attribute[] attributes = null)
 		{
 			// Check for modifying attributes
-			for (int i = 0; i < attributes.Length; i++)
+			for (int i = 0; i < (attributes?.Length ?? 0); i++)
 			{
 				if (attributes[i] is RangeAttribute)
 				{

@@ -121,7 +121,7 @@ namespace AquaEngine.IO
 		/// <summary>
 		/// Converts <paramref name="target"/> to JSON using <see cref="ISerializable.OnSerialize"/> and writes contents to <paramref name="path"/>
 		/// </summary>
-		public static void WriteJSON(string path, JObject contents) => Write(path, JsonConvert.SerializeObject(contents));
+		public static void WriteJSON(string path, JObject contents, bool indent = true) => Write(path, JsonConvert.SerializeObject(contents, indent ? Formatting.Indented : Formatting.None));
 
 		/// <summary>
 		/// Reads <paramref name="path"/> as JSON

@@ -20,7 +20,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Called when this system is created (before <see cref="OnEnabled"/>)
 		/// </summary>
-		protected virtual void Start() { }
+		protected virtual void Start() { Log.Trace("Start for " + GetType().Name); }
 
 		/// <summary>
 		/// Called once per frame
@@ -98,7 +98,7 @@ namespace AquaEngine
 
 		#region Unmanaged Calls
 		// Called from C++
-		internal void aqua_Initialise(uint worldID) => World = worldID != uint.MaxValue ? World.Get(worldID) : null;
+		internal void aqua_Initialise(ulong worldID) => World = worldID != UUID.Invalid ? World.Get(worldID) : null;
 
 		// Called from C++
 		private void aqua_Enable(bool enable)

@@ -124,7 +124,6 @@ namespace AquaEngine
 		AquaAPI Entity CreateEntity(EntityID id);
 		AquaAPI bool HasEntity(EntityID entity);
 		AquaAPI void DestroyEntity(EntityID entity);
-		AquaAPI void PrepareEntities(unsigned int count);
 
 		/// <summary>
 		/// Gets an entity with matching ID, or creates entity if it does not exist

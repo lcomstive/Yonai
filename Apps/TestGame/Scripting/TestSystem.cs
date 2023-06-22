@@ -5,7 +5,6 @@ namespace TestGame
 {
 	public class TestSystem : AquaSystem
 	{
-		private Mesh m_QuadMesh;
 		private Shader m_SpriteShader;
 		private Texture m_Texture;
 
@@ -14,43 +13,32 @@ namespace TestGame
 		private uint m_AudioDeviceIndex = 0;
 		private float m_Pitch = 1.0f;
 
-		protected override void Enabled()
-		{
-			Log.Debug(" ---- TestSystem Enabled()");
-			World.AddSystem<CameraControlSystem>();
-		}
+		protected override void Enabled() => World.AddSystem<CameraControlSystem>();
 
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 		
 		protected override void Start()
 		{
-			Log.Debug(" ---- TestSystem Start()");
-
 			// Load test texture
 			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");
 
 			// Load test sprite shader
-			ShaderImportSettings shaderStages = new ShaderImportSettings()
-			{
-				VertexPath = "assets://Shaders/Sprite.vert",
-				FragmentPath = "assets://Shaders/NewSprite.frag",
-			};
-			m_SpriteShader = Resource.Load<Shader>("Shaders/NewSpriteShader", shaderStages);
-
-			m_QuadMesh = Resource.Load<Mesh>("Meshes/Primitive/Quad");
+			ShaderImportSettings shaderStages = new ShaderImportSettings();
+			shaderStages.VertexPath = "assets://Shaders/Sprite.vert";
+			shaderStages.FragmentPath = "assets://Shaders/NewSprite.frag";
+			m_SpriteShader = Resource.Load<Shader>("assets://Shaders/NewSpriteShader", shaderStages);
 
 			Vector3 v = new Vector3(1, 2, 5);
 			Log.Debug(v);
 
 			m_AudioDeviceIndex = Audio.OutputDevice.Index;
 			m_Sound = Resource.Load<Sound>("assets://Audio/Fall.mp3");
-			m_SoundMixer = Resource.Get<SoundMixer>("Mixers/SFX2");
+
+			m_SoundMixer = Resource.Load<SoundMixer>("assets://Audio/Mixers/SFX.mixer");
 		}
 
 		protected override void Update()
-		{
-			Log.Debug(" ---- TestSystem Update()");
-			
+		{			
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);
 
 			if (Input.IsKeyDown(Key.LeftControl) && Input.IsKeyDown(Key.Q))
@@ -136,11 +124,11 @@ namespace TestGame
 			renderer.Sprite = m_Texture;
 
 			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * ProjectileForce);
-			e.AddComponent<DestroyAfterSeconds>().StartCountdown(2.5f);
+			e.AddComponent<DestroyAfterSeconds>().StartCountdown(5.0f);
 
 			SoundSource source = e.AddComponent<SoundSource>();
 			source.Sound = m_Sound;
-			source.Spatialize = false;
+			source.Spatialise = false;
 			source.Pitch += Random.Range(1.0f);
 			source.Mixer = m_SoundMixer;
 			source.Volume = Random.Range(0.5f, 1.0f);

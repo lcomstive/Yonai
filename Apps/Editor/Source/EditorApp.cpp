@@ -135,9 +135,10 @@ void EditorApp::InitialiseMounts()
 	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
 
 	VFS::Mount("project://", m_ProjectPath.string());
-	VFS::Mount("assets://", "app://Assets"); // Default assets
 	VFS::Mount("assets://", "project://Assets");
+	VFS::Mount("assets://", "app://Assets"); // Default assets
 	VFS::Mount("editor://", "project://.aqua");
+	VFS::Mount("mono://", "app://Assets/Mono");
 }
 
 void EditorApp::Draw()

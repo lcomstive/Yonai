@@ -71,7 +71,7 @@ namespace AquaEngine
 				}
 
 				Component component = (Component)_AddComponent(World.ID, ID, type, out IntPtr handle);
-				component.Handle = handle;
+				component.SetHandle(handle);
 				if (component == null)
 				{
 					Log.Warning($"Failed to add component of type '{fullName}' during deserialization");
@@ -147,13 +147,13 @@ namespace AquaEngine
 			Component component = (Component)_AddComponent(World.ID, ID, componentType, out IntPtr handle);
 			if (component == null)
 				return null;
-			component.Handle = handle;
+			component.SetHandle(handle);
 			m_Components.Add(componentType, component);
 
 			// Handle behaviour
 			if (World.IsActive)
 			{
-				if(componentType.IsAssignableFrom(typeof(IBehaviour)))
+				if(typeof(IBehaviour).IsAssignableFrom(componentType))
 				{
 					IBehaviour behaviour = (IBehaviour)component;
 					behaviour.Enabled = true;

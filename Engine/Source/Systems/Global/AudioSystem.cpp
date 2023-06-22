@@ -220,9 +220,3 @@ const char* AudioSystem::GetDeviceName(unsigned int index)
 	index = (std::min)(index, s_PlaybackDeviceCount - 1);
 	return s_PlaybackDeviceInfos[index].name;
 }
-
-// INTERNAL CALLS //
-#include <AquaEngine/Scripting/InternalCalls.hpp>
-
-ADD_MANAGED_METHOD(AudioSystem, GetDeviceName, MonoString*, (unsigned int index), AquaEngine.Systems)
-{ return mono_string_new(mono_domain_get(), AudioSystem::GetDeviceName(index)); }

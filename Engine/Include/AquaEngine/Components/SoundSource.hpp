@@ -109,6 +109,11 @@ namespace AquaEngine
 
 			SoundState m_State = SoundState::Stopped;
 
+			/// <summary>
+			/// Calls UpdateState(uint state) in managed C# code for this component
+			/// </summary>
+			void UpdateManagedState();
+
 			friend class AquaEngine::Systems::AudioSystem;
 		};
 	}

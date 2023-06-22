@@ -29,12 +29,24 @@ namespace AquaEditor.Views
 			Camera camera = Camera.Main;
 			if(!camera)
 			{
+				foreach(World world in SceneManager.GetActiveScenes())
+				{
+					Camera[] cameras = world.GetComponents<Camera>();
+					if (cameras.Length == 0)
+						continue;
+
+					camera = Camera.Main = cameras[0];
+					break;
+				}
+			}
+			if(!camera)
+			{
 				ImGUI.Text("No camera found");
 				return;
 			}
 
 			// Disable input system to game content unless this view is focused
-			// Input.Enabled = ImGUI.WindowFocused;
+			Input.Enabled = ImGUI.WindowFocused;
 
 			IVector2 viewportSize = (IVector2)ImGUI.ContentRegionAvailable;
 

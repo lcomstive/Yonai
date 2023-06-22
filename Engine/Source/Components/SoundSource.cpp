@@ -1,5 +1,6 @@
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Audio/Sound.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Components/SoundSource.hpp>
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 
@@ -26,12 +27,14 @@ void SoundSource::Play()
 
 	// Reset pause state
 	m_PausedFrames = 0;
+
+	UpdateManagedState();
 }
 
 void SoundSource::Pause()
 {
 	if (m_State != SoundState::Playing)
-		return;
+		return; // No change
 
 	m_State = SoundState::Paused;
 
@@ -40,12 +43,14 @@ void SoundSource::Pause()
 
 	// Stop playing sound
 	ma_sound_stop(&m_Data);
+
+	UpdateManagedState();
 }
 
 void SoundSource::Resume()
 {
 	if (m_State != SoundState::Paused)
-		return;
+		return; // No change
 
 	m_State = SoundState::Playing;
 
@@ -54,10 +59,15 @@ void SoundSource::Resume()
 
 	// Seek to previous position
 	ma_sound_seek_to_pcm_frame(&m_Data, m_PausedFrames);
+
+	UpdateManagedState();
 }
 
 void SoundSource::Stop()
 {
+	if (m_State == SoundState::Stopped)
+		return; // No change
+
 	// Set state
 	m_State = SoundState::Stopped;
 
@@ -66,6 +76,8 @@ void SoundSource::Stop()
 
 	// Reset pause state
 	m_PausedFrames = 0;
+
+	UpdateManagedState();
 }
 
 float SoundSource::GetVolume() { return m_Volume; }
@@ -189,6 +201,20 @@ void SoundSource::SetMixer(ResourceID mixer)
 	ma_node_attach_output_bus(&m_Data, 0, output, 0);
 }
 
+void SoundSource::UpdateManagedState()
+{
+	static MonoMethod* method = nullptr;
+	if (!method)
+	{
+		MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SoundSource");
+		method = mono_class_get_method_from_name(klass, "UpdateState", 1);
+	}
+
+	unsigned int state = (unsigned int)m_State;
+	void* params = { &state };
+	mono_runtime_invoke(method, ManagedData.GetInstance(), &params, nullptr);
+}
+
 #pragma region Scripting Internal Calls
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
@@ -237,7 +263,7 @@ ADD_MANAGED_METHOD(SoundSource, SetSpatialization, void, (void* instance, bool v
 ADD_MANAGED_METHOD(SoundSource, GetMixer, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetMixer(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, unsigned int value))
+ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, uint64_t value))
 { ((SoundSource*)instance)->SetMixer(value); }
 
 ADD_MANAGED_METHOD(SoundSource, GetPanning, float, (void* instance))

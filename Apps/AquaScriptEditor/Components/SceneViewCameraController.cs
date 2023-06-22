@@ -74,10 +74,10 @@ namespace AquaEditor
 		{
 			Vector3 euler = m_Transform.LocalRotation.Euler;
 
-			Input.MouseState = Input.IsMouseDown(MouseButton.Right) ? MouseState.Disabled : MouseState.Normal;
-			if(Input.IsMouseDown(MouseButton.Right))
+			ImGUI.SetMouseCursor(ImGUI.IsMouseDragging(MouseButton.Right) ? ImGUI.MouseCursor.None : ImGUI.MouseCursor.Arrow);
+			if(ImGUI.IsMouseDragging(MouseButton.Right))
 			{
-				Vector2 mouseDelta = Input.MouseDelta / 1000.0f;
+				Vector2 mouseDelta = ImGUI.GetMouseDelta() / 1000.0f;
 				xRot += mouseDelta.y * MouseSensitivity.x;
 				yRot += mouseDelta.x * MouseSensitivity.y;
 			}

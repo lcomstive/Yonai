@@ -373,7 +373,7 @@ namespace AquaEditor
 				return; // Not found
 
 			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
-			SceneManager.Load(m_TestWorld);
+			SceneManager.Load(m_TestWorld, SceneAddType.Single, false);
 		}
 		#endregion
 	}

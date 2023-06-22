@@ -175,3 +175,6 @@ bool SystemManager::Remove(size_t hash)
 	m_Systems.erase(hash);
 	return true;
 }
+
+bool SystemManager::Remove(MonoType* managedType)
+{ return Remove(Scripting::Assembly::GetTypeHash(managedType)); }

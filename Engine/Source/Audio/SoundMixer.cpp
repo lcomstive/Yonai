@@ -46,7 +46,11 @@ ResourceID SoundMixer::GetParent() { return m_Parent; }
 ADD_MANAGED_METHOD(SoundMixer, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle))
 {
 	char* path = mono_string_to_utf8(pathRaw);
-	*outResourceID = Resource::Load<SoundMixer>(path);
+
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID(); // If no resource ID, generate one
+	Resource::Load<SoundMixer>(*outResourceID, path);
+
 	*outHandle = Resource::Get<SoundMixer>(*outResourceID);
 	mono_free(path);
 }

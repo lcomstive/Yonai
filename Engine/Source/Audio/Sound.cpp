@@ -49,7 +49,9 @@ void Sound::Import(string filepath)
 ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, unsigned long long* outResourceID, void** outHandle))
 {
 	char* resourcePath = mono_string_to_utf8(path);
-	*outResourceID = Resource::Load<Sound>(resourcePath);
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID(); // If no resource ID, generate one
+	Resource::Load<Sound>(*outResourceID, resourcePath, string(resourcePath));
 	*outHandle = Resource::Get<Sound>(*outResourceID);
 	mono_free(resourcePath);
 }

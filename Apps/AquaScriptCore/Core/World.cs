@@ -4,6 +4,7 @@ using AquaEngine.IO;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace AquaEngine
 {
@@ -33,6 +34,7 @@ namespace AquaEngine
 		}
 
 		private Dictionary<UUID, Entity> m_Entities = new Dictionary<UUID, Entity>();
+		private Dictionary<Type, AquaSystem> m_Systems = new Dictionary<Type, AquaSystem>();
 
 		private static Dictionary<UUID, World> s_Instances = new Dictionary<UUID, World>();
 
@@ -140,6 +142,7 @@ namespace AquaEngine
 					if (systemType != null && aquaSystemType.IsAssignableFrom(systemType))
 					{
 						AquaSystem system = AddSystem(systemType);
+						system.Enable(m_IsActive);
 						JObject value = systemJSON.Value.Value<JObject>();
 						system.OnDeserialize(value);
 					}
@@ -179,6 +182,11 @@ namespace AquaEngine
 						behaviour.Destroyed();
 				}
 			}
+
+			// Handle systems
+			AquaSystem[] systems = m_Systems.Values.ToArray();
+			foreach(AquaSystem system in systems)
+				system.Enable(m_IsActive);
 
 			StateChanged?.Invoke(m_IsActive);
 		}
@@ -351,14 +359,27 @@ namespace AquaEngine
 		public bool HasSystem<T>() => HasSystem(typeof(T));
 		public bool HasSystem(Type type) => _HasSystem(ID, type);
 
-		public T AddSystem<T>() => (T)_AddSystem(ID, typeof(T));
-		public AquaSystem AddSystem(Type type) => (AquaSystem)_AddSystem(ID, type);
+		public T AddSystem<T>() where T : AquaSystem => (T)AddSystem(typeof(T));
+		public AquaSystem AddSystem(Type type)
+		{
+			if (m_Systems.ContainsKey(type))
+				return m_Systems[type];
 
-		public T GetSystem<T>() => (T)_GetSystem(ID, typeof(T));
+			AquaSystem instance = (AquaSystem)_AddSystem(ID, type);
+			m_Systems.Add(type, instance);
+			return instance;
+		}
+
+		public T GetSystem<T>() where T : AquaSystem => (T)GetSystem(typeof(T));
 		public AquaSystem GetSystem(Type type) => (AquaSystem)_GetSystem(ID, type);
 
-		public bool RemoveSystem<T>() => _RemoveSystem(ID, typeof(T));
-		public bool RemoveSystem(Type type) => _RemoveSystem(ID, type);
+		public bool RemoveSystem<T>() where T : AquaSystem => RemoveSystem(typeof(T));
+		public bool RemoveSystem(Type type)
+		{
+			bool result = _RemoveSystem(ID, type);
+			result = result || m_Systems.Remove(type);
+			return result;
+		}
 
 		public void EnableSystem<T>(bool enable) => _EnableSystem(ID, typeof(T), enable);
 		public void EnableSystem(Type type, bool enable) => _EnableSystem(ID, type, enable);
@@ -366,14 +387,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Gets all systems attached to world
 		/// </summary>
-		public AquaSystem[] GetSystems()
-		{
-			object[] objs = _GetSystems(ID);
-			AquaSystem[] systems = new AquaSystem[objs.Length];
-			for(int i = 0; i < objs.Length; i++)
-				systems[i] = (AquaSystem)objs[i];
-			return systems;
-		}
+		public AquaSystem[] GetSystems() => m_Systems.Values.ToArray();
 		#endregion
 
 		#region Static getters

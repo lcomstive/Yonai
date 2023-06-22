@@ -4,6 +4,7 @@ namespace TestGame
 {
 	public class DestroyAfterSeconds : Behaviour
 	{
+		[Serialize]
 		private float m_SecondsRemaining = -1;
 		private bool m_Ticking = false;
 

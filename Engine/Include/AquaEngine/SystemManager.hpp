@@ -84,6 +84,7 @@ namespace AquaEngine
 
 		AquaAPI bool Has(size_t hash);
 		AquaAPI bool Remove(size_t hash);
+		AquaAPI bool Remove(MonoType* managedType);
 		AquaAPI Systems::System* Get(size_t hash);
 
 		AquaAPI std::vector<Systems::System*> All();

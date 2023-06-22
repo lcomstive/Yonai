@@ -14,27 +14,47 @@ namespace AquaEngine
 
 	public class SoundMixer : NativeResourceBase, ISerializable
 	{
+		private string m_Name;
+		private float m_Volume;
+		private SoundMixer m_ParentMixer;
+		private UUID m_ParentMixerID = UUID.Invalid;
+
 		public string Name
 		{
-			get => _GetName(Handle);
-			set => _SetName(Handle, value);
+			get => m_Name;
+			set
+			{
+				if(m_Name != value)
+					_SetName(Handle, m_Name = value);
+			}
 		}
 
 		public float Volume
 		{
-			get => _GetVolume(Handle);
-			set => _SetVolume(Handle, value);
+			get => m_Volume;
+			set
+			{
+				if(m_Volume != value)
+					_SetVolume(Handle, m_Volume = value);
+			}
 		}
 
 		public UUID ParentMixerID
 		{
-			get => _GetParent(Handle);
-			set => _SetParent(Handle, value);
+			get => m_ParentMixerID;
+			set
+			{
+				if (m_ParentMixerID == value)
+					return; // No change
+
+				_SetParent(Handle, m_ParentMixerID = value);
+				ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(ParentMixerID);
+			}
 		}
 
 		public SoundMixer ParentMixer
 		{
-			get => Resource.Get<SoundMixer>(ParentMixerID);
+			get => m_ParentMixer;
 			set => ParentMixerID = value?.ResourceID ?? UUID.Invalid;
 		}
 
@@ -45,6 +65,10 @@ namespace AquaEngine
 
 			ResourceID = resourceID;
 			Handle = handle;
+
+			m_Name = _GetName(Handle);
+			m_Volume = _GetVolume(Handle);
+			m_ParentMixerID = _GetParent(Handle);
 		}
 
 		protected override void OnImported()
@@ -52,9 +76,10 @@ namespace AquaEngine
 			if (!TryGetImportSettings(out SoundMixerImportSettings settings))
 				return;
 
-			Name = settings.Name;
-			Volume = settings.Volume;
-			ParentMixerID = settings.ParentMixer;
+			m_Name = settings.Name;
+			m_Volume = settings.Volume;
+			m_ParentMixerID = settings.ParentMixer;
+			m_ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(ParentMixerID);
 		}
 
 		public JObject OnSerialize() => new JObject(

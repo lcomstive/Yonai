@@ -15,8 +15,7 @@ extern SystemMethodEnabledFn SystemMethodEnabled;
 extern SystemMethodInitialiseFn SystemMethodInitialise;
 
 #define TRACE_SYSTEM(msg) \
-	World* world = GetWorld(); \
-	spdlog::trace(msg " system '{}' [{}]", GetTypeName(ManagedData.Type), (world ? ("World #" + std::to_string(world->ID())) : "Global"));
+	spdlog::trace(msg " system '{}' [{}]", GetTypeName(ManagedData.Type), (GetWorld() ? ("World #" + std::to_string(GetWorld()->ID())) : "Global"));
 
 UUID ScriptSystem::GetWorldID()
 {
@@ -31,12 +30,27 @@ void ScriptSystem::Init()
 	if (!ManagedData.IsValid())
 		return;
 
-	TRACE_SYSTEM("Initialising");
+	try
+	{
+		TRACE_SYSTEM("Initialising");
 
-	MonoObject* instance = ManagedData.GetInstance();
-	MonoException* exception = nullptr;
-	SystemMethodInitialise(instance, GetWorldID(), &exception);
-	SystemMethodStart(instance, &exception);
+		MonoObject* instance = ManagedData.GetInstance();
+		MonoException* exception = nullptr;
+		SystemMethodInitialise(instance, GetWorldID(), &exception);
+		if (exception)
+			mono_print_unhandled_exception((MonoObject*)exception);
+
+		TRACE_SYSTEM("Starting");
+		SystemMethodStart(instance, &exception);
+		if (exception)
+			mono_print_unhandled_exception((MonoObject*)exception);
+	}
+	catch (std::exception& e)
+	{
+		spdlog::error("Failed to initialise system '{}' - {}", GetTypeName(Type), e.what());
+		SystemManager* systemManager = GetWorld() ? GetWorld()->GetSystemManager() : SystemManager::Global();
+		systemManager->Remove(Type);
+	}
 }
 
 void ScriptSystem::Destroy()
@@ -52,10 +66,9 @@ void ScriptSystem::Destroy()
 
 void ScriptSystem::OnEnabled()
 {
-	TRACE_SYSTEM("Enabling")
-
 	if (!ManagedData.IsValid())
 		return;
+	TRACE_SYSTEM("Enabling")
 
 	MonoException* exception = nullptr;
 	SystemMethodEnabled(ManagedData.GetInstance(), true, &exception);
@@ -63,10 +76,9 @@ void ScriptSystem::OnEnabled()
 
 void ScriptSystem::OnDisabled()
 {
-	TRACE_SYSTEM("Disabling")
-
 	if (!ManagedData.IsValid())
 		return;
+	TRACE_SYSTEM("Disabling")
 
 	MonoException* exception = nullptr;
 	SystemMethodEnabled(ManagedData.GetInstance(), false, &exception);
@@ -98,8 +110,11 @@ void ScriptSystem::Draw()
 
 void ScriptSystem::OnScriptingReloadedBefore()
 {
-	TRACE_SYSTEM("Reloading (before)")
+	if (!ManagedData.IsValid())
+		return;
 
+	TRACE_SYSTEM("OnScriptingReloadedBefore");
+	
 	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
 
@@ -110,8 +125,11 @@ void ScriptSystem::OnScriptingReloadedBefore()
 
 void ScriptSystem::OnScriptingReloadedAfter()
 {
-	TRACE_SYSTEM("Reloading (after)")
+	if (!ManagedData.IsValid())
+		return;
 
+	TRACE_SYSTEM("OnScriptingReloadedAfter");
+	
 	MonoObject* instance = ManagedData.GetInstance();
 	MonoException* exception = nullptr;
 

@@ -33,3 +33,6 @@ ADD_MANAGED_METHOD(Resource, GetInstance, void*, (uint64_t resourceID))
 
 ADD_MANAGED_METHOD(Resource, Exists, bool, (uint64_t resourceID))
 { return Resource::IsValidResourceID(resourceID); }
+
+ADD_MANAGED_METHOD(Resource, Print)
+{ Resource::PrintResourceTypes(); }

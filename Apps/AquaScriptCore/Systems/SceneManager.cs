@@ -13,7 +13,7 @@ namespace AquaEngine
 		/// <summary>
 		/// Clears all currently active scenes and loads a new one
 		/// </summary>
-		public static void Load(World world, SceneAddType addType = SceneAddType.Single)
+		public static void Load(World world, SceneAddType addType = SceneAddType.Single, bool active = true)
 		{
 			switch(addType)
 			{
@@ -21,7 +21,7 @@ namespace AquaEngine
 				case SceneAddType.Single: _Load(world.ID); break;
 				case SceneAddType.Additive: _LoadAdditive(world.ID); break;
 			}
-			world.SetActive(true);
+			world.SetActive(active);
 
 			m_ActiveWorlds.Add(world.ID, world);
 			WorldChanged?.Invoke(world, true);
