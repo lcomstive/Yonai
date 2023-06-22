@@ -70,10 +70,10 @@
 
     <!-- Core -->
     <Compile Include="Core\Application.cs" />
+    <Compile Include="Core\BaseGameLauncher.cs" />
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\IImportSettings.cs" />
     <Compile Include="Core\Input.cs" />
-    <Compile Include="Core\ISerializable.cs" />
     <Compile Include="Core\Keys.cs" />
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Mouse.cs" />
@@ -99,6 +99,7 @@
 
     <!-- IO -->
     <Compile Include="IO\Clipboard.cs" />
+    <Compile Include="IO\ISerializable.cs" />
     <Compile Include="IO\VFS.cs" />
     
     <!-- Math -->
@@ -113,6 +114,7 @@
     <Compile Include="Math\Vector3.cs" />
 
     <!-- Systems -->
+    <Compile Include="Systems\AudioSystem.cs" />
     <Compile Include="Systems\BehaviourSystem.cs" />
     <Compile Include="Systems\NativeSystem.cs" />
     <Compile Include="Systems\RenderSystem.cs" />
