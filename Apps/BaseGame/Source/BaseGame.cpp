@@ -44,7 +44,7 @@ void BaseGame::InitialiseScripting()
 		*/
 	);
 
-	ScriptEngine::AddInternalCall("AquaEngine.BaseGameLauncher::_LoadAssembly", LoadAssembly);
+	ScriptEngine::AddInternalCall("AquaEngine.BaseGameLauncher::_LoadAssembly", (const void*)LoadAssembly);
 
 	// Call AquaEngine.Application.BaseGameLaunch()
 	MonoClass* appClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher");

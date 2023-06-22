@@ -232,7 +232,11 @@ namespace AquaEngine
 
 		public void DestroyEntity(UUID entityID)
 		{
-			Entity entity = m_Entities[entityID];
+			if(!m_Entities.TryGetValue(entityID, out Entity entity))
+			{
+				Log.Warning($"Failed to destroy entity [{entityID}] - Could not find entity in world [{ID}]");
+				return;
+			}
 
 			if(entity.TryGetComponent(out Transform transform))
 			{
