@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
@@ -25,22 +26,16 @@ namespace AquaEngine
 	
 	public static class Random
 	{
-		public static float Range(float min, float max)
-		{
-			System.Random rand = new System.Random();
-			return (float)rand.NextDouble() * (max - min) + min;
-		}
-		
-		public static int Range(int min, int max)
-		{
-			System.Random rand = new System.Random();
-			return rand.Next(min, max);
-		}
+		public static float Range(float max) => _Float(0, max);
+		public static float Range(float min, float max) => _Float(min, max);
 
-		public static int Range(int max) => Range(0, max);
-		public static float Range(float max) => Range(0, max);
+		public static int Range(int max) => _Int(0, max);
+		public static int Range(int min, int max) => _Int(min, max);
 
 		public static T Range<T>(T[] values) => values[Range(values.Length)];
 		public static T Range<T>(List<T> values) => values[Range(values.Count)];
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _Int(int min, int max);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Float(float min, float max);
 	}
 }

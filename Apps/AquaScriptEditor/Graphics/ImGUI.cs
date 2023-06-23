@@ -1966,9 +1966,11 @@ namespace AquaEditor
 			_AddBezierCubic(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCubic(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
 
+		/*
 		public static void AddBezierCurve(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness = 1.0f, int segments = 0) =>
 			_AddBezierCurve(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCurve(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
+		*/
 
 		public static void AddBezierQuadratic(Vector2 p1, Vector2 p2, Vector2 p3, Colour colour, float thickness = 1.0f, int segments = 0) =>
 			_AddBezierQuadratic(ref p1, ref p2, ref p3, ref colour, thickness, segments);

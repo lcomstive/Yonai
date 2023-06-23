@@ -99,7 +99,7 @@ namespace AquaEngine::Scripting
 			MonoClass* klass = mono_class_from_name(Image, managedNamespace, managedName);
 			if (!klass)
 			{
-				spdlog::warn("Failed to add internal managed component definition for '{}' - not found in assembly '{}'", managedName, mono_image_get_name(Image));
+				spdlog::warn("Failed to add internal managed type definition for '{}' - not found in assembly '{}'", managedName, mono_image_get_name(Image));
 				return false;
 			}
 

@@ -962,7 +962,7 @@ ADD_MANAGED_METHOD(ImGUI, _AddBezierCubic, void, (glm::vec2* p1, glm::vec2* p2, 
 { GetDrawList()->AddBezierCubic(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness, segments); }
 
 ADD_MANAGED_METHOD(ImGUI, _AddBezierCurve, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec2* p4, glm::vec4* colour, float thickness, int segments), AquaEditor)
-{ GetDrawList()->AddBezierCurve(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness, segments); }
+{ /* GetDrawList()->AddBe(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToVec2(p4), ToU32(colour), thickness, segments); */ }
 
 ADD_MANAGED_METHOD(ImGUI, _AddBezierQuadratic, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec4* colour, float thickness, int segments), AquaEditor)
 { GetDrawList()->AddBezierQuadratic(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToU32(colour), thickness, segments); }
