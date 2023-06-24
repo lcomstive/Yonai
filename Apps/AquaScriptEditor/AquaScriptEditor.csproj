@@ -66,6 +66,7 @@
 
     <!-- Services -->
     <Compile Include="Services/EditorService.cs" />
+    <Compile Include="Services/ImGUISystem.cs" />
     <Compile Include="Services/EditorUI/BasicMenuItems.cs" />
     <Compile Include="Services/EditorUI/EditorUIService.cs" />
     <Compile Include="Services/EditorUI/MenuItemData.cs" />
