@@ -160,11 +160,6 @@
     "Type": "AquaEngine.SoundMixer"
   },
   {
-    "ID": "10522831733631266596",
-    "Path": "project://Assets/Textures/Aqua.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
     "ID": "1368404488378282947",
     "Path": "project://Assets/Textures/texture_09.png",
     "Type": "AquaEngine.Graphics.Texture"
@@ -203,5 +198,35 @@
     "ID": "3031916730827344260",
     "Path": "project://Assets/Audio/Lifelike.mp3",
     "Type": "AquaEngine.Sound"
+  },
+  {
+    "ID": "10031138512492472585",
+    "Path": "project://Assets/Textures/Aqua.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "2497382191480865192",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "8357773485068196779",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "1553686605994059412",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "4448353709651691703",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "10840139679907649417",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
   }
 ]

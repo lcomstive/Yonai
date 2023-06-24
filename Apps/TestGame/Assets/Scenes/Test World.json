@@ -14,7 +14,7 @@
         },
         {
           "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "10522831733631266596",
+          "Sprite": "10031138512492472585",
           "Colour": {
             "r": 1.0,
             "g": 0.9843137,
@@ -85,6 +85,45 @@
       ]
     },
     {
+      "ID": "16765798305678760197",
+      "Components": [
+        {
+          "ComponentType": "AquaEngine.NameComponent",
+          "Name": "Second"
+        },
+        {
+          "ComponentType": "AquaEngine.SpriteRenderer",
+          "Sprite": "10031138512492472585",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "5953939257442262790"
+        },
+        {
+          "ComponentType": "AquaEngine.Transform",
+          "Position": {
+            "x": -2.5,
+            "y": 0.0,
+            "z": -5.00166436E-07
+          },
+          "Rotation": {
+            "x": 9.149782E-07,
+            "y": -0.0005889737,
+            "z": -8.516174E-06,
+            "w": -0.9999998
+          },
+          "Scale": {
+            "x": 0.959698,
+            "y": 0.9599429,
+            "z": 0.9596864
+          }
+        }
+      ]
+    },
+    {
       "ID": "2432770377810913269",
       "Components": [
         {
@@ -110,88 +149,10 @@
             "z": 0.0
           },
           "Rotation": {
-            "x": 1.0,
+            "x": 9.099629E-07,
             "y": 0.0,
             "z": 0.0,
-            "w": 0.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "ID": "16765798305678760197",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Second"
-        },
-        {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "10522831733631266596",
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": "5953939257442262790"
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": -2.5,
-            "y": 0.0,
-            "z": -5.00166436E-07
-          },
-          "Rotation": {
-            "x": 9.149798E-07,
-            "y": -0.00058902317,
-            "z": -8.51807454E-06,
-            "w": -0.9999998
-          },
-          "Scale": {
-            "x": 0.959733,
-            "y": 0.9599429,
-            "z": 0.9597214
-          }
-        }
-      ]
-    },
-    {
-      "ID": "5810792497182943223",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "3709196398890155700",
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": "5953939257442262790"
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": -17.5,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 0.0
+            "w": 1.0
           },
           "Scale": {
             "x": 1.0,
@@ -230,7 +191,7 @@
       ]
     },
     {
-      "ID": "8831687503922809722",
+      "ID": "5810792497182943223",
       "Components": [
         {
           "ComponentType": "AquaEngine.NameComponent",
@@ -250,7 +211,7 @@
         {
           "ComponentType": "AquaEngine.Transform",
           "Position": {
-            "x": -7.5,
+            "x": -17.5,
             "y": 0.0,
             "z": 0.0
           },
@@ -264,6 +225,45 @@
             "x": 1.0,
             "y": 1.0,
             "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "8831687503922809722",
+      "Components": [
+        {
+          "ComponentType": "AquaEngine.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "AquaEngine.SpriteRenderer",
+          "Sprite": "2497382191480865192",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "5953939257442262790"
+        },
+        {
+          "ComponentType": "AquaEngine.Transform",
+          "Position": {
+            "x": -7.5,
+            "y": 0.282236159,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 0.0155204795,
+            "y": 0.209694833,
+            "z": -0.0721356049,
+            "w": -0.9749788
+          },
+          "Scale": {
+            "x": 3.40000486,
+            "y": 3.40000439,
+            "z": 3.39999986
           }
         }
       ]
