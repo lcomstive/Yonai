@@ -24,6 +24,8 @@
 
 namespace AquaEngine
 {
+	typedef void (*WindowResizeCallback)(glm::ivec2);
+
 	enum class FullscreenMode : int
 	{
 		None,
@@ -96,6 +98,11 @@ namespace AquaEngine
 		/// Tracks if InitContext is called, and successful
 		/// </summary>
 		static bool s_ContextInitialised;
+
+		/// <summary>
+		/// Callbacks for when the window gets resized
+		/// </summary>
+		static std::vector<WindowResizeCallback> s_WindowResizeCallbacks;
 
 #if defined(AQUA_PLATFORM_DESKTOP)
 		static void GLFWJoystickCallback(int jid, int event);
@@ -205,6 +212,11 @@ namespace AquaEngine
 		/// Places a window in the center of the display
 		/// </summary>
 		AquaAPI static void CenterOnDisplay();
+
+		/// <summary>
+		/// Adds a callback for when the window gets resized
+		/// </summary>
+		AquaAPI static void AddResizedCallback(WindowResizeCallback callback);
 
 		AquaAPI static WINDOW_HANDLE_TYPE GetNativeHandle();
 	};

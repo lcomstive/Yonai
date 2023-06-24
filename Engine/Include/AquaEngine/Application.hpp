@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <glm/glm.hpp>
 #include <unordered_map>
 #include <AquaEngine/API.hpp>
 #include <AquaEngine/SystemManager.hpp>
@@ -80,6 +81,8 @@ namespace AquaEngine
 	class WindowedApplication : public Application
 	{
 		Systems::RenderSystem* m_RenderSystem = nullptr;
+
+		static void OnWindowResized(glm::ivec2 resolution);
 
 	public:
 		WindowedApplication() : Application() { }

@@ -265,6 +265,8 @@ void WindowedApplication::Setup()
 
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 	m_RenderSystem->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
+
+	Window::AddResizedCallback(OnWindowResized);
 }
 
 void WindowedApplication::Cleanup()
@@ -274,7 +276,7 @@ void WindowedApplication::Cleanup()
 	SystemManager::Global()->Remove<SceneSystem>();
 }
 
-AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
+RenderSystem* WindowedApplication::GetRenderSystem()
 {
 	if (!m_RenderSystem)
 	{
@@ -320,6 +322,8 @@ void WindowedApplication::Run()
 	if(Window::ContextIsInitialised())
 		Window::DestroyContext();
 }
+
+void WindowedApplication::OnWindowResized(glm::ivec2 resolution) { ((WindowedApplication*)Application::Current())->m_RenderSystem->GetPipeline()->SetResolution(resolution); }
 #pragma endregion
 
 #pragma region Managed Glue

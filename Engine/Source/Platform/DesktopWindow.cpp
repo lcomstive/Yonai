@@ -22,6 +22,7 @@ using namespace AquaEngine;
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
 bool Window::s_ContextInitialised = false;
+vector<WindowResizeCallback> Window::s_WindowResizeCallbacks = {};
 
 void GLFWErrorCallback(int error, const char* message);
 void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
@@ -404,6 +405,8 @@ void Window::SetVideoMode(const VideoMode mode)
 	glViewport(0, 0, mode.Resolution.x, mode.Resolution.y);
 }
 
+void Window::AddResizedCallback(WindowResizeCallback callback) { s_WindowResizeCallbacks.push_back(callback); }
+
 #pragma region GLFW Callbacks
 void Window::GLFWWindowCloseCallback(GLFWwindow* window) { s_Instance->Close(); }
 
@@ -412,11 +415,16 @@ void Window::GLFWErrorCallback(int error, const char* description)
 	spdlog::error("[GLFW] {}", description);
 }
 
+#include <AquaEngine/Application.hpp>
 void Window::GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 {
-	s_Instance->m_Resolution = { width, height };
+	glm::ivec2 resolution = { width, height };
+	s_Instance->m_Resolution = resolution;
 	
 	glViewport(0, 0, width, height);
+
+	for (WindowResizeCallback callback : s_WindowResizeCallbacks)
+		callback(resolution);
 }
 
 void Window::GLFWScrollCallback(GLFWwindow* window, double xOffset, double yOffset) { Input::s_ScrollDelta += (float)yOffset; }
