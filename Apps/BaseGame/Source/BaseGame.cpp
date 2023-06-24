@@ -1,5 +1,6 @@
 #include <BaseGame.hpp>
 #include <AquaEngine/IO/VFS.hpp>
+#include <AquaEngine/Window.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
@@ -58,4 +59,15 @@ bool LoadAssembly(MonoString* pathRaw)
 	Assembly* assembly = ScriptEngine::LoadAssembly(path);
 	mono_free(path);
 	return assembly != nullptr;
+}
+
+#include <vector>
+#include <AquaEngine/Components/Camera.hpp>
+#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+using namespace AquaEngine::Systems;
+using namespace AquaEngine::Components;
+void BaseGame::OnPostDraw()
+{
+	// Blit output to default framebuffer
+	SystemManager::Global()->Get<RenderSystem>()->GetPipeline()->GetOutput()->BlitTo();
 }

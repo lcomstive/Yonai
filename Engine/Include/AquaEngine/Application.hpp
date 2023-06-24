@@ -86,7 +86,8 @@ namespace AquaEngine
 		WindowedApplication(int argc, char** argv) : Application(argc, argv) { }
 
 	protected:
-		AquaAPI virtual void OnDraw() { }
+		AquaAPI virtual void OnPreDraw() { }
+		AquaAPI virtual void OnPostDraw() { }
 		AquaAPI Systems::RenderSystem* GetRenderSystem();
 
 	public:

@@ -11,4 +11,5 @@ public:
 	
 protected:
 	void Setup() override;
+	void OnPostDraw() override;
 };

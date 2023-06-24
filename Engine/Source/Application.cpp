@@ -303,8 +303,9 @@ void WindowedApplication::Run()
 		OnUpdate();
 		SystemManager::Global()->Update();
 			
-		OnDraw();
+		OnPreDraw();
 		SystemManager::Global()->Draw();
+		OnPostDraw();
 
 		Window::SwapBuffers();
 		Window::PollEvents();
