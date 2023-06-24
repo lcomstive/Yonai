@@ -17,6 +17,9 @@ ADD_MANAGED_METHOD(Window, SetFullscreenMode, void, (int state))
 ADD_MANAGED_METHOD(Window, GetFullscreenMode, int)
 { return (int)Window::GetFullscreen(); }
 
+ADD_MANAGED_METHOD(Window, GetContentScaling, void, (glm::vec2* outValue))
+{ *outValue = Window::GetContentScaling(); }
+
 ADD_MANAGED_METHOD(Screen, GetVideoModes, unsigned int, (MonoArray** outWidths, MonoArray** outHeights, MonoArray** outRefreshRates))
 {
 	vector<VideoMode> modes = Window::GetVideoModes();

@@ -3,13 +3,14 @@
 #include <spdlog/spdlog.h>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Window.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
+#include <AquaEditor/Systems/ImGUISystem.hpp>
+#include <AquaEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
+#include <AquaEditor/Systems/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
 #include <GLFW/glfw3.h>
 
 using namespace glm;
 using namespace AquaEngine;
+using namespace AquaEditor::Systems;
 using namespace AquaEngine::Systems;
 
 ImGUISystem::ImGUISystem()

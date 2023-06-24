@@ -14,7 +14,7 @@
 // Systems to map, unmanaged -> managed
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
+#include <AquaEngine/Systems/Global/RenderSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -223,15 +223,15 @@ void Assembly::CacheTypes(bool isCore)
 
 void Assembly::LoadScriptCoreTypes()
 {
-	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
-	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
-	AddInternalManagedComponent<Components::SoundSource>("AquaEngine", "SoundSource");
-	AddInternalManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
-	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
+	BindManagedComponent<Components::Camera>("AquaEngine", "Camera");
+	BindManagedComponent<Components::Transform>("AquaEngine", "Transform");
+	BindManagedComponent<Components::SoundSource>("AquaEngine", "SoundSource");
+	BindManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
+	BindManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
 
-	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
-	AddInternalManagedSystem<Systems::ImGUISystem>("AquaEngine.Systems", "ImGUISystem");
-	AddInternalManagedSystem<Systems::AudioSystem>("AquaEngine.Systems", "AudioSystem");
+	BindManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
+	BindManagedSystem<Systems::AudioSystem>("AquaEngine.Systems", "AudioSystem");
+	BindManagedSystem<Systems::RenderSystem>("AquaEngine.Systems", "RenderSystem");
 
 #pragma region Component Methods
 	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");

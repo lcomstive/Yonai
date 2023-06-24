@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
+#include <mono/jit/jit.h>
 #include <AquaEngine/API.hpp>
 
 #if defined(AQUA_PLATFORM_DESKTOP)
@@ -103,6 +104,9 @@ namespace AquaEngine
 		/// Callbacks for when the window gets resized
 		/// </summary>
 		static std::vector<WindowResizeCallback> s_WindowResizeCallbacks;
+
+		static MonoMethod* s_ManagedMethodScaled;
+		static MonoMethod* s_ManagedMethodResized;
 
 #if defined(AQUA_PLATFORM_DESKTOP)
 		static void GLFWJoystickCallback(int jid, int event);

@@ -2,9 +2,9 @@
 #include <imgui.h>
 #include <AquaEngine/Systems/System.hpp>
 
-namespace AquaEngine::Systems
+namespace AquaEditor::Systems
 {
-	struct ImGUISystem : public System
+	struct ImGUISystem : public AquaEngine::Systems::System
 	{
 		ImGuiIO* m_IO = nullptr;
 		ImGuiContext* m_Context = nullptr;

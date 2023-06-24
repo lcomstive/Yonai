@@ -1,17 +1,17 @@
 #include <imgui.h>
-#include <Glue.hpp>
-#include <EditorApp.hpp>
 #include <spdlog/spdlog.h>
+#include <AquaEditor/Glue.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Resource.hpp>
+#include <AquaEditor/EditorApp.hpp>
 #include <AquaEngine/Graphics/Shader.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 #include <AquaEngine/Components/FPSCamera.hpp>
 #include <AquaEngine/Platform/FixDLLBoundaries.hpp>
 
 // Systems //
-#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
+#include <AquaEditor/Systems/ImGUISystem.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 #include <AquaEngine/Systems/CameraControlSystem.hpp>
@@ -29,8 +29,9 @@ using namespace glm;
 using namespace AquaEditor;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
-using namespace AquaEngine::Graphics;
+using namespace AquaEditor::Systems;
 using namespace AquaEngine::Systems;
+using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Scripting;
 using namespace AquaEngine::Components;
 
@@ -57,8 +58,11 @@ void EditorApp::Setup()
 	// Add global systems
 	SystemManager::Global()->Add<AudioSystem>();
 
-	ImGUISystem* guiSystem = SystemManager::Global()->Add<ImGUISystem>();
-	ImGui::SetCurrentContext(guiSystem->GetContext());
+	ImGUISystem* imGUISystem = SystemManager::Global()->Add<ImGUISystem>();
+	ImGui::SetCurrentContext(imGUISystem->GetContext());
+
+	string vfsPath = VFS::GetAbsolutePath("editor://EditorLayout.ini");
+	ImGui::GetIO().IniFilename = vfsPath.c_str();
 
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
@@ -66,12 +70,7 @@ void EditorApp::Setup()
 	m_RenderSystem->Enable(false);
 
 	SystemManager::Global()->Add<SceneSystem>();
-
-	// Set ImGUI layout file
-	ImGuiIO& io = ImGui::GetIO();
-	ImGuiIniFilename = VFS::GetAbsolutePath("editor://EditorLayout.ini");
-	io.IniFilename = ImGuiIniFilename.c_str();
-
+	
 	LaunchEditorService();
 }
 
@@ -80,14 +79,13 @@ void EditorApp::Cleanup()
 	Application::Cleanup();
 
 	SystemManager::Global()->Remove<SceneSystem>();
-	SystemManager::Global()->Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<AudioSystem>();
+	SystemManager::Global()->Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<RenderSystem>();
 
 	m_RenderSystem = nullptr;
 }
 
-#include <AquaEngine/Input.hpp>
 void EditorApp::OnUpdate()
 {
 	if(ScriptEngine::AwaitingReload())
@@ -100,6 +98,10 @@ void EditorApp::LaunchEditorService()
 {
 	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll", true);
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
+
+	// Let managed code add & remove native ImGUISystem
+	assembly->BindManagedSystem<Systems::ImGUISystem>("AquaEditor.Systems", "ImGUISystem");
+
 	SystemManager::Global()->Add(editorService);
 }
 

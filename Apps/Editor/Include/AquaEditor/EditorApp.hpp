@@ -4,9 +4,9 @@
 #include <typeindex>
 #include <filesystem>
 #include <unordered_map>
-#include <ProjectInfo.hpp>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Application.hpp>
+#include <AquaEditor/ProjectInfo.hpp>
 #include <AquaEngine/Components/Camera.hpp>
 #include <AquaEngine/Graphics/RenderTexture.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>

@@ -1,3 +1,4 @@
+using AquaEditor.Systems;
 using AquaEngine;
 using AquaEngine.IO;
 using AquaEngine.Systems;
@@ -38,6 +39,7 @@ namespace AquaEditor
 		private World[] m_ClonedWorlds = new World[0];
 
 		private const string ProjectFilePath = "project://project.json";
+		private const string ImGUIFile = "editor://EditorLayout.ini";
 
 		protected override void Destroyed()
 		{
@@ -61,6 +63,18 @@ namespace AquaEditor
 			Add<ImGUISystem>();
 			Add<BehaviourSystem>().Enable(false); // Disabled during edit mode
 
+			// Set ImGUI layout file
+			#region ImGUI Setup
+			// Settings from disk
+			ImGUI.SetIniFilename(ImGUIFile);
+			ImGUI.LoadIniSettingsFromDisk(ImGUIFile);
+
+			// Window set initial content scale and listen for change
+			OnWindowContentScaleChanged(Window.ContentScaling);
+			Window.ContentScaleChanged += OnWindowContentScaleChanged;
+			#endregion
+
+			// Read project file
 			Project = VFS.Read<ProjectFile>(ProjectFilePath);
 			foreach (string assembly in Project.Assemblies)
 				if (VFS.Exists(assembly) && !Scripting.IsAssemblyLoaded(assembly))
@@ -68,6 +82,12 @@ namespace AquaEditor
 
 			// Launch editor UI
 			Add<EditorUIService>();
+		}
+
+		private void OnWindowContentScaleChanged(Vector2 resolution)
+		{
+			ImGUI.SetDisplayFramebufferScale(Window.ContentScaling);
+			ImGUI.SetFontGlobalScale(Window.ContentScaling.x);
 		}
 
 		protected override void Disabled()
@@ -79,6 +99,7 @@ namespace AquaEditor
 			Remove<BehaviourSystem>();
 
 			Resource.SaveDatabase();
+			ImGUI.SaveIniSettingsToDisk(ImGUIFile);
 		}
 
 		protected override void Update()
@@ -95,8 +116,7 @@ namespace AquaEditor
 
 		private void CreateWindow()
 		{
-			// EditorWindow.CreationHint(WindowHint.Maximised, true);
-
+			EditorWindow.CreationHint(WindowHint.Maximised, true);
 			EditorWindow.Create();
 		}
 

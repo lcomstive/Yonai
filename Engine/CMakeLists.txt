@@ -5,7 +5,7 @@ include(./Dependencies.cmake)
 # Aqua Engine Core
 project(AquaEngine)
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp")
+file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/*.hpp")
 
 list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
 

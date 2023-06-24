@@ -5,24 +5,26 @@
 * Uses the GLFW library to heavily simplify.
 *
 */
-
-#include <AquaEngine/Input.hpp>
-#include <AquaEngine/IO/Files.hpp>
+#include <AquaEngine/API.hpp>
 
 #if defined(AQUA_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
-#include <imgui.h>
+#include <AquaEngine/Input.hpp>
+#include <AquaEngine/IO/Files.hpp>
 #include <spdlog/spdlog.h>
-#include <imgui_internal.h>
 #include <AquaEngine/Window.hpp>
+#include <AquaEngine/Scripting/ScriptEngine.hpp>
 
 using namespace std;
 using namespace glm;
 using namespace AquaEngine;
+using namespace AquaEngine::Scripting;
 
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
 bool Window::s_ContextInitialised = false;
 vector<WindowResizeCallback> Window::s_WindowResizeCallbacks = {};
+MonoMethod* Window::s_ManagedMethodScaled = nullptr;
+MonoMethod* Window::s_ManagedMethodResized = nullptr;
 
 void GLFWErrorCallback(int error, const char* message);
 void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
@@ -38,6 +40,13 @@ bool Window::InitContext()
 		spdlog::critical("Failed to initialise GLFW");
 		return false;
 	}
+
+	s_ManagedMethodResized = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Window"),
+		"_OnResized", 0);
+	s_ManagedMethodScaled = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Window"),
+		"_OnContentScaleChanged", 0);
 
 	s_ContextInitialised = true;
 	return true;
@@ -228,13 +237,6 @@ ivec2 Window::GetFramebufferResolution(bool useImGui)
 	ivec2 resolution(0, 0);
 	if(!s_Instance)
 		return resolution;
-
-	if(useImGui && GImGui && GImGui->CurrentWindow)
-	{
-		// If inside ImGui window, get window size
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		return { viewportPanelSize.x, viewportPanelSize.y };
-	}
 	
 	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
 	return resolution;
@@ -425,6 +427,8 @@ void Window::GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, in
 
 	for (WindowResizeCallback callback : s_WindowResizeCallbacks)
 		callback(resolution);
+
+	mono_runtime_invoke(s_ManagedMethodResized, nullptr, nullptr, nullptr);
 }
 
 void Window::GLFWScrollCallback(GLFWwindow* window, double xOffset, double yOffset) { Input::s_ScrollDelta += (float)yOffset; }
@@ -466,14 +470,9 @@ void Window::GLFWWindowScaleCallback(GLFWwindow* window, float xScale, float ySc
 	if(s_Instance)
 		s_Instance->m_Scaling = { xScale, yScale };
 
-	spdlog::trace("Window content scaling set to ({}, {})", xScale, yScale);
+	mono_runtime_invoke(s_ManagedMethodScaled, nullptr, nullptr, nullptr);
 
-	if (ImGui::GetCurrentContext())
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplayFramebufferScale = { xScale, yScale };
-		io.FontGlobalScale = xScale;
-	}
+	spdlog::trace("Window content scaling set to ({}, {})", xScale, yScale);
 }
 
 void Window::GLFWJoystickCallback(int jid, int event)

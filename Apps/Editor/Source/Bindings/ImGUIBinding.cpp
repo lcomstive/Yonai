@@ -19,6 +19,42 @@ ImVec2 ToVec2(glm::ivec2* value) { return ImVec2(value->x, value->y); }
 ImVec4 ToVec4(glm::vec4* value) { return ImVec4(value->x, value->y, value->z, value->w); }
 ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z, value->w); }
 
+ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), AquaEditor)
+{
+	char* name = mono_string_to_utf8(pathRaw);
+	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
+	ImGui::GetIO().IniFilename = vfsPath.c_str();
+	mono_free(name);
+
+	spdlog::trace("ImGUI IniFilename set to '{}'", vfsPath.c_str());
+}
+
+ADD_MANAGED_METHOD(ImGUI, SetDisplayFramebufferScale, void, (float scaleX, float scaleY), AquaEditor)
+{ ImGui::GetIO().DisplayFramebufferScale = { scaleX, scaleY }; }
+
+ADD_MANAGED_METHOD(ImGUI, LoadIniSettingsFromDisk, void, (MonoString* pathRaw), AquaEditor)
+{
+	char* name = mono_string_to_utf8(pathRaw);
+	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
+	ImGui::LoadIniSettingsFromDisk(vfsPath.c_str());
+	mono_free(name);
+
+	spdlog::trace("ImGUI IniFilename loaded from '{}'", vfsPath.c_str());
+}
+
+ADD_MANAGED_METHOD(ImGUI, SaveIniSettingsToDisk, void, (MonoString* pathRaw), AquaEditor)
+{
+	char* name = mono_string_to_utf8(pathRaw);
+	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
+	ImGui::SaveIniSettingsToDisk(vfsPath.c_str());
+	mono_free(name);
+
+	spdlog::trace("ImGUI IniFilename saved to '{}'", vfsPath.c_str());
+}
+
+ADD_MANAGED_METHOD(ImGUI, SetFontGlobalScale, void, (float scale), AquaEditor)
+{ ImGui::GetIO().FontGlobalScale = scale; }
+
 /// Window Begin / End ///
 ADD_MANAGED_METHOD(ImGUI, _Begin, void, (MonoString* nameRaw, int flags), AquaEditor)
 {

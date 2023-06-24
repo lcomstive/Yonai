@@ -1,19 +1,7 @@
-#include <EditorApp.hpp>
-#include <SpashScreen.hpp>
-#include <AquaEngine/API.hpp>
+#include <AquaEditor/EditorApp.hpp>
 
 int main(int argc, char** argv)
 {
-#if 0 // !defined(BUILD_SHARED_LIBS) // Splashscreen currently does not work across .dll boundaries
-	AquaEditor::SplashScreenApp splashScreen;
-	splashScreen.ProcessArgs(argc, argv);
-	splashScreen.Run();
-
-	// Check if error occurred, or user requested closing
-	if(splashScreen.LaunchDisrupted())
-		return -1;
-#endif
-	
 	// Launch editor
 	AquaEditor::EditorApp app(argc, argv);
 	

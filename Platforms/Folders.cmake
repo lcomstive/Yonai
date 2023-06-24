@@ -5,10 +5,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
 # Engine
 
 # Apps
+set_target_properties(GlueGenerator		 PROPERTIES FOLDER "Apps")
 if(AQUA_BUILD_EDITOR)
 	set_target_properties(AquaEditor 		 PROPERTIES FOLDER "Apps")
-	set_target_properties(GlueGenerator		 PROPERTIES FOLDER "Apps")
-	set_target_properties(AquaEditorLauncher PROPERTIES FOLDER "Apps")
 endif()
 
 # Tests
@@ -20,9 +19,12 @@ endif()
 set(DEPENDENCY_PROJECTS
 	glad
 	assimp
-	imgui
 	spdlog
 )
+
+if(AQUA_BUILD_EDITOR)
+	list(APPEND DEPENDENCY_PROJECTS imgui)
+endif()
 
 if(ASSIMP_BUILD_ZLIB)
 	list(APPEND DEPENDENCY_PROJECTS zlibstatic)

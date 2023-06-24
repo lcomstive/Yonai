@@ -1,6 +1,3 @@
-option(AQUA_BUILD_EDITOR "Build the Aqua Editor" ON)
-option(AQUA_BUILD_BASE_GAME "Build the base game application" ON)
-
 if(MSVC)
 	option(AQUA_GENERATE_MDBS "Generate mono-compatible debug symbol files for AquaScriptCore and AquaScriptEditor" ON)
 endif()
@@ -22,6 +19,5 @@ endif()
 # Editor
 if(AQUA_BUILD_EDITOR)
 	add_subdirectory(Editor)
-	add_subdirectory(EditorLauncher)
 	add_subdirectory(AquaScriptEditor)
 endif()

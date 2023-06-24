@@ -79,39 +79,39 @@ list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS glad)
 list(APPEND AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include")
 
 # ImGui and ImGuizmo
-project(imgui)
+if(AQUA_BUILD_EDITOR)
+	project(imgui)
 
-add_library(imgui STATIC
-	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_rectpack.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_textedit.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_truetype.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_internal.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_tables.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_widgets.cpp
+	add_library(imgui STATIC
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_rectpack.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_textedit.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imstb_truetype.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_internal.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_tables.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_widgets.cpp
 
-	# ImGuizmo
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/GraphEditor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/GraphEditor.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImCurveEdit.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImCurveEdit.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGradient.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGradient.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImSequencer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImSequencer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImZoomSlider.h
-)
-target_include_directories(imgui PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo>
-    $<INSTALL_INTERFACE:include>)
-	
-list(APPEND AQUA_ENGINE_DEPENDENCY_LIBS imgui)
+		# ImGuizmo
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/GraphEditor.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/GraphEditor.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImCurveEdit.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImCurveEdit.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGradient.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGradient.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImSequencer.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImSequencer.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo/ImZoomSlider.h
+	)
+	target_include_directories(imgui PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ImGuizmo>
+		$<INSTALL_INTERFACE:include>)
+endif() # AQUA_BUILD_EDITOR
 
 # X11 on Linux
 if(LINUX)

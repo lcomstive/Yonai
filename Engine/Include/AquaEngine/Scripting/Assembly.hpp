@@ -78,7 +78,50 @@ namespace AquaEngine::Scripting
 		AquaAPI static ManagedSystemData GetManagedSystemData(size_t unmanagedType);
 		AquaAPI static ManagedComponentData GetManagedComponentData(size_t unmanagedType);
 
-	
+		template<typename T>
+		/// <summary>
+		/// Binds a managed system to an unmanaged system.
+		/// Once binding is complete, any operations performed on the managed system (e.g. added, removed) is also done to the unmanaged system in the same world.
+		/// </summary>
+		AquaAPI void BindManagedSystem(const char* managedNamespace, const char* managedName)
+		{
+			size_t managedHash = 0;
+			size_t hash = typeid(T).hash_code();
+			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
+				return;
+
+			s_InternalManagedSystemTypes.emplace(
+				managedHash,
+				ManagedSystemData
+				{
+					hash,
+					[](SystemManager* systemManager) -> Systems::System* { return systemManager->Add<T>(); }
+				}
+			);
+		}
+
+		template<typename T>
+		/// <summary>
+		/// Binds a managed component to an unmanaged component.
+		/// Once binding is complete, any operations performed on the component (e.g. added, removed) is also done to the unmanaged component on the same entity.
+		/// </summary>
+		AquaAPI void BindManagedComponent(const char* managedNamespace, const char* managedName)
+		{
+			size_t managedHash = 0;
+			size_t hash = typeid(T).hash_code();
+			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
+				return;
+
+			s_InternalManagedComponentTypes.emplace(
+				managedHash,
+				ManagedComponentData
+				{
+					hash,
+					[](World* world, EntityID entityID) -> Components::Component* { return world->AddComponent<T>(entityID); }
+				}
+			);
+		}
+
 	private:
 		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
 		static std::unordered_map<size_t, MonoType*> s_ReverseTypeHashes;
@@ -112,43 +155,6 @@ namespace AquaEngine::Scripting
 			s_ReverseTypeHashes.emplace(*managedHash, managedType);
 
 			return true;
-		}
-
-		template<typename T>
-		void AddInternalManagedComponent(const char* managedNamespace, const char* managedName)
-		{
-			size_t managedHash = 0;
-			size_t hash = typeid(T).hash_code();
-			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
-				return;
-
-			s_InternalManagedComponentTypes.emplace(
-				managedHash,
-				ManagedComponentData
-				{
-					hash,
-					[](World* world, EntityID entityID) -> Components::Component* { return world->AddComponent<T>(entityID); }
-				}
-			);
-		}
-
-		template<typename T>
-		void AddInternalManagedSystem(const char* managedNamespace, const char* managedName)
-		{
-			size_t managedHash = 0;
-			size_t hash = typeid(T).hash_code();
-			if (!AddInternalManagedType(hash, managedNamespace, managedName, &managedHash))
-				return;
-
-			s_InternalManagedSystemTypes.emplace(
-				managedHash,
-				ManagedSystemData
-				{
-					hash,
-					[](SystemManager* systemManager) -> Systems::System* { return systemManager->Add<T>(); }
-				}
-			);
-
 		}
 	};
 }

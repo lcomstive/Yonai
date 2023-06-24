@@ -1,6 +1,6 @@
 project(AquaEditor)
 file(GLOB_RECURSE SOURCE_FILES "Source/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "Include/*.hpp")
+file(GLOB_RECURSE HEADER_FILES "Include/AquaEditor/*.hpp" "Include/AquaEditor/*.h")
 
 list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp")
 
@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_SOURCE_DIR}/Engine/Include
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine)
+target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine imgui)
 
 # Add dependency to the C# binding projects
 add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor)
@@ -24,7 +24,7 @@ add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor)
 # Generate C# bindings from C#
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
-	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/Glue.hpp"
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
 	DEPENDS GlueGenerator
 )
 

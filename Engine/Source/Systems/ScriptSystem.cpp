@@ -1,4 +1,3 @@
-#include <imgui.h>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Systems/ScriptSystem.hpp>
 #include <AquaEngine/Scripting/UnmanagedThunks.hpp>

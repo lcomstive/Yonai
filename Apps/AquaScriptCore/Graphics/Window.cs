@@ -13,6 +13,15 @@ namespace AquaEngine
 			}
 			set => _SetResolution(ref value);
 		}
+		
+		public static Vector2 ContentScaling
+		{
+			get
+			{
+				_GetContentScaling(out Vector2 value);
+				return value;
+			}
+		}
 
 		public static FullscreenMode Fullscreen
 		{
@@ -63,7 +72,17 @@ namespace AquaEngine
 		/// </summary>
 		public static void CenterOnDisplay() => _CenterOnDisplay();
 
+		public delegate void OnResized(IVector2 resolution);
+		public delegate void OnContentScaleChanged(Vector2 resolution);
+
+		public static event OnResized Resized;
+		public static event OnContentScaleChanged ContentScaleChanged;
+
 		#region Internal Calls
+		private static void _OnResized() => Resized?.Invoke(Resolution);
+		private static void _OnContentScaleChanged() => ContentScaleChanged?.Invoke(ContentScaling);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetContentScaling(out Vector2 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(out IVector2 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetResolution(ref IVector2 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFullscreenMode();

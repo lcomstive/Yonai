@@ -1105,6 +1105,18 @@ namespace AquaEditor
 			NoSharedDelay				 = 1 << 13,
 		};
 
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetIniFilename(string path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SaveIniSettingsToDisk(string path);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void LoadIniSettingsFromDisk(string path);
+
+		public static void SetDisplayFramebufferScale(Vector2 scale) => SetDisplayFramebufferScale(scale.x, scale.y);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetDisplayFramebufferScale(float scaleX, float scaleY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetFontGlobalScale(float scale);
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);
