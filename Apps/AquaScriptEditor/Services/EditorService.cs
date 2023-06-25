@@ -116,7 +116,7 @@ namespace AquaEditor
 
 		private void CreateWindow()
 		{
-			EditorWindow.CreationHint(WindowHint.Maximised, true);
+			// EditorWindow.CreationHint(WindowHint.Maximised, true);
 			EditorWindow.Create();
 		}
 

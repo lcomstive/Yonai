@@ -30,7 +30,7 @@ namespace AquaEngine
 			string msg = string.Empty;
 			if(e.InnerException != null)
 				msg = FormatException(e.InnerException);
-			msg += e.Message + "\n\n" + e.Source + "\n\t" + e.StackTrace;
+			msg += $"[{e.GetType().Name}] " + e.Message + "\n\n" + e.Source + "\n\t" + e.StackTrace;
 			return msg;
 		}
 
