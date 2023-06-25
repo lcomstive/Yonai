@@ -40,7 +40,7 @@ vcpkg_installed
 
 # Don't upload the generated glue files
 Engine/Include/AquaEngine/Glue.hpp
-Apps/Editor/Include/Glue.hpp
+Apps/Editor/Include/AquaEditor/Glue.hpp
 
 # Do include mono shared libs
 !Engine/Vendor/mono/bin/
