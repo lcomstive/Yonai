@@ -186,6 +186,11 @@ namespace AquaEngine
 		private static readonly Type ResourceBaseType = typeof(ResourceBase);
 		private void SerializeObject(JObject json, string label, Type t, object value)
 		{
+			if(value == null)
+			{
+				json[label] = null;
+				return;
+			}
 			// Check if resource, if so then serialize as UUID
 			if(ResourceBaseType.IsAssignableFrom(t))
 				json[label] = ((ResourceBase)value).ResourceID.ToString();
