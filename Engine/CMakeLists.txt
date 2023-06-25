@@ -14,9 +14,7 @@ if(APPLE)
 	list(APPEND SOURCE_FILES ${OBJC_FILES})
 endif()
 
-if((NOT BUILD_SHARED_LIBS) OR WIN32)
-	# Windows currently only supports static linking with AquaEngine.
-	# This is because of dll-boundary issues with mono
+if(NOT BUILD_SHARED_LIBS)
 	add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
 	add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})

@@ -34,7 +34,7 @@ if(APPLE)
 	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 elseif(WIN32)
-	install(TARGETS AquaEditor AquaEditorLauncher DESTINATION .)
+	install(TARGETS AquaEditor DESTINATION .)
 
 	install(DIRECTORY ${AQUA_RESOURCES_DIR}/Assets DESTINATION .)
 	install(FILES ${AQUA_RESOURCES_DIR}/AquaScriptCore.dll DESTINATION .)
@@ -57,7 +57,7 @@ elseif(WIN32)
 
 	# Add start menu shortcut(s)
 	set(CPACK_NSIS_CREATE_ICONS_EXTRA
-		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Aqua Editor.lnk' '$INSTDIR\\\\Aqua Editor Launcher.exe'"
+		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Aqua Editor.lnk' '$INSTDIR\\\\Aqua Editor.exe'"
 	)
 
 	# Replace '/' with '\\'; regex so have to escape characters
@@ -71,7 +71,6 @@ elseif(WIN32)
 else()
 	install(FILES
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditor
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaEditorLauncher
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AquaScriptCore.dll
 		DESTINATION .)
 	install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets DESTINATION .)

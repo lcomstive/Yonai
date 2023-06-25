@@ -13,14 +13,14 @@ namespace AquaEditor::Systems
 		void EndFrame();
 
 	public:
-		AquaAPI ImGUISystem();
+		ImGUISystem();
 
-		AquaAPI void OnEnabled() override;
-		AquaAPI void OnDisabled() override;
+		void OnEnabled() override;
+		void OnDisabled() override;
 
-		AquaAPI void Draw() override;
+		void Draw() override;
 
-		AquaAPI ImGuiIO* GetIO();
-		AquaAPI ImGuiContext* GetContext();
+		ImGuiIO* GetIO();
+		ImGuiContext* GetContext();
 	};
 }

@@ -48,8 +48,8 @@ namespace AquaEngine::Scripting
 		///				unmanaged (C++) component (hash code of type_info),
 		///				and function for when component is added to an entity
 		/// </summary>
-		static std::unordered_map<size_t, ManagedSystemData> s_InternalManagedSystemTypes;
-		static std::unordered_map<size_t, ManagedComponentData> s_InternalManagedComponentTypes;
+		AquaAPI static std::unordered_map<size_t, ManagedSystemData> s_InternalManagedSystemTypes;
+		AquaAPI static std::unordered_map<size_t, ManagedComponentData> s_InternalManagedComponentTypes;
 
 		std::vector<MonoClass*> m_ManagedSystemTypes = {};
 		std::vector<MonoClass*> m_ManagedComponentTypes = {};
@@ -83,7 +83,7 @@ namespace AquaEngine::Scripting
 		/// Binds a managed system to an unmanaged system.
 		/// Once binding is complete, any operations performed on the managed system (e.g. added, removed) is also done to the unmanaged system in the same world.
 		/// </summary>
-		AquaAPI void BindManagedSystem(const char* managedNamespace, const char* managedName)
+		void BindManagedSystem(const char* managedNamespace, const char* managedName)
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();
@@ -105,7 +105,7 @@ namespace AquaEngine::Scripting
 		/// Binds a managed component to an unmanaged component.
 		/// Once binding is complete, any operations performed on the component (e.g. added, removed) is also done to the unmanaged component on the same entity.
 		/// </summary>
-		AquaAPI void BindManagedComponent(const char* managedNamespace, const char* managedName)
+		void BindManagedComponent(const char* managedNamespace, const char* managedName)
 		{
 			size_t managedHash = 0;
 			size_t hash = typeid(T).hash_code();
@@ -123,8 +123,8 @@ namespace AquaEngine::Scripting
 		}
 
 	private:
-		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
-		static std::unordered_map<size_t, MonoType*> s_ReverseTypeHashes;
+		AquaAPI static std::unordered_map<MonoType*, size_t> s_TypeHashes;
+		AquaAPI static std::unordered_map<size_t, MonoType*> s_ReverseTypeHashes;
 		
 		/// <summary>
 		/// Hashes all types.
@@ -137,7 +137,7 @@ namespace AquaEngine::Scripting
 		// Intended to be used when reloading assemblies
 		static void ClearCachedTypes();
 
-		bool AddInternalManagedType(size_t unmanagedTypeHash, const char* managedNamespace, const char* managedName, size_t* managedHash)
+		AquaAPI bool AddInternalManagedType(size_t unmanagedTypeHash, const char* managedNamespace, const char* managedName, size_t* managedHash)
 		{
 			MonoClass* klass = mono_class_from_name(Image, managedNamespace, managedName);
 			if (!klass)

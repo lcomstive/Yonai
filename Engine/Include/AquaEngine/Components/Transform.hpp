@@ -22,20 +22,20 @@ namespace AquaEngine::Components
 		/// Sets the parent and handles changes in
 		/// previous and new parent's children
 		/// </summary>
-		void SetParent(Transform* parent);
+		AquaAPI void SetParent(Transform* parent);
 
-		void AddChild(Transform* child);
-		void RemoveChild(Transform* child);
+		AquaAPI void AddChild(Transform* child);
+		AquaAPI void RemoveChild(Transform* child);
 
 #pragma region Getters
-		glm::mat4 GetModelMatrix(bool global = true);
-		glm::vec3 GetGlobalScale();
-		glm::vec3 GetGlobalPosition();
-		glm::quat GetGlobalRotation();
+		AquaAPI glm::mat4 GetModelMatrix(bool global = true);
+		AquaAPI glm::vec3 GetGlobalScale();
+		AquaAPI glm::vec3 GetGlobalPosition();
+		AquaAPI glm::quat GetGlobalRotation();
 
-		glm::vec3 Up();
-		glm::vec3 Right();
-		glm::vec3 Forward();
+		AquaAPI glm::vec3 Up();
+		AquaAPI glm::vec3 Right();
+		AquaAPI glm::vec3 Forward();
 
 		template<typename T>
 		T* GetComponentInChildren()

@@ -42,13 +42,15 @@ function(CheckMonoInstallDir rootDir)
 
     if(BUILD_SHARED_LIBS)
         find_file(MONO_LIBRARY NAMES
-            libmono-static-sgen.lib # Windows only runs with static linkage
+            mono-2.0-sgen.lib       # Windows
             libmonosgen-2.0.so      # Linux
             libmonosgen-2.0.dylib   # Mac
             PATHS "${rootDir}/lib" REQUIRED)
 
         if(NOT WIN32)
             set(MONO_SHARED_LIB ${MONO_LIBRARY} PARENT_SCOPE)
+        else()
+            set(MONO_SHARED_LIB ${rootDir}/bin/mono-2.0-sgen.dll PARENT_SCOPE)
         endif()
     else()
         find_file(MONO_LIBRARY NAMES
