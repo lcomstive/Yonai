@@ -39,7 +39,8 @@ namespace fs = std::filesystem;
 
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
-string AquaScriptCorePath = "app://AquaScriptCore.dll";
+string AquaScriptCorePath = "mono://AquaScriptCore.dll";
+string AquaScriptEditorPath = "mono://AquaScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -96,7 +97,7 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-	Assembly* assembly = ScriptEngine::LoadAssembly("app://AquaScriptEditor.dll", true);
+	Assembly* assembly = ScriptEngine::LoadAssembly(AquaScriptEditorPath, true);
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
 
 	// Let managed code add & remove native ImGUISystem
@@ -107,6 +108,7 @@ void EditorApp::LaunchEditorService()
 
 void EditorApp::InitialiseScripting()
 {
+	VFS::Mount("mono://", "app://Assets/Mono");
 	if (AquaScriptCorePath.empty() || !VFS::Exists(AquaScriptCorePath))
 	{
 		spdlog::critical("Core DLL path not specified or file '{}' does not exist.", AquaScriptCorePath.c_str());
