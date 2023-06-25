@@ -103,7 +103,7 @@ namespace AquaEditor
 						continue;
 
 					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
-					SceneManager.Load(scene, SceneAddType.Additive);
+					SceneManager.Load(scene, SceneAddType.Additive, false);
 				}
 				catch (Exception e) { Log.Exception(e); }
 			}
