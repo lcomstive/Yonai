@@ -179,7 +179,7 @@ namespace AquaEditor
 
 			// Re-load all scenes that were active when entering play mode
 			foreach (UUID worldID in m_EditModeSceneIDs)
-				SceneManager.Load(World.Get(worldID), SceneAddType.Additive);
+				SceneManager.Load(World.Get(worldID), SceneAddType.Additive, false);
 		}
 
 		public delegate void OnStateChanged(EditorState oldState, EditorState newState);
