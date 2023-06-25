@@ -36,7 +36,7 @@ namespace AquaEditor
 			Quaternion rotation = GetRotation();
 
 			// Apply speed to movement
-			if (Input.IsKeyDown(Key.LeftShift))
+			if (ImGUI.IsKeyDown(Key.LeftShift))
 				movement *= SprintMultiplier;
 			else
 				movement *= Speed;
@@ -49,23 +49,12 @@ namespace AquaEditor
 		{
 			Vector3 movement = Vector3.Zero;
 
-			if (Input.IsKeyDown(Key.W)) movement.z++;
-			if (Input.IsKeyDown(Key.S)) movement.z--;
-			if (Input.IsKeyDown(Key.A)) movement.x++;
-			if (Input.IsKeyDown(Key.D)) movement.x--;
-			if (Input.IsKeyDown(Key.E)) movement.y++;
-			if (Input.IsKeyDown(Key.Q)) movement.y--;
-			
-			if(Input.IsGamepadConnected(0))
-			{
-				Vector2 gamepadInput = new Vector2(
-					Input.GetAxis(0, GamepadAxis.AxisLeftX),
-					Input.GetAxis(0, GamepadAxis.AxisLeftY)
-				);
-
-				if (gamepadInput.Magnitude >= ControllerDeadzone)
-					movement += new Vector3(gamepadInput.x, 0, gamepadInput.y);
-			}
+			if (ImGUI.IsKeyDown(Key.W)) movement.z++;
+			if (ImGUI.IsKeyDown(Key.S)) movement.z--;
+			if (ImGUI.IsKeyDown(Key.A)) movement.x++;
+			if (ImGUI.IsKeyDown(Key.D)) movement.x--;
+			if (ImGUI.IsKeyDown(Key.E)) movement.y++;
+			if (ImGUI.IsKeyDown(Key.Q)) movement.y--;
 
 			return movement * Time.DeltaTime;
 		}

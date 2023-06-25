@@ -1190,6 +1190,11 @@ namespace AquaEditor
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
 
+		public static bool IsKeyUp(Key key) => !IsKeyDown(key);
+		public static bool IsKeyDown(Key key) => _IsKeyDown((int)key);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _IsKeyDown(int key);
+
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PushID(string id);
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PopID();
 

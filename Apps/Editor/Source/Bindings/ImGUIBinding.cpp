@@ -102,6 +102,9 @@ ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), AquaEditor) { return ImGui::B
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), AquaEditor) { return ImGui::EndDisabled(); }
 ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), AquaEditor) { ImGui::SetItemDefaultFocus(); }
 
+ADD_MANAGED_METHOD(ImGUI, _IsKeyDown, bool, (int key), AquaEditor)
+{ return ImGui::GetIO().KeysDown[key]; }
+
 ADD_MANAGED_METHOD(ImGUI, PushID, void, (MonoString* idRaw), AquaEditor)
 {
 	char* id = mono_string_to_utf8(idRaw);
