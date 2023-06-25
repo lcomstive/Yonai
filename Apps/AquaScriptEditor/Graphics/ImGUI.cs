@@ -1190,10 +1190,26 @@ namespace AquaEditor
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
 
+		/// <returns>True if <paramref name="key"/> is not held down</returns>
 		public static bool IsKeyUp(Key key) => !IsKeyDown(key);
+
+		/// <returns>True if <paramref name="key"/> is held down</returns>
 		public static bool IsKeyDown(Key key) => _IsKeyDown((int)key);
+
+		/// <returns>True if <paramref name="key"/> went down this frame</returns>
+		public static bool IsKeyPressed(Key key) => _IsKeyPressed((int)key);
+
+		/// <returns>True if <paramref name="key"/> was released this frame</returns>
+		public static bool IsKeyReleased(Key key) => _IsKeyReleased((int)key);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _IsKeyDown(int key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _IsKeyPressed(int key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _IsKeyReleased(int key);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PushID(string id);
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PopID();

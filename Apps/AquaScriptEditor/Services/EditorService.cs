@@ -107,6 +107,10 @@ namespace AquaEditor
 			if (State == EditorState.Step)
 				State = EditorState.Pause;
 
+			// Toggle play mode with CTRL+P
+			if (ImGUI.IsKeyDown(Key.LeftControl) && ImGUI.IsKeyPressed(Key.P))
+				State = State == EditorState.Edit ? EditorState.Play : EditorState.Edit;
+
 			if (Window.RequestedToClose)
 			{
 				EditorWindow.Destroy();
@@ -170,7 +174,7 @@ namespace AquaEditor
 		private void ExitPlayMode()
 		{
 			Log.Trace("Exiting play mode");
-			
+
 			SceneManager.UnloadAll();
 
 			// Destroy cloned worlds
@@ -180,6 +184,9 @@ namespace AquaEditor
 			// Re-load all scenes that were active when entering play mode
 			foreach (UUID worldID in m_EditModeSceneIDs)
 				SceneManager.Load(World.Get(worldID), SceneAddType.Additive, false);
+
+			// Force mouse state to be normal when not in play mode
+			Input.MouseState = MouseState.Normal;
 		}
 
 		public delegate void OnStateChanged(EditorState oldState, EditorState newState);

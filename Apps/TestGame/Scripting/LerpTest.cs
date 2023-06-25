@@ -11,8 +11,11 @@ namespace TestGame
 		private Transform m_Transform = null;
 		private Vector3 m_StartPosition = Vector3.Zero;
 
-		public override void OnEnable() => m_Transform = GetComponent<Transform>();
-		public override void Start() => m_StartPosition = m_Transform.LocalPosition;
+		public override void Start()
+		{
+			m_Transform = GetComponent<Transform>(); 
+			m_StartPosition = m_Transform.LocalPosition;
+		}
 
 		public float m_TotalTime = 0;
 		public float m_DeltaTime = 0;

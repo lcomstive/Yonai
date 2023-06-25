@@ -9,6 +9,7 @@ namespace TestGame
 		public const float SideMoveSpeed = 1.0f;
 		public const float DefaultFOV = 65.0f;
 
+		public float MoveSpeed = 5;
 		public Vector2 MouseSensitivity = new Vector2(1, 1);
 
 		private float xRot = 0, yRot = 0;
@@ -18,6 +19,7 @@ namespace TestGame
 		protected override void Enabled()
 		{
 			m_Target = Camera.Main;
+			Input.MouseState = MouseState.Disabled;
 			Log.Debug("CameraControlSystem target set to " + (m_Target ? m_Target.GetComponent<NameComponent>().Name : "(none)"));
 		}
 
@@ -32,7 +34,8 @@ namespace TestGame
 			m_Target.FOV -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 			m_Target.OrthographicSize -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 
-			Input.MouseState = Input.IsMouseDown(MouseButton.Right) ? MouseState.Disabled : MouseState.Normal;
+			if(Input.IsKeyPressed(Key.Escape))
+				Input.MouseState = Input.MouseState == MouseState.Disabled ? MouseState.Normal : MouseState.Disabled;
 			
 			// Reset FOV
 			if (Input.IsKeyPressed(Key.F5))
@@ -61,23 +64,40 @@ namespace TestGame
 				m_Transform.LocalRotation = Quaternion.FromEuler(Vector3.Forward);
 
 			m_Transform.LocalRotation = GetRotation();
+			m_Transform.LocalPosition += m_Transform.LocalRotation.Inverted * GetMovement();
 		}
 
 		private Quaternion GetRotation()
 		{
-			Vector3 euler = m_Transform.LocalRotation.Euler;
-
-			if (Input.IsMouseDown(MouseButton.Right))
-			{
-				Vector2 mouseDelta = Input.MouseDelta / 1000.0f;
-				xRot += mouseDelta.y * MouseSensitivity.x;
-				yRot += mouseDelta.x * MouseSensitivity.y;
-			}
+			Vector2 mouseDelta = Input.MouseDelta / 1000.0f;
+			xRot += mouseDelta.y * MouseSensitivity.x;
+			yRot += mouseDelta.x * MouseSensitivity.y;
 
 			Quaternion pitch = Quaternion.AngleAxis(xRot, Vector3.Right);
 			Quaternion yaw = Quaternion.AngleAxis(yRot, Vector3.Up);
 
 			return (pitch * yaw).Normalised;
+		}
+
+		private const float MovementInputLerpSpeed = 1.0f;
+		private Vector3 m_PreviousMovement = Vector3.Zero;
+		private Vector3 GetMovement()
+		{
+			Vector3 movement = Vector3.Zero;
+			if (Input.IsKeyDown(Key.W)) movement.z++;
+			if (Input.IsKeyDown(Key.S)) movement.z--;
+			if (Input.IsKeyDown(Key.A)) movement.x++;
+			if (Input.IsKeyDown(Key.D)) movement.x--;
+			if (Input.IsKeyDown(Key.E)) movement.y++;
+			if (Input.IsKeyDown(Key.Q)) movement.y--;
+
+			movement.z += Input.GetAxis(0, GamepadAxis.AxisLeftY);
+			movement.x += Input.GetAxis(0, GamepadAxis.AxisLeftX);
+
+			movement = Vector3.Lerp(m_PreviousMovement, movement, MovementInputLerpSpeed * Time.DeltaTime);
+			m_PreviousMovement = movement;
+
+			return movement * MoveSpeed * Time.DeltaTime;
 		}
 	}
 }

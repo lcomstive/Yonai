@@ -225,27 +225,31 @@ namespace AquaEngine
 		
 		private object DeserializeObject(JObject json, string label, Type t)
 		{
-			if (json[label] == null) return null;
-
-			if (typeof(ResourceBase).IsAssignableFrom(t)) return Resource.Get(ulong.Parse(json[label].Value<string>()));
-			else if (t == typeof(int))			return json[label].Value<int>();
-			else if (t == typeof(uint))		return json[label].Value<uint>();
-			else if (t == typeof(bool))		return json[label].Value<bool>();
-			else if (t == typeof(float))	return json[label].Value<float>();
-			else if (t == typeof(string))	return json[label].Value<string>();
-			else if (t == typeof(UUID))		return (UUID)ulong.Parse(json[label].Value<string>());
-			else if (t.IsEnum)				return Enum.Parse(t, json[label].Value<string>());
-			else if (typeof(Component).IsAssignableFrom(t))
+			try
 			{
-				// Reference to another component
-				JObject componentJSON = json[label].Value<JObject>();
-				UUID componentEntityID = ulong.Parse(componentJSON["Entity"].Value<string>());
-				Entity componentEntity = World.GetEntity(componentEntityID);
-				Type componentType = Type.GetType(componentJSON["Type"].Value<string>());
-				return componentEntity.GetComponent(componentType);
+				if (json[label] == null) return null;
+
+				if (typeof(ResourceBase).IsAssignableFrom(t)) return Resource.Get(ulong.Parse(json[label].Value<string>() ?? UUID.Invalid.ToString()));
+				else if (t == typeof(int)) return json[label].Value<int>();
+				else if (t == typeof(uint)) return json[label].Value<uint>();
+				else if (t == typeof(bool)) return json[label].Value<bool>();
+				else if (t == typeof(float)) return json[label].Value<float>();
+				else if (t == typeof(string)) return json[label].Value<string>();
+				else if (t == typeof(UUID)) return (UUID)ulong.Parse(json[label].Value<string>());
+				else if (t.IsEnum) return Enum.Parse(t, json[label].Value<string>());
+				else if (typeof(Component).IsAssignableFrom(t))
+				{
+					// Reference to another component
+					JObject componentJSON = json[label].Value<JObject>();
+					UUID componentEntityID = ulong.Parse(componentJSON["Entity"].Value<string>());
+					Entity componentEntity = World.GetEntity(componentEntityID);
+					Type componentType = Type.GetType(componentJSON["Type"].Value<string>());
+					return componentEntity.GetComponent(componentType);
+				}
+				else
+					Log.Debug($"Type '{t.Name}' has no method to be deserialized");
 			}
-			else
-				Log.Debug($"Type '{t.Name}' has no method to be deserialized");
+			catch(Exception e) { Log.Exception(e, $"Failed to deserialize '{label}' on type '{t.Name}'"); }
 			return null;
 		}
 
