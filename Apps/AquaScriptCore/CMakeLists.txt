@@ -15,7 +15,7 @@ if(MSVC)
     # Copy AquaScriptCore.dll to output resources mono directory
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "Copying AquaScriptCore.dll to app://Assets/Mono/"
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${AQUA_RESOURCES_DIR}/Assets/Mono/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${AQUA_RESOURCES_DIR}/Assets/Mono/AquaScriptCore.dll
     )
 
     if(AQUA_GENERATE_MDBS)
@@ -24,7 +24,7 @@ if(MSVC)
             COMMAND $<IF:$<CONFIG:Release>,echo,${MONO_MDB2PDB}> $<TARGET_FILE:${PROJECT_NAME}>)
         # Copy MDB to resources mono directory 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND $<IF:$<CONFIG:Release>,echo,${CMAKE_COMMAND}> -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/AquaScriptCore.dll.mdb ${AQUA_RESOURCES_DIR}/Assets/Mono/)
+            COMMAND $<IF:$<CONFIG:Release>,echo,${CMAKE_COMMAND}> -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/AquaScriptCore.dll.mdb ${AQUA_RESOURCES_DIR}/Assets/Mono/AquaScriptCore.dll.mdb)
     endif()
 
 else()
