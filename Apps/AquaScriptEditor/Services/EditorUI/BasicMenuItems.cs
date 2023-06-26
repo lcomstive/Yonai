@@ -14,7 +14,10 @@ namespace AquaEditor.EditorUI
 		private static void Fullscreen() =>
 			Window.Fullscreen = Window.Fullscreen == FullscreenMode.Windowed ? FullscreenMode.Borderless : FullscreenMode.Windowed;
 
-		[MenuItem("Print Resources")]
-		private static void PrintResources() => Resource._Print();
+		[MenuItem("File/Resources/Save", Icon = "Save")]
+		private static void SaveResources() => Resource.SaveDatabase();
+
+		[MenuItem("File/Resources/Load")]
+		private static void LoadResources() => Resource.LoadDatabase();
 	}
 }

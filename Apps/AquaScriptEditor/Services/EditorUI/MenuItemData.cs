@@ -1,20 +1,22 @@
 using AquaEngine;
 using System.Reflection;
 using System.Collections.Generic;
+using System;
+using AquaEngine.Graphics;
 
 namespace AquaEditor.EditorUI
 {
 	internal class MenuItemData
 	{
 		public string Name;
-		public MethodInfo Callback = null;
+		public Action Callback = null;
 		public MenuItemAttribute Attribute;
 
 		public List<MenuItemData> Children = new List<MenuItemData>();
 
 		public bool IsDirectory => Callback == null || Attribute == null;
 
-		public MenuItemData(string name, MenuItemAttribute attribute = null, MethodInfo callback = null)
+		public MenuItemData(string name, MenuItemAttribute attribute = null, Action callback = null)
 		{
 			Name = name;
 			Callback = callback;
@@ -29,10 +31,14 @@ namespace AquaEditor.EditorUI
 				RenderDirectory();
 			else
 			{
-				// ImGUI.Image(Icons.Get(Attribute.Icon), new Vector2(20, 20));
-				// ImGUI.SameLine();
+				if (!string.IsNullOrEmpty(Attribute.Icon))
+				{
+					Texture icon = Icons.Has(Attribute.Icon) ? Icons.Get(Attribute.Icon) : Resource.Get<Texture>(Attribute.Icon);
+					ImGUI.Image(icon, new Vector2(20, 20));
+					ImGUI.SameLine();
+				}
 				if (ImGUI.MenuItem(Name, Attribute.Shortcut))
-					Callback?.Invoke(null, null);
+					Callback?.Invoke();
 			}
 		}
 
@@ -48,12 +54,17 @@ namespace AquaEditor.EditorUI
 		}
 
 		public void AddDirectory(string path)
-			=> Add(null, path, null);
+			=> Add(path, (Action)null, null);
 
 		public void Add(MethodInfo method, MenuItemAttribute attribute)
-			=> Add(method, attribute.Path, attribute);
+			=> Add(attribute.Path, method, attribute);
 
-		public void Add(MethodInfo method, string path, MenuItemAttribute attribute)
+		public void Add(Action callback, MenuItemAttribute attribute)
+			=> Add(attribute.Path, callback, attribute);
+
+		public void Add(string path, MethodInfo methodInfo, MenuItemAttribute attribute) =>
+			Add(path, (Action)Delegate.CreateDelegate(typeof(Action), methodInfo), attribute);
+		public void Add(string path, Action callback, MenuItemAttribute attribute)
 		{
 			// Check for valid path
 			if (string.IsNullOrEmpty(path))
@@ -66,8 +77,8 @@ namespace AquaEditor.EditorUI
 			{
 				string subpath = splitPath[splitPath.Length - 1];
 				// Check if method and attribute are available, if not could just be creating an empty directory
-				if (method != null && attribute != null)
-					Children.Add(new MenuItemData(subpath, attribute, method));
+				if (callback != null && attribute != null)
+					Children.Add(new MenuItemData(subpath, attribute, callback));
 				else // Add empty directory
 					Children.Add(new MenuItemData(subpath));
 				return;
@@ -78,22 +89,17 @@ namespace AquaEditor.EditorUI
 			{
 				if (child.Name == splitPath[0] && child.IsDirectory)
 				{
-					child.Add(method, path.Substring(splitPath[0].Length + 1), attribute);
+					child.Add(path.Substring(splitPath[0].Length + 1), callback, attribute);
 					return;
 				}
 			}
 
 			// No child directory found, create new one
 			MenuItemData directory = new MenuItemData(splitPath[0]);
-			directory.Add(method, path.Substring(splitPath[0].Length + 1), attribute);
+			directory.Add(path.Substring(splitPath[0].Length + 1), callback, attribute);
 			Children.Add(directory);
 
 			Log.Debug($"Created menu item directory {splitPath[0]}");
-		}
-
-		public void Sort()
-		{
-
 		}
 	}
 }

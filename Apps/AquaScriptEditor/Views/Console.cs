@@ -46,10 +46,10 @@ namespace AquaEditor.Views
 			Log.Message += OnLogMessage;
 
 			Log.Trace("This is\na test\nMulti\n\tline\n\nmessage");
-			// Log.Warning("And this message is a very, very, very long message that should fill up the entire length of the window because it just keeps on going and going and going...");
+			Log.Warning("And this message is a very, very, very long message that should fill up the entire length of the window because it just keeps on going and going and going...");
 
-			m_IconUp = Icons.Get("Up");
-			m_IconDown = Icons.Get("Down");
+			m_IconUp = Resource.Get<Texture>("assets://Textures/Icons/Kenney/Up.png");
+			m_IconDown = Resource.Get<Texture>("assets://Textures/Icons/Kenney/Down.png");
 		}
 
 		protected override void Closed() => Log.Message -= OnLogMessage;

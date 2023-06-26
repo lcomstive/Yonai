@@ -125,6 +125,11 @@
     "Type": "AquaEngine.Graphics.Texture"
   },
   {
+    "ID": "16764344784701655863",
+    "Path": "assets://Textures/Icons/OS/Windows.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
     "ID": "3709196398890155700",
     "Path": "assets://Textures/texture_09.png",
     "Type": "AquaEngine.Graphics.Texture"
@@ -143,90 +148,5 @@
     "ID": "4807936073239384562",
     "Path": "project://Assets/Audio/Mixers/SFX.mixer",
     "Type": "AquaEngine.SoundMixer"
-  },
-  {
-    "ID": "9987706167669326045",
-    "Path": "assets://Shaders/NewSpriteShader",
-    "Type": "AquaEngine.Graphics.Shader"
-  },
-  {
-    "ID": "10177895426473125389",
-    "Path": "assets://Audio/Fall.mp3",
-    "Type": "AquaEngine.Sound"
-  },
-  {
-    "ID": "13529969992875555437",
-    "Path": "assets://Audio/Mixers/SFX.mixer",
-    "Type": "AquaEngine.SoundMixer"
-  },
-  {
-    "ID": "1368404488378282947",
-    "Path": "project://Assets/Textures/texture_09.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "2325750803290234581",
-    "Path": "assets://Textures/Icons/Kenney/gear.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "7748432744322109940",
-    "Path": "assets://Textures/Icons/Kenney/larger.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "10430664079013849414",
-    "Path": "assets://Textures/Icons/Kenney/up.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "14856186938147081278",
-    "Path": "assets://Textures/Icons/Kenney/power.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "2520737587246200632",
-    "Path": "assets://Textures/Icons/Kenney/down.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "17987233137012267584",
-    "Path": "assets://Textures/Icons/Kenney/save.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "3031916730827344260",
-    "Path": "project://Assets/Audio/Lifelike.mp3",
-    "Type": "AquaEngine.Sound"
-  },
-  {
-    "ID": "10031138512492472585",
-    "Path": "project://Assets/Textures/Aqua.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "2497382191480865192",
-    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "8357773485068196779",
-    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "1553686605994059412",
-    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "4448353709651691703",
-    "Path": "project://Assets/Models/Backpack/1001_normal.png",
-    "Type": "AquaEngine.Graphics.Texture"
-  },
-  {
-    "ID": "10840139679907649417",
-    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
-    "Type": "AquaEngine.Graphics.Texture"
   }
 ]

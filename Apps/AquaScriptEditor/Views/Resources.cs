@@ -43,7 +43,7 @@ namespace AquaEditor.Views
 
 		protected override void Opened()
 		{
-			m_IconFolder = Icons.Get("Folder");
+			m_IconFolder = Resource.Get<Texture>("assets://Textures/Icons/Folder.png");
 			OpenDirectory(RootDirectory);
 		}
 

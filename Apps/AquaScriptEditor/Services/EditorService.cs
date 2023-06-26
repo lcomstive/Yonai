@@ -1,11 +1,8 @@
-using AquaEditor.Systems;
 using AquaEngine;
 using AquaEngine.IO;
 using AquaEngine.Systems;
-using Newtonsoft.Json;
-using System;
-using System.Linq;
-using System.Reflection;
+using AquaEditor.Systems;
+using AquaEditor.BuildProcess;
 
 namespace AquaEditor
 {
@@ -82,6 +79,8 @@ namespace AquaEditor
 
 			// Launch editor UI
 			Add<EditorUIService>();
+
+			GameBuilder.Initialise();
 		}
 
 		private void OnWindowContentScaleChanged(Vector2 resolution)

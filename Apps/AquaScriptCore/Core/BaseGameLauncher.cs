@@ -22,14 +22,14 @@ namespace AquaEngine
 			VFS.Mount("assets://", "build://ProjectFiles");
 			VFS.Mount("project://Assets/", "build://ProjectFiles");
 
-			JSON = LoadJSON("build://launch.json");
+			JSON = LoadJSON("build://Launch.json");
 
 			LoadBaseSystems();
 
 			if(JSON.ContainsKey("Assemblies"))
 				LoadAssemblies();
 
-			Resource.LoadDatabase("build://resources.json");
+			Resource.LoadDatabase("build://Resources.json");
 
 			if (JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
 				LoadGlobalSystems();

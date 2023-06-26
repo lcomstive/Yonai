@@ -34,6 +34,8 @@ namespace AquaEngine.IO
 
 		public string FullPath => ParentDirectory + FileName;
 
+		public string FileNameWithoutExtension => FileName.Replace(Extension, "");
+
 		public VFSFile(string filepath)
 		{
 			if (string.IsNullOrEmpty(filepath))

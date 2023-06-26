@@ -340,11 +340,35 @@ ADD_MANAGED_METHOD(Application, GetArg, MonoString*, (MonoString* name, MonoStri
 ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
 { return Application::Current()->HasArg(mono_string_to_utf8(name)); }
 
-ADD_MANAGED_METHOD(Application, GetBuildType, int)
+ADD_MANAGED_METHOD(Application, GetBuildType, unsigned char)
 #ifndef NDEBUG // Debug mode
 { return 0; }
 #else // Release mode
 { return 1; }
+#endif
+
+ADD_MANAGED_METHOD(Application, GetPlatform, unsigned char)
+#if defined(AQUA_PLATFORM_WINDOWS)
+{ return 1; }
+#elif defined(AQUA_PLATFORM_MAC)
+{ return 2; }
+#elif defined(AQUA_PLATFORM_LINUX)
+{ return 3; }
+#elif defined(AQUA_PLATFORM_iOS)
+{ return 4; }
+#elif defined(AQUA_PLATFORM_ANDROID)
+{ return 5; }
+#elif defined(AQUA_PLATFORM_UNIX)
+{ return 6; }
+#else
+{ return 0; }
+#endif
+
+ADD_MANAGED_METHOD(Application, IsDesktop, bool)
+#if defined(AQUA_PLATFORM_DESKTOP)
+{ return true; }
+#else
+{ return false; }
 #endif
 
 #pragma endregion

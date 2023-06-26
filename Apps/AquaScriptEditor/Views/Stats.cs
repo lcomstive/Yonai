@@ -64,7 +64,7 @@ namespace AquaEditor.Views
 				if (ImGUI.Checkbox("VSync", ref vsync))
 					Window.VSync = vsync;
 
-				if (Application.Configuration == Application.BuildType.Debug)
+				if (Application.Configuration == BuildType.Debug)
 					ImGUI.Text("Debug Mode");
 			}
 			ImGUI.End();

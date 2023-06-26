@@ -2,10 +2,26 @@
 
 namespace AquaEngine
 {
+	public enum Platform : byte
+	{
+		Unknown,
+		Windows,
+		Mac,
+		Linux,
+		iOS,
+		Android,
+		Unix // Other Unix platform
+	}
+
+	public enum BuildType : byte { Debug, Release }
+
 	public static class Application
 	{
-		public enum BuildType { Debug, Release }
+		public static Platform Platform => (Platform)_GetPlatform();
 		public static BuildType Configuration => (BuildType)_GetBuildType();
+
+		public static bool IsDesktop => _IsDesktop();
+		public static bool IsMobile => !_IsDesktop();
 
 		public static void Exit() => _Exit();
 
@@ -24,7 +40,9 @@ namespace AquaEngine
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Exit();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasArg(string name);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetBuildType();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetBuildType();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetPlatform();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsDesktop();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetArg(string name, string defaultValue);
 		#endregion
 	}

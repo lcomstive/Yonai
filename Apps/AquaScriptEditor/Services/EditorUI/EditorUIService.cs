@@ -75,7 +75,7 @@ namespace AquaEditor
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = "Save")]
+		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = "assets://Textures/Icons/Kenney/Save.png")]
 		private static void SaveScene()
 		{
 			if (!VFS.Exists(SceneDir))
@@ -121,12 +121,6 @@ namespace AquaEditor
 			}
 			uiService.CreateTestScene();
 		}
-
-		[MenuItem("File/Resources/Save", Icon = "Save")]
-		private static void SaveResources() => Resource.SaveDatabase();
-
-		[MenuItem("File/Resources/Load")]
-		private static void LoadResources() => Resource.LoadDatabase();
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
 		{
@@ -297,6 +291,7 @@ namespace AquaEditor
 				State = EditorState.Step;
 		}
 
+		#region Menu Items
 		private void CompileMenuItems()
 		{
 			// Add default menu item directories
@@ -332,6 +327,10 @@ namespace AquaEditor
 			}
 			catch (Exception e) { Log.Exception(e); }
 		}
+
+		public void AddMenuItem(Action callback, MenuItemAttribute attribute) => m_RootMenuItem.Add(callback, attribute);
+		public void AddMenuItemDirectory(string directory) => m_RootMenuItem.AddDirectory(directory);
+		#endregion
 
 		#region Test Scene
 		private World m_TestWorld = null;

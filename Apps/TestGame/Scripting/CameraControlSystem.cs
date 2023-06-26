@@ -79,7 +79,7 @@ namespace TestGame
 			return (pitch * yaw).Normalised;
 		}
 
-		private const float MovementInputLerpSpeed = 1.0f;
+		private const float MovementInputLerpSpeed = 10.0f;
 		private Vector3 m_PreviousMovement = Vector3.Zero;
 		private Vector3 GetMovement()
 		{
