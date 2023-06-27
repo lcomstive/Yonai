@@ -72,7 +72,8 @@ namespace AquaEditor.BuildProcess
 		{
 			ProjectFile project = AquaSystem.Get<EditorService>().Project;
 			string outputFolder = FileDialog.OpenFolder("Build Output", "project://");
-			BuildProcess.Execute(outputFolder, project);
+			if (!string.IsNullOrEmpty(outputFolder))
+				BuildProcess.Execute(outputFolder, project);
 		}
 
 		internal static void Initialise()
@@ -80,11 +81,9 @@ namespace AquaEditor.BuildProcess
 			// Set platform to host platform by default
 			// TODO: Cache selected platform somewhere in a local user settings file?
 			SelectPlatform(Application.Platform);
-
-			ConstructBuildMenu();
 		}
 
-		private static void ConstructBuildMenu()
+		internal static void ConstructBuildMenu()
 		{
 			EditorUIService editorUI = AquaSystem.Get<EditorUIService>();
 			editorUI.AddMenuItemDirectory("Build");

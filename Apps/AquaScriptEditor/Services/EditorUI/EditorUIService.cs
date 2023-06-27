@@ -9,6 +9,7 @@ using AquaEditor.EditorUI;
 using AquaEngine.Graphics;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using AquaEditor.BuildProcess;
 
 namespace AquaEditor
 {
@@ -75,7 +76,7 @@ namespace AquaEditor
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S", Icon = "assets://Textures/Icons/Kenney/Save.png")]
+		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S")]
 		private static void SaveScene()
 		{
 			if (!VFS.Exists(SceneDir))
@@ -297,6 +298,8 @@ namespace AquaEditor
 			// Add default menu item directories
 			m_RootMenuItem.AddDirectory("File");
 			m_RootMenuItem.AddDirectory("Window");
+
+			GameBuilder.ConstructBuildMenu();
 
 			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
 

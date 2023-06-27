@@ -86,6 +86,18 @@ namespace AquaEngine
 		public static AquaSystem Get(Type type) => World._GetSystem(GlobalWorldID, type) as AquaSystem;
 
 		/// <summary>
+		/// Gets all global systems
+		/// </summary>
+		public static AquaSystem[] GetAll()
+		{
+			object[] objs = World._GetSystems(GlobalWorldID);
+			AquaSystem[] systems = new AquaSystem[objs.Length];
+			for(int i = 0; i < objs.Length; i++)
+				systems[i] = objs[i] as AquaSystem;
+			return systems;
+		}
+
+		/// <summary>
 		/// Removes a global system
 		/// </summary>
 		public static bool Remove<T>() => World._RemoveSystem(GlobalWorldID, typeof(T));

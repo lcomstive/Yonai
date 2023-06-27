@@ -7,9 +7,8 @@ class BaseGame : public AquaEngine::WindowedApplication
 	void InitialiseScripting();
 
 public:
-	BaseGame(int argc, char** argv) : WindowedApplication(argc, argv) { }
+	BaseGame(int argc, char** argv);
 	
 protected:
-	void Setup() override;
 	void OnPostDraw() override;
 };

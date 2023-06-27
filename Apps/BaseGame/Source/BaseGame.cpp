@@ -13,12 +13,10 @@ string AquaScriptCorePath = "mono://AquaScriptCore.dll";
 
 bool LoadAssembly(MonoString*);
 
-void BaseGame::Setup()
+BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
 {
-	WindowedApplication::Setup();
-
 	VFS::Mount("build://", "./Assets");
-	VFS::Mount("mono://", "build://Mono");
+	VFS::Mount("mono://", "build://Editor/Mono");
 	VFS::Mount("project://", "build://ProjectFiles");
 	
 	InitialiseScripting();
