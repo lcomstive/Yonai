@@ -16,7 +16,7 @@ namespace AquaEditor.Inspectors
 			if (Target is VFSFile)
 			{
 				VFSFile file = (VFSFile)Target;
-				m_Target = Resource.Load<Shader>(file.FullPath);
+				m_Target = Resource.Load<Shader>(file.FullPath, new ShaderImportSettings());
 			}
 			else // Is Shader object
 				m_Target = Target as Shader;

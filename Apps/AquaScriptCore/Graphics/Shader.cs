@@ -29,7 +29,6 @@ namespace AquaEngine.Graphics
 			ResourceID = resourceID;
 			Handle = handle;
 
-			ShaderStages = new ShaderImportSettings();
 			_GetStages(
 				Handle,
 				out string vertexPath,

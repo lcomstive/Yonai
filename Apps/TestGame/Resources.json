@@ -153,5 +153,35 @@
     "ID": "15405574584158869772",
     "Path": "project://Assets/Shaders/Default2D.shader",
     "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "7437466743858212748",
+    "Path": "project://Assets/Shaders/NewSprite.shader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "7891015904350980317",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "3311989918236138693",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "5369899181345225285",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "12247785765439590057",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "13460682877028109887",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "AquaEngine.Graphics.Texture"
   }
 ]
