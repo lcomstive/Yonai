@@ -1,7 +1,6 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEditor/Systems/ImGUISystem.hpp>
 #include <AquaEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
@@ -37,8 +36,10 @@ void ImGUISystem::OnEnabled()
 	ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
 	ImGui_ImplOpenGL3_Init();
 
+	/*
 	std::string fontPath = IO::VFS::GetAbsolutePath("assets://Fonts/OpenSans-Regular.ttf", true);
 	m_IO->FontDefault = m_IO->Fonts->AddFontFromFileTTF(fontPath.c_str(), 18);
+	*/
 
 	ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 

@@ -26,7 +26,7 @@ ADD_MANAGED_METHOD(FileDialog, _OpenFile, MonoArray*, (MonoString* titleRaw, Mon
 	for (size_t i = 0; i < filters.size(); i++)
 		filters[i] = string(mono_string_to_utf8(mono_array_get(filtersRaw, MonoString*, i)));
 
-	vector<string> selected = pfd::open_file(title, initialDir, filters, multiselect).result();
+	vector<string> selected = pfd::open_file(title, initialDir, filters, multiselect ? pfd::opt::multiselect : pfd::opt::none).result();
 
 	mono_free(title.data());
 	mono_free(initialDir.data());

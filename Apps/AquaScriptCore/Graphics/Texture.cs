@@ -65,10 +65,13 @@ namespace AquaEngine.Graphics
 				ImportSettings = importSettings;
 			else
 				ImportSettings = new TextureImportSettings(TextureFiltering.Linear);
-			_Import(Handle, ResourcePath, HDR, (int)Filter);
+			Upload(VFS.Read(ResourcePath), (TextureImportSettings)ImportSettings);
 		}
 
 		public void Bind(uint index = 0) => _Bind(Handle, index);
+
+		public void Upload(byte[] data, TextureImportSettings settings) =>
+			_Upload(Handle, data, settings.HDR, (int)Filter);
 
 		public JObject OnSerialize() =>
 			new JObject(
@@ -86,7 +89,7 @@ namespace AquaEngine.Graphics
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, bool hdr, int filter);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Upload(IntPtr handle, byte[] data, bool hdr, int filter);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(IntPtr handle);

@@ -1,9 +1,7 @@
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
 ADD_MANAGED_METHOD(Audio, GetDeviceCount, unsigned int)

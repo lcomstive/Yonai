@@ -15,7 +15,7 @@ namespace AquaEngine
 {
 	public static class Resource
 	{
-		private const string DatabaseFilePath = "project://resources.json";
+		private const string DatabaseFilePath = "project://Resources.json";
 		private static Dictionary<string, UUID> s_Paths = new Dictionary<string, UUID>();
 		private static Dictionary<UUID, ResourceBase> s_Instances = new Dictionary<UUID, ResourceBase>();
 
@@ -249,6 +249,8 @@ namespace AquaEngine
 				resources.Add(resource);
 			}
 
+			Log.Debug($"Saving resources to '{database}' ({VFS.ExpandPath(database)?.FullPath ?? string.Empty})");
+
 			string json = JsonConvert.SerializeObject(resources, Formatting.Indented);
 			VFS.Write(database, json.Replace("\r\n", "\n"));
 		}
@@ -267,6 +269,8 @@ namespace AquaEngine
 				SaveDatabase();
 				return;
 			}
+
+			Log.Debug($"Loading resources from '{database}' ({VFS.ExpandPath(database)?.FullPath ?? string.Empty})");
 
 			JArray root = JsonConvert.DeserializeObject<JArray>(VFS.ReadText(database));
 			foreach(JObject resource in root)
@@ -349,14 +353,18 @@ namespace AquaEngine
 
 			Log.Trace($"Saving resource '{resource.ResourcePath}' " + (serializeFileOptions == null ? string.Empty : "[cache]"));
 
-			string directory = resource.ResourcePath.Substring(0, resource.ResourcePath.LastIndexOf('/'));
-			if(!VFS.Exists(directory))
+			VFSFile vfsFile = resource.ResourcePath;
+			VFSMapping mapping = VFS.GetMapping(resource.ResourcePath, false, FilePermissions.Write);
+			if (!mapping.Exists(vfsFile.ParentDirectory))
 			{
-				Log.Debug($"Creating directory '{directory}'");
-				VFS.CreateDirectory(directory);
+				Log.Debug($"Creating directory '{vfsFile.ParentDirectory}'");
+				mapping.CreateDirectory(vfsFile.ParentDirectory);
 			}
 
-			VFS.Write(path, serializable);
+			if (mapping)
+				mapping.Write(path, serializable);
+			else
+				Log.Warning($"Failed to find writable mapping for '{resource.ResourcePath}'");
 		}
 
 		public static bool LoadFromDisk(ResourceBase resource, bool suppressWarnings = false)
@@ -386,6 +394,7 @@ namespace AquaEngine
 
 			Log.Trace($"Loading resource '{path}' from disk...");
 			resource._Load();
+
 			serializable.OnDeserialize(VFS.ReadJSON(path));
 			return true;
 		}

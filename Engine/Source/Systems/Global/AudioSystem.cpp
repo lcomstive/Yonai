@@ -5,7 +5,6 @@ using namespace AquaEngine::Systems;
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Scripting/Class.hpp>
 #include <AquaEngine/Components/Transform.hpp>
 #include <AquaEngine/Components/SoundSource.hpp>

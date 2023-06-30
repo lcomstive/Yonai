@@ -1,3 +1,4 @@
+using AquaEngine.IO;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -7,7 +8,7 @@ namespace AquaEngine
 	public abstract class ResourceBase
 	{
 		public UUID ResourceID { get; internal set; } = UUID.Invalid;
-		public string ResourcePath { get; internal set; } = string.Empty;
+		public string ResourcePath { get; internal set; }
 
 		public IImportSettings ImportSettings { get; internal set; }
 

@@ -2,7 +2,6 @@
 #include <assimp/Importer.hpp>
 #include <AquaEngine/Timer.hpp>
 #include <assimp/postprocess.h>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Resource.hpp>
 #include <AquaEngine/Graphics/Model.hpp>
 #include <AquaEngine/Graphics/Shader.hpp>
@@ -19,11 +18,7 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 using namespace AquaEngine::Components;
 
-Model::Model() : m_Path(""), m_Root(), m_MeshIDs(), m_ImportMaterials(true) { }
-Model::Model(string& path) : Model() { Import(path); }
-
-void Model::Import(const char* path, bool importMaterials) { Import(string(path), importMaterials); }
-void Model::Import(string path, bool importMaterials)
+void Model::Import(string path, vector<unsigned char>& modelData, bool importMaterials)
 {
 	if (!m_Path.empty())
 		// Release previous model
@@ -32,7 +27,7 @@ void Model::Import(string path, bool importMaterials)
 	m_Path = path;
 	m_ImportMaterials = importMaterials;
 
-	Load();
+	Load(modelData);
 }
 
 void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
@@ -69,13 +64,11 @@ void Model::CreateMeshMaterialPair(const MeshData& data, vector<pair<ResourceID,
 vector<pair<ResourceID, ResourceID>> Model::GetMeshesAndMaterials()
 {
 	vector<pair<ResourceID, ResourceID>> output;
-
 	CreateMeshMaterialPair(m_Root, output);
-
 	return output;
 } 
 
-void Model::Load()
+void Model::Load(vector<unsigned char>& modelData)
 {
 	if (m_Path.empty())
 		return;
@@ -85,11 +78,9 @@ void Model::Load()
 	const aiScene* scene = nullptr;
 	unsigned int postProcessing = aiProcess_Triangulate | aiProcess_FlipUVs;
 
-	// Read in model file
-	vector<unsigned char> modelData = VFS::Read(m_Path);
 	if (modelData.size() == 0)
 	{
-		spdlog::error("Failed to load model '{}' - Could not find file in VFS", m_Path);
+		spdlog::error("Failed to load model '{}' - Empty data", m_Path);
 		return;
 	}
 	string extension = filesystem::path(m_Path).extension().string();
@@ -138,7 +129,7 @@ void LoadMaterialTextures(
 	string texturePath = currentDirectory + aiTexturePath.C_Str();
 	replace(texturePath.begin(), texturePath.end(), '\\', '/');
 
-	outputID = Resource::Load<Texture>(texturePath, texturePath);
+	outputID = Resource::Load<Texture>(texturePath);
 }
 
 ResourceID Model::CreateMaterial(aiMaterial* aiMat)
@@ -239,8 +230,14 @@ ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, voi
 	mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, bool importMaterials), AquaEngine.Graphics)
-{ ((Model*)handle)->Import(mono_string_to_utf8(filepath), importMaterials); }
+ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, MonoArray* modelData, bool importMaterials), AquaEngine.Graphics)
+{
+	vector<unsigned char> data;
+	data.resize(mono_array_length(modelData));
+	for (size_t i = 0; i < data.size(); i++)
+		data[i] = mono_array_get(modelData, unsigned char, i);
+	((Model*)handle)->Import(mono_string_to_utf8(filepath), data, importMaterials);
+}
 
 ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
 {

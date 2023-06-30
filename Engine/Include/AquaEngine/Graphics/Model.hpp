@@ -25,19 +25,14 @@ namespace AquaEngine::Graphics
 		bool m_ImportMaterials;
 		std::vector<ResourceID> m_MeshIDs;
 
-		void Load();
+		void Load(std::vector<unsigned char>& data);
 		ResourceID CreateMaterial(aiMaterial* material);
-		void CreateEntity(MeshData& mesh, Entity* parent);
 		ResourceID ProcessMesh(aiMesh* mesh, const aiScene* scene);
 		void ProcessNode(aiNode* node, MeshData* parent, const aiScene* scene);
 		void CreateMeshMaterialPair(const MeshData& data, std::vector<std::pair<ResourceID, ResourceID>>& output);
 
 	public:
-		Model();
-		Model(std::string& path);
-
-		void Import(const char* path, bool importMaterials = true);
-		void Import(std::string path, bool importMaterials = true);
+		void Import(std::string path, std::vector<unsigned char>& data, bool importMaterials = true);
 
 		/// <summary>
 		/// When true, materials are imported

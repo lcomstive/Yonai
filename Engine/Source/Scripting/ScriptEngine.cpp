@@ -2,8 +2,8 @@
 #include <AquaEngine/Timer.hpp>
 #include <AquaEngine/World.hpp>
 #include <AquaEngine/Utils.hpp>
-#include <AquaEngine/IO/VFS.hpp>
 #include <mono/metadata/threads.h>
+#include <AquaEngine/IO/Files.hpp>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
 #include <AquaEngine/Application.hpp>
@@ -24,8 +24,7 @@ using namespace AquaEngine::Scripting;
 
 namespace fs = std::filesystem;
 
-const char* AssembliesPath = "mono://";
-const char* MonoConfigPath = "mono://Config";
+const char* MonoDebugLogPath = "MonoDebugger.log";
 const char* AppDomainName = "AquaEngineAppDomain";
 const char* MonoDefaultMountPath = "assets://Mono";
 
@@ -36,12 +35,11 @@ MonoDomain* ScriptEngine::s_AppDomain = nullptr;
 Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
 vector<Assembly*> ScriptEngine::s_Assemblies = {};
+vector<FileWatcher*> ScriptEngine::s_FileWatchers = {};
 vector<function<void()>> ScriptEngine::s_ReloadCallbacks = {};
 vector<function<void()>> ScriptEngine::s_PreReloadCallbacks = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
-
-const char* MonoDebugLogPath = "data://MonoDebugger.log";
 
 void JITParseOptions(unsigned int debugPort)
 {
@@ -55,7 +53,7 @@ void JITParseOptions(unsigned int debugPort)
 	debugging += "suspend=" + string(waitForDebugger ? "y" : "n") + ",";
 	debugging += "address=0.0.0.0:" + to_string(debugPort);
 	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "1");
-	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
+	debugging += ",logfile=" + Application::GetPersistentDirectory() + MonoDebugLogPath;
 
 	options.push_back(debugging.c_str());
 
@@ -67,41 +65,31 @@ void JITParseOptions(unsigned int debugPort)
 
 bool TryLoadDebugSymbols(MonoImage* image, fs::path& path)
 {
-	if (!VFS::Exists(path.string()))
+	if (!fs::exists(path.string()))
 		return false;
 
-	auto pdbContents = VFS::Read(path.string());
+	auto pdbContents = IO::Read(path.string());
 	mono_debug_open_image_from_memory(image, (const mono_byte*)pdbContents.data(), (int)pdbContents.size());
 	spdlog::trace("Added debug symbols found at '{}'", path.string().c_str());
 	return true;
 }
 
-void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
+void ScriptEngine::Init(std::string assembliesPath, bool allowDebugging)
 {
-	s_CoreDLLPath = coreDllPath;
+	s_CoreDLLPath = assembliesPath + "/AquaScriptCore.dll";
 	if (s_RootDomain)
 		return; // Already initialised
 
 	s_DebuggingEnabled = allowDebugging;
 
-	if (!VFS::HasMount("mono:/"))
-		VFS::Mount("mono://", MonoDefaultMountPath);
-
-	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
-	if (!VFS::Exists(assembliesPath))
-	{
-		spdlog::error("Mono assemblies path is invalid, disabling scripting");
-		return;
-	}
 	mono_set_assemblies_path(assembliesPath.c_str());
 
-	if (VFS::Exists(MonoConfigPath))
+	string configFile = assembliesPath + "/Config";
+	if (fs::exists(configFile))
 	{
-		string configFile = VFS::GetAbsolutePath(MonoConfigPath);
 		mono_config_parse(configFile.c_str());
 		spdlog::debug("Mono config file: {}", configFile.c_str());
 	}
-
 
 	// Setup debugging session
 	if (allowDebugging)
@@ -142,6 +130,10 @@ void ScriptEngine::Destroy()
 	if (!s_RootDomain)
 		return; // Already destroyed
 
+	for (FileWatcher* watcher : s_FileWatchers)
+		delete watcher;
+	s_FileWatchers.clear();
+
 	mono_jit_cleanup(s_RootDomain);
 
 	s_AppDomain = nullptr;
@@ -156,14 +148,14 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 {
 	if (path.empty())
 		return nullptr;
-	if (!IO::VFS::Exists(path))
+	if (!fs::exists(path))
 	{
 		spdlog::warn("Failed to load '{}' - could not be found", path);
 		return nullptr;
 	}
 
 	spdlog::debug("Loading C# script from '{}'", path);
-	auto data = IO::VFS::Read(path);
+	auto data = IO::Read(path);
 	if (data.empty())
 	{
 		spdlog::warn("Failed to load '{}' - failed to read", path);
@@ -176,7 +168,11 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 
 		// Watch files and reload if any changes occur
 		if (shouldWatch)
-			IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
+		{
+			FileWatcher* watcher = new FileWatcher(path);
+			watcher->Start(ScriptEngine::OnAssemblyFileChanged);
+			s_FileWatchers.push_back(watcher);
+		}
 	}
 
 	MonoImageOpenStatus status;
@@ -292,13 +288,16 @@ void ScriptEngine::Reload(bool force)
 	std::vector<AssemblyPath> assemblyPaths = s_AssemblyPaths;
 	s_AssemblyPaths.clear();
 
+	for (FileWatcher* watcher : s_FileWatchers)
+		delete watcher;
+
 	// Load AquaScriptCore assembly
 	LoadCoreAssembly();
 
 	// Load all previously loaded assemblies, in same order
 	for (AssemblyPath& assemblyPath : assemblyPaths)
 	{
-		if(!VFS::Exists(assemblyPath.Path))
+		if(!fs::exists(assemblyPath.Path))
 		{
 			spdlog::warn("Assembly '{}' no longer exists in filesystem", assemblyPath.Path);
 			// TODO: Check if continue watching assembly that has been removed causes issues.
@@ -307,8 +306,6 @@ void ScriptEngine::Reload(bool force)
 		}
 
 		spdlog::debug("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
-		if (assemblyPath.WatchForChanges)
-			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
 	}
 

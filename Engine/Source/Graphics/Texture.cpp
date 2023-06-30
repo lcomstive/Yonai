@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Graphics/Texture.hpp>
 
 #ifndef NDEBUG
@@ -12,13 +11,9 @@
 
 using namespace std;
 using namespace AquaEngine;
-using namespace AquaEngine::IO;
 using namespace AquaEngine::Graphics;
 
-Texture::Texture() : m_Path(""), m_ID(GL_INVALID_VALUE), m_Resolution(), m_HDR(false) { }
-
-Texture::Texture(string path, bool hdr) : m_ID(GL_INVALID_VALUE), m_Resolution()
-{ Import(path, hdr); }
+Texture::Texture() : m_Filter(GL_LINEAR), m_ID(GL_INVALID_VALUE), m_Resolution(), m_HDR(false) { }
 
 Texture::~Texture()
 {
@@ -26,30 +21,12 @@ Texture::~Texture()
 		glDeleteTextures(1, &m_ID);
 }
 
-void Texture::Import(const char* path, bool hdr, int filter) { Import(string(path), hdr, filter); }
-void Texture::Import(std::string path, bool hdr, int filter)
+bool Texture::Upload(vector<unsigned char>& textureData, bool hdr, int filter)
 {
-	if (m_Path == path && hdr == m_HDR)
-		return; // No change
-
-	m_HDR = hdr;
-	m_Path = path;
-	m_Filter = filter;
-
-	// Destroy any previous texture
-	if (m_ID != GL_INVALID_VALUE)
-		glDeleteTextures(1, &m_ID);
-
-	// Create new texture
-	GenerateImage();
-}
-
-void Texture::GenerateImage()
-{
-	if (m_Path.empty())
+	if (textureData.empty())
 	{
 		spdlog::warn("Cannot generate texture with empty path");
-		return;
+		return false;
 	}
 
 #ifndef NDEBUG
@@ -63,22 +40,10 @@ void Texture::GenerateImage()
 	// Flip loaded textures, so OpenGL loads them right way up
 	stbi_set_flip_vertically_on_load(true);
 	
-	if (VFS::Exists(m_Path))
-	{
-		// Load from virtual filesystem
-		vector<unsigned char> fileContents = VFS::Read(m_Path);
-		if (!m_HDR)
-			data = stbi_load_from_memory(fileContents.data(), (int)fileContents.size(), &width, &height, &channelCount, 0);
-		else
-			data = stbi_loadf_from_memory(fileContents.data(), (int)fileContents.size(), &width, &height, &channelCount, 0);
-	}
-	else // Load from filepath
-	{
-		if(!m_HDR)
-			data = stbi_load(m_Path.c_str(), &width, &height, &channelCount, 0);
-		else
-			data = stbi_loadf(m_Path.c_str(), &width, &height, &channelCount, 0);
-	}
+	if (!m_HDR)
+		data = stbi_load_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
+	else
+		data = stbi_loadf_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
 
 	// Check for validity
 	if (!data)
@@ -86,12 +51,14 @@ void Texture::GenerateImage()
 		// Release resources, these are now stored inside OpenGL's texture buffer
 		stbi_image_free(data);
 
-		spdlog::warn("Failed to load '{} - {}", m_Path, stbi_failure_reason());
-		return;
+		spdlog::warn("Failed to load texture - {}", stbi_failure_reason());
+		return false;
 	}
 
 	// Generate texture ID
-	glGenTextures(1, &m_ID);
+	if(m_ID == GL_INVALID_VALUE)
+		glGenTextures(1, &m_ID);
+	
 	// Set as 2D Texture
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 
@@ -132,14 +99,16 @@ void Texture::GenerateImage()
 
 #ifndef NDEBUG
 	profileTimer.Stop();
-	spdlog::debug("Loaded texture '{}' ({}x{}) in {}ms {}", m_Path, width, height, profileTimer.ElapsedTime().count(), m_HDR ? "[HDR]" : "");
+	spdlog::debug("Loaded texture ({}x{}) in {}ms {}", width, height, profileTimer.ElapsedTime().count(), m_HDR ? "[HDR]" : "");
 #endif
+
+	return true;
 }
 
 bool Texture::GetHDR() { return m_HDR; }
 int Texture::GetFilter() { return m_Filter; }
-string Texture::GetPath() { return m_Path; }
 unsigned int Texture::GetID() { return m_ID; }
+bool Texture::IsValid() { return m_ID != GL_INVALID_VALUE; }
 glm::ivec2& Texture::GetResolution() { return m_Resolution; }
 
 void Texture::Bind(unsigned int index)
@@ -166,12 +135,14 @@ ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResou
 		mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Texture, Import, void, (void* instance, MonoString* filepath, bool hdr, int filter), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Upload, bool, (void* instance, MonoArray* textureDataRaw, bool hdr, int filter), AquaEngine.Graphics)
 {
-	char* path = mono_string_to_utf8(filepath);
-	((Texture*)instance)->Import(path, hdr, filter);
-	if(filepath)
-		mono_free(path);
+	vector<unsigned char> textureData;
+	textureData.resize(mono_array_length(textureDataRaw));
+	for (size_t i = 0; i < textureData.size(); i++)
+		textureData[i] = mono_array_get(textureDataRaw, unsigned char, i);
+
+	return ((Texture*)instance)->Upload(textureData, hdr, filter);
 }
 
 ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)
@@ -186,11 +157,7 @@ ADD_MANAGED_METHOD(Texture, GetHDR, bool, (void* instance), AquaEngine.Graphics)
 ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), AquaEngine.Graphics)
 { return ((Texture*)instance)->GetFilter(); }
 
-ADD_MANAGED_METHOD(Texture, GetPath, MonoString*, (void* instance), AquaEngine.Graphics)
-{
-	Texture* texture = (Texture*)instance;
-	return texture && !texture->GetPath().empty() ?
-		mono_string_new(mono_domain_get(), texture->GetPath().c_str()) : nullptr;
-}
+ADD_MANAGED_METHOD(Texture, IsValid, bool, (void* instance), AquaEngine.Graphics)
+{ return ((Texture*)instance)->IsValid(); }
 
 #pragma endregion

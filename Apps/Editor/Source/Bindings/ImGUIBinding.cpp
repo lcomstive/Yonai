@@ -8,6 +8,7 @@
 #include <AquaEngine/Graphics/RenderTexture.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
 
+using namespace std;
 using namespace glm;
 using namespace AquaEngine;
 using namespace AquaEngine::Graphics;
@@ -22,11 +23,9 @@ ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z,
 ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), AquaEditor)
 {
 	char* name = mono_string_to_utf8(pathRaw);
-	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
-	ImGui::GetIO().IniFilename = vfsPath.c_str();
+	ImGui::GetIO().IniFilename = name;
+	spdlog::trace("ImGUI IniFilename set to '{}'", name);
 	mono_free(name);
-
-	spdlog::trace("ImGUI IniFilename set to '{}'", vfsPath.c_str());
 }
 
 ADD_MANAGED_METHOD(ImGUI, SetDisplayFramebufferScale, void, (float scaleX, float scaleY), AquaEditor)
@@ -35,21 +34,36 @@ ADD_MANAGED_METHOD(ImGUI, SetDisplayFramebufferScale, void, (float scaleX, float
 ADD_MANAGED_METHOD(ImGUI, LoadIniSettingsFromDisk, void, (MonoString* pathRaw), AquaEditor)
 {
 	char* name = mono_string_to_utf8(pathRaw);
-	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
-	ImGui::LoadIniSettingsFromDisk(vfsPath.c_str());
+	ImGui::LoadIniSettingsFromDisk(name);
+	spdlog::trace("ImGUI IniFilename loaded from '{}'", name);
 	mono_free(name);
-
-	spdlog::trace("ImGUI IniFilename loaded from '{}'", vfsPath.c_str());
 }
 
 ADD_MANAGED_METHOD(ImGUI, SaveIniSettingsToDisk, void, (MonoString* pathRaw), AquaEditor)
 {
 	char* name = mono_string_to_utf8(pathRaw);
-	std::string vfsPath = AquaEngine::IO::VFS::GetAbsolutePath(name);
-	ImGui::SaveIniSettingsToDisk(vfsPath.c_str());
+	ImGui::SaveIniSettingsToDisk(name);
+	spdlog::trace("ImGUI IniFilename saved to '{}'", name);
 	mono_free(name);
+}
 
-	spdlog::trace("ImGUI IniFilename saved to '{}'", vfsPath.c_str());
+ADD_MANAGED_METHOD(ImGUI, AddFontFromFile, void, (MonoString* pathRaw, int fontSize), AquaEditor)
+{
+	char* name = mono_string_to_utf8(pathRaw);
+	ImGui::GetIO().Fonts->AddFontFromFileTTF(name, fontSize);
+	spdlog::trace("Added font '{}' to ImGUI", name);
+	mono_free(name);
+}
+
+ADD_MANAGED_METHOD(ImGUI, AddFont, void, (MonoArray* dataRaw, int fontSize), AquaEditor)
+{
+	vector<unsigned char> data;
+	data.resize(mono_array_length(dataRaw));
+	for (size_t i = 0; i < data.size(); i++)
+		data[i] = mono_array_get(dataRaw, unsigned char, i);
+
+	data.resize(mono_array_length(dataRaw));
+	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data.data(), (int)data.size(), fontSize);
 }
 
 ADD_MANAGED_METHOD(ImGUI, SetFontGlobalScale, void, (float scale), AquaEditor)

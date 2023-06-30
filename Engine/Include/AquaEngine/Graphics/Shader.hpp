@@ -12,9 +12,16 @@ namespace AquaEngine::Graphics
 	struct ShaderStageInfo
 	{
 		std::string VertexPath;
+		std::string VertexContents;
+
 		std::string FragmentPath;
+		std::string FragmentContents;
+
 		std::string ComputePath;
+		std::string ComputeContents;
+
 		std::string GeometryPath;
+		std::string GeometryContents;
 	};
 
 	struct ShaderUniform
@@ -34,7 +41,6 @@ namespace AquaEngine::Graphics
 		void Destroy();
 		void CreateShaders();
 		void CacheUniformLocations();
-		void WatchShader(std::string path, bool watch = true);
 		void ShaderSourceChangedCallback(std::string path, IO::FileWatchStatus changeType);
 		GLuint CreateShader(const std::string & source, const GLenum type, const std::string& debugName);
 

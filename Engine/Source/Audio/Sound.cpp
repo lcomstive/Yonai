@@ -1,10 +1,9 @@
-#include <AquaEngine/IO/VFS.hpp>
+#include <spdlog/spdlog.h>
 #include <AquaEngine/Audio/Sound.hpp>
 #include <AquaEngine/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
-using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 
 Sound::Sound() : m_Sound() { }
@@ -32,9 +31,7 @@ void Sound::Import(string filepath)
 	if (m_FilePath.empty())
 		return;
 
-	string assetPath = VFS::GetAbsolutePath(m_FilePath, true);
-
-	ma_result result = ma_sound_init_from_file(&AudioSystem::s_Engine, assetPath.c_str(), c_Flags, nullptr, nullptr, &m_Sound);
+	ma_result result = ma_sound_init_from_file(&AudioSystem::s_Engine, m_FilePath.c_str(), c_Flags, nullptr, nullptr, &m_Sound);
 	if (result != MA_SUCCESS)
 	{
 		spdlog::warn("Failed to create sound for '{}' [{}]", m_FilePath.c_str(), (int)result);

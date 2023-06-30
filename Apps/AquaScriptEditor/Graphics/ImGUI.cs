@@ -1117,6 +1117,12 @@ namespace AquaEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetFontGlobalScale(float scale);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void AddFontFromFile(string filepath, int fontSize = 18);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void AddFont(byte[] data, int fontSize = 18);
+
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
 		public static bool Begin(string label, ref bool open, WindowFlags flags = WindowFlags.None) => _BeginClosable(label, ref open, (int)flags);

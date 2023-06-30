@@ -3,8 +3,8 @@
 #include <functional>
 #include <mono/jit/jit.h>
 #include <AquaEngine/API.hpp>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Systems/System.hpp>
+#include <AquaEngine/IO/FileWatcher.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 
 namespace AquaEngine::Scripting
@@ -18,6 +18,7 @@ namespace AquaEngine::Scripting
 		static MonoDomain* s_RootDomain;
 		static Assembly* s_CoreAssembly;
 		static std::vector<Assembly*> s_Assemblies;
+		static std::vector<IO::FileWatcher*> s_FileWatchers;
 
 		// Callbacks when script engine reloads all assemblies
 		static std::vector<std::function<void()>> s_ReloadCallbacks;
@@ -50,9 +51,9 @@ namespace AquaEngine::Scripting
 		/// <summary>
 		/// Begins the scripting engine and loads the core assembly
 		/// </summary>
-		/// <param name="coreDllPath">The path to AquaScriptCore.dll</param>
+		/// <param name="assembliesPath">The path containing AquaScriptCore.dll and Mono .dlls</param>
 		/// <param name="allowDebugging">Should a debugger for managed code be setup?</param>
-		AquaAPI static void Init(std::string& coreDllPath, bool allowDebugging = false);
+		AquaAPI static void Init(std::string assembliesPath, bool allowDebugging = false);
 
 		AquaAPI static void AddInternalCall(const char* name, const void* fn);
 		AquaAPI static void AddInternalCalls(const std::vector<std::pair<const char*, const void*>>& methods);

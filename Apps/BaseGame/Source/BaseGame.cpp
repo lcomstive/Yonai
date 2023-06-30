@@ -1,5 +1,4 @@
 #include <BaseGame.hpp>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
@@ -9,15 +8,17 @@ using namespace AquaEngine;
 using namespace AquaEngine::IO;
 using namespace AquaEngine::Scripting;
 
-string AquaScriptCorePath = "mono://AquaScriptCore.dll";
+string AssembliesPath = "./Assets/Editor/Mono/";
 
 bool LoadAssembly(MonoString*);
 
 BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
 {
+	/*
 	VFS::Mount("build://", "./Assets");
 	VFS::Mount("mono://", "build://Editor/Mono");
 	VFS::Mount("project://", "build://ProjectFiles");
+	*/
 	
 	InitialiseScripting();
 
@@ -26,14 +27,7 @@ BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
 
 void BaseGame::InitialiseScripting()
 {
-	if (AquaScriptCorePath.empty() || !VFS::Exists(AquaScriptCorePath))
-	{
-		spdlog::critical("Core DLL path not specified or file '{}' does not exist.", AquaScriptCorePath.c_str());
-		Exit();
-		return;
-	}
-
-	ScriptEngine::Init(AquaScriptCorePath,
+	ScriptEngine::Init(AssembliesPath,
 //#ifndef NDEBUG // Allow debugging in debug builds
 		true
 		/*

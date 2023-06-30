@@ -73,6 +73,8 @@ namespace AquaEngine
 		#pragma endregion
 
 		AquaAPI static Application* Current();
+
+		AquaAPI static std::string GetPersistentDirectory();
 	};
 
 	/// <summary>

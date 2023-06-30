@@ -288,7 +288,9 @@ namespace AquaEditor.Views
 
 		private void ShowInExplorer(string directory)
 		{
-			directory = VFS.GetAbsolutePath(directory);
+			// Get absolute directory
+			directory = VFS.GetMapping<VFSFileMapping>(directory)?.ExpandPath(directory) ?? directory;
+
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				directory = directory.Replace("/", "\\");

@@ -3,10 +3,10 @@
 #include <string>
 #include <typeinfo>
 #include <typeindex>
+#include <algorithm>
 #include <functional>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/ResourceID.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 

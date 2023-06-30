@@ -3,6 +3,7 @@ using AquaEngine.IO;
 using AquaEngine.Systems;
 using AquaEditor.Systems;
 using AquaEditor.BuildProcess;
+using System.IO;
 
 namespace AquaEditor
 {
@@ -48,6 +49,38 @@ namespace AquaEditor
 		{
 			Log.Debug("Launched editor service");
 
+			InitialiseVFS();
+
+			if (Application.HasArg("projectpath"))
+				LoadProject(Application.GetArg("projectpath"));
+			else
+			{
+				Log.Warning("No project path set");
+				Application.Exit();
+			}
+		}
+
+		private void InitialiseVFS()
+		{
+			VFS.Mount("app://", VFS.CurrentDirectory);
+			VFS.Mount("assets://", "app://Assets"); // Editor assets
+		}
+
+		private void LoadProject(string projectPath)
+		{
+			if(string.IsNullOrEmpty(projectPath))
+			{
+				Log.Warning("Cannot load project - invalid path");
+				return;
+			}
+
+			VFS.Mount("project://", projectPath);
+			VFS.Mount("assets://", "project://Assets");
+			VFS.Mount("editor://", "project://.aqua");
+
+			// Default full filesystem mapping for absolute paths
+			VFS.Mount("");
+
 			if (!EditorWindow.ContextIsInitialised())
 			{
 				EditorWindow.InitContext();
@@ -63,8 +96,9 @@ namespace AquaEditor
 			// Set ImGUI layout file
 			#region ImGUI Setup
 			// Settings from disk
-			ImGUI.SetIniFilename(ImGUIFile);
-			ImGUI.LoadIniSettingsFromDisk(ImGUIFile);
+			string imguiFile = VFS.ExpandPath(ImGUIFile);
+			ImGUI.SetIniFilename(imguiFile);
+			ImGUI.LoadIniSettingsFromDisk(imguiFile);
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);
@@ -74,8 +108,11 @@ namespace AquaEditor
 			// Read project file
 			Project = VFS.Read<ProjectFile>(ProjectFilePath);
 			foreach (string assembly in Project.Assemblies)
-				if (VFS.Exists(assembly) && !Scripting.IsAssemblyLoaded(assembly))
-					Scripting.LoadAssembly(assembly, true /* Should watch */);
+			{
+				string vfsPath = VFS.ExpandPath(assembly, true);
+				if (VFS.Exists(vfsPath) && !Scripting.IsAssemblyLoaded(vfsPath))
+					Scripting.LoadAssembly(vfsPath, true /* Should watch */);
+			}
 
 			// Launch editor UI
 			Add<EditorUIService>();
@@ -98,7 +135,7 @@ namespace AquaEditor
 			Remove<BehaviourSystem>();
 
 			Resource.SaveDatabase();
-			ImGUI.SaveIniSettingsToDisk(ImGUIFile);
+			ImGUI.SaveIniSettingsToDisk(VFS.ExpandPath(ImGUIFile));
 		}
 
 		protected override void Update()

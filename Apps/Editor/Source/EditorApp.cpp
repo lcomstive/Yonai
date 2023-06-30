@@ -2,7 +2,6 @@
 #include <spdlog/spdlog.h>
 #include <AquaEditor/Glue.hpp>
 #include <AquaEngine/Window.hpp>
-#include <AquaEngine/IO/VFS.hpp>
 #include <AquaEngine/Resource.hpp>
 #include <AquaEditor/EditorApp.hpp>
 #include <AquaEngine/Graphics/Shader.hpp>
@@ -39,8 +38,8 @@ namespace fs = std::filesystem;
 
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
-string AquaScriptCorePath = "mono://AquaScriptCore.dll";
-string AquaScriptEditorPath = "mono://AquaScriptEditor.dll";
+string AssembliesDirectory = "./Assets/Mono/";
+string AquaScriptEditorPath = AssembliesDirectory + "AquaScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -62,8 +61,7 @@ void EditorApp::Setup()
 	ImGUISystem* imGUISystem = SystemManager::Global()->Add<ImGUISystem>();
 	ImGui::SetCurrentContext(imGUISystem->GetContext());
 
-	string vfsPath = VFS::GetAbsolutePath("editor://EditorLayout.ini");
-	ImGui::GetIO().IniFilename = vfsPath.c_str();
+	ImGui::GetIO().IniFilename = "./EditorLayout.ini";
 
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
@@ -108,15 +106,8 @@ void EditorApp::LaunchEditorService()
 
 void EditorApp::InitialiseScripting()
 {
-	VFS::Mount("mono://", "app://Assets/Mono");
-	if (AquaScriptCorePath.empty() || !VFS::Exists(AquaScriptCorePath))
-	{
-		spdlog::critical("Core DLL path not specified or file '{}' does not exist.", AquaScriptCorePath.c_str());
-		Exit();
-		return;
-	}
-
-	ScriptEngine::Init(AquaScriptCorePath,
+	// VFS::Mount("mono://", "app://Assets/Mono");
+	ScriptEngine::Init(AssembliesDirectory,
 		// Allow debugging in debug builds
 		true);
 
@@ -138,11 +129,13 @@ void EditorApp::InitialiseMounts()
 		spdlog::warn("Empty project path!");
 	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
 
+	/*
 	VFS::Mount("project://", m_ProjectPath.string());
 	VFS::Mount("assets://", "project://Assets");
 	VFS::Mount("assets://", "app://Assets"); // Default assets
 	VFS::Mount("editor://", "project://.aqua");
 	VFS::Mount("mono://", "app://Assets/Mono");
+	*/
 }
 
 void EditorApp::Draw()

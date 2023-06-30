@@ -52,7 +52,8 @@ namespace AquaEngine.Graphics
 		{
 			// Load model
 			TryGetImportSettings(out ModelImportSettings settings);
-			_Import(Handle, ResourcePath, ImportMaterials = settings.ImportMaterials);
+			byte[] modelData = VFS.Read(ResourcePath);
+			_Import(Handle, ResourcePath, modelData, ImportMaterials = settings.ImportMaterials);
 
 			// Get meshes
 			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
@@ -71,7 +72,7 @@ namespace AquaEngine.Graphics
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, bool importMaterials);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, byte[] modelData, bool importMaterials);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMeshes(IntPtr handle, out ulong[] meshIDs, out ulong[] materialIDs);
 		#endregion

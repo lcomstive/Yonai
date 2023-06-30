@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <AquaEngine/Time.hpp>
 #include <AquaEngine/Utils.hpp>
+#include <AquaEngine/Window.hpp>
 #include <AquaEngine/Application.hpp>
 #include <AquaEngine/Scripting/Assembly.hpp>
 
@@ -12,11 +13,6 @@
 #include <AquaEngine/SystemManager.hpp>
 #include <AquaEngine/Systems/Global/SceneSystem.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
-
-// Virtual File System //
-#include <AquaEngine/IO/VFS.hpp>
-
-#include <AquaEngine/Window.hpp>
 
 // Platform Specific //
 #if defined(AQUA_PLATFORM_WINDOWS)
@@ -39,7 +35,7 @@ namespace fs = std::filesystem;
 
 Application* Application::s_Instance = nullptr;
 
-string GetPersistentDir()
+string Application::GetPersistentDirectory()
 {
 #if defined(AQUA_PLATFORM_WINDOWS)
 #pragma warning(disable : 4996) // "This function may be unsafe"
@@ -68,7 +64,7 @@ void Application::InitLogger()
 
 	consoleSink->set_level(logLevel);
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDir() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDirectory() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -79,8 +75,9 @@ void Application::InitLogger()
 
 void Application::InitVFS()
 {
+	/* TODO: Move to C# code
 	// Map persistent data
-	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDir());
+	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDirectory());
 
 	// Get executable path and directory
 #if defined(AQUA_PLATFORM_WINDOWS)
@@ -109,6 +106,7 @@ void Application::InitVFS()
 #endif
 
 	VFS::Mount("file:///", "");
+	*/
 }
 
 Application::Application()
@@ -143,7 +141,7 @@ void Application::Setup()
 	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
 	spdlog::info("");
 
-	string persistentPath = VFS::GetMapping("data://")->GetMountPath() + "/";
+	string persistentPath = GetPersistentDirectory();
 	spdlog::debug("{:>12}: {}", "Persistent", persistentPath);
 	spdlog::debug("{:>12}: {}", "Log File", persistentPath + LogFile);
 	spdlog::debug("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());

@@ -2,6 +2,7 @@ using AquaEngine.IO;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace AquaEngine.Graphics
 {
@@ -39,10 +40,10 @@ namespace AquaEngine.Graphics
 
 			ShaderStages = new ShaderImportSettings()
 			{
-				VertexPath	 = new VFSFile(vertexPath),
-				FragmentPath = new VFSFile(fragmentPath),
-				ComputePath  = new VFSFile(computePath),
-				GeometryPath = new VFSFile(geometryPath)
+				VertexPath	 = vertexPath,
+				FragmentPath = fragmentPath,
+				ComputePath  = computePath,
+				GeometryPath = geometryPath
 			};
 		}
 
@@ -59,10 +60,22 @@ namespace AquaEngine.Graphics
 			ShaderStages = importSettings;
 			_UpdateStages(
 				Handle,
+				
+				// Vertex
 				ShaderStages.VertexPath.FullPath,
+				ReadShaderFile(ShaderStages.VertexPath),
+
+				// Fragment
 				ShaderStages.FragmentPath.FullPath,
+				ReadShaderFile(ShaderStages.FragmentPath),
+
+				// Compute
 				ShaderStages.ComputePath.FullPath,
-				ShaderStages.GeometryPath.FullPath
+				ReadShaderFile(ShaderStages.ComputePath),
+
+				// Geometry
+				ShaderStages.GeometryPath.FullPath,
+				ReadShaderFile(ShaderStages.GeometryPath)
 			);
 		}
 
@@ -106,6 +119,29 @@ namespace AquaEngine.Graphics
 		public void Set(string location, Vector3 value) => _SetStr_vec3(Handle, location, value);
 		public void Set(string location, Vector4 value) => _SetStr_vec4(Handle, location, value);
 
+		private static readonly Regex IncludeRegex = new Regex("\\#include\\s+\\\"(.*)\\\"", RegexOptions.ECMAScript | RegexOptions.Multiline);
+
+		private string ReadShaderFile(VFSFile file)
+		{
+			string contents = VFS.ReadText(file);
+			ReplaceIncludes(ref contents);
+			return contents;
+		}
+
+		private void ReplaceIncludes(ref string contents)
+		{
+			var matches = IncludeRegex.Matches(contents);
+			foreach (Match match in matches)
+			// Match[0] = Entire captured string
+			// Match[1] = First capture group, the include filepath.
+			{
+				string fullMatch = match.Groups[0].Value;
+				string includeFile = match.Groups[1].Value;
+				string includeContents = VFS.ReadText(includeFile);
+				contents = contents.Replace(fullMatch, includeContents);
+			}
+		}
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
 
@@ -114,16 +150,16 @@ namespace AquaEngine.Graphics
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UnloadStages(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _UpdateStages(IntPtr handle,
-																							 string vertexPath,
-																							 string fragmentPath,
-																							 string computePath,
-																							 string geometryPath);
+																							 string vertexPath, string vertexContents,
+																							 string fragmentPath, string fragmentContents,
+																							 string computePath, string computeContents,
+																							 string geometryPath, string geometryContents);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetStages(IntPtr handle,
-																							 out string vertexPath,
-																							 out string fragmentPath,
-																							 out string computePath,
-																							 out string geometryPath);
+																							 out string vertexContents,
+																							 out string fragmentContents,
+																							 out string computeContents,
+																							 out string geometryContents);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Set_int(IntPtr handle, int location, int value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetStr_int(IntPtr handle, string location, int value);
