@@ -18,6 +18,13 @@ namespace AquaEngine.IO
 
 	public static class VFS
 	{
+		/// <summary>
+		/// When true and no mapping is found, checks for valid file in system's filesystem.
+		/// Set to false when only explicitly defined mounts are allowed.
+		/// </summary>
+		public static bool AllowAbsolutePaths = true;
+
+		private static readonly VFSFileMapping s_AbsolutePathMapping = new VFSFileMapping();
 		private static Dictionary<string, List<VFSMapping>> s_Mappings = new Dictionary<string, List<VFSMapping>>();
 
 		public static VFSFile CurrentDirectory => Directory.GetCurrentDirectory() + "/";
@@ -71,8 +78,10 @@ namespace AquaEngine.IO
 
 		public static void Unmount(string mountPoint)
 		{
-			if (s_Mappings.ContainsKey(mountPoint))
-				s_Mappings.Remove(mountPoint);
+			if (!s_Mappings.ContainsKey(mountPoint))
+				return;
+			Log.Debug($"Unmounting '{mountPoint}'");
+			s_Mappings.Remove(mountPoint);
 		}
 
 		public static void Unmount(string mountPoint, string mountPath)
@@ -80,11 +89,12 @@ namespace AquaEngine.IO
 			if (!s_Mappings.ContainsKey(mountPoint))
 				return; // No mapping found
 
-			foreach(VFSMapping mapping in s_Mappings[mountPoint])
+			foreach (VFSMapping mapping in s_Mappings[mountPoint])
 			{
-				if (!mapping.MountPath.Equals(mountPoint))
+				if (!mapping.MountPath.Equals(mountPath))
 					continue;
 
+				Log.Debug($"Unmounting '{mountPoint}' [{mountPath}]");
 				s_Mappings[mountPoint].Remove(mapping);
 				break;
 			}
@@ -109,6 +119,8 @@ namespace AquaEngine.IO
 						return mapping;
 				}
 			}
+			if (AllowAbsolutePaths && s_AbsolutePathMapping.Exists(file))
+				return s_AbsolutePathMapping;
 			return null;
 		}
 		#endregion

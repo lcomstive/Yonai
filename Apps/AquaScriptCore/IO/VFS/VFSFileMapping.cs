@@ -8,14 +8,13 @@ namespace AquaEngine.IO
 		public override FilePermissions Permissions => FilePermissions.ReadWrite;
 
 		/// <returns><paramref name="file"/> as an absolute path on the device's filesystem</returns>
-		public override VFSFile ExpandPath(VFSFile file)
+		public override VFSFile ExpandPath(VFSFile file, bool needExistingFile = false)
 		{
 			// If mounting is empty, representing an absolute path mounting
 			if (string.IsNullOrEmpty(MountPath))
 				return file.FullPath;
 
-			// string mountPath = VFS.GetMapping(MountPath, false)?.ExpandPath(MountPath) ?? MountPath;
-			string mountPath = VFS.ExpandPath(MountPath) ?? MountPath;
+			string mountPath = VFS.ExpandPath(MountPath, needExistingFile) ?? MountPath;
 			return mountPath + file.FullPath.Replace(MountPoint, "/");
 		}
 
@@ -55,8 +54,34 @@ namespace AquaEngine.IO
 		public override void Copy(VFSFile source, VFSFile destination)
 		{
 			VFSMapping destinationMapping = VFS.GetMapping(destination, false, FilePermissions.Write);
-			if (destinationMapping)
+			if (!destinationMapping)
+			{
+				Log.Warning($"Failed to copy from '{source}' to '{destination}' - no writable VFS mapping found for destination");
+				return;
+			}
+
+			// Add filename if destination is directory.
+			// e.g. Copying "./Test.txt" to "./A/B/" writes to "./A/B/Test.txt"
+			if (!source.IsDirectory && destination.IsDirectory)
+				destination += source.FileName;
+
+			// Copy file
+			if (!source.IsDirectory)
+			{
 				destinationMapping.Write(destination, Read(source));
+				return;
+			}
+
+			// Source is directory, copy all files recursively
+			VFSFile[] files = GetFiles(source);
+			foreach (VFSFile file in files)
+			{
+				string output = $"{destination}/{file.FullPath.Replace(source.FullPath, "")}";
+
+				if(Application.Configuration == BuildType.Debug)
+					Log.Trace($"Copying '{source}' -> '{destination}' = {file} -> {output}");
+				Copy(file, output);
+			}
 		}
 
 		public override void Move(VFSFile source, VFSFile destination)
@@ -90,10 +115,16 @@ namespace AquaEngine.IO
 			return true;
 		}
 
-		public override void Write(VFSFile path, byte[] data) => File.WriteAllBytes(ExpandPath(path), data);
+		public override void Write(VFSFile path, byte[] data)
+		{
+			CreateDirectory(path.ParentDirectory);
+			File.WriteAllBytes(ExpandPath(path), data);
+		}
 
 		public override void Write(VFSFile file, string data, bool append = false)
 		{
+			CreateDirectory(file.ParentDirectory);
+			
 			string path = ExpandPath(file);
 			if (append)
 				File.AppendAllText(path, data);

@@ -78,9 +78,6 @@ namespace AquaEditor
 			VFS.Mount("assets://", "project://Assets");
 			VFS.Mount("editor://", "project://.aqua");
 
-			// Default full filesystem mapping for absolute paths
-			VFS.Mount("");
-
 			if (!EditorWindow.ContextIsInitialised())
 			{
 				EditorWindow.InitContext();

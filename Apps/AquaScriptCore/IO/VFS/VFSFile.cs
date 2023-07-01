@@ -73,6 +73,8 @@ namespace AquaEngine.IO
 		public static implicit operator VFSFile(string path) => new VFSFile(path);
 		public static implicit operator string(VFSFile vfsFile) => vfsFile.FullPath;
 
+		public override string ToString() => FullPath;
+
 		public static bool operator ==(VFSFile a, VFSFile b) => a.FullPath.Equals(b.FullPath);
 		public static bool operator !=(VFSFile a, VFSFile b) => !a.FullPath.Equals(b.FullPath);
 	}

@@ -7,13 +7,13 @@ namespace AquaEngine.IO
 	{
 		public virtual FilePermissions Permissions { get; }
 
-		public string MountPoint { get; internal set; }
-		public string MountPath  { get; internal set; }
+		public string MountPoint { get; internal set; } = string.Empty;
+		public string MountPath  { get; internal set; } = string.Empty;
 
 		public abstract bool Exists(VFSFile path);
 
 		/// <returns><paramref name="file"/> as an absolute path on the device's filesystem</returns>
-		public abstract VFSFile ExpandPath(VFSFile file);
+		public abstract VFSFile ExpandPath(VFSFile file, bool needExistingFile = false);
 
 		public abstract byte[] Read(VFSFile path);
 		public abstract string ReadText(VFSFile path);

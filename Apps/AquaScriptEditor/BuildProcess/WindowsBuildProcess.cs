@@ -13,6 +13,8 @@ namespace AquaEditor.BuildProcess
 
 		public void Execute(string outputFolder, ProjectFile project)
 		{
+			outputFolder = outputFolder.Replace('\\', '/');
+
 			VFS.Mount("build://", outputFolder);
 
 			// Launching executable
@@ -33,11 +35,11 @@ namespace AquaEditor.BuildProcess
 				VFS.Copy(assemblyPath, "build://Assets/Assemblies/" + Path.GetFileName(assemblyPath));
 
 			// Copy editor default assets
-			VFS.Copy("app://Assets", "build://Assets/Editor");
+			VFS.Copy("app://Assets/", "build://Assets/Editor/");
 
 			// Project files
 			VFS.CreateDirectory("build://Assets/ProjectFiles");
-			VFS.Copy("project://Assets", "build://Assets/ProjectFiles");
+			VFS.Copy("project://Assets/", "build://Assets/ProjectFiles");
 
 			// If base game was compiled as shared library, will need to copy dependency .dll files
 			if (VFS.Exists("app://AquaEngine.dll"))
@@ -51,7 +53,7 @@ namespace AquaEditor.BuildProcess
 			CreateLaunchJSON(project);
 
 			// Unmount virtual mount
-			VFS.Unmount("build:/");
+			VFS.Unmount("build://");
 		}
 
 		private void CreateLaunchJSON(ProjectFile project)
