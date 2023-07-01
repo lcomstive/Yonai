@@ -2,27 +2,30 @@
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
 #include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <AquaEngine/Systems/Global/RenderSystem.hpp>
 
 using namespace std;
 using namespace AquaEngine;
 using namespace AquaEngine::IO;
+using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
 string AssembliesPath = "./Assets/Editor/Mono/";
 
-bool LoadAssembly(MonoString*);
+bool LoadAssembly(MonoArray*, MonoString*);
 
 BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
-{
-	/*
-	VFS::Mount("build://", "./Assets");
-	VFS::Mount("mono://", "build://Editor/Mono");
-	VFS::Mount("project://", "build://ProjectFiles");
-	*/
-	
-	InitialiseScripting();
+{ InitialiseScripting(); }
 
-	auto systems = SystemManager::Global()->All();
+void BaseGame::Setup()
+{
+	SystemManager::Global()->Add<SceneSystem>();
+	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+
+	// Call AquaEngine.Application.BaseGameLaunch()
+	MonoClass* appClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher");
+	MonoMethod* method = mono_class_get_method_from_name(appClass, "Launch", 0);
+	mono_runtime_invoke(method, nullptr, nullptr, nullptr);
 }
 
 void BaseGame::InitialiseScripting()
@@ -38,18 +41,22 @@ void BaseGame::InitialiseScripting()
 	);
 
 	ScriptEngine::AddInternalCall("AquaEngine.BaseGameLauncher::_LoadAssembly", (const void*)LoadAssembly);
-
-	// Call AquaEngine.Application.BaseGameLaunch()
-	MonoClass* appClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher");
-	MonoMethod* method = mono_class_get_method_from_name(appClass, "Launch", 0);
-	mono_runtime_invoke(method, nullptr, nullptr, nullptr);
 }
 
-bool LoadAssembly(MonoString* pathRaw)
+bool LoadAssembly(MonoArray* dataRaw, MonoString* friendlyNameRaw)
 {
-	char* path = mono_string_to_utf8(pathRaw);
-	Assembly* assembly = ScriptEngine::LoadAssembly(path);
-	mono_free(path);
+	// Get data
+	vector<unsigned char> data;
+	data.resize(mono_array_length(dataRaw));
+	for (size_t i = 0; i < data.size(); i++)
+		data[i] = mono_array_get(dataRaw, unsigned char, i);
+
+	// Get friendly name
+	char* friendlyName = mono_string_to_utf8(friendlyNameRaw);
+
+	Assembly* assembly = ScriptEngine::LoadAssembly(data, friendlyName);
+	
+	mono_free(friendlyName);
 	return assembly != nullptr;
 }
 
@@ -61,5 +68,10 @@ using namespace AquaEngine::Components;
 void BaseGame::OnPostDraw()
 {
 	// Blit output to default framebuffer
-	SystemManager::Global()->Get<RenderSystem>()->GetPipeline()->GetOutput()->BlitTo();
+	m_RenderSystem->GetPipeline()->GetOutput()->BlitTo();
+}
+
+void BaseGame::OnPreDraw()
+{
+	m_RenderSystem->GetPipeline()->SetResolution(Window::GetResolution());
 }

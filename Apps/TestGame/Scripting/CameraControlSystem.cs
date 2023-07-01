@@ -19,7 +19,7 @@ namespace TestGame
 		protected override void Enabled()
 		{
 			m_Target = Camera.Main;
-			Input.MouseState = MouseState.Disabled;
+			// Input.MouseState = MouseState.Disabled;
 			Log.Debug("CameraControlSystem target set to " + (m_Target ? m_Target.GetComponent<NameComponent>().Name : "(none)"));
 		}
 
@@ -34,8 +34,10 @@ namespace TestGame
 			m_Target.FOV -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 			m_Target.OrthographicSize -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 
+			/*
 			if(Input.IsKeyPressed(Key.Escape))
 				Input.MouseState = Input.MouseState == MouseState.Disabled ? MouseState.Normal : MouseState.Disabled;
+			*/
 			
 			// Reset FOV
 			if (Input.IsKeyPressed(Key.F5))

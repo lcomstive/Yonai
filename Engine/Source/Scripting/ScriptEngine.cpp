@@ -220,6 +220,39 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	return instance;
 }
 
+Assembly* ScriptEngine::LoadAssembly(vector<unsigned char>& data, const char* friendlyName)
+{
+	if (data.empty())
+		return nullptr;
+
+	MonoImageOpenStatus status;
+	MonoImage* image = mono_image_open_from_data_full(
+		reinterpret_cast<char*>(data.data()),
+		(uint32_t)data.size(),
+		1, 	// Bool. Copy data to internal mono buffer
+		&status,
+		0	// Bool. Load in reflection mode
+	);
+
+	if (status != MONO_IMAGE_OK)
+	{
+		spdlog::error("Failed to load assembly '{}' from memory - '{}'", friendlyName, mono_image_strerror(status));
+		return nullptr;
+	}
+
+	MonoAssembly* assembly = mono_assembly_load_from_full(
+		image,
+		friendlyName, // Friendly name, used for warnings & errors
+		&status,
+		0	// Bool. Load in reflection mode
+	);
+	mono_image_close(image);
+
+	Assembly* instance = new Assembly(assembly, false /* isCoreAssembly */);
+	s_Assemblies.push_back(instance);
+	return instance;
+}
+
 vector<const char*> CoreAssemblyDependencies =
 {
 	// "app://Newtonsoft.Json.dll"

@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
+#include <AquaEngine/Time.hpp>
 #include <AquaEditor/Glue.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/Resource.hpp>
@@ -52,7 +53,6 @@ void EditorApp::Setup()
 		return;
 	}
 
-	InitialiseMounts();
 	InitialiseScripting();
 
 	// Add global systems
@@ -115,29 +115,6 @@ void EditorApp::InitialiseScripting()
 	ScriptEngine::AddInternalCalls(_InternalMethods);
 }
 
-void EditorApp::InitialiseMounts()
-{
-	if (!HasArg(ProjectPathArg))
-	{
-		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
-		Exit();
-		return;
-	}
-
-	m_ProjectPath = fs::path(GetArg(ProjectPathArg));
-	if (m_ProjectPath.empty())
-		spdlog::warn("Empty project path!");
-	spdlog::info("Project path: {}", m_ProjectPath.string().c_str());
-
-	/*
-	VFS::Mount("project://", m_ProjectPath.string());
-	VFS::Mount("assets://", "project://Assets");
-	VFS::Mount("assets://", "app://Assets"); // Default assets
-	VFS::Mount("editor://", "project://.aqua");
-	VFS::Mount("mono://", "app://Assets/Mono");
-	*/
-}
-
 void EditorApp::Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -146,4 +123,6 @@ void EditorApp::Draw()
 
 	Window::SwapBuffers();
 	Window::PollEvents();
+
+	Time::OnFrameEnd();
 }

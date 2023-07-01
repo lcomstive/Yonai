@@ -35,7 +35,7 @@ namespace AquaEngine
 		/// </summary>
 		/// <param name="name">Name of the argument to check for</param>
 		/// <param name="defaultValue">Value to return if argument is not found</param>
-		public static string GetArg(string name, string defaultValue = "") => _GetArg(name.ToLower(), defaultValue);
+		public static string GetArg(string name, string defaultValue = "") => _GetArg(name.ToLower(), defaultValue ?? string.Empty);
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Exit();

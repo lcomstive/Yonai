@@ -183,5 +183,25 @@
     "ID": "13460682877028109887",
     "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
     "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "10492579232489207820",
+    "Path": "assets://Shaders/NewSpriteShader",
+    "Type": "AquaEngine.Graphics.Shader"
+  },
+  {
+    "ID": "2971783442870059048",
+    "Path": "assets://Audio/Fall.mp3",
+    "Type": "AquaEngine.Sound"
+  },
+  {
+    "ID": "14647269563724193385",
+    "Path": "assets://Audio/Mixers/SFX.mixer",
+    "Type": "AquaEngine.SoundMixer"
+  },
+  {
+    "ID": "13998269716433993735",
+    "Path": "project://Assets/Audio/Lifelike.mp3",
+    "Type": "AquaEngine.Sound"
   }
 ]

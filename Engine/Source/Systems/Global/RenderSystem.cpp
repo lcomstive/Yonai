@@ -45,7 +45,7 @@ void RenderSystem::Draw()
 	auto scenes = m_SceneSystem->GetActiveScenes();
 	for (auto& scene : scenes)
 	{
-		auto cameras = scene->GetComponents<Camera>();
+		vector<Camera*> cameras = scene->GetComponents<Camera>();
 		for (auto camera : cameras)
 			Draw(camera);
 	}

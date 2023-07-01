@@ -395,7 +395,8 @@ namespace AquaEngine
 			Log.Trace($"Loading resource '{path}' from disk...");
 			resource._Load();
 
-			serializable.OnDeserialize(VFS.ReadJSON(path));
+			VFSMapping mapping = VFS.GetMapping(path);
+			serializable.OnDeserialize(mapping.ReadJSON(path));
 			return true;
 		}
 

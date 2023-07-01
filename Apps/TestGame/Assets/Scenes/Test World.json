@@ -551,7 +551,7 @@
           }
         },
         {
-          "ComponentType": "TestGame.LerpTest, TestGame, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "TestGame.LerpTest, TestGame",
           "A": {
             "x": -1.0,
             "y": 1.0,

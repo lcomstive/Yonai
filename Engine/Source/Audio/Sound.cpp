@@ -48,7 +48,7 @@ ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, unsigned long long* out
 	char* resourcePath = mono_string_to_utf8(path);
 	if (*outResourceID == InvalidResourceID)
 		*outResourceID = ResourceID(); // If no resource ID, generate one
-	Resource::Load<Sound>(*outResourceID, resourcePath, string(resourcePath));
+	Resource::Load<Sound>(*outResourceID, resourcePath);
 	*outHandle = Resource::Get<Sound>(*outResourceID);
 	mono_free(resourcePath);
 }

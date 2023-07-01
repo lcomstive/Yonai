@@ -170,9 +170,16 @@ void SoundSource::SetSound(ResourceID id)
 	m_Sound = id;
 	Sound* sound = Resource::Get<Sound>(m_Sound);
 
+	if (!sound || sound->GetLength() <= 0.0f)
+	{
+		spdlog::error("Failed to initialise sound source - invalid sound");
+		m_Sound = InvalidResourceID;
+		return;
+	}
+
 	ma_result result = ma_sound_init_copy(&AudioSystem::s_Engine, &sound->m_Sound, sound->c_Flags, nullptr, &m_Data);
 	if(result != MA_SUCCESS)
-		spdlog::error("Failed to initialise sound source [{}]", (int)result);
+		spdlog::error("Failed to initialise sound source - sound engine error [{}]", (int)result);
 
 	// Update values //
 	SetPitch(m_Pitch);

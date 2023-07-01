@@ -1,12 +1,10 @@
 using System;
+using AquaEngine.IO;
 using System.Runtime.CompilerServices;
 
 namespace AquaEngine
 {
-	public struct SoundImportSettings : IImportSettings
-	{
-		public string FilePath;
-	}
+	public struct SoundImportSettings : IImportSettings {}
 
 	public class Sound : NativeResourceBase
 	{
@@ -22,7 +20,7 @@ namespace AquaEngine
 		protected override void OnImported()
 		{
 			if(TryGetImportSettings(out SoundImportSettings importSettings))
-				_Import(Handle, importSettings.FilePath);
+				_Import(Handle, VFS.ExpandPath(ResourcePath));
 			else
 				_Import(Handle, string.Empty);
 		}

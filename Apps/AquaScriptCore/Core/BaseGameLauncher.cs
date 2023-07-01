@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using AquaEngine.Systems;
 using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace AquaEngine
 {
@@ -18,6 +19,7 @@ namespace AquaEngine
 
 		internal static void Launch()
 		{
+			VFS.Mount("build://", "./Assets");
 			VFS.Mount("assets://", "build://Editor");
 			VFS.Mount("assets://", "build://ProjectFiles");
 			VFS.Mount("project://Assets/", "build://ProjectFiles");
@@ -36,16 +38,15 @@ namespace AquaEngine
 
 			if (JSON.ContainsKey("Scenes") && JSON["Scenes"].GetType() == typeof(JArray))
 				LoadInitialScene();
-
-			Log.Debug("Loaded Worlds:");
-			foreach (World world in World.GetAll())
-				Log.Debug(" - " + world.Name);
 		}
 
 		private static void LoadAssemblies()
 		{
-			foreach(string path in JSON["Assemblies"].Values<string>())
-				_LoadAssembly(AssemblyDir + path);
+			foreach (string path in JSON["Assemblies"].Values<string>())
+			{
+				VFSFile file = new VFSFile(path);
+				_LoadAssembly(VFS.Read(AssemblyDir + path), file.FileNameWithoutExtension);
+			}
 		}
 
 		private static void LoadInitialScene()
@@ -72,12 +73,12 @@ namespace AquaEngine
 				Log.Trace($"Loading global system '{className}'");
 				Type systemType = Type.GetType(className);
 				if (systemType != null && aquaSystemType.IsAssignableFrom(systemType))
-					AquaSystem.Add(systemType);
+					AquaSystem.Add(systemType).Enable(false);
 				else
 					Log.Warning($"Could not find AquaSystem type '{className}'");
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _LoadAssembly(string path);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _LoadAssembly(byte[] data, string friendlyName);
 	}
 }

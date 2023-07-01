@@ -15,6 +15,7 @@ namespace TestGame
 
 		protected override void Enabled()
 		{
+			Log.Debug("TestSystem.Enabled() ---------");
 			Camera[] cameras = World.GetComponents<Camera>();
 			if (cameras.Length > 0)
 			{

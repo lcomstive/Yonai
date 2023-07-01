@@ -1,3 +1,4 @@
+using System;
 using AquaEngine;
 using System.Linq;
 using System.Collections.Generic;
@@ -34,18 +35,19 @@ namespace AquaEditor.BuildProcess
 		public static IBuildProcess BuildProcess { get; private set; } = null;
 		public static Platform[] AvailableBuildPlatforms => BuildPlatformMatrix[Application.Platform];
 
+		/// <returns>True if this host platform can build for desired platform <paramref name="platform"/></returns>
+		public static bool IsValidBuildPlatform(Platform platform) => AvailableBuildPlatforms.Contains(platform);
+
 		/// <returns>True if <see cref="ActivePlatform"/> was set to <paramref name="platform"/></returns>
 		public static bool SelectPlatform(Platform platform)
 		{
 			if (platform == ActivePlatform)
 				return true; // No change
 
-			Platform hostPlatform = Application.Platform;
-
 			// Check this host can build for desired platform
-			if (!BuildPlatformMatrix[hostPlatform].Contains(platform))
+			if (!IsValidBuildPlatform(platform))
 			{
-				Log.Error($"Cannot select platform '{platform}' for host '{hostPlatform}' - not supported");
+				Log.Error($"Cannot select platform '{platform}' for host '{Application.Platform}' - not supported");
 				return false;
 			}
 
@@ -58,29 +60,38 @@ namespace AquaEditor.BuildProcess
 		/// Changes to the new platform, starts the build process, and changes back to the previous platform
 		/// </summary>
 		/// <param name="platform"></param>
-		public static void StartBuild(Platform platform)
+		public static void StartBuild(Platform platform, string outputFolder = null)
 		{
 			Platform previousPlatform = ActivePlatform;
 			if (!SelectPlatform(platform))
 				return;
 
-			StartBuild(platform);
+			StartBuild(platform, outputFolder);
 			SelectPlatform(previousPlatform);
 		}
 
-		public static void StartBuild()
+		public static void StartBuild(string outputFolder = null)
 		{
 			ProjectFile project = AquaSystem.Get<EditorService>().Project;
-			string outputFolder = FileDialog.OpenFolder("Build Output", "project://");
+			if (string.IsNullOrEmpty(outputFolder))
+				outputFolder = FileDialog.OpenFolder("Build Output", "project://");
 			if (!string.IsNullOrEmpty(outputFolder))
 				BuildProcess.Execute(outputFolder, project);
 		}
 
-		internal static void Initialise()
+		internal static bool Initialise()
 		{
-			// Set platform to host platform by default
-			// TODO: Cache selected platform somewhere in a local user settings file?
-			SelectPlatform(Application.Platform);
+			// Default build platform is host platform
+			Platform platform = Application.Platform;
+
+			// Check for arg and parse it, if fails then set back to default
+			if (Application.HasArg("platform") &&
+				!Enum.TryParse(Application.GetArg("platform"), out platform))
+					platform = Application.Platform;
+
+			// TODO: Save project build settings to file and load desired platform from disk
+
+			return SelectPlatform(platform);
 		}
 
 		internal static void ConstructBuildMenu()
@@ -91,7 +102,9 @@ namespace AquaEditor.BuildProcess
 			foreach (Platform platform in AvailableBuildPlatforms)
 				editorUI.AddMenuItem(() => SelectPlatform(platform), new MenuItemAttribute($"Build/Platform/{platform}") { Icon = PlatformIcons[platform] });
 
-			editorUI.AddMenuItem(StartBuild, new MenuItemAttribute("Build/Start Build") { PrependSeparator = true, Shortcut = "CTRL+SHIFT+B" });
+			editorUI.AddMenuItem(StartBuildFromMenu, new MenuItemAttribute("Build/Start Build") { PrependSeparator = true, Shortcut = "CTRL+SHIFT+B" });
 		}
+
+		private static void StartBuildFromMenu() => StartBuild();
 	}
 }

@@ -81,6 +81,13 @@ namespace AquaEngine::Scripting
 #endif
 		);
 
+		/// <summary>
+		/// Loads an assembly from memory
+		/// </summary>
+		/// <param name="friendlyName">Name for debugging, warnings and errors</param>
+		static Assembly* LoadAssembly(std::vector<unsigned char>& assemblyData, const char* friendlyName);
+
+
 		/// <returns>All assemblies currently loaded</summary>
 		AquaAPI static std::vector<Assembly*>& GetAssemblies();
 

@@ -188,7 +188,8 @@ void Assembly::CacheTypes(bool isCore)
 
 		if (!klass)
 		{
-			spdlog::warn("Failed to cache type '{}.{}'", _namespace, _name);
+			if(isCore && strcmp(_namespace, "") != 0)
+				spdlog::warn("Failed to cache type '{}.{}'", _namespace, _name);
 			continue;
 		}
 

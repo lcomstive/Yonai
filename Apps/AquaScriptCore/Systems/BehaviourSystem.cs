@@ -15,15 +15,13 @@ namespace AquaEngine.Systems
 			Type behaviourType = typeof(IBehaviour);
 			foreach (Assembly assembly in assemblies)
 			{
-				try
-				{
-					foreach (Type type in assembly.GetTypes())
-						if(behaviourType.IsAssignableFrom(type) && // Inherits from IBehaviour
-							!type.IsInterface && !type.IsAbstract) // No interfaces or abstract classes
-							m_BehaviourTypes.Add(type);
-				}
-				// Some assemblies throw reflection errors, ignore them as they're internal or system types
-				catch { }
+				if (assembly.FullName.StartsWith("System."))
+					continue; // Skip system and internal assemblies
+
+				foreach (Type type in assembly.GetTypes())
+					if(behaviourType.IsAssignableFrom(type) && // Inherits from IBehaviour
+						!type.IsInterface && !type.IsAbstract) // No interfaces or abstract classes
+						m_BehaviourTypes.Add(type);
 			}
 		}
 

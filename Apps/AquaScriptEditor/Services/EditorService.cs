@@ -51,13 +51,18 @@ namespace AquaEditor
 
 			InitialiseVFS();
 
-			if (Application.HasArg("projectpath"))
-				LoadProject(Application.GetArg("projectpath"));
-			else
+			if (!Application.HasArg("projectpath"))
 			{
 				Log.Warning("No project path set");
 				Application.Exit();
 			}
+			if(Application.HasArg("build"))
+			{
+				DoBuildAndExit();
+				return;
+			}
+	
+			LoadProject(Application.GetArg("projectpath"));
 		}
 
 		private void InitialiseVFS()
@@ -220,6 +225,32 @@ namespace AquaEditor
 
 			// Force mouse state to be normal when not in play mode
 			Input.MouseState = MouseState.Normal;
+		}
+
+		private void DoBuildAndExit()
+		{
+			string projectPath = Application.GetArg("projectpath");
+			if (string.IsNullOrEmpty(projectPath))
+			{
+				Log.Error("Cannot load project - no ProjectPath argument set");
+				return;
+			}
+
+			VFS.Mount("project://", projectPath);
+			VFS.Mount("assets://", "project://Assets");
+			VFS.Mount("editor://", "project://.aqua");
+
+			// Read project file
+			Project = VFS.Read<ProjectFile>(ProjectFilePath);
+
+			string output = Application.GetArg("output");
+			if(!string.IsNullOrEmpty(output))
+				Log.Info($"Build output folder: {output}");
+
+			if (GameBuilder.Initialise())
+				GameBuilder.StartBuild(output);
+
+			Application.Exit();
 		}
 
 		public delegate void OnStateChanged(EditorState oldState, EditorState newState);
