@@ -33,7 +33,7 @@ else()
     add_custom_target(
         AquaScriptCore
         COMMENT "Copying AquaScriptCore.dll to app://Assets/Mono/"
-        COMMAND mkdir -p ${AQUA_RESOURCES_DIR}
+        COMMAND mkdir -p ${AQUA_RESOURCES_DIR}/Assets/Mono/
         COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/AquaScriptCore.* ${AQUA_RESOURCES_DIR}/Assets/Mono/
     )
 endif()

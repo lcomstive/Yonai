@@ -102,7 +102,6 @@
     <Compile Include="IO\Clipboard.cs" />
     <Compile Include="IO\ISerializable.cs" />
     <Compile Include="IO\VFS\VFS.cs" />
-    <Compile Include="IO\VFS\VFS.cs" />
     <Compile Include="IO\VFS\VFSFile.cs" />
     <Compile Include="IO\VFS\VFSFileMapping.cs" />
     <Compile Include="IO\VFS\VFSMapping.cs" />

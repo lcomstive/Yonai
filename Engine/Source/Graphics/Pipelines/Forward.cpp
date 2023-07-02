@@ -21,7 +21,9 @@ using namespace AquaEngine::Graphics::Pipelines;
 
 ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 {
+	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	FramebufferSpec framebufferSpecs = { Window::GetResolution() };
 	framebufferSpecs.Attachments =

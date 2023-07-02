@@ -19,7 +19,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine imgui)
 
 # Add dependency to the C# binding projects
-add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor)
+add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor BaseGame)
 
 # Generate C# bindings from C#
 add_custom_command(
