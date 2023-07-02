@@ -39,8 +39,8 @@ namespace fs = std::filesystem;
 
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
-string AssembliesDirectory = "./Assets/Mono/";
-string AquaScriptEditorPath = AssembliesDirectory + "AquaScriptEditor.dll";
+string AssembliesDirectory = "/Assets/Mono";
+string AquaScriptEditorPath = AssembliesDirectory + "/AquaScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -93,7 +93,7 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-	Assembly* assembly = ScriptEngine::LoadAssembly(AquaScriptEditorPath, true);
+	Assembly* assembly = ScriptEngine::LoadAssembly(GetExecutableDirectory().string() + AquaScriptEditorPath, true);
 	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
 
 	// Let managed code add & remove native ImGUISystem
@@ -104,8 +104,7 @@ void EditorApp::LaunchEditorService()
 
 void EditorApp::InitialiseScripting()
 {
-	// VFS::Mount("mono://", "app://Assets/Mono");
-	ScriptEngine::Init(AssembliesDirectory,
+	ScriptEngine::Init(GetExecutableDirectory().string() + AssembliesDirectory,
 		// Allow debugging in debug builds
 		true);
 

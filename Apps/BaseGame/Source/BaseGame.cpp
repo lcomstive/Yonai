@@ -10,7 +10,7 @@ using namespace AquaEngine::IO;
 using namespace AquaEngine::Systems;
 using namespace AquaEngine::Scripting;
 
-string AssembliesPath = "./Assets/Editor/Mono/";
+string AssembliesPath = "/Assets/Editor/Mono";
 
 bool LoadAssembly(MonoArray*, MonoString*);
 
@@ -22,6 +22,12 @@ void BaseGame::Setup()
 	SystemManager::Global()->Add<SceneSystem>();
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 
+	glm::vec2 resolution = Window::GetResolution();
+	glm::vec2 scaling = Window::GetContentScaling();
+	resolution.x *= scaling.x;
+	resolution.y *= scaling.y;
+	m_RenderSystem->GetPipeline()->SetResolution(resolution);
+
 	// Call AquaEngine.Application.BaseGameLaunch()
 	MonoClass* appClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher");
 	MonoMethod* method = mono_class_get_method_from_name(appClass, "Launch", 0);
@@ -30,14 +36,13 @@ void BaseGame::Setup()
 
 void BaseGame::InitialiseScripting()
 {
-	ScriptEngine::Init(AssembliesPath,
-//#ifndef NDEBUG // Allow debugging in debug builds
+	string assemblyPath = GetExecutableDirectory().string() + AssembliesPath;
+	ScriptEngine::Init(GetExecutableDirectory().string() + AssembliesPath,
+#ifndef NDEBUG // Allow debugging in debug builds
 		true
-		/*
 #else // Release mode
 		false
 #endif
-		*/
 	);
 
 	ScriptEngine::AddInternalCall("AquaEngine.BaseGameLauncher::_LoadAssembly", (const void*)LoadAssembly);

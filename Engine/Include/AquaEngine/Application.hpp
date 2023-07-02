@@ -17,9 +17,9 @@ namespace AquaEngine
 	{
 		bool m_Running = true;
 		std::filesystem::path m_ExecutablePath;
+		std::filesystem::path m_ExecutableDirectory;
 		std::unordered_map<std::string, std::string> m_Args = {};
 
-		void InitVFS();
 		void InitLogger();
 
 		static Application* s_Instance;
@@ -61,6 +61,11 @@ namespace AquaEngine
 		/// The path to the launched executable.
 		/// </summary>
 		AquaAPI std::filesystem::path& GetExecutablePath();
+
+		/// <summary>
+		/// The directory containing the launched executable.
+		/// </summary>
+		AquaAPI std::filesystem::path& GetExecutableDirectory();
 
 		#pragma region Arguments
 		AquaAPI void ProcessArgs(int argc, char** argv);

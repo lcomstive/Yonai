@@ -19,7 +19,7 @@ namespace AquaEngine
 
 		internal static void Launch()
 		{
-			VFS.Mount("build://", "./Assets");
+			VFS.Mount("build://", Application.ExecutableDirectory + "/Assets");
 			VFS.Mount("assets://", "build://Editor");
 			VFS.Mount("assets://", "build://ProjectFiles");
 			VFS.Mount("project://Assets/", "build://ProjectFiles");

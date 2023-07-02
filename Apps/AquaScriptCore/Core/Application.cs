@@ -23,6 +23,9 @@ namespace AquaEngine
 		public static bool IsDesktop => _IsDesktop();
 		public static bool IsMobile => !_IsDesktop();
 
+		public static string ExecutablePath => _GetExecutablePath();
+		public static string ExecutableDirectory => _GetExecutableDirectory();
+
 		public static void Exit() => _Exit();
 
 		/// <summary>
@@ -39,6 +42,8 @@ namespace AquaEngine
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Exit();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetExecutablePath();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetExecutableDirectory();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasArg(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetBuildType();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetPlatform();

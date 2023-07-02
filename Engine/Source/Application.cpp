@@ -73,46 +73,9 @@ void Application::InitLogger()
 	spdlog::set_default_logger(logger);
 }
 
-void Application::InitVFS()
-{
-	/* TODO: Move to C# code
-	// Map persistent data
-	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDirectory());
-
-	// Get executable path and directory
-#if defined(AQUA_PLATFORM_WINDOWS)
-	wchar_t exeResult[MAX_PATH];
-	if (GetModuleFileNameW(NULL, exeResult, MAX_PATH) > 0)
-#elif defined(AQUA_PLATFORM_LINUX)
-	char exeResult[PATH_MAX];
-	if (readlink("/proc/self/exe", exeResult, PATH_MAX) > 0)
-#elif defined(AQUA_PLATFORM_APPLE)
-	char exeResult[PATH_MAX];
-	uint32_t exeResultSize = PATH_MAX;
-	if (_NSGetExecutablePath(exeResult, &exeResultSize) == 0)
-#endif
-		m_ExecutablePath = std::filesystem::path(exeResult);
-
-	// Map app:// to launched executable directory
-#if defined(AQUA_PLATFORM_APPLE)
-	fs::path executableDir = m_ExecutablePath.parent_path();
-	if(executableDir.filename().compare("MacOS") == 0) // App Bundle
-		// Assets for app are found in Resources subfolder in the app bundle
-		VFS::Mount("app://", (executableDir.parent_path() / "Resources").string());
-	else
-		VFS::Mount("app://", executableDir.string());
-#else
-	VFS::Mount("app://", m_ExecutablePath.parent_path().string());
-#endif
-
-	VFS::Mount("file:///", "");
-	*/
-}
-
 Application::Application()
 {
 	InitLogger();
-	InitVFS();
 
 	s_Instance = this;
 }
@@ -122,7 +85,6 @@ Application::Application(int argc, char** argv)
 	ProcessArgs(argc, argv);
 
 	InitLogger();
-	InitVFS();
 
 	s_Instance = this;
 }
@@ -190,6 +152,17 @@ Application* Application::Current() { return s_Instance; }
 
 void Application::ProcessArgs(int argc, char** argv)
 {
+	if(argc > 0)
+	{
+		m_ExecutablePath = fs::path(argv[0]);
+
+		m_ExecutableDirectory = m_ExecutablePath.parent_path();
+
+		#if defined(AQUA_PLATFORM_MAC)
+		m_ExecutableDirectory = m_ExecutableDirectory.parent_path().append("Resources");
+		#endif
+	}
+
 	size_t previousArgCount = m_Args.size();
 	for(int i = 0; i < argc; i++)
 	{
@@ -254,6 +227,7 @@ std::string Application::GetArg(string name, string defaultValue)
 }
 
 filesystem::path& Application::GetExecutablePath() { return m_ExecutablePath; }
+filesystem::path& Application::GetExecutableDirectory() { return m_ExecutableDirectory; }
 
 #pragma region Windowed Application
 void WindowedApplication::Setup()
@@ -334,6 +308,12 @@ ADD_MANAGED_METHOD(Application, GetArg, MonoString*, (MonoString* name, MonoStri
 	string value = Application::Current()->GetArg(mono_string_to_utf8(name), mono_string_to_utf8(defaultValue));
 	return mono_string_new(mono_domain_get(), value.c_str());
 }
+
+ADD_MANAGED_METHOD(Application, GetExecutablePath, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetExecutablePath().string().c_str()); }
+
+ADD_MANAGED_METHOD(Application, GetExecutableDirectory, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetExecutableDirectory().string().c_str()); }
 
 ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
 { return Application::Current()->HasArg(mono_string_to_utf8(name)); }

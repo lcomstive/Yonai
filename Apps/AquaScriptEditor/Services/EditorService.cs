@@ -3,7 +3,6 @@ using AquaEngine.IO;
 using AquaEngine.Systems;
 using AquaEditor.Systems;
 using AquaEditor.BuildProcess;
-using System.IO;
 
 namespace AquaEditor
 {
@@ -67,7 +66,7 @@ namespace AquaEditor
 
 		private void InitialiseVFS()
 		{
-			VFS.Mount("app://", VFS.CurrentDirectory);
+			VFS.Mount("app://", Application.ExecutableDirectory);
 			VFS.Mount("assets://", "app://Assets"); // Editor assets
 		}
 
@@ -130,6 +129,9 @@ namespace AquaEditor
 
 		protected override void Disabled()
 		{
+			if(Application.HasArg("build"))
+				return; // Nothing below was loaded as we just built a project
+
 			Log.Error("Disabled editor service");
 
 			Remove<EditorUIService>();
