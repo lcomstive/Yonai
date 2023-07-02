@@ -203,5 +203,40 @@
     "ID": "13998269716433993735",
     "Path": "project://Assets/Audio/Lifelike.mp3",
     "Type": "AquaEngine.Sound"
+  },
+  {
+    "ID": "1032429905144893469",
+    "Path": "assets://Textures/Icons/OS/Mac.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "676461646458361878",
+    "Path": "assets://Textures/Icons/Kenney/gear.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "17016906719531727062",
+    "Path": "assets://Textures/Icons/Kenney/larger.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "9866649324233370558",
+    "Path": "assets://Textures/Icons/Kenney/up.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "3434681933565480983",
+    "Path": "assets://Textures/Icons/Kenney/power.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "13115733963006561844",
+    "Path": "assets://Textures/Icons/Kenney/down.png",
+    "Type": "AquaEngine.Graphics.Texture"
+  },
+  {
+    "ID": "14038077314846003397",
+    "Path": "assets://Textures/Icons/Kenney/save.png",
+    "Type": "AquaEngine.Graphics.Texture"
   }
 ]

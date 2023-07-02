@@ -12,7 +12,8 @@ namespace AquaEditor.BuildProcess
 		/// </summary>
 		private static Dictionary<Platform, IBuildProcess> BuildProcesses = new Dictionary<Platform, IBuildProcess>()
 		{
-			{ Platform.Windows, new WindowsBuildProcess() }
+			{ Platform.Windows, new WindowsBuildProcess() },
+			{ Platform.Mac, new MacBuildProcess() }
 		};
 
 		/// <summary>
@@ -20,15 +21,18 @@ namespace AquaEditor.BuildProcess
 		/// </summary>
 		private static Dictionary<Platform, Platform[]> BuildPlatformMatrix = new Dictionary<Platform, Platform[]>()
 		{
-			{ Platform.Windows, new Platform[] { Platform.Windows } }
+			{ Platform.Windows, new Platform[] { Platform.Windows } },
+			{ Platform.Mac, new Platform[] { Platform.Mac} }
 		};
 
 		/// <summary>
-		/// Maps a <see cref="Platform"/> to the <see cref="AquaEngine.IO.VFS"/> filepath of icon texture
+		/// Maps a <see cref="Platform"/> to the <see cref="AquaEngine.IO.VFS"/> filepath of icon texture.
+		/// Can also be from the path assets://Textures/OS/ and exclude the .png file extension
 		/// </summary>
 		private static Dictionary<Platform, string> PlatformIcons = new Dictionary<Platform, string>()
 		{
-			{ Platform.Windows, "Windows" }
+			{ Platform.Windows, "Windows" },
+			{ Platform.Mac, "Mac" }
 		};
 
 		public static Platform ActivePlatform { get; private set; } = Platform.Unknown;
@@ -70,14 +74,7 @@ namespace AquaEditor.BuildProcess
 			SelectPlatform(previousPlatform);
 		}
 
-		public static void StartBuild(string outputFolder = null)
-		{
-			ProjectFile project = AquaSystem.Get<EditorService>().Project;
-			if (string.IsNullOrEmpty(outputFolder))
-				outputFolder = FileDialog.OpenFolder("Build Output", "project://");
-			if (!string.IsNullOrEmpty(outputFolder))
-				BuildProcess.Execute(outputFolder, project);
-		}
+		public static void StartBuild(string outputFolder = null) => BuildProcess.Execute(outputFolder, AquaSystem.Get<EditorService>().Project);
 
 		internal static bool Initialise()
 		{

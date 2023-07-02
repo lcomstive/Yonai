@@ -37,12 +37,19 @@ namespace AquaEngine.IO
 
 		public VFSFile(string filepath)
 		{
-			if (string.IsNullOrEmpty(filepath))
+			IsDirectory = false;
+			FileName = string.Empty;
+			Extension = string.Empty;
+			ParentDirectory = string.Empty;
+
+			if(string.IsNullOrEmpty(filepath))
+				return;
+
+			// Check if is base directory for VFS mount
+			if(filepath.EndsWith("://"))
 			{
-				IsDirectory = false;
-				FileName = string.Empty;
-				Extension = string.Empty;
-				ParentDirectory = string.Empty;
+				IsDirectory = true;
+				ParentDirectory = filepath;
 				return;
 			}
 
@@ -54,10 +61,7 @@ namespace AquaEngine.IO
 				Extension = Path.GetExtension(filepath);
 			}
 			else
-			{
-				Extension = string.Empty;
 				FileName = filepath.Substring(filepath.LastIndexOf("/") + 1);
-			}
 			ParentDirectory = filepath.Substring(0, filepath.LastIndexOf('/') + 1);
 		}
 

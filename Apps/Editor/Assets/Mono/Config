@@ -1,7 +1,0 @@
-<configuration>
-	<!-- OSX -->
-	<dllmap dll="System.Native" target="libmono-native.dylib" os="osx" />
-	
-	<!-- Linux -->
-	<dllmap dll="System.Native" target="libmono-native.so" os="!windows,osx" />
-</configuration>

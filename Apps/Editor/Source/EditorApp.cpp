@@ -58,11 +58,6 @@ void EditorApp::Setup()
 	// Add global systems
 	SystemManager::Global()->Add<AudioSystem>();
 
-	ImGUISystem* imGUISystem = SystemManager::Global()->Add<ImGUISystem>();
-	ImGui::SetCurrentContext(imGUISystem->GetContext());
-
-	ImGui::GetIO().IniFilename = "./EditorLayout.ini";
-
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
@@ -71,6 +66,10 @@ void EditorApp::Setup()
 	SystemManager::Global()->Add<SceneSystem>();
 	
 	LaunchEditorService();
+	
+	ImGUISystem* imGUISystem = SystemManager::Global()->Get<ImGUISystem>();
+	if(imGUISystem)
+		ImGui::SetCurrentContext(imGUISystem->GetContext());
 }
 
 void EditorApp::Cleanup()
@@ -79,7 +78,6 @@ void EditorApp::Cleanup()
 
 	SystemManager::Global()->Remove<SceneSystem>();
 	SystemManager::Global()->Remove<AudioSystem>();
-	SystemManager::Global()->Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<RenderSystem>();
 
 	m_RenderSystem = nullptr;

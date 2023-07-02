@@ -13,6 +13,15 @@ namespace AquaEditor.BuildProcess
 
 		public void Execute(string outputFolder, ProjectFile project)
 		{
+			if(string.IsNullOrEmpty(outputFolder))
+			{
+				outputFolder = FileDialog.OpenFolder("Build Output", "project://");
+				if(string.IsNullOrEmpty(outputFolder))
+				{
+					Log.Error("Cannot build - not output folder selected");
+					return;
+				}
+			}
 			outputFolder = outputFolder.Replace('\\', '/');
 
 			VFS.Mount("build://", outputFolder);

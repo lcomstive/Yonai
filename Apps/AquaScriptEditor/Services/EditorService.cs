@@ -133,11 +133,15 @@ namespace AquaEditor
 			Log.Error("Disabled editor service");
 
 			Remove<EditorUIService>();
-			Remove<ImGUISystem>();
 			Remove<BehaviourSystem>();
 
+			if(Has<ImGUISystem>())
+			{
+				Remove<ImGUISystem>();
+				ImGUI.SaveIniSettingsToDisk(VFS.ExpandPath(ImGUIFile));
+			}
+
 			Resource.SaveDatabase();
-			ImGUI.SaveIniSettingsToDisk(VFS.ExpandPath(ImGUIFile));
 		}
 
 		protected override void Update()
@@ -247,8 +251,12 @@ namespace AquaEditor
 			if(!string.IsNullOrEmpty(output))
 				Log.Info($"Build output folder: {output}");
 
-			if (GameBuilder.Initialise())
-				GameBuilder.StartBuild(output);
+			try
+			{
+				if (GameBuilder.Initialise())
+					GameBuilder.StartBuild(output);
+			}
+			catch(System.Exception e) { Log.Exception(e); }
 
 			Application.Exit();
 		}

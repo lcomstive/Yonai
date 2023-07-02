@@ -113,7 +113,7 @@ namespace AquaEngine.IO
 				foreach (VFSMapping mapping in s_Mappings[mount])
 				{
 					int flags = (int)(mapping.Permissions & requiredPermissions);
-					if (!needExistingFile && (mapping.Permissions & requiredPermissions) != 0)
+					if (!needExistingFile && flags != 0)
 						return mapping; // Valid mapping found. No file check required
 					if (needExistingFile && mapping.Exists(file))
 						return mapping;

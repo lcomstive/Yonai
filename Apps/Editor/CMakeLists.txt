@@ -63,7 +63,24 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
 		${AQUA_RESOURCES_DIR}/Assets/
+
+	COMMAND ${CMAKE_COMMAND} -E remove_directory
+		${AQUA_RESOURCES_DIR}/Assets/Mono/
 )
+
+if(WIN32)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_CURRENT_SOURCE_DIR}/Assets/Mono/Windows
+			${AQUA_RESOURCES_DIR}/Assets/Mono/
+	)
+else()
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_CURRENT_SOURCE_DIR}/Assets/Mono/Unix
+			${AQUA_RESOURCES_DIR}/Assets/Mono/
+	)
+endif()
 
 if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD	
@@ -94,17 +111,24 @@ if(APPLE)
 	endif()
 
 	find_file(MONO_LIBRARY_NATIVE NAMES
-		libmono-native.dylib   # Homebrew
-		libmono-native-compat.dylib   # Default Framework
+		libmono-native.dylib   			# Homebrew
+		libmono-native-compat.dylib   	# Default Framework
 		PATHS "${MONO_LIBRARY_DIRS}" REQUIRED)
 
-	if(MONO_LIBRARY_NATIVE)
-		# Copy libmono-native-*.dylib to resource directory
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-			COMMAND echo Copying ${MONO_LIBRARY_NATIVE} to output
-			COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${AQUA_RESOURCES_DIR}/libmono-native.dylib
-		)
-	endif()
+	find_file(MONO_LIBRARY_POSIXHELPER NAMES libMonoPosixHelper.dylib PATHS "${MONO_LIBRARY_DIRS}" REQUIRED)
+
+	# Copy base game to resource directory
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND echo Copying base game to output
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/BaseGame ${AQUA_RESOURCES_DIR}/BaseGame
+	)	
+
+	# Copy required Mono .dylibs to resource directory
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND echo Copying ${MONO_LIBRARY_NATIVE} to output
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${AQUA_RESOURCES_DIR}/libmono-native.dylib
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_POSIXHELPER} ${AQUA_RESOURCES_DIR}
+	)
 endif()
 
 AddPlatformSpecifics()

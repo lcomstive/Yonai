@@ -132,6 +132,8 @@ if(MONO_FOUND)
 
     if(WIN32)
         set(MONO_MDB2PDB ${MONO_ROOT}/bin/pdb2mdb.bat PARENT_SCOPE)
+	else()
+		set(MONO_MDB2PDB ${MONO_ROOT}/bin/pdb2mdb PARENT_SCOPE)
     endif()
 endif()
 

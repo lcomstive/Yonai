@@ -15,6 +15,7 @@ namespace AquaEngine.IO
 				return file.FullPath;
 
 			string mountPath = VFS.ExpandPath(MountPath, needExistingFile) ?? MountPath;
+			if(string.IsNullOrEmpty(mountPath)) mountPath = MountPath;
 			return mountPath + file.FullPath.Replace(MountPoint, "/");
 		}
 
@@ -105,7 +106,13 @@ namespace AquaEngine.IO
 
 		public override void Remove(VFSFile path) => File.Delete(ExpandPath(path));
 
-		public override bool CreateDirectory(VFSFile target) => Directory.CreateDirectory(ExpandPath(target))?.Exists ?? false;
+		public override bool CreateDirectory(VFSFile target)
+		{
+			string targetDir = ExpandPath(target);
+			if(!targetDir.EndsWith("/"))
+				target += "/";
+			return Directory.CreateDirectory(targetDir)?.Exists ?? false;
+		}
 
 		public override bool RemoveDirectory(VFSFile target)
 		{
@@ -117,8 +124,9 @@ namespace AquaEngine.IO
 
 		public override void Write(VFSFile path, byte[] data)
 		{
-			CreateDirectory(path.ParentDirectory);
-			File.WriteAllBytes(ExpandPath(path), data);
+			path = ExpandPath(path);
+			Directory.CreateDirectory(path.ParentDirectory);
+			File.WriteAllBytes(path.FullPath, data);
 		}
 
 		public override void Write(VFSFile file, string data, bool append = false)

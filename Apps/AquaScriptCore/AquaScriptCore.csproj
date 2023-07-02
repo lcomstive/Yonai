@@ -24,7 +24,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -48,8 +49,8 @@
     <!-- Attributes -->
     <Compile Include="Attributes/HideInInspectorAttribute.cs" />
     <Compile Include="Attributes/RangeAttribute.cs" />
-    <Compile Include="Attributes/SerializeFileOptionsAttribute.cs" />
     <Compile Include="Attributes/SerializeAttribute.cs" />
+    <Compile Include="Attributes/SerializeFileOptionsAttribute.cs" />
     <Compile Include="Attributes/ShowInInspectorAttribute.cs" />
  
     <!-- Audio -->
@@ -100,7 +101,11 @@
     <!-- IO -->
     <Compile Include="IO\Clipboard.cs" />
     <Compile Include="IO\ISerializable.cs" />
-    <Compile Include="IO\VFS.cs" />
+    <Compile Include="IO\VFS\VFS.cs" />
+    <Compile Include="IO\VFS\VFS.cs" />
+    <Compile Include="IO\VFS\VFSFile.cs" />
+    <Compile Include="IO\VFS\VFSFileMapping.cs" />
+    <Compile Include="IO\VFS\VFSMapping.cs" />
     
     <!-- Math -->
     <Compile Include="Math\Colour.cs" />

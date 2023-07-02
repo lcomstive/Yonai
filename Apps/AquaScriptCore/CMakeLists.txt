@@ -26,7 +26,6 @@ if(MSVC)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND $<IF:$<CONFIG:Release>,echo,${CMAKE_COMMAND}> -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/AquaScriptCore.dll.mdb ${AQUA_RESOURCES_DIR}/Assets/Mono/AquaScriptCore.dll.mdb)
     endif()
-
 else()
     # Generator is not Visual Studio.
     # AquaScriptCore will have to be compiled manually,

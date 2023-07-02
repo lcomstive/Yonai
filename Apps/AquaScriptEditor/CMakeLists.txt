@@ -34,7 +34,7 @@ else()
 	add_custom_target(
 		AquaScriptEditor
 		COMMENT "Copying AquaScriptEditor to output directory"
-		COMMAND mkdir -p ${AQUA_RESOURCES_DIR}
-		COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/AquaScriptEditor.* ${AQUA_RESOURCES_DIR}
+		COMMAND mkdir -p ${AQUA_RESOURCES_DIR}/Assets/Mono
+		COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/AquaScriptEditor.* ${AQUA_RESOURCES_DIR}/Assets/Mono/
 	)
 endif()
