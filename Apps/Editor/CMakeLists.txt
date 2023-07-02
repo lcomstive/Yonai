@@ -61,26 +61,18 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND echo Copying standard assets to output directory
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/Assets/
-		${AQUA_RESOURCES_DIR}/Assets/
+		${CMAKE_CURRENT_SOURCE_DIR}/Assets
+		${AQUA_RESOURCES_DIR}/Assets
 
-	COMMAND ${CMAKE_COMMAND} -E remove_directory
-		${AQUA_RESOURCES_DIR}/Assets/Mono/
+	# Copy .NET .dlls for this platform to the root of the Assets/Mono/
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${AQUA_RESOURCES_DIR}/Assets/Mono/$<IF:$<PLATFORM_ID:Windows>,Windows,Unix>
+		${AQUA_RESOURCES_DIR}/Assets/Mono
+
+	# Remove platform .NET .dll folders
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${AQUA_RESOURCES_DIR}/Assets/Mono/Windows
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${AQUA_RESOURCES_DIR}/Assets/Mono/Unix
 )
-
-if(WIN32)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-			${CMAKE_CURRENT_SOURCE_DIR}/Assets/Mono/Windows
-			${AQUA_RESOURCES_DIR}/Assets/Mono/
-	)
-else()
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-			${CMAKE_CURRENT_SOURCE_DIR}/Assets/Mono/Unix
-			${AQUA_RESOURCES_DIR}/Assets/Mono/
-	)
-endif()
 
 if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD	

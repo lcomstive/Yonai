@@ -9,7 +9,7 @@ if(MSVC)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         DEBUG_POSTFIX ""
         VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2"
-        VS_DOTNET_REFERENCES "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/Mono/Newtonsoft.Json.dll;System"
+        VS_DOTNET_REFERENCES "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/Mono/Windows/Newtonsoft.Json.dll;System"
     )
 
     # Copy AquaScriptCore.dll to output resources mono directory
