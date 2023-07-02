@@ -58,6 +58,9 @@ void EditorApp::Setup()
 	// Add global systems
 	SystemManager::Global()->Add<AudioSystem>();
 
+	if (!HasArg("build"))
+		ImGui::SetCurrentContext(SystemManager::Global()->Add<ImGUISystem>()->GetContext());
+
 	// Disable drawing to default framebuffer.
 	// Instead store pointer to render system and call manually
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
@@ -66,10 +69,6 @@ void EditorApp::Setup()
 	SystemManager::Global()->Add<SceneSystem>();
 	
 	LaunchEditorService();
-	
-	ImGUISystem* imGUISystem = SystemManager::Global()->Get<ImGUISystem>();
-	if(imGUISystem)
-		ImGui::SetCurrentContext(imGUISystem->GetContext());
 }
 
 void EditorApp::Cleanup()
