@@ -92,16 +92,16 @@ Application::Application(int argc, char** argv)
 void Application::Setup()
 {
 	#pragma region Log engine information
-	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
-		"Engine",
+	spdlog::info("{:>12} v{}.{}.{}-{} [{}]",
+		"Aqua Engine",
 		AQUA_ENGINE_VERSION_MAJOR,
 		AQUA_ENGINE_VERSION_MINOR,
 		AQUA_ENGINE_VERSION_PATCH,
 		AQUA_ENGINE_VERSION_REV,
 		AQUA_ENGINE_VERSION_BRANCH
 	);
-	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
-	spdlog::info("");
+	spdlog::debug("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
+	spdlog::debug("");
 
 	string persistentPath = GetPersistentDirectory();
 	spdlog::debug("{:>12}: {}", "Persistent", persistentPath);
@@ -113,7 +113,18 @@ void Application::Setup()
 
 #if !defined(NDEBUG)
 	spdlog::debug("{:>12}: {}", "Configuration", "Debug");
+#else
+	spdlog::debug("{:>12}: {}", "Configuration", "Release");
 #endif
+
+	spdlog::trace("Arguments:");
+	for(auto& pair : m_Args)
+	{
+		if(pair.second.empty())
+			spdlog::trace("  {}", pair.first);
+		else
+			spdlog::trace("  {}: {}", pair.first, pair.second);
+	}
 #pragma endregion
 }
 
@@ -199,18 +210,6 @@ void Application::ProcessArgs(int argc, char** argv)
 			// Add to list of found arguments
 			m_Args.emplace(key, value);
 		}
-	}
-
-	if(m_Args.size() == previousArgCount)
-		return; // Nothing new added
-
-	spdlog::debug("Added {} argument(s)", m_Args.size());
-	for(auto& pair : m_Args)
-	{
-		if(pair.second.empty())
-			spdlog::debug("  '{}'", pair.first);
-		else
-			spdlog::debug("  '{}' = '{}'", pair.first, pair.second);
 	}
 }
 
