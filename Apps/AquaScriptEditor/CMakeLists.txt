@@ -22,11 +22,11 @@ if(MSVC)
 
 	if(AQUA_GENERATE_MDBS)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-			COMMAND $<IF:$<CONFIG:Release>,echo,${MONO_MDB2PDB}> $<TARGET_FILE:${PROJECT_NAME}>)
-		# Copy MDB to resources mono directory 
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-			COMMAND $<IF:$<CONFIG:Release>,echo,${CMAKE_COMMAND}> -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/AquaScriptEditor.dll.mdb ${AQUA_RESOURCES_DIR}/Assets/Mono/AquaScriptEditor.dll.mdb)
-	endif()
+			# Generate MDB
+            COMMAND $<IF:$<CONFIG:Release,MinSizeRel>,echo,${MONO_MDB2PDB}> "$<TARGET_FILE:${PROJECT_NAME}>"
+        	# Copy MDB to resources mono directory 
+            COMMAND $<IF:$<CONFIG:Release,MinSizeRel>,echo,${CMAKE_COMMAND}> -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/AquaScriptEditor.dll.mdb ${AQUA_RESOURCES_DIR}/Assets/Mono/AquaScriptEditor.dll.mdb)
+    endif()
 else()
 	# Generator is not Visual Studio.
 	# AquaScriptEditor will have to be compiled manually,
