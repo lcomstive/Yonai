@@ -1,0 +1,283 @@
+@use "sass:math";
+@import url('https://fonts.googleapis.com/css2?family=Archivo');
+
+$font-colour: #fff;
+$font-secondary-colour: #d8d8d8;
+$font-stack: 'Archivo', sans-serif;
+$font-size: 18px;
+$font-size-small: $font-size * 0.8;
+
+$accent-colour: #5353ff;
+$background-colour: #19191f;
+
+$transition: all 0.1s ease-out;
+
+/* Spacing between landing -> content, and content -> footer, etc. */
+$panel-spacing: 35px;
+$content-width: 50vw;
+
+$button-padding: 5px 15px;
+$button-border-width: 3px;
+$button-border-radius: 20px;
+$button-click-colour: darken($accent-colour, 7.5%);
+
+$landing-bg-colour: #1c1c30;
+$landing-height: 550px;
+$landing-image-size: $landing-height * 0.25;
+
+$navbar-height: 50px;
+$navbar-icon-height: 30px;
+$navbar-horizontal-padding: 35px;
+
+$footer-vertical-padding: 40px;
+
+html, body
+{
+	font-size: $font-size;
+	width: 100%;
+	margin: 0;
+	font-family: $font-stack;
+	color: $font-colour;
+	background-color: $background-colour;
+	min-height: 100vh;
+	overflow-x: hidden; /* Hide horizontal scrollbar */
+}
+
+button
+{
+	background: none;
+	color: $font-colour;
+	padding: $button-padding;
+	border: $button-border-width solid $accent-colour;
+	border-radius: $button-border-radius;
+	transition: $transition;
+}
+
+button:hover
+{
+	cursor: pointer;
+	background: $accent-colour;
+	transition: $transition;
+}
+
+button:active
+{
+	background: $button-click-colour;
+	border-color: $button-click-colour;
+	transition: $transition;
+}
+
+a { color: $accent-colour; }
+a:hover
+{
+	color: lighten($accent-colour, 5%);
+}
+
+.subtitle { color: $font-secondary-colour; }
+
+section
+{
+	position: relative;
+	transition: $transition;
+}
+
+#navbar
+{
+	z-index: 1;
+	background-color: $landing-bg-colour;
+	justify-content: center;
+	display: flex;
+	font-size: $font-size-small;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: $navbar-height;
+	padding: 0 calc(100vw - $content-width) * 0.5;
+
+	align-items: center;
+
+	a
+	{
+		font-weight: 400;
+		color: white;
+		text-decoration: none;
+		padding-right: $navbar-horizontal-padding;
+	}
+
+	a:hover { color: $font-secondary-colour; }
+
+	#nav-home
+	{
+		height: 80%;
+		display: flex;
+		width: fit-content;
+		align-items: center;
+		transition: $transition;
+
+		img { height: $navbar-icon-height; }
+
+		p { padding-left: 5px; }
+	}
+
+	#nav-home:hover
+	{
+		opacity: 0.8;
+		transition: $transition;
+	}
+}
+
+#landing
+{
+	width: 100%;
+	height: $landing-height;
+	background: $landing-bg-colour;
+	text-align: center;
+	margin-bottom: $panel-spacing;
+	
+	img
+	{
+		margin-top: $landing-height * 0.4 - math.div($landing-image-size, 2);
+		width: $landing-image-size;
+		height: $landing-image-size;
+	}
+
+	button
+	{
+		border-radius: $button-border-radius * 0.5;
+		font-size: $font-size;
+		background-color: $accent-colour;
+		transition: $transition;
+		letter-spacing: 2px;
+
+		&:hover
+		{
+			border-color: lighten($accent-colour, 5%);
+			background-color: lighten($accent-colour, 5%);
+			transition: $transition;
+		}
+	}
+}
+
+#content
+{
+	text-align: left;
+	width: $content-width;
+	padding: 0 calc(100vw - $content-width) * 0.5;
+}
+
+#footer
+{
+	font-size: $font-size-small;
+	
+	position: relative;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin-top: $panel-spacing;
+
+	background: $landing-bg-colour;
+	padding: $footer-vertical-padding * 2 0;
+	padding-left: (100vw - $content-width) * 0.5;
+	padding-right: (100vw - $content-width) * 0.5;
+
+	display: flex;
+	flex-wrap: wrap;
+
+	div:not(.footer-wave) { width: 33%; }
+
+	a
+	{
+		margin-right: 10px;
+		color: white;
+		text-decoration: underline solid $accent-colour;
+		transition: $transition;
+	}
+	a:hover
+	{
+		color: $accent-colour;
+		transition: $transition;
+	}
+}
+
+/* Waves */
+.landing-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.landing-wave svg {
+    position: relative;
+    display: block;
+    width: calc(149% + 1.3px);
+    height: 73px;
+    transform: rotateY(180deg);
+}
+
+.landing-wave .shape-fill {
+    fill: #19191f;
+}
+
+.footer-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.footer-wave svg {
+    position: relative;
+    display: block;
+    width: calc(130% + 1.3px);
+    height: 63px;
+}
+
+.footer-wave .shape-fill {
+    fill: #19191F;
+}
+
+/* Animations */
+@keyframes wave {
+	0%   { transform: translate(-50%,-75%) rotate(0deg);   }
+	100% { transform: translate(-50%,-75%) rotate(360deg); }
+}
+
+/* Media Queries */
+@media screen and (max-width: 1100px)
+{
+	$content-width: 90vw;
+
+	#navbar { padding: 0 calc(100vw - $content-width) * 0.5; }
+
+	#content
+	{
+		width: $content-width;
+		padding: 0 calc(100vw - $content-width) * 0.5;
+	}
+	
+	#footer
+	{
+		padding-left: (100vw - $content-width) * 0.5;
+		padding-right: (100vw - $content-width) * 0.5;
+	}
+}
+
+@media screen and (max-width: 600px)
+{
+	#footer
+	{
+		flex-direction: row;
+
+		div
+		{
+			width: 100%;
+			margin-bottom: $panel-spacing;
+		}
+	}
+}
