@@ -13,17 +13,20 @@ jobs:
         - {
             name: "Windows",
             os: windows-latest,
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 17 2022",
+            options: "-DBUILD_SHARED_LIBS=OFF"
           }
         - {
             name: "Linux",
             os: ubuntu-latest,
-            generator: "Ninja"
+            generator: "Ninja",
+            options: "-DBUILD_SHARED_LIBS=ON"
           }
         - {
             name: "MacOS",
             os: macOS-latest,
-            generator: "Unix Makefiles"
+            generator: "Unix Makefiles",
+            options: "-DBUILD_SHARED_LIBS=ON"
           }
 
     # Get source
@@ -70,7 +73,7 @@ jobs:
 
     # Configure CMake
     - name: Configure
-      run: cmake -B ${{ github.workspace }}/build -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} -DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      run: cmake -B ${{ github.workspace }}/build -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{ env.CMAKE_CONFIG }} ${{ matrix.config.options }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     # Build AquaScriptCore C# project manually on Unix systems
     - name: Build C# Bindings
