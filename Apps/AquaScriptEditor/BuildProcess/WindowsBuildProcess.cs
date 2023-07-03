@@ -15,7 +15,7 @@ namespace AquaEditor.BuildProcess
 		{
 			if(string.IsNullOrEmpty(outputFolder))
 			{
-				outputFolder = FileDialog.OpenFolder("Build Output", "project://");
+				outputFolder = FileDialog.OpenFolder("Build Output");
 				if(string.IsNullOrEmpty(outputFolder))
 				{
 					Log.Error("Cannot build - not output folder selected");
@@ -51,7 +51,7 @@ namespace AquaEditor.BuildProcess
 			VFS.Copy("project://Assets/", "build://Assets/ProjectFiles");
 
 			// If base game was compiled as shared library, will need to copy dependency .dll files
-			if (VFS.Exists("app://AquaEngine.dll"))
+			if (VFS.Exists("app://AquaEngine.dll") || VFS.Exists("app://AquaEngined.dll"))
 			{
 				VFSFile[] localFiles = VFS.GetFiles("app://");
 				foreach (var file in localFiles)

@@ -17,7 +17,8 @@ namespace AquaEngine
 
 		private static JObject LoadJSON(string path) => JsonConvert.DeserializeObject<JObject>(VFS.ReadText(path));
 
-		internal static void Launch()
+		// Called from unmanaged code
+		private static void Launch()
 		{
 			VFS.Mount("build://", Application.ExecutableDirectory + "/Assets");
 			VFS.Mount("assets://", "build://Editor");
@@ -45,7 +46,8 @@ namespace AquaEngine
 			foreach (string path in JSON["Assemblies"].Values<string>())
 			{
 				VFSFile file = new VFSFile(path);
-				_LoadAssembly(VFS.Read(AssemblyDir + path), file.FileNameWithoutExtension);
+				// _LoadAssembly(VFS.Read(AssemblyDir + path), file.FileNameWithoutExtension);
+				AppDomain.CurrentDomain.Load(VFS.Read(AssemblyDir + path));
 			}
 		}
 

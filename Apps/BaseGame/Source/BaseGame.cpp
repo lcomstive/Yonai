@@ -1,8 +1,9 @@
 #include <BaseGame.hpp>
 #include <AquaEngine/Window.hpp>
 #include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
 #include <AquaEngine/Systems/Global/RenderSystem.hpp>
+
+#include <AquaEngine/Scripting/Class.hpp>
 
 using namespace std;
 using namespace AquaEngine;
@@ -29,40 +30,22 @@ void BaseGame::Setup()
 	m_RenderSystem->GetPipeline()->SetResolution(resolution);
 
 	// Call AquaEngine.Application.BaseGameLaunch()
-	MonoClass* appClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher");
-	MonoMethod* method = mono_class_get_method_from_name(appClass, "Launch", 0);
-	mono_runtime_invoke(method, nullptr, nullptr, nullptr);
+	Scripting::Class appClass(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "BaseGameLauncher"), nullptr);
+	Method method = appClass.GetMethod("Launch", 0);
+	method.Invoke();
 }
 
 void BaseGame::InitialiseScripting()
 {
-	string assemblyPath = GetExecutableDirectory().string() + AssembliesPath;
 	ScriptEngine::Init(GetExecutableDirectory().string() + AssembliesPath,
-#ifndef NDEBUG // Allow debugging in debug builds
+// #ifndef NDEBUG // Allow debugging in debug builds
 		true
+/*
 #else // Release mode
 		false
 #endif
+*/
 	);
-
-	ScriptEngine::AddInternalCall("AquaEngine.BaseGameLauncher::_LoadAssembly", (const void*)LoadAssembly);
-}
-
-bool LoadAssembly(MonoArray* dataRaw, MonoString* friendlyNameRaw)
-{
-	// Get data
-	vector<unsigned char> data;
-	data.resize(mono_array_length(dataRaw));
-	for (size_t i = 0; i < data.size(); i++)
-		data[i] = mono_array_get(dataRaw, unsigned char, i);
-
-	// Get friendly name
-	char* friendlyName = mono_string_to_utf8(friendlyNameRaw);
-
-	Assembly* assembly = ScriptEngine::LoadAssembly(data, friendlyName);
-	
-	mono_free(friendlyName);
-	return assembly != nullptr;
 }
 
 #include <vector>

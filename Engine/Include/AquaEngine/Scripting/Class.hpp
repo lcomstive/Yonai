@@ -2,6 +2,7 @@
 #include <memory>
 #include <mono/jit/jit.h>
 #include <AquaEngine/API.hpp>
+#include <AquaEngine/Scripting/Method.hpp>
 
 namespace AquaEngine::Scripting
 {
@@ -14,7 +15,8 @@ namespace AquaEngine::Scripting
 
 		AquaAPI MonoClassField* GetField(const char* name);
 		AquaAPI MonoProperty* GetProperty(const char* name);
-		AquaAPI MonoMethod* GetMethod(const char* name, int parameterCount = 0);
+		AquaAPI Method GetMethod(const char* name, int parameterCount = 0);
+		AquaAPI MonoMethod* GetMonoMethod(const char* name, int parameterCount = 0);
 
 		AquaAPI void Invoke(MonoMethod* method, void** params = nullptr);
 		AquaAPI void Invoke(const char* methodName, void** params = nullptr);
