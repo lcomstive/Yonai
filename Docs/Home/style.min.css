@@ -1,12 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Archivo");
-/* Spacing between landing -> content, and content -> footer, etc. */
+/* Spacing between sections (e.g. landing -> content, content -> footer) */
+/*
+$landing-button-colour: $font-colour;
+$landing-button-bg-colour: $accent-colour;
+$landing-button-shadow-colour: darken($landing-button-bg-colour, 5%);
+*/
 html, body {
   font-size: 18px;
   width: 100%;
   margin: 0;
   font-family: "Archivo", sans-serif;
   color: #fff;
-  background-color: #19191f;
+  background-color: #12121c;
   min-height: 100vh;
   overflow-x: hidden; /* Hide horizontal scrollbar */
 }
@@ -15,33 +20,33 @@ button {
   background: none;
   color: #fff;
   padding: 5px 15px;
-  border: 3px solid #5353ff;
+  border: 3px solid #6038ff;
   border-radius: 20px;
   transition: all 0.1s ease-out;
 }
 
 button:hover {
   cursor: pointer;
-  background: #5353ff;
+  background: #6038ff;
   transition: all 0.1s ease-out;
 }
 
 button:active {
-  background: #2d2dff;
-  border-color: #2d2dff;
+  background: #4112ff;
+  border-color: #4112ff;
   transition: all 0.1s ease-out;
 }
 
 a {
-  color: #5353ff;
+  color: #bcabff;
 }
 
 a:hover {
-  color: #6d6dff;
+  color: #896bff;
 }
 
 .subtitle {
-  color: #d8d8d8;
+  color: #ececec;
 }
 
 section {
@@ -49,13 +54,28 @@ section {
   transition: all 0.1s ease-out;
 }
 
+p {
+  letter-spacing: 1.5px;
+}
+
+hr {
+  opacity: 0.5;
+  border-color: #08080c;
+}
+
+.code {
+  display: block;
+  border-radius: 5px;
+  padding: 25px;
+  background-color: #08080c;
+}
+
 #navbar {
   z-index: 1;
-  background-color: #1c1c30;
+  background-color: #08080c;
   justify-content: center;
   display: flex;
   font-size: 14.4px;
-  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -70,7 +90,7 @@ section {
   padding-right: 35px;
 }
 #navbar a:hover {
-  color: #d8d8d8;
+  color: #ececec;
 }
 #navbar #nav-home {
   height: 80%;
@@ -93,29 +113,41 @@ section {
 #landing {
   width: 100%;
   height: 550px;
-  background: #1c1c30;
+  background: #08080c;
   text-align: center;
   margin-bottom: 35px;
+  color: white;
+  letter-spacing: 3px;
 }
 #landing img {
-  margin-top: 151.25px;
-  width: 137.5px;
-  height: 137.5px;
+  margin-top: 41.25px;
+  width: auto;
+  height: 247.5px;
 }
 #landing button {
-  border-radius: 10px;
-  font-size: 18px;
-  background-color: #5353ff;
-  transition: all 0.1s ease-out;
   letter-spacing: 2px;
+  font-size: 18px;
+  transition: all 0.1s ease-out;
+  color: #fff;
+  background-color: #6038ff;
+  border-radius: 10px;
+  border-color: #6038ff;
+  box-shadow: 0px 4px #4c1fff;
 }
 #landing button:hover {
-  border-color: #6d6dff;
-  background-color: #6d6dff;
+  border-color: #7452ff;
+  background-color: #7452ff;
   transition: all 0.1s ease-out;
+  transform: translateY(4px);
+  box-shadow: none;
+}
+#landing button:active {
+  border-color: #896bff;
+  background-color: #896bff;
 }
 
 #content {
+  display: block;
   text-align: left;
   width: 50vw;
   padding: 0 25vw;
@@ -128,7 +160,7 @@ section {
   left: 0;
   right: 0;
   margin-top: 35px;
-  background: #1c1c30;
+  background: #08080c;
   padding: 80px 0;
   padding-left: 25vw;
   padding-right: 25vw;
@@ -140,66 +172,79 @@ section {
 }
 #footer a {
   margin-right: 10px;
-  color: white;
-  text-decoration: underline solid #5353ff;
+  color: #fff;
+  text-decoration: underline 2px solid;
   transition: all 0.1s ease-out;
+  text-decoration-color: #6038ff;
 }
 #footer a:hover {
-  color: #5353ff;
+  color: #d9d9d9;
   transition: all 0.1s ease-out;
 }
 
 /* Waves */
 .landing-wave {
-  position: absolute;
-  bottom: 0;
   left: 0;
   width: 100%;
-  overflow: hidden;
+  bottom: 0px;
   line-height: 0;
+  overflow: hidden;
+  position: absolute;
 }
 
 .landing-wave svg {
-  position: relative;
-  display: block;
-  width: calc(149% + 1.3px);
   height: 73px;
+  display: block;
+  position: relative;
+  width: calc(149% + 1.3px);
   transform: rotateY(180deg);
 }
 
 .landing-wave .shape-fill {
-  fill: #19191f;
+  fill: #12121c;
 }
 
 .footer-wave {
-  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  overflow: hidden;
   line-height: 0;
+  overflow: hidden;
+  position: absolute;
 }
 
 .footer-wave svg {
-  position: relative;
-  display: block;
-  width: calc(130% + 1.3px);
   height: 63px;
+  display: block;
+  position: relative;
+  width: calc(130% + 1.3px);
 }
 
 .footer-wave .shape-fill {
-  fill: #19191F;
+  fill: #12121c;
 }
 
-/* Animations */
-@keyframes wave {
-  0% {
-    transform: translate(-50%, -75%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -75%) rotate(360deg);
-  }
+.navbar-wave {
+  left: 0;
+  top: 0px;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+  position: absolute;
+  transform: rotate(180deg);
 }
+
+.navbar-wave svg {
+  height: 26px;
+  display: block;
+  position: relative;
+  width: calc(262% + 1.3px);
+}
+
+.navbar-wave .shape-fill {
+  fill: #08080c;
+}
+
 /* Media Queries */
 @media screen and (max-width: 1100px) {
   #navbar {
@@ -215,12 +260,32 @@ section {
   }
 }
 @media screen and (max-width: 600px) {
-  #footer {
-    flex-direction: row;
+  #landing p {
+    padding: 0 5%;
   }
-  #footer div {
-    width: 100%;
+  #landing img {
+    width: 75vw;
+    height: auto;
+  }
+  #footer {
+    display: block;
+    padding: 80px 10%;
+  }
+  #footer div:not(:first-child) {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw !important;
     margin-bottom: 35px;
+  }
+}
+@media screen and (max-width: 300px) {
+  #navbar a {
+    padding: 0;
+    width: 30%;
+    text-align: center;
+  }
+  #navbar a img {
+    display: none;
   }
 }
 

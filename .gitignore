@@ -12,6 +12,7 @@
 
 # Generated Documentation
 Docs/Dist/
+*.css.map
 
 # Generated files & artifacts
 [Bb]in/

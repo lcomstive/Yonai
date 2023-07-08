@@ -19,6 +19,10 @@ FULL_PATH_NAMES			= NO
 AUTOLINK_SUPPORT		= YES
 SHOW_USED_FILES			= NO
 LAYOUT_FILE				= DoxygenLayout.xml
+DOT_IMAGE_FORMAT		= svg
+DOT_TRANSPARENT			= YES
+INTERACTIVE_SVG			= YES # Scroll and zoom in big images
+HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
 
 # Theming
 GENERATE_TREEVIEW		= YES
