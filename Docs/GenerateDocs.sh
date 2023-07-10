@@ -15,14 +15,15 @@ if [ "$GIT_BRANCH" != "main" ]; then
 	VERSION="$VERSION-$GIT_HASH [$GIT_BRANCH]"
 fi
 
-if [ -f "./Dist/" ]; then
+if [ -d "./Dist/" ]; then
 	rm -rf ./Dist/
 fi
 
 echo "Generating documents for v$VERSION"
 
 # Create output directory
-mkdir -p ./Dist/
+mkdir -p ./Dist/API
+mkdir -p ./Dist/InternalAPI
 
 ### Generate documentation
 # Pipe output with project version to doxygen command
@@ -34,12 +35,12 @@ mkdir -p ./Dist/
 ( cat DoxyfileInternal ; echo ; echo "PROJECT_NUMBER=$VERSION" ) | doxygen -
 
 # Move all items in Dist/API/html to Dist/API
-mv ./Dist/API/html/ ./Dist/API/
+mv -f ./Dist/API/html/* ./Dist/API/
 rm -rf ./Dist/API/html
 
 # Move all items in Dist/InternalAPI/html to Dist/InternalAPI
-mv ./Dist/InternalAPI/html/ ./Dist/InternalAPI/
+mv -f ./Dist/InternalAPI/html/* ./Dist/InternalAPI/
 rm -rf ./Dist/InternalAPI/html
 
 # Copy Home/ folder to Dist/
-cp ./Home/ ./Dist/
+cp -r ./Home/* ./Dist/

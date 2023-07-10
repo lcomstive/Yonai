@@ -1,5 +1,5 @@
 DOXYFILE_ENCODING		= UTF-8
-PROJECT_NAME			= AquaEngine
+PROJECT_NAME			= Yonai
 # PROJECT_LOGO			= "Media/Logo.png"
 OUTPUT_DIRECTORY		= ./Dist/InternalAPI
 CREATE_SUBDIRS			= NO

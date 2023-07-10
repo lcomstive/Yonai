@@ -106,11 +106,11 @@ jobs:
       with:
         if-no-files-found: error
         name: YonaiEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}-${{ github.ref_name }}
-        path: ${{ github.workspace }}/build/Yonai\ Editor\ v*
+        path: ${{ github.workspace }}/build/Yonai\ v*
 
     - uses: actions/upload-artifact@v3
       if: matrix.config.name == 'Windows'
       with:
         if-no-files-found: error
         name: YonaiEngine-${{ matrix.config.name }}-${{ steps.readFile.outputs.content }}-${{ github.ref_name }}
-        path: ${{ github.workspace }}\build\Yonai Editor v*
+        path: ${{ github.workspace }}\build\Yonai v*

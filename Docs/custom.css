@@ -7,7 +7,7 @@ html
 
 html.dark-mode
 {
-	--primary-color: #b0b0ff;
-	--primary-dark-color: #ababff;
-	--primary-light-color: #d3d3ff;
+	--primary-color: #8080e3;
+	--primary-dark-color: #bdbdff;
+	--primary-light-color: #5858ff;
 }

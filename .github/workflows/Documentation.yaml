@@ -33,7 +33,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Install dependencies
-        run: sudo apt-get install doxygen
+        run: sudo apt-get install doxygen graphviz -y
       - name: Generate Website
         run: cd ${{ github.workspace }}/Docs; bash ./GenerateDocs.sh
       - name: Upload artifact
