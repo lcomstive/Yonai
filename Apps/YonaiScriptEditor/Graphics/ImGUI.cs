@@ -1165,6 +1165,8 @@ namespace YonaiEditor
 		#endregion
 
 		#region State
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void SetCurrentContext();
+
 		public static bool IsItemHovered(HoveredFlags flags = HoveredFlags.None) => _IsItemHovered((int)flags);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsItemHovered(int flags);
 

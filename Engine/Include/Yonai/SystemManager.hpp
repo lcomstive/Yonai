@@ -36,7 +36,7 @@ namespace Yonai
 		YonaiAPI static SystemManager* Global();
 
 		template<typename T>
-		T* Add(size_t type)
+		T* Add(size_t type, bool enabled = true)
 		{
 			if (!std::is_base_of<Systems::System, T>())
 			{
@@ -54,13 +54,14 @@ namespace Yonai
 			Systems::System* system = (Systems::System*)instance;
 			system->ManagedData = CreateManagedInstance(type);
 			system->Init();
+			system->m_Enabled = enabled;
 
 			m_Systems.emplace(type, instance);
 			return instance;
 		}
 
 		template<typename T>
-		T* Add() { return Add<T>(typeid(T).hash_code()); }
+		T* Add(bool enabled = true) { return Add<T>(typeid(T).hash_code(), enabled); }
 
 		YonaiAPI Systems::ScriptSystem* Add(MonoType* managedType);
 

@@ -8,17 +8,17 @@ namespace YonaiEditor
 {
 	public struct ProjectFile : ISerializable
 	{
-		public string Path { get; set; }
+		public VFSFile Path { get; set; }
 
 		public string Name { get; set; }
 
-		public string AssetDirectory { get; set; }
+		public VFSFile AssetDirectory { get; set; }
 
 		public string[] Assemblies { get; set; }
 
 		public string[] EditorAssemblies { get; set; }
 
-		public ProjectFile(string name = "Aqua Project")
+		public ProjectFile(string name = "Yonai Project")
 		{
 			Name = name;
 			Path = "project://project.json";
@@ -27,17 +27,34 @@ namespace YonaiEditor
 			EditorAssemblies = new string[0];
 		}
 
+		public static ProjectFile? FromPath(VFSFile path)
+		{
+			if (!VFS.Exists(path))
+				return null;
+			try
+			{
+				ProjectFile project = VFS.Read<ProjectFile>(path);
+				project.Path = path;
+				return project;
+			}
+			catch(Exception e)
+			{
+				Log.Exception(e, $"Failed to read project '{path}'");
+				return null;
+			}
+		}
+
 		public void OnDeserialize(JObject json)
 		{
 			Name = json["Name"].Value<string>();
-			AssetDirectory = json["AssetDir"].Value<string>();
+			AssetDirectory = (VFSFile)json["AssetDir"].Value<string>();
 			Assemblies = json["Assemblies"].Values<string>().ToArray();
 			EditorAssemblies = json["EditorAssemblies"].Values<string>().ToArray();
 		}
 
 		public JObject OnSerialize() => new JObject(
 				new JProperty("Name", Name),
-				new JProperty("AssetDir", AssetDirectory),
+				new JProperty("AssetDir", AssetDirectory.FullPath),
 				new JProperty("Assemblies", new JArray(Assemblies)),
 				new JProperty("EditorAssemblies", new JArray(EditorAssemblies))
 			);

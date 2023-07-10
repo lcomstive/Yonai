@@ -70,7 +70,7 @@ namespace YonaiEditor
 	}
 
 	/// <summary>
-	/// Extension of the <see cref="Window"/> class
+	/// Extended functionality of the <see cref="Window"/> class
 	/// </summary>
 	public static class EditorWindow
 	{
@@ -83,6 +83,8 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Create();
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Destroy();
+
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void Show(bool show = true);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void ResetHints();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _CreationHintInt(int flag, int value);

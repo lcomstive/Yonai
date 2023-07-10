@@ -28,6 +28,9 @@ ADD_MANAGED_METHOD(EditorWindow, Create, void, (), YonaiEditor)
 #endif
 }
 
+ADD_MANAGED_METHOD(EditorWindow, Show, void, (bool show), YonaiEditor)
+{ Window::Show(show); }
+
 ADD_MANAGED_METHOD(EditorWindow, Destroy, void, (), YonaiEditor)
 { Window::Destroy(); }
 

@@ -46,27 +46,23 @@ void EditorApp::Setup()
 {
 	Application::Setup();
 
-	if (!HasArg(ProjectPathArg))
-	{
-		spdlog::warn("No project path set, use '-{} <path>' argument", ProjectPathArg);
-		Exit();
-		return;
-	}
-
 	InitialiseScripting();
 
 	// Add global systems
 	SystemManager::Global()->Add<AudioSystem>();
 
 	if (!HasArg("build"))
-		ImGui::SetCurrentContext(SystemManager::Global()->Add<ImGUISystem>()->GetContext());
+	{
+		ImGUISystem* imguiSystem = SystemManager::Global()->Add<ImGUISystem>(false);
+		ImGui::SetCurrentContext(imguiSystem->GetContext());
 
-	// Disable drawing to default framebuffer.
-	// Instead store pointer to render system and call manually
-	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
-	m_RenderSystem->Enable(false);
+		// Disable drawing to default framebuffer.
+		// Instead store pointer to render system and call manually
+		m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
+		m_RenderSystem->Enable(false);
 
-	SystemManager::Global()->Add<SceneSystem>();
+		SystemManager::Global()->Add<SceneSystem>();
+	}
 	
 	LaunchEditorService();
 }
@@ -113,7 +109,7 @@ void EditorApp::InitialiseScripting()
 
 void EditorApp::Draw()
 {
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SystemManager::Global()->Draw();
 

@@ -44,7 +44,7 @@ string Application::GetPersistentDirectory()
 #elif defined(YONAI_PLATFORM_MAC)
 		return string(getenv("HOME")) + "/Library/Caches/Yonai/";
 #else
-		return "./.data/";
+		return "./.data/Yonai/";
 #endif
 }
 
@@ -313,6 +313,9 @@ ADD_MANAGED_METHOD(Application, GetExecutablePath, MonoString*)
 
 ADD_MANAGED_METHOD(Application, GetExecutableDirectory, MonoString*)
 { return mono_string_new(mono_domain_get(), Application::Current()->GetExecutableDirectory().string().c_str()); }
+
+ADD_MANAGED_METHOD(Application, GetPersistentDirectory, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetPersistentDirectory().c_str()); }
 
 ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
 { return Application::Current()->HasArg(mono_string_to_utf8(name)); }

@@ -85,7 +85,15 @@ vector<System*> SystemManager::All()
 
 bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.end() && m_Systems[hash]; }
 
-System* SystemManager::Get(size_t hash) { return Has(hash) ? m_Systems[hash] : nullptr; }
+System* SystemManager::Get(size_t hash)
+{
+	if (!Has(hash))
+		return nullptr;
+	System* system = m_Systems[hash];
+	if (system->ManagedData.GCHandle == 0 && ScriptEngine::IsLoaded())
+		system->ManagedData = CreateManagedInstance(hash);
+	return system;
+}
 
 Yonai::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t typeHash)
 {

@@ -319,7 +319,10 @@ ADD_MANAGED_METHOD(World, AddSystem, MonoObject*, (uint64_t worldID, MonoReflect
 
 	// Check for existing component of same type on entity
 	if (systemManager->Has(typeHash))
-		return systemManager->Get(typeHash)->ManagedData.GetInstance();
+	{
+		Yonai::Systems::System* system = systemManager->Get(typeHash);
+		return system->ManagedData.GetInstance();
+	}
 
 	// Get unmanaged->managed data
 	Assembly::ManagedSystemData systemData = Assembly::GetManagedSystemData(typeHash);

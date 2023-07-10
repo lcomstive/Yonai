@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using YonaiEditor.BuildProcess;
 
-namespace YonaiEditor
+namespace YonaiEditor.Systems
 {
 	public class EditorUIService : YonaiSystem
 	{
@@ -30,7 +30,7 @@ namespace YonaiEditor
 			set => Get<EditorService>().State = value;
 		}
 
-		protected override void Enabled()
+		protected override void Start()
 		{
 			SceneManager.WorldChanged += (world, added) =>
 				Log.Info($"World '{world.Name}' [{world.ID}] has been " + (added ? "added" : "removed"));
@@ -50,11 +50,15 @@ namespace YonaiEditor
 
 				// CreateTestScene();
 				LoadTestScene();
+
+				if(Window.Resolution.x < 1600 || Window.Resolution.y < 900)
+					Window.Resolution = new IVector2(1600, 900);
+				EditorWindow.Show();
 			}
 			catch (Exception e) { Log.Exception(e); }
 		}
 
-		protected override void Disabled()
+		protected override void Destroyed()
 		{
 			m_TestWorld?.Destroy();
 			foreach (var view in m_ActiveViews.Values)

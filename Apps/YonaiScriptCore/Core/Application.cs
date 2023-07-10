@@ -26,6 +26,14 @@ namespace Yonai
 		public static string ExecutablePath => _GetExecutablePath();
 		public static string ExecutableDirectory => _GetExecutableDirectory();
 
+		/// <summary>
+		/// Directory with persistent storage.<br>
+		/// Windows: %APPDATA%/Yonai.<br>
+		/// Mac: ~/Library/Caches/Yonai<br>
+		/// Linux: ./.data/Yonai
+		/// </summary>
+		public static string PersistentDirectory => _GetPersistentDirectory();
+
 		public static void Exit() => _Exit();
 
 		/// <summary>
@@ -44,6 +52,7 @@ namespace Yonai
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Exit();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetExecutablePath();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetExecutableDirectory();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPersistentDirectory();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _HasArg(string name);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetBuildType();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetPlatform();

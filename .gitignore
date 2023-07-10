@@ -19,8 +19,7 @@ Docs/Dist/
 [Oo]bj/
 [Bb]uild/
 
-.aqua/
-AquaEngine*.zip
+Yonai*.zip
 
 # VCPKG packages
 vcpkg_installed
@@ -33,15 +32,9 @@ vcpkg_installed
 *.csproj
 
 # Except AquaScriptCore, used on Unix platforms
-!Apps/AquaScriptCore/AquaScriptCore.csproj
-!Apps/AquaScriptCore/AquaScriptEditor.csproj
-
-# Keep template scripting output
-!Apps/Editor/Assets/ProjectTemplate/Scripting/bin/AquaProject.dll
+!Apps/YonaiScriptCore/YonaiScriptCore.csproj
+!Apps/YonaiScriptCore/YonaiScriptEditor.csproj
 
 # Don't upload the generated glue files
-Engine/Include/AquaEngine/Glue.hpp
-Apps/Editor/Include/AquaEditor/Glue.hpp
-
-# Do include mono shared libs
-!Engine/Vendor/mono/bin/
+Engine/Include/Yonai/Glue.hpp
+Apps/Editor/Include/YonaiEditor/Glue.hpp

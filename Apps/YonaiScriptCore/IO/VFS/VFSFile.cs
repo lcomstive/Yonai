@@ -69,7 +69,7 @@ namespace Yonai.IO
 		{
 			if (!(obj is VFSFile) && !(obj is string))
 				return false;
-			return ((string)obj).Equals(FullPath);
+			return (obj as string)?.Equals(FullPath) ?? false;
 		}
 
 		public override int GetHashCode() => FullPath.GetHashCode();

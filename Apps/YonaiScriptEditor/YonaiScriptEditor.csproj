@@ -78,6 +78,7 @@
     <Compile Include="Services/EditorUI/BasicMenuItems.cs" />
     <Compile Include="Services/EditorUI/EditorUIService.cs" />
     <Compile Include="Services/EditorUI/MenuItemData.cs" />
+    <Compile Include="Services/EditorUI/ProjectHub.cs" />
 
     <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />

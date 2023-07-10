@@ -105,6 +105,12 @@ void ScriptSystem::Draw()
 
 	MonoException* exception = nullptr;
 	SystemMethodDraw(ManagedData.GetInstance(), &exception);
+	if (exception)
+	{
+		TRACE_SYSTEM("Exception in Draw() for");
+		mono_print_unhandled_exception((MonoObject*)exception);
+		Enable(false);
+	}
 }
 
 void ScriptSystem::OnScriptingReloadedBefore()

@@ -18,6 +18,7 @@ ImGUISystem::ImGUISystem()
 	m_Context = ImGui::CreateContext();
 
 	m_IO = &ImGui::GetIO();
+	m_IO->IniFilename = nullptr; // Disable automatic saving and loading
 
 	// Activate docking & viewport features
 	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
@@ -43,11 +44,19 @@ void ImGUISystem::OnEnabled()
 
 	ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 
+	ImGui::LoadIniSettingsFromDisk(m_IniFilepath.c_str());
+
 	StartFrame();
+
+	spdlog::trace("Enabled ImGUI system");
 }
 
 void ImGUISystem::OnDisabled()
 {
+	spdlog::trace("Disabling ImGUI system");
+
+	ImGui::SaveIniSettingsToDisk(m_IniFilepath.c_str());
+	
 	ImGui::Render();
 
 	ImGui_ImplOpenGL3_Shutdown();

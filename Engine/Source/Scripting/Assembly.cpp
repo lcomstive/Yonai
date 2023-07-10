@@ -98,6 +98,9 @@ size_t Assembly::GetTypeHash(MonoType* type)
 	auto managedIt = s_InternalManagedComponentTypes.find(it->second);
 	if (managedIt != s_InternalManagedComponentTypes.end())
 		return managedIt->second.Type;
+	auto systemIt = s_InternalManagedSystemTypes.find(it->second);
+	if (systemIt != s_InternalManagedSystemTypes.end())
+		return systemIt->second.Type;
 	return it->second;
 }
 

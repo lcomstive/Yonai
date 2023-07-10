@@ -7,11 +7,13 @@
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Graphics/RenderTexture.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
+#include <YonaiEditor/Systems/ImGUISystem.hpp>
 
 using namespace std;
 using namespace glm;
 using namespace Yonai;
 using namespace Yonai::Graphics;
+using namespace YonaiEditor::Systems;
 
 // Helper Functions //
 ImU32 ToU32(glm::vec4* colour) { return ImGui::ColorConvertFloat4ToU32(ImVec4(colour->x, colour->y, colour->z, colour->w)); }
@@ -20,10 +22,13 @@ ImVec2 ToVec2(glm::ivec2* value) { return ImVec2(value->x, value->y); }
 ImVec4 ToVec4(glm::vec4* value) { return ImVec4(value->x, value->y, value->z, value->w); }
 ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z, value->w); }
 
+ADD_MANAGED_METHOD(ImGUI, SetCurrentContext, void, (), YonaiEditor)
+{ ImGui::SetCurrentContext(SystemManager::Global()->Get<ImGUISystem>()->GetContext()); }
+
 ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), YonaiEditor)
 {
 	char* name = mono_string_to_utf8(pathRaw);
-	ImGui::GetIO().IniFilename = name;
+	SystemManager::Global()->Get<ImGUISystem>()->m_IniFilepath = string(name);
 	spdlog::trace("ImGUI IniFilename set to '{}'", name);
 	mono_free(name);
 }

@@ -1,6 +1,7 @@
 using System;
 using Yonai;
 using System.Linq;
+using YonaiEditor.Systems;
 using System.Collections.Generic;
 
 namespace YonaiEditor.BuildProcess
@@ -74,15 +75,17 @@ namespace YonaiEditor.BuildProcess
 			SelectPlatform(previousPlatform);
 		}
 
-		public static void StartBuild(string outputFolder = null) => BuildProcess.Execute(outputFolder, YonaiSystem.Get<EditorService>().Project);
+		public static void StartBuild(string outputFolder = null) => BuildProcess.Execute(outputFolder, ProjectHubService.ActiveProject);
+		public static void StartBuild(ProjectFile project, string outputFolder = null) => BuildProcess.Execute(outputFolder, project);
 
 		internal static bool Initialise()
 		{
 			// Default build platform is host platform
 			Platform platform = Application.Platform;
 
-			// Check for arg and parse it, if fails then set back to default
-			if (Application.HasArg("platform") &&
+			// If building from command line, check for platform arg and parse it,
+			// if fails then set back to default (host platform)
+			if (Application.HasArg("build") && Application.HasArg("platform") &&
 				!Enum.TryParse(Application.GetArg("platform"), out platform))
 					platform = Application.Platform;
 

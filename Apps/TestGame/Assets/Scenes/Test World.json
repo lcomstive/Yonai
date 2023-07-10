@@ -9,11 +9,11 @@
       "ID": "2654914000653199596",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -24,7 +24,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -22.5,
             "y": 0.0,
@@ -48,11 +48,11 @@
       "ID": "9336376843701531948",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "First"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": "13249753376079074857",
           "Colour": {
             "r": 1.0,
@@ -63,7 +63,7 @@
           "Shader": "9233319700737574020"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -2.5,
             "y": 0.0,
@@ -85,105 +85,66 @@
       ]
     },
     {
-      "ID": "2432770377810913269",
-      "Components": [
-        {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Sprite": null,
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": null
-        },
-        {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Position": {
-            "x": -15.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
-        }
-      ]
-    },
-    {
       "ID": "16765798305678760197",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Second"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Sprite": null,
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
           "Colour": {
             "r": 1.0,
-            "g": 1.0,
+            "g": 0.9843137,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": null
+          "Shader": "9233319700737574020"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -2.5,
             "y": 0.0,
             "z": -5.00166436E-07
           },
           "Rotation": {
-            "x": 9.149766E-07,
-            "y": -0.0005888966,
-            "z": -8.514516E-06,
+            "x": 9.1497526E-07,
+            "y": -0.0005888152,
+            "z": -8.51337154E-06,
             "w": -0.9999998
           },
           "Scale": {
-            "x": 0.959641337,
+            "x": 0.9595788,
             "y": 0.9599429,
-            "z": 0.9596297
+            "z": 0.9595672
           }
         }
       ]
     },
     {
-      "ID": "5810792497182943223",
+      "ID": "2432770377810913269",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Sprite": null,
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
           "Colour": {
             "r": 1.0,
-            "g": 1.0,
+            "g": 0.9843137,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": null
+          "Shader": "9233319700737574020"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
-            "x": -17.5,
+            "x": -15.0,
             "y": 0.0,
             "z": 0.0
           },
@@ -205,11 +166,11 @@
       "ID": "5172316110957065007",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -5.0,
             "y": 0.0,
@@ -228,7 +189,27 @@
           }
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        }
+      ]
+    },
+    {
+      "ID": "5810792497182943223",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -237,6 +218,25 @@
             "a": 1.0
           },
           "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -17.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
         }
       ]
     },
@@ -244,11 +244,11 @@
       "ID": "8831687503922809722",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -259,7 +259,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -7.5,
             "y": 0.282236159,
@@ -283,22 +283,22 @@
       "ID": "16643791368294567827",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-          "Sprite": null,
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
           "Colour": {
             "r": 1.0,
-            "g": 1.0,
+            "g": 0.9843137,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": null
+          "Shader": "9233319700737574020"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -10.0,
             "y": 0.0,
@@ -322,11 +322,11 @@
       "ID": "14304072608388693376",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -337,7 +337,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -12.5,
             "y": 0.0,
@@ -361,11 +361,11 @@
       "ID": "4888394632879399331",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -376,7 +376,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -25.0,
             "y": 0.0,
@@ -400,11 +400,11 @@
       "ID": "16315931371264259523",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -415,7 +415,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -27.5,
             "y": 0.0,
@@ -439,11 +439,11 @@
       "ID": "18258099385681715863",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -454,7 +454,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -30.0,
             "y": 0.0,
@@ -478,11 +478,11 @@
       "ID": "10345353490343126674",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -493,7 +493,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -32.5,
             "y": 0.0,
@@ -517,11 +517,11 @@
       "ID": "3947551982180446718",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Entity"
         },
         {
-          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.SpriteRenderer",
           "Sprite": null,
           "Colour": {
             "r": 1.0,
@@ -532,7 +532,7 @@
           "Shader": null
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": -19.9576321,
             "y": -2.7375645E-05,
@@ -551,7 +551,7 @@
           }
         },
         {
-          "ComponentType": "TestGame.LerpTest, TestGame, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "TestGame.LerpTest, TestGame",
           "A": {
             "x": -1.0,
             "y": 1.0,
@@ -573,11 +573,11 @@
       "ID": "1432599742301125144",
       "Components": [
         {
-          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.NameComponent",
           "Name": "Camera"
         },
         {
-          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Transform",
           "Position": {
             "x": 0.0,
             "y": 0.0,
@@ -596,7 +596,7 @@
           }
         },
         {
-          "ComponentType": "Yonai.Camera, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "ComponentType": "Yonai.Camera",
           "FOV": 60.0,
           "Near": 0.1,
           "Far": 1000.0,
