@@ -32,6 +32,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Pages
         uses: actions/configure-pages@v3
+      - name: Install dependencies
+        run: sudo apt-get install doxygen
       - name: Generate Website
         run: cd ${{ github.workspace }}/Docs; bash ./GenerateDocs.sh
       - name: Upload artifact
