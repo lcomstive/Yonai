@@ -88,7 +88,7 @@ jobs:
 
     # Test
     - name: Run Test
-      run: ${{ env.BINARY_DIR }}/YonaiEngineTest
+      run: ${{ env.BINARY_DIR }}/YonaiTest
 
     # Read engine version from text file
     - uses: juliangruber/read-file-action@v1

@@ -92,7 +92,7 @@ if(APPLE)
 			COMMAND echo Copying YonaiEngine dynamic lib to output
 
 			COMMAND ${CMAKE_COMMAND} -E copy
-				$<TARGET_FILE:YonaiEngine>
+				$<TARGET_FILE:Yonai>
 				${YONAI_RESOURCES_DIR}
 
 			COMMAND echo Copying dependency dynamic libs to output
