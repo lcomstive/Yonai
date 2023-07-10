@@ -45,8 +45,8 @@ namespace Yonai
 			Type type = GetType();
 
 			json["ComponentType"] = type.FullName;
-			if (type.Namespace != "AquaEngine")
-				json["ComponentType"] += ", " + type.Assembly.GetName();
+			if (type.Namespace != "Yonai")
+				json["ComponentType"] += ", " + type.Assembly.GetName().Name;
 
 			var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

@@ -5,6 +5,9 @@ using System.Reflection;
 using Yonai.Graphics;
 using System.Linq;
 using System.Collections.Generic;
+using Yonai.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace YonaiEditor.Inspectors
 {
@@ -108,7 +111,11 @@ namespace YonaiEditor.Inspectors
 		{
 			if (ImGUI.BeginPopupContextItem($"Inspector:{m_Target.ID}:{type.FullName}", ImGUI.PopupFlags.MouseButtonRight))
 			{
-				// m_Target.RemoveComponent(component.GetType());
+				if (ImGUI.Selectable("Copy"))
+					Clipboard.SetText(JsonConvert.SerializeObject(m_Target.GetComponent(type).OnSerialize()));
+				if (ImGUI.Selectable("Paste"))
+					m_Target.GetComponent(type).OnDeserialize(JsonConvert.DeserializeObject<JObject>(Clipboard.GetText()));
+				ImGUI.Separator();
 				if (ImGUI.Selectable("Remove"))
 				{
 					m_Target.RemoveComponent(type);
