@@ -1,7 +1,7 @@
 # Installation using CPack
 set(CPACK_COMPONENTS_ALL "")
 
-set(CPACK_PACKAGE_NAME "Yonai Editor")
+set(CPACK_PACKAGE_NAME "Yonai")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_VERSION ${VERSION_STRING})
 set(CPACK_PACKAGE_VENDOR "Madissia Technologies")
@@ -10,14 +10,14 @@ set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
 set(CPACK_STRIP_FILES ".DS_Store;.git;Engine/Vendor;")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "Yonai Editor/v${VERSION_STRING}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Yonai/v${VERSION_STRING}")
 
 if("${GIT_BRANCH}" STREQUAL "main") # Production build
-	set(CPACK_PACKAGE_FILE_NAME "Yonai Editor v${VERSION_STRING}")
+	set(CPACK_PACKAGE_FILE_NAME "Yonai v${VERSION_STRING}")
 elseif("${GIT_BRANCH}" STREQUAL "staging") # Staging build
-	set(CPACK_PACKAGE_FILE_NAME "Yonai Editor v${VERSION_STRING_LONG}")
+	set(CPACK_PACKAGE_FILE_NAME "Yonai v${VERSION_STRING_LONG}")
 else() # Dev build
-	set(CPACK_PACKAGE_FILE_NAME "Yonai Editor v${VERSION_STRING_LONG}-dev")
+	set(CPACK_PACKAGE_FILE_NAME "Yonai v${VERSION_STRING_LONG}-dev")
 endif()
 
 if(APPLE)
@@ -27,9 +27,9 @@ if(APPLE)
 	)
 
 	set(CPACK_GENERATOR "DragNDrop")
-	set(CPACK_PACKAGE_EXECUTABLES "YonaiEditor.app" "Yonai Editor")
-	set(CPACK_BUNDLE_NAME "Yonai Editor")
-	set(CPACK_BUNDLE_PLIST ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/YonaiEditor.app/Contents/Info.plist)
+	set(CPACK_PACKAGE_EXECUTABLES "Yonai.app" "Yonai Editor")
+	set(CPACK_BUNDLE_NAME "Yonai")
+	set(CPACK_BUNDLE_PLIST ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Yonai.app/Contents/Info.plist)
 	set(CPACK_DMG_VOLUME_NAME ${CPACK_SOURCE_PACKAGE_FILE_NAME})
 	set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/Platforms/Mac/AppIcon.icns)
@@ -57,7 +57,7 @@ elseif(WIN32)
 
 	# Add start menu shortcut(s)
 	set(CPACK_NSIS_CREATE_ICONS_EXTRA
-		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Yonai Editor.lnk' '$INSTDIR\\\\Yonai Editor.exe'"
+		"CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Yonai.lnk' '$INSTDIR\\\\Yonai Editor.exe'"
 	)
 
 	# Replace '/' with '\\'; regex so have to escape characters
@@ -65,9 +65,9 @@ elseif(WIN32)
 
 	set(CPACK_GENERATOR "NSIS64")
 	set(CPACK_NSIS_DISPLAY_NAME ${CPACK_PACKAGE_NAME})
-	set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/YonaiIcon.ico)
-	set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/YonaiIcon.ico)
-	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/YonaiIcon.ico)
+	set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/Icon.ico)
+	set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/Platforms/Windows/Icon.ico)
+	set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_SOURCE_DIR}/Platforms/Windows/Icon.ico)
 else()
 	install(FILES
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/YonaiEditor
