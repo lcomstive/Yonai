@@ -1,16 +1,16 @@
-#include <AquaEngine/API.hpp>
-#if defined(AQUA_PLATFORM_APPLE)
-#include <AquaEngine/IO/Clipboard.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/API.hpp>
+#if defined(YONAI_PLATFORM_APPLE)
+#include <Yonai/IO/Clipboard.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine::IO;
+using namespace Yonai::IO;
 
 #include <Foundation/Foundation.h>
 
-#if defined(AQUA_PLATFORM_MAC) // Desktop
+#if defined(YONAI_PLATFORM_MAC) // Desktop
 #include <AppKit/NSPasteboard.h>
-#elif defined(AQUA_PLATFORM_iOS) // Mobile
+#elif defined(YONAI_PLATFORM_iOS) // Mobile
 #import <UIKit/UIPasteboard.h>
 #endif
 
@@ -20,10 +20,10 @@ void Clipboard::SetText(string text)
 {
 	NSString* buffer = [NSString stringWithUTF8String: text.c_str()];
 
-#if defined(AQUA_PLATFORM_MAC) // Desktop
+#if defined(YONAI_PLATFORM_MAC) // Desktop
 	[[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSPasteboardTypeString] owner:nil];
 	[[NSPasteboard generalPasteboard] setString:buffer forType: NSPasteboardTypeString];
-#elif defined(AQUA_PLATFORM_iOS) // Mobile
+#elif defined(YONAI_PLATFORM_iOS) // Mobile
 	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
 	pasteboard.string = buffer;
 #endif
@@ -31,10 +31,10 @@ void Clipboard::SetText(string text)
 
 string Clipboard::GetText()
 {
-#if defined(AQUA_PLATFORM_MAC) // Desktop
+#if defined(YONAI_PLATFORM_MAC) // Desktop
 	NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
 	return string([[pasteboard stringForType:NSPasteboardTypeString] UTF8String]);
-#elif defined(AQUA_PLATFORM_iOS) // Mobile
+#elif defined(YONAI_PLATFORM_iOS) // Mobile
 	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
 	return string([pasteboard.string UTF8String]);
 #endif

@@ -76,7 +76,7 @@ else()
 	
 	if(BUILD_SHARED_LIBS)
 		install(FILES
-			$<TARGET_FILE:YonaiEngine>
+			$<TARGET_FILE:Yonai>
 			$<TARGET_FILE:assimp>
 			$<TARGET_FILE:glfw>
 			$<TARGET_FILE:spdlog>
