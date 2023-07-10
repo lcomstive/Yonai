@@ -1,10 +1,10 @@
 #include <mono/jit/jit.h>
-#include <AquaEngine/Input.hpp>
-#include <AquaEngine/InputKeys.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Input.hpp>
+#include <Yonai/InputKeys.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-using namespace AquaEngine;
+using namespace Yonai;
 
 ADD_MANAGED_METHOD(Input, InputEnabled, bool)
 { return Input::IsEnabled(); }

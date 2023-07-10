@@ -1,9 +1,9 @@
 #include <random>
 #include <unordered_map>
-#include <AquaEngine/UUID.hpp>
+#include <Yonai/UUID.hpp>
 
 using namespace std;
-using namespace AquaEngine;
+using namespace Yonai;
 
 static random_device s_RandomDevice;
 static mt19937_64 s_Engine(s_RandomDevice());

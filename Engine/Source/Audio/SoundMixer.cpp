@@ -1,9 +1,9 @@
-#include <AquaEngine/Audio/SoundMixer.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Audio/SoundMixer.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
+using namespace Yonai;
+using namespace Yonai::Systems;
 
 SoundMixer::SoundMixer(string name, ResourceID parent) : Name(name), m_Volume(1.0f), m_Parent(parent)
 {
@@ -40,8 +40,8 @@ void SoundMixer::SetParent(ResourceID parent)
 ResourceID SoundMixer::GetParent() { return m_Parent; }
 
 #pragma region Scripting Bindings
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_METHOD(SoundMixer, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle))
 {

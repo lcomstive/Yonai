@@ -1,10 +1,10 @@
 #pragma once
-#include <AquaEngine/Application.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Application.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
-class BaseGame : public AquaEngine::WindowedApplication
+class BaseGame : public Yonai::WindowedApplication
 {
-	AquaEngine::Systems::RenderSystem* m_RenderSystem = nullptr;
+	Yonai::Systems::RenderSystem* m_RenderSystem = nullptr;
 	void InitialiseScripting();
 
 public:

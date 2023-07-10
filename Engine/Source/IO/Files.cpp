@@ -2,14 +2,14 @@
 #include <fstream>
 #include <filesystem>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/Files.hpp>
+#include <Yonai/IO/Files.hpp>
 
 using namespace std;
-using namespace AquaEngine::IO;
+using namespace Yonai::IO;
 
 namespace fs = std::filesystem;
 
-string AquaEngine::IO::ReadText(string path)
+string Yonai::IO::ReadText(string path)
 {
 	if (!fs::exists(path))
 	{
@@ -33,7 +33,7 @@ string AquaEngine::IO::ReadText(string path)
 	return contents;
 }
 
-vector<unsigned char> AquaEngine::IO::Read(string path)
+vector<unsigned char> Yonai::IO::Read(string path)
 {
 	if (!fs::exists(path))
 	{
@@ -58,7 +58,7 @@ vector<unsigned char> AquaEngine::IO::Read(string path)
 	return contents;
 }
 
-void AquaEngine::IO::Write(string path, string& contents)
+void Yonai::IO::Write(string path, string& contents)
 {
 	ofstream filestream(path, ios::out | ios::binary);
 	filestream.write(contents.c_str(), contents.size());
@@ -66,7 +66,7 @@ void AquaEngine::IO::Write(string path, string& contents)
 	filestream.close();
 }
 
-void AquaEngine::IO::Write(string path, vector<unsigned char>& data)
+void Yonai::IO::Write(string path, vector<unsigned char>& data)
 {
 	ofstream filestream(path, ios::out | ios::binary);
 	filestream.write((const char*)data.data(), data.size());
@@ -74,4 +74,4 @@ void AquaEngine::IO::Write(string path, vector<unsigned char>& data)
 	filestream.close();
 }
 
-bool AquaEngine::IO::Exists(std::string path) { return fs::exists(path); }
+bool Yonai::IO::Exists(std::string path) { return fs::exists(path); }

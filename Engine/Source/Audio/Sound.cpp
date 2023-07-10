@@ -1,10 +1,10 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Audio/Sound.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Audio/Sound.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
+using namespace Yonai;
+using namespace Yonai::Systems;
 
 Sound::Sound() : m_Sound() { }
 Sound::Sound(string& filepath) : m_Sound() { Import(filepath); }
@@ -40,8 +40,8 @@ void Sound::Import(string filepath)
 }
 
 #pragma region Scripting Bindings
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, unsigned long long* outResourceID, void** outHandle))
 {

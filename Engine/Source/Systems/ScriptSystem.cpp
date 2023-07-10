@@ -1,10 +1,10 @@
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/Systems/ScriptSystem.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Systems/ScriptSystem.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 extern EmptyMethodFn SystemMethodDraw;
 extern EmptyMethodFn SystemMethodStart;

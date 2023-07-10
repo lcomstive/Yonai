@@ -5,19 +5,19 @@
 * Uses the GLFW library to heavily simplify.
 *
 */
-#include <AquaEngine/API.hpp>
+#include <Yonai/API.hpp>
 
-#if defined(AQUA_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
-#include <AquaEngine/Input.hpp>
-#include <AquaEngine/IO/Files.hpp>
+#if defined(YONAI_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
+#include <Yonai/Input.hpp>
+#include <Yonai/IO/Files.hpp>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
 using namespace glm;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Scripting;
 
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
@@ -42,10 +42,10 @@ bool Window::InitContext()
 	}
 
 	s_ManagedMethodResized = mono_class_get_method_from_name(
-		ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Window"),
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
 		"_OnResized", 0);
 	s_ManagedMethodScaled = mono_class_get_method_from_name(
-		ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Window"),
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
 		"_OnContentScaleChanged", 0);
 
 	s_ContextInitialised = true;
@@ -85,7 +85,7 @@ Window::Window() :
 	// Window creation options //
 	// Set preferred OpenGL version 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-#if !defined(AQUA_PLATFORM_APPLE)
+#if !defined(YONAI_PLATFORM_APPLE)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 #else
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -148,9 +148,9 @@ Window::Window() :
 	SetVSync(true);
 
 	// Update gamepad mappings from local file
-	if (AquaEngine::IO::Exists(GamepadMappingPath))
+	if (Yonai::IO::Exists(GamepadMappingPath))
 	{
-		if (glfwUpdateGamepadMappings(AquaEngine::IO::ReadText(GamepadMappingPath).c_str()))
+		if (glfwUpdateGamepadMappings(Yonai::IO::ReadText(GamepadMappingPath).c_str()))
 			spdlog::debug("Updated gamepad mappings from file '{}'", GamepadMappingPath);
 		else
 			spdlog::warn("Failed to update gamepad mapping from file '{}'", GamepadMappingPath);
@@ -417,7 +417,7 @@ void Window::GLFWErrorCallback(int error, const char* description)
 	spdlog::error("[GLFW] {}", description);
 }
 
-#include <AquaEngine/Application.hpp>
+#include <Yonai/Application.hpp>
 void Window::GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 {
 	glm::ivec2 resolution = { width, height };

@@ -1,13 +1,13 @@
 #include <memory>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/ComponentManager.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Components/Component.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/ComponentManager.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Components/Component.hpp>
+#include <Yonai/Components/ScriptComponent.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Components;
 
 unordered_map<UUID, World*> World::s_Worlds;
 
@@ -15,8 +15,8 @@ World::World(string name) : m_Name(name)
 {
 	s_Worlds.emplace(m_ID, this);
 
-	m_SystemManager = make_unique<AquaEngine::SystemManager>(this);
-	m_ComponentManager = make_unique<AquaEngine::ComponentManager>(m_ID);
+	m_SystemManager = make_unique<Yonai::SystemManager>(this);
+	m_ComponentManager = make_unique<Yonai::ComponentManager>(m_ID);
 }
 
 UUID& World::ID() { return m_ID; }

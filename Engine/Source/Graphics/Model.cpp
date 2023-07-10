@@ -1,22 +1,22 @@
 #include <spdlog/spdlog.h>
 #include <assimp/Importer.hpp>
-#include <AquaEngine/Timer.hpp>
+#include <Yonai/Timer.hpp>
 #include <assimp/postprocess.h>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Model.hpp>
-#include <AquaEngine/Graphics/Shader.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/DebugName.hpp>
-#include <AquaEngine/Components/MeshRenderer.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Model.hpp>
+#include <Yonai/Graphics/Shader.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/DebugName.hpp>
+#include <Yonai/Components/MeshRenderer.hpp>
 
 using namespace glm;
 using namespace std;
 using namespace Assimp;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
 
 void Model::Import(string path, vector<unsigned char>& modelData, bool importMaterials)
 {
@@ -215,11 +215,11 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 
 #pragma region Internal Calls
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), Yonai.Graphics)
 {
 	if (*outID == InvalidResourceID)
 		*outID = ResourceID(); // Assign resource ID
@@ -230,7 +230,7 @@ ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, voi
 	mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, MonoArray* modelData, bool importMaterials), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, MonoArray* modelData, bool importMaterials), Yonai.Graphics)
 {
 	vector<unsigned char> data;
 	data.resize(mono_array_length(modelData));
@@ -239,7 +239,7 @@ ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, Mon
 	((Model*)handle)->Import(mono_string_to_utf8(filepath), data, importMaterials);
 }
 
-ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), Yonai.Graphics)
 {
 	vector<pair<ResourceID, ResourceID>> meshes = ((Model*)handle)->GetMeshesAndMaterials();
 	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint64_class(), meshes.size());

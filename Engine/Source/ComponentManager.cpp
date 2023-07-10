@@ -1,15 +1,15 @@
-#include <AquaEngine/ComponentManager.hpp>
-#include <AquaEngine/Components/Component.hpp>
+#include <Yonai/ComponentManager.hpp>
+#include <Yonai/Components/Component.hpp>
 
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Components/ScriptComponent.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
@@ -162,7 +162,7 @@ void ComponentManager::InvalidateAllManagedInstances()
 	}
 }
 
-AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, UUID entityID)
+Yonai::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, UUID entityID)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedComponentData managedData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);

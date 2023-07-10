@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 			// matches[8] = namespace
 			FunctionInfo info = { matches[1], matches[2] };
 			info.ReturnType = matches[4].matched ? matches[4] : string("void");
-			info.NamespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
+			info.NamespaceName = matches[8].matched ? matches[8] : string("Yonai");
 
 			if (matches[6].matched)
 			{
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 			auto className = matches[2];
 			auto propertyName = matches[3];
 			auto propertyType = matches[6];
-			auto namespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
+			auto namespaceName = matches[8].matched ? matches[8] : string("Yonai");
 
 			if(type.compare("GET") == 0 || type.compare("GET_SET") == 0)
 				AddGetter(className, propertyName, propertyType, namespaceName);

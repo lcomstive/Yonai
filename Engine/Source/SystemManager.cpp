@@ -1,17 +1,17 @@
 #include <iostream>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/SystemManager.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/SystemManager.hpp>
 
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Systems/ScriptSystem.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Systems/ScriptSystem.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 extern SystemMethodInitialiseFn SystemMethodInitialise;
 
@@ -87,7 +87,7 @@ bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.
 
 System* SystemManager::Get(size_t hash) { return Has(hash) ? m_Systems[hash] : nullptr; }
 
-AquaEngine::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t typeHash)
+Yonai::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t typeHash)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedSystemData managedData = ScriptEngine::GetCoreAssembly()->GetManagedSystemData(typeHash);

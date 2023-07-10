@@ -1,10 +1,10 @@
 #include <string>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 #include <portable-file-dialogs/portable-file-dialogs.h>
 
 using namespace std;
 
-ADD_MANAGED_METHOD(FileDialog, _OpenFolder, MonoString*, (MonoString* titleRaw, MonoString* initialDirRaw), AquaEditor)
+ADD_MANAGED_METHOD(FileDialog, _OpenFolder, MonoString*, (MonoString* titleRaw, MonoString* initialDirRaw), YonaiEditor)
 {
 	char* title = mono_string_to_utf8(titleRaw);
 	char* initialDir = mono_string_to_utf8(initialDirRaw);
@@ -16,7 +16,7 @@ ADD_MANAGED_METHOD(FileDialog, _OpenFolder, MonoString*, (MonoString* titleRaw, 
 	return mono_string_new(mono_domain_get(), selected.c_str());
 }
 
-ADD_MANAGED_METHOD(FileDialog, _OpenFile, MonoArray*, (MonoString* titleRaw, MonoString* initialDirRaw, MonoArray* filtersRaw, bool multiselect), AquaEditor)
+ADD_MANAGED_METHOD(FileDialog, _OpenFile, MonoArray*, (MonoString* titleRaw, MonoString* initialDirRaw, MonoArray* filtersRaw, bool multiselect), YonaiEditor)
 {
 	string title = string(mono_string_to_utf8(titleRaw));
 	string initialDir = string(mono_string_to_utf8(initialDirRaw));

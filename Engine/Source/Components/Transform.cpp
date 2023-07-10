@@ -1,11 +1,11 @@
-#include <AquaEngine/World.hpp>
+#include <Yonai/World.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <AquaEngine/Components/Transform.hpp>
+#include <Yonai/Components/Transform.hpp>
 
 using namespace glm;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
 
 vec3 Transform::GetGlobalPosition()
 {
@@ -80,7 +80,7 @@ void Transform::RemoveChild(Transform* child)
 }
 
 #pragma region Scripting
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_METHOD(Transform, GetPosition, void, (void* handle, glm::vec3* output)) { *output = ((Transform*)handle)->Position; }
 ADD_MANAGED_METHOD(Transform, SetPosition, void, (void* handle, glm::vec3* input)) { ((Transform*)handle)->Position = *input; }

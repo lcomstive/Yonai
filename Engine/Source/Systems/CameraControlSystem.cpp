@@ -1,16 +1,16 @@
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Input.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Input.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/FPSCamera.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/CameraControlSystem.hpp>
+#include <Yonai/Components/Camera.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/FPSCamera.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/CameraControlSystem.hpp>
 
 using namespace glm;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Components;
 
 const float ControllerDeadzone = 0.1f;
 

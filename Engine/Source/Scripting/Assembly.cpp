@@ -1,25 +1,25 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Class.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
 
 // Components to map, unmanaged -> managed
-#include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Components/MeshRenderer.hpp>
-#include <AquaEngine/Components/SpriteRenderer.hpp>
+#include <Yonai/Components/Camera.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Components/MeshRenderer.hpp>
+#include <Yonai/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 unordered_map<MonoType*, size_t> Assembly::s_TypeHashes = {};
 unordered_map<size_t, MonoType*> Assembly::s_ReverseTypeHashes = {};
@@ -167,8 +167,8 @@ void Assembly::CacheTypes(bool isCore)
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
-	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
-	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
+	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "Yonai", "Component");
+	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "Yonai", "YonaiSystem");
 
 	// spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
@@ -193,13 +193,13 @@ void Assembly::CacheTypes(bool isCore)
 			continue;
 		}
 
-		// Check if derives from AquaEngine.System
+		// Check if derives from Yonai.System
 		if (klass != coreSystemType && mono_class_is_subclass_of(klass, coreSystemType, false))
 		{
 			m_ManagedSystemTypes.push_back(klass);
 			// spdlog::trace("  {}.{} [System][{}]", _namespace, _name, hash);
 		}
-		// Check if derives from AquaEngine.Component
+		// Check if derives from Yonai.Component
 		else if (klass != coreComponentType && mono_class_is_subclass_of(klass, coreComponentType, false))
 		{
 			m_ManagedComponentTypes.push_back(klass);
@@ -224,25 +224,25 @@ void Assembly::CacheTypes(bool isCore)
 
 void Assembly::LoadScriptCoreTypes()
 {
-	BindManagedComponent<Components::Camera>("AquaEngine", "Camera");
-	BindManagedComponent<Components::Transform>("AquaEngine", "Transform");
-	BindManagedComponent<Components::SoundSource>("AquaEngine", "SoundSource");
-	BindManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
-	BindManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
+	BindManagedComponent<Components::Camera>("Yonai", "Camera");
+	BindManagedComponent<Components::Transform>("Yonai", "Transform");
+	BindManagedComponent<Components::SoundSource>("Yonai", "SoundSource");
+	BindManagedComponent<Components::MeshRenderer>("Yonai", "MeshRenderer");
+	BindManagedComponent<Components::SpriteRenderer>("Yonai", "SpriteRenderer");
 
-	BindManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
-	BindManagedSystem<Systems::AudioSystem>("AquaEngine.Systems", "AudioSystem");
-	BindManagedSystem<Systems::RenderSystem>("AquaEngine.Systems", "RenderSystem");
+	BindManagedSystem<Systems::SceneSystem>("Yonai", "SceneManager");
+	BindManagedSystem<Systems::AudioSystem>("Yonai.Systems", "AudioSystem");
+	BindManagedSystem<Systems::RenderSystem>("Yonai.Systems", "RenderSystem");
 
 #pragma region Component Methods
-	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");
+	MonoClass* component = mono_class_from_name(Image, "Yonai", "Component");
 
-	// Component.Initialise
-	MonoMethod* method = mono_class_get_method_from_name(component, "aqua_Initialise", 2);
+	// Component._Initialise
+	MonoMethod* method = mono_class_get_method_from_name(component, "_Initialise", 2);
 	ComponentMethodInitialise = (ComponentMethodInitialiseFn)mono_method_get_unmanaged_thunk(method);
 
 	// Component._Enable
-	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
+	method = mono_class_get_method_from_name(component, "_Enable", 1);
 	ComponentMethodEnabled = method ? (ComponentMethodEnabledFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	method = mono_class_get_method_from_name(component, "Update", 0);
@@ -254,14 +254,14 @@ void Assembly::LoadScriptCoreTypes()
 #pragma endregion
 
 #pragma region System Methods
-	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "AquaSystem");
+	MonoClass* system = mono_class_from_name(Image, "Yonai", "YonaiSystem");
 
-	// System.aqua_Initialise
-	method = mono_class_get_method_from_name(system, "aqua_Initialise", 1);
+	// System._Initialise
+	method = mono_class_get_method_from_name(system, "_Initialise", 1);
 	SystemMethodInitialise = method ? (void(*)(MonoObject*, uint64_t, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
-	// System.aqua_Enable
-	method = mono_class_get_method_from_name(system, "aqua_Enable", 1);
+	// System._Enable
+	method = mono_class_get_method_from_name(system, "_Enable", 1);
 	SystemMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddSystemMethod(Draw)

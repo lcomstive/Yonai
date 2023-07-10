@@ -1,9 +1,8 @@
-﻿using System;
-using AquaEngine;
+﻿using Yonai;
 
 namespace TestGame
 {
-	public class CameraControlSystem : AquaSystem
+	public class CameraControlSystem : YonaiSystem
 	{
 		public const float ScrollSpeed = 100;
 		public const float SideMoveSpeed = 1.0f;

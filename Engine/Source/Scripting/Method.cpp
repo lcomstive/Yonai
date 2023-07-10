@@ -1,7 +1,7 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Method.hpp>
+#include <Yonai/Scripting/Method.hpp>
 
-using namespace AquaEngine::Scripting;
+using namespace Yonai::Scripting;
 
 Method::Method(MonoMethod* handle) { Handle = handle; }
 

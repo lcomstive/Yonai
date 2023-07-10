@@ -1,7 +1,7 @@
-#include <AquaEngine/Resource.hpp>
+#include <Yonai/Resource.hpp>
 
 using namespace std;
-using namespace AquaEngine;
+using namespace Yonai;
 
 vector<Resource::ResourceInstance> Resource::s_Instances;
 unordered_map<string, ResourceID> Resource::s_InstancePaths;

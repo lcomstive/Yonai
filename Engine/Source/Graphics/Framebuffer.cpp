@@ -1,14 +1,14 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Mesh.hpp>
-#include <AquaEngine/Graphics/Framebuffer.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Mesh.hpp>
+#include <Yonai/Graphics/Framebuffer.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
 Framebuffer::Framebuffer(FramebufferSpec& specs) : m_Specs(specs), m_ID(GL_INVALID_VALUE), m_DepthAttachment(nullptr)
 {
@@ -219,7 +219,7 @@ bool Framebuffer::HasDepthAttachment() { return m_DepthAttachment != nullptr; }
 FramebufferSpec& Framebuffer::GetSpecs() { return m_Specs; }
 
 #pragma region Internal Calls
-ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapchainTarget, unsigned int samples, MonoArray* attachments), AquaEngine.Grapghics)
+ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapchainTarget, unsigned int samples, MonoArray* attachments), Yonai.Grapghics)
 {
 	FramebufferSpec spec =
 	{
@@ -235,34 +235,34 @@ ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapc
 	return new Framebuffer(spec);
 }
 
-ADD_MANAGED_METHOD(Framebuffer, Destroy, void, (void* handle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, Destroy, void, (void* handle), Yonai.Graphics)
 { if (handle) delete handle; }
 
-ADD_MANAGED_METHOD(Framebuffer, Bind, void, (void* handle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, Bind, void, (void* handle), Yonai.Graphics)
 { ((Framebuffer*)handle)->Bind(); }
 
-ADD_MANAGED_METHOD(Framebuffer, Unind, void, (void* handle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, Unind, void, (void* handle), Yonai.Graphics)
 { ((Framebuffer*)handle)->Unbind(); }
 
-ADD_MANAGED_METHOD(Framebuffer, SetSamples, void, (void* handle, unsigned int samples), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, SetSamples, void, (void* handle, unsigned int samples), Yonai.Graphics)
 { ((Framebuffer*)handle)->SetSamples(samples); }
 
-ADD_MANAGED_METHOD(Framebuffer, SetResolution, void, (void* handle, glm::ivec2* resolution), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, SetResolution, void, (void* handle, glm::ivec2* resolution), Yonai.Graphics)
 { ((Framebuffer*)handle)->SetResolution(*resolution); }
 
-ADD_MANAGED_METHOD(Framebuffer, GetAttachmentCount, unsigned int, (void* handle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, GetAttachmentCount, unsigned int, (void* handle), Yonai.Graphics)
 { return ((Framebuffer*)handle)->AttachmentCount(); }
 
-ADD_MANAGED_METHOD(Framebuffer, GetColourAttachmentCount, unsigned int, (void* handle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, GetColourAttachmentCount, unsigned int, (void* handle), Yonai.Graphics)
 { return ((Framebuffer*)handle)->ColourAttachmentCount(); }
 
-ADD_MANAGED_METHOD(Framebuffer, CopyAttachmentTo, void, (void* handle, void* destination, unsigned int attachmentIndex), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, CopyAttachmentTo, void, (void* handle, void* destination, unsigned int attachmentIndex), Yonai.Graphics)
 { ((Framebuffer*)handle)->CopyAttachmentTo((RenderTexture*)destination, attachmentIndex); }
 
-ADD_MANAGED_METHOD(Framebuffer, BlitTo, void, (void* handle, void* destination, unsigned int flags), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, BlitTo, void, (void* handle, void* destination, unsigned int flags), Yonai.Graphics)
 { ((Framebuffer*)handle)->BlitTo((Framebuffer*)destination, flags); }
 
-ADD_MANAGED_METHOD(Framebuffer, GetAttachments, MonoArray*, (void* handle, int* outDepthAttachmentIndex), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, GetAttachments, MonoArray*, (void* handle, int* outDepthAttachmentIndex), Yonai.Graphics)
 {
 	Framebuffer* fb = (Framebuffer*)handle;
 	vector<RenderTexture*> attachments = fb->GetAttachments();

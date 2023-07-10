@@ -1,15 +1,15 @@
 #include <BaseGame.hpp>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
-#include <AquaEngine/Scripting/Class.hpp>
+#include <Yonai/Scripting/Class.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 string AssembliesPath = "/Assets/Editor/Mono";
 
@@ -49,10 +49,10 @@ void BaseGame::InitialiseScripting()
 }
 
 #include <vector>
-#include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Components;
+#include <Yonai/Components/Camera.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+using namespace Yonai::Systems;
+using namespace Yonai::Components;
 void BaseGame::OnPostDraw()
 {
 	// Blit output to default framebuffer

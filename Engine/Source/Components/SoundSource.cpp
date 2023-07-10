@@ -1,12 +1,12 @@
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Audio/Sound.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Audio/Sound.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Components;
 
 SoundSource::~SoundSource()
 {
@@ -213,7 +213,7 @@ void SoundSource::UpdateManagedState()
 	static MonoMethod* method = nullptr;
 	if (!method)
 	{
-		MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SoundSource");
+		MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SoundSource");
 		method = mono_class_get_method_from_name(klass, "UpdateState", 1);
 	}
 
@@ -223,7 +223,7 @@ void SoundSource::UpdateManagedState()
 }
 
 #pragma region Scripting Internal Calls
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_METHOD(SoundSource, GetSound, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetSound(); }

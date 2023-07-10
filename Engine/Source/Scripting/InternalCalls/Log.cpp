@@ -1,7 +1,7 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 /// <summary>
 /// Levels:

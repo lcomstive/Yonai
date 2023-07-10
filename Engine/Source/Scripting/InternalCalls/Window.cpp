@@ -1,11 +1,11 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <mono/jit/jit.h>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine;
+using namespace Yonai;
 
 ADD_MANAGED_METHOD(Window, SetResolution, void, (glm::ivec2* value))
 { Window::SetResolution(*value); }
@@ -28,7 +28,7 @@ ADD_MANAGED_METHOD(Screen, GetVideoModes, unsigned int, (MonoArray** outWidths, 
 	*outHeights		 = mono_array_new(mono_domain_get(), mono_get_int32_class(), modes.size());
 	*outRefreshRates = mono_array_new(mono_domain_get(), mono_get_single_class(), modes.size());
 
-#ifdef AQUA_PLATFORM_DESKTOP
+#ifdef YONAI_PLATFORM_DESKTOP
 	for (size_t i = 0; i < modes.size(); i++)
 	{
 		mono_array_set(*outWidths,		 int,	i, modes[i].Resolution.x);

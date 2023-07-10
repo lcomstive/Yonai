@@ -6,25 +6,64 @@
   },
   "Entities": [
     {
+      "ID": "2654914000653199596",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Position": {
+            "x": -22.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
       "ID": "9336376843701531948",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "First"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "132780900234957915",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": "13249753376079074857",
           "Colour": {
             "r": 1.0,
             "g": 0.9843137,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": "9233319700737574020"
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -2.5,
             "y": 0.0,
@@ -46,64 +85,25 @@
       ]
     },
     {
-      "ID": "2654914000653199596",
-      "Components": [
-        {
-          "ComponentType": "AquaEngine.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": "15405574584158869772"
-        },
-        {
-          "ComponentType": "AquaEngine.Transform",
-          "Position": {
-            "x": -22.5,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
-        }
-      ]
-    },
-    {
       "ID": "2432770377810913269",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -15.0,
             "y": 0.0,
@@ -127,22 +127,22 @@
       "ID": "16765798305678760197",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Second"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "132780900234957915",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -2.5,
             "y": 0.0,
@@ -166,22 +166,22 @@
       "ID": "5810792497182943223",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -17.5,
             "y": 0.0,
@@ -205,11 +205,11 @@
       "ID": "5172316110957065007",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -5.0,
             "y": 0.0,
@@ -228,15 +228,15 @@
           }
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         }
       ]
     },
@@ -244,22 +244,22 @@
       "ID": "8831687503922809722",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "7891015904350980317",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -7.5,
             "y": 0.282236159,
@@ -283,22 +283,22 @@
       "ID": "16643791368294567827",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -10.0,
             "y": 0.0,
@@ -322,22 +322,22 @@
       "ID": "14304072608388693376",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -12.5,
             "y": 0.0,
@@ -361,22 +361,22 @@
       "ID": "4888394632879399331",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -25.0,
             "y": 0.0,
@@ -400,22 +400,22 @@
       "ID": "16315931371264259523",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -27.5,
             "y": 0.0,
@@ -439,22 +439,22 @@
       "ID": "18258099385681715863",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -30.0,
             "y": 0.0,
@@ -478,22 +478,22 @@
       "ID": "10345353490343126674",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -32.5,
             "y": 0.0,
@@ -517,22 +517,22 @@
       "ID": "3947551982180446718",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Entity"
         },
         {
-          "ComponentType": "AquaEngine.SpriteRenderer",
-          "Sprite": "13076232397891898463",
+          "ComponentType": "Yonai.SpriteRenderer, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+          "Sprite": null,
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": "15405574584158869772"
+          "Shader": null
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
             "x": -19.9576321,
             "y": -2.7375645E-05,
@@ -551,7 +551,7 @@
           }
         },
         {
-          "ComponentType": "TestGame.LerpTest, TestGame",
+          "ComponentType": "TestGame.LerpTest, TestGame, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "A": {
             "x": -1.0,
             "y": 1.0,
@@ -573,30 +573,30 @@
       "ID": "1432599742301125144",
       "Components": [
         {
-          "ComponentType": "AquaEngine.NameComponent",
+          "ComponentType": "Yonai.NameComponent, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Name": "Camera"
         },
         {
-          "ComponentType": "AquaEngine.Transform",
+          "ComponentType": "Yonai.Transform, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "Position": {
-            "x": -6.688881,
+            "x": 0.0,
             "y": 0.0,
-            "z": -10.9167213
+            "z": 10.0
           },
           "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
+            "x": 0.0272219889,
+            "y": 1.00401985E-06,
+            "z": 0.999629438,
+            "w": 8.816096E-07
           },
           "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
+            "x": 0.9999799,
+            "y": 0.9999796,
+            "z": 0.9999799
           }
         },
         {
-          "ComponentType": "AquaEngine.Camera",
+          "ComponentType": "Yonai.Camera, YonaiScriptCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
           "FOV": 60.0,
           "Near": 0.1,
           "Far": 1000.0,

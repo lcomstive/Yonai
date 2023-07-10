@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_METHOD(Random, Seed, void, (unsigned int seed))
 { srand(seed); }

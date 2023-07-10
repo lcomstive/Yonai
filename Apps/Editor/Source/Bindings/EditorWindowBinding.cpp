@@ -1,39 +1,39 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
-ADD_MANAGED_METHOD(EditorWindow, InitContext, void, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, InitContext, void, (), YonaiEditor)
 { Window::InitContext(); }
 
-ADD_MANAGED_METHOD(EditorWindow, DestroyContext, void, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, DestroyContext, void, (), YonaiEditor)
 { Window::DestroyContext(); }
 
-ADD_MANAGED_METHOD(EditorWindow, ContextIsInitialised, bool, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, ContextIsInitialised, bool, (), YonaiEditor)
 { return Window::ContextIsInitialised(); }
 
-ADD_MANAGED_METHOD(EditorWindow, Create, void, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, Create, void, (), YonaiEditor)
 {
 	Window::Create();
 
-#ifdef AQUA_PLATFORM_DESKTOP
+#ifdef YONAI_PLATFORM_DESKTOP
 	glfwMakeContextCurrent(Window::GetNativeHandle());
 	gladLoadGL(glfwGetProcAddress);
 #endif
 }
 
-ADD_MANAGED_METHOD(EditorWindow, Destroy, void, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, Destroy, void, (), YonaiEditor)
 { Window::Destroy(); }
 
-ADD_MANAGED_METHOD(EditorWindow, _CreationHintBool, void, (int hint, bool value), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, _CreationHintBool, void, (int hint, bool value), YonaiEditor)
 {
-#ifdef AQUA_PLATFORM_DESKTOP
+#ifdef YONAI_PLATFORM_DESKTOP
 	if (!Window::GetNativeHandle())
 		glfwWindowHint(hint, value);
 	else
@@ -41,9 +41,9 @@ ADD_MANAGED_METHOD(EditorWindow, _CreationHintBool, void, (int hint, bool value)
 #endif
 }
 
-ADD_MANAGED_METHOD(EditorWindow, _CreationHintInt, void, (int hint, int value), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, _CreationHintInt, void, (int hint, int value), YonaiEditor)
 {
-#ifdef AQUA_PLATFORM_DESKTOP
+#ifdef YONAI_PLATFORM_DESKTOP
 	if (!Window::GetNativeHandle())
 		glfwWindowHint(hint, value);
 	else
@@ -51,9 +51,9 @@ ADD_MANAGED_METHOD(EditorWindow, _CreationHintInt, void, (int hint, int value), 
 #endif
 }
 
-ADD_MANAGED_METHOD(EditorWindow, ResetHints, void, (), AquaEditor)
+ADD_MANAGED_METHOD(EditorWindow, ResetHints, void, (), YonaiEditor)
 {
-#ifdef AQUA_PLATFORM_DESKTOP
+#ifdef YONAI_PLATFORM_DESKTOP
 	glfwDefaultWindowHints();
 #endif
 }

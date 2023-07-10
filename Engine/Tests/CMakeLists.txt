@@ -1,11 +1,11 @@
 enable_testing()
-project(AquaEngineTest)
+project(YonaiTest)
 
 # Add tests
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} GTest::gtest_main AquaEngine ${AQUA_ENGINE_DEPENDENCY_LIBS})
+target_link_libraries(${PROJECT_NAME} GTest::gtest_main Yonai ${AQUA_ENGINE_DEPENDENCY_LIBS})
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/../Include
 	${CMAKE_CURRENT_SOURCE_DIR}/../Vendor/googletest/googletest/include
@@ -32,4 +32,4 @@ elseif(WIN32)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(AquaEngineTest)
+gtest_discover_tests(YonaiTest)

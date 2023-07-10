@@ -2,20 +2,20 @@
 #include <unordered_map>
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/ComponentManager.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Systems/ScriptSystem.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/ComponentManager.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Systems/ScriptSystem.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Components/ScriptComponent.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
 extern EmptyMethodFn ComponentMethodStart;
 extern EmptyMethodFn ComponentMethodUpdate;

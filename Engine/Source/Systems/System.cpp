@@ -1,12 +1,12 @@
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Systems/System.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/SystemManager.hpp>
+#include <Yonai/Systems/System.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 bool System::IsEnabled() { return m_Enabled; }
 

@@ -1,10 +1,10 @@
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Scripting;
 
 ADD_MANAGED_METHOD(Resource, Duplicate, uint64_t, (uint64_t originalID, MonoString* newPath))
 {

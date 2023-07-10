@@ -1,9 +1,9 @@
 #include <mono/jit/jit.h>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
-#include <AquaEngine/Components/SpriteRenderer.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
+#include <Yonai/Components/SpriteRenderer.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Components;
 
 ADD_MANAGED_GET_SET(SpriteRenderer, Sprite, uint64_t)
 ADD_MANAGED_GET_SET(SpriteRenderer, Shader, uint64_t)

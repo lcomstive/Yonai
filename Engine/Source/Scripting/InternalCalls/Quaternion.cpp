@@ -2,8 +2,8 @@
 #include <mono/jit/jit.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace glm;
 

@@ -1,14 +1,14 @@
-project(AquaEditor)
+project(YonaiEditor)
 file(GLOB_RECURSE SOURCE_FILES "Source/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "Include/AquaEditor/*.hpp" "Include/AquaEditor/*.h")
+file(GLOB_RECURSE HEADER_FILES "Include/YonaiEditor/*.hpp" "Include/YonaiEditor/*.h")
 
-list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp")
+list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/YonaiEditor/Glue.hpp")
 
 add_executable(
 	${PROJECT_NAME}
 	${SOURCE_FILES}
 	${HEADER_FILES}
-	${AQUA_EXECUTABLE_RESOURCES}
+	${YONAI_EXECUTABLE_RESOURCES}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -16,20 +16,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_SOURCE_DIR}/Engine/Include
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE AquaEngine imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE Yonai imgui)
 
 # Add dependency to the C# binding projects
-add_dependencies(${PROJECT_NAME} AquaScriptCore AquaScriptEditor BaseGame)
+add_dependencies(${PROJECT_NAME} YonaiScriptCore YonaiScriptEditor BaseGame)
 
 # Generate C# bindings from C#
 add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
-	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEditor/Glue.hpp"
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/YonaiEditor/Glue.hpp"
+	COMMAND GlueGenerator "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/YonaiEditor/Glue.hpp"
 	DEPENDS GlueGenerator
 )
 
 if(WIN32 OR APPLE)
-	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Aqua Editor")
+	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Yonai Editor")
 endif()
 
 if(APPLE)
@@ -39,16 +39,16 @@ if(APPLE)
 		BUNDLE TRUE
 		MACOSX_BUNDLE TRUE
 		MACOSX_BUNDLE_GUI_IDENTIFIER com.madissia.${PROJECT_NAME}
-		MACOSX_BUNDLE_BUNDLE_NAME "Aqua Editor"
+		MACOSX_BUNDLE_BUNDLE_NAME "Yonai Editor"
 		MACOSX_BUNDLE_COPYRIGHT "© 2023 Madissia Technologies"
-		MACOSX_BUNDLE_EXECUTABLE_NAME "AquaEditor"
-		MACOSX_BUNDLE_ICON_FILE ${AQUA_ICON}
+		MACOSX_BUNDLE_EXECUTABLE_NAME "YonaiEditor"
+		MACOSX_BUNDLE_ICON_FILE ${YONAI_ICON}
 		MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_STRING_LONG}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_STRING}
 		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
 	)
 
-	set_source_files_properties(${AQUA_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	set_source_files_properties(${YONAI_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
 # Group source files inside IDE
@@ -62,16 +62,16 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/Assets
-		${AQUA_RESOURCES_DIR}/Assets
+		${YONAI_RESOURCES_DIR}/Assets
 
 	# Copy .NET .dlls for this platform to the root of the Assets/Mono/
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${AQUA_RESOURCES_DIR}/Assets/Mono/$<IF:$<PLATFORM_ID:Windows>,Windows,Unix>
-		${AQUA_RESOURCES_DIR}/Assets/Mono
+		${YONAI_RESOURCES_DIR}/Assets/Mono/$<IF:$<PLATFORM_ID:Windows>,Windows,Unix>
+		${YONAI_RESOURCES_DIR}/Assets/Mono
 
 	# Remove platform .NET .dll folders
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${AQUA_RESOURCES_DIR}/Assets/Mono/Windows
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${AQUA_RESOURCES_DIR}/Assets/Mono/Unix
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${YONAI_RESOURCES_DIR}/Assets/Mono/Windows
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${YONAI_RESOURCES_DIR}/Assets/Mono/Unix
 )
 
 if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
@@ -81,24 +81,24 @@ if(BUILD_SHARED_LIBS AND MONO_SHARED_LIB)
 
 		COMMAND ${CMAKE_COMMAND} -E copy
 			${MONO_SHARED_LIB}
-			${AQUA_RESOURCES_DIR}
+			${YONAI_RESOURCES_DIR}
 	)
 endif()
 
 if(APPLE)
 	if(BUILD_SHARED_LIBS)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-			# Copy AquaEngine library to output
-			COMMAND echo Copying AquaEngine dynamic lib to output
+			# Copy YonaiEngine library to output
+			COMMAND echo Copying YonaiEngine dynamic lib to output
 
 			COMMAND ${CMAKE_COMMAND} -E copy
-				$<TARGET_FILE:AquaEngine>
-				${AQUA_RESOURCES_DIR}
+				$<TARGET_FILE:YonaiEngine>
+				${YONAI_RESOURCES_DIR}
 
 			COMMAND echo Copying dependency dynamic libs to output
 			COMMAND ${CMAKE_COMMAND} -E copy
 				${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib
-				${AQUA_RESOURCES_DIR}
+				${YONAI_RESOURCES_DIR}
 		)
 	endif()
 
@@ -112,14 +112,14 @@ if(APPLE)
 	# Copy base game to resource directory
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND echo Copying base game to output
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/BaseGame ${AQUA_RESOURCES_DIR}/BaseGame
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/BaseGame ${YONAI_RESOURCES_DIR}/BaseGame
 	)	
 
 	# Copy required Mono .dylibs to resource directory
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND echo Copying ${MONO_LIBRARY_NATIVE} to output
-		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${AQUA_RESOURCES_DIR}/libmono-native.dylib
-		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_POSIXHELPER} ${AQUA_RESOURCES_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${YONAI_RESOURCES_DIR}/libmono-native.dylib
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_POSIXHELPER} ${YONAI_RESOURCES_DIR}
 	)
 endif()
 

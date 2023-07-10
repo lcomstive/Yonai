@@ -1,7 +1,7 @@
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Components/Component.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Components/Component.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;

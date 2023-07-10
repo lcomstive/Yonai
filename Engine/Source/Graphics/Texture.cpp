@@ -3,15 +3,15 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Graphics/Texture.hpp>
+#include <Yonai/Graphics/Texture.hpp>
 
 #ifndef NDEBUG
-#include <AquaEngine/Timer.hpp>
+#include <Yonai/Timer.hpp>
 #endif
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
 Texture::Texture() : m_Filter(GL_LINEAR), m_ID(GL_INVALID_VALUE), m_Resolution(), m_HDR(false) { }
 
@@ -120,10 +120,10 @@ void Texture::Bind(unsigned int index)
 }
 
 #pragma region Managed Binding
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle), Yonai.Graphics)
 {
 	char* path = mono_string_to_utf8(pathRaw);
 	if (*outResourceID == InvalidResourceID)
@@ -135,7 +135,7 @@ ADD_MANAGED_METHOD(Texture, Load, void, (MonoString* pathRaw, uint64_t* outResou
 		mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Texture, Upload, bool, (void* instance, MonoArray* textureDataRaw, bool hdr, int filter), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Upload, bool, (void* instance, MonoArray* textureDataRaw, bool hdr, int filter), Yonai.Graphics)
 {
 	vector<unsigned char> textureData;
 	textureData.resize(mono_array_length(textureDataRaw));
@@ -145,19 +145,19 @@ ADD_MANAGED_METHOD(Texture, Upload, bool, (void* instance, MonoArray* textureDat
 	return ((Texture*)instance)->Upload(textureData, hdr, filter);
 }
 
-ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, Bind, void, (void* instance, unsigned int index), Yonai.Graphics)
 { ((Texture*)instance)->Bind(index); }
 
-ADD_MANAGED_METHOD(Texture, GetResolution, void, (void* instance, glm::ivec2* outResolution), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, GetResolution, void, (void* instance, glm::ivec2* outResolution), Yonai.Graphics)
 { *outResolution = ((Texture*)instance)->GetResolution(); }
 
-ADD_MANAGED_METHOD(Texture, GetHDR, bool, (void* instance), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, GetHDR, bool, (void* instance), Yonai.Graphics)
 { return ((Texture*)instance)->GetHDR(); }
 
-ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), Yonai.Graphics)
 { return ((Texture*)instance)->GetFilter(); }
 
-ADD_MANAGED_METHOD(Texture, IsValid, bool, (void* instance), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Texture, IsValid, bool, (void* instance), Yonai.Graphics)
 { return ((Texture*)instance)->IsValid(); }
 
 #pragma endregion

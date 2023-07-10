@@ -1,6 +1,6 @@
-{
-  "Vertex": "assets://Shaders/Lit.vert",
-  "Fragment": "assets://Shaders/Lit.frag",
-  "Compute": "",
-  "Geometry": ""
+{
+  "Vertex": "",
+  "Fragment": "",
+  "Compute": "",
+  "Geometry": ""
 }

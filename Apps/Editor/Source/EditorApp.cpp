@@ -1,46 +1,46 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Time.hpp>
-#include <AquaEditor/Glue.hpp>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEditor/EditorApp.hpp>
-#include <AquaEngine/Graphics/Shader.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Components/FPSCamera.hpp>
-#include <AquaEngine/Platform/FixDLLBoundaries.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Resource.hpp>
+#include <YonaiEditor/Glue.hpp>
+#include <YonaiEditor/EditorApp.hpp>
+#include <Yonai/Graphics/Shader.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Components/FPSCamera.hpp>
+#include <Yonai/Platform/FixDLLBoundaries.hpp>
 
 // Systems //
-#include <AquaEditor/Systems/ImGUISystem.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
-#include <AquaEngine/Systems/CameraControlSystem.hpp>
+#include <YonaiEditor/Systems/ImGUISystem.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Systems/CameraControlSystem.hpp>
 
 // Scripting //
-#include <AquaEngine/Scripting/Class.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Components/ScriptComponent.hpp>
 
-#include <AquaEngine/Audio/Sound.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
+#include <Yonai/Audio/Sound.hpp>
+#include <Yonai/Components/SoundSource.hpp>
 
 using namespace std;
 using namespace glm;
-using namespace AquaEditor;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEditor::Systems;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace YonaiEditor;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace YonaiEditor::Systems;
+using namespace Yonai::Systems;
+using namespace Yonai::Graphics;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
 namespace fs = std::filesystem;
 
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AssembliesDirectory = "/Assets/Mono";
-string AquaScriptEditorPath = AssembliesDirectory + "/AquaScriptEditor.dll";
+string AquaScriptEditorPath = AssembliesDirectory + "/YonaiScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -93,10 +93,10 @@ void EditorApp::OnUpdate()
 void EditorApp::LaunchEditorService()
 {
 	Assembly* assembly = ScriptEngine::LoadAssembly(GetExecutableDirectory().string() + AquaScriptEditorPath, true);
-	MonoType* editorService = assembly->GetTypeFromClassName("AquaEditor", "EditorService");
+	MonoType* editorService = assembly->GetTypeFromClassName("YonaiEditor", "EditorService");
 
 	// Let managed code add & remove native ImGUISystem
-	assembly->BindManagedSystem<Systems::ImGUISystem>("AquaEditor.Systems", "ImGUISystem");
+	assembly->BindManagedSystem<Systems::ImGUISystem>("YonaiEditor.Systems", "ImGUISystem");
 
 	SystemManager::Global()->Add(editorService);
 }
@@ -113,7 +113,7 @@ void EditorApp::InitialiseScripting()
 
 void EditorApp::Draw()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SystemManager::Global()->Draw();
 

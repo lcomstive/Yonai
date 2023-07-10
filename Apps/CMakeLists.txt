@@ -1,5 +1,5 @@
 if(MSVC)
-	option(AQUA_GENERATE_MDBS "Generate mono-compatible debug symbol files for AquaScriptCore and AquaScriptEditor" ON)
+	option(YONAI_GENERATE_MDBS "Generate mono-compatible debug symbol files for YonaiScriptCore and YonaiScriptEditor" ON)
 endif()
 
 if(WIN32)
@@ -8,16 +8,16 @@ else()
 	set(EXECUTABLE_RESOURCES "")
 endif()
 
-# AquaScriptCore
-add_subdirectory(AquaScriptCore)
+# YonaiScriptCore
+add_subdirectory(YonaiScriptCore)
 
 # Base Game
-if(AQUA_BUILD_BASE_GAME)
+if(YONAI_BUILD_BASE_GAME)
 	add_subdirectory(BaseGame)
 endif()
 
 # Editor
-if(AQUA_BUILD_EDITOR)
+if(YONAI_BUILD_EDITOR)
 	add_subdirectory(Editor)
-	add_subdirectory(AquaScriptEditor)
+	add_subdirectory(YonaiScriptEditor)
 endif()

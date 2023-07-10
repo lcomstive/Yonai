@@ -1,9 +1,9 @@
-﻿using AquaEngine;
-using AquaEngine.Graphics;
+﻿using Yonai;
+using Yonai.Graphics;
 
 namespace TestGame
 {
-	public class TestSystem : AquaSystem
+	public class TestSystem : YonaiSystem
 	{
 		private Shader m_SpriteShader;
 		private Texture m_Texture;

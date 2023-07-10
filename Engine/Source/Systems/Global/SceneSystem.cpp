@@ -1,14 +1,14 @@
 #include <algorithm>
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 SceneSystem* SceneSystem::s_Instance = nullptr;
 vector<World*> SceneSystem::s_ActiveScenes = {};
@@ -60,7 +60,7 @@ void SceneSystem::OnScriptEngineReloaded()
 	if (!ScriptEngine::IsLoaded())
 		return;
 	
-	MonoClass* managedClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "SceneManager");
+	MonoClass* managedClass = ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SceneManager");
 	SceneChangedMethod = mono_class_get_method_from_name(
 		managedClass,
 		"_UpdateScenes", // Function name

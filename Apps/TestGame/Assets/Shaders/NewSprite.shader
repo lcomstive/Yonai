@@ -1,6 +1,6 @@
 {
   "Vertex": "",
-  "Fragment": "",
+  "Fragment": "project://Assets/Shaders/NewSprite.frag",
   "Compute": "",
   "Geometry": ""
 }

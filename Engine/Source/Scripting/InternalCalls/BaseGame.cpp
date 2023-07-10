@@ -1,10 +1,10 @@
 #include <vector>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine::Scripting;
+using namespace Yonai::Scripting;
 
 ADD_MANAGED_METHOD(BaseGameLauncher, LoadAssembly, bool, (MonoArray* dataRaw, MonoString* friendlyNameRaw))
 {

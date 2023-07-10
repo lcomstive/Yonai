@@ -1,13 +1,13 @@
-set(AQUA_BUILD_TESTS ON CACHE BOOL "Build the test suite")
+set(YONAI_BUILD_TESTS ON CACHE BOOL "Build the test suite")
 
 include(./Dependencies.cmake)
 
-# Aqua Engine Core
-project(AquaEngine)
+# Yonai Engine Core
+project(Yonai)
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/*.hpp")
+file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Yonai/*.hpp")
 
-list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp")
+list(APPEND HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Yonai/Glue.hpp")
 
 if(APPLE)
 	file(GLOB_RECURSE OBJC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.mm")
@@ -20,11 +20,7 @@ else()
 	add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  BUILD_SHARED_LIBS)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE AQUA_ENGINE_EXPORT_DLL)
-endif()
-
-if(AQUA_BUILD_AUDIO)
-	target_compile_definitions(${PROJECT_NAME} PUBLIC AQUA_ENABLE_AUDIO)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE YONAI_EXPORT_DLL)
 endif()
 
 set_target_properties(
@@ -40,10 +36,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Include" PREFIX "Include" FILES $
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	Include
-	${AQUA_ENGINE_DEPENDENCY_INCLUDE_DIRS}
+	${YONAI_DEPENDENCY_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${AQUA_ENGINE_DEPENDENCY_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${YONAI_DEPENDENCY_LIBS})
 
 if(NOT WIN32)
 	include(GNUInstallDirs)
@@ -58,15 +54,15 @@ if(UNIX)
 	target_compile_options(${PROJECT_NAME} PUBLIC -Wno-delete-incomplete)
 endif()
 
-if(AQUA_BUILD_TESTS)
+if(YONAI_BUILD_TESTS)
 	add_subdirectory(./Tests)
 endif()
 
 # Glue generator
 add_subdirectory(./GlueGenerator)
 add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
-	COMMAND GlueGenerator "-prefix=_" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/AquaEngine/Glue.hpp"
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/Include/Yonai/Glue.hpp"
+	COMMAND GlueGenerator "-prefix=_" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/Include/Yonai/Glue.hpp"
 	DEPENDS GlueGenerator
 )
 

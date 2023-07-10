@@ -1,35 +1,35 @@
 #include <filesystem>
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Utils.hpp>
-#include <AquaEngine/Window.hpp>
-#include <AquaEngine/Application.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Utils.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Application.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
 
 // spdlog //
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
 // Systems //
-#include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <Yonai/SystemManager.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 // Platform Specific //
-#if defined(AQUA_PLATFORM_WINDOWS)
+#if defined(YONAI_PLATFORM_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-#elif defined(AQUA_PLATFORM_LINUX)
+#elif defined(YONAI_PLATFORM_LINUX)
 	#include <libgen.h>         // dirname
 	#include <unistd.h>         // readlink
 	#include <linux/limits.h>   // PATH_MAX
-#elif defined(AQUA_PLATFORM_APPLE)
+#elif defined(YONAI_PLATFORM_APPLE)
 	#include <mach-o/dyld.h>
 #endif
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Systems;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Systems;
 
 namespace fs = std::filesystem;
 
@@ -37,12 +37,12 @@ Application* Application::s_Instance = nullptr;
 
 string Application::GetPersistentDirectory()
 {
-#if defined(AQUA_PLATFORM_WINDOWS)
+#if defined(YONAI_PLATFORM_WINDOWS)
 #pragma warning(disable : 4996) // "This function may be unsafe"
-		return string(getenv("appdata")) + "/Aqua Engine/";
+		return string(getenv("appdata")) + "/Yonai/";
 #pragma warning(default : 4996) // Restore warning
-#elif defined(AQUA_PLATFORM_MAC)
-		return string(getenv("HOME")) + "/Library/Caches/Aqua Engine/";
+#elif defined(YONAI_PLATFORM_MAC)
+		return string(getenv("HOME")) + "/Library/Caches/Yonai/";
 #else
 		return "./.data/";
 #endif
@@ -93,14 +93,14 @@ void Application::Setup()
 {
 	#pragma region Log engine information
 	spdlog::info("{:>12} v{}.{}.{}-{} [{}]",
-		"Aqua Engine",
-		AQUA_ENGINE_VERSION_MAJOR,
-		AQUA_ENGINE_VERSION_MINOR,
-		AQUA_ENGINE_VERSION_PATCH,
-		AQUA_ENGINE_VERSION_REV,
-		AQUA_ENGINE_VERSION_BRANCH
+		"Yonai Engine",
+		YONAI_VERSION_MAJOR,
+		YONAI_VERSION_MINOR,
+		YONAI_VERSION_PATCH,
+		YONAI_VERSION_REV,
+		YONAI_VERSION_BRANCH
 	);
-	spdlog::debug("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
+	spdlog::debug("{:>12}: {}", "Platform", YONAI_PLATFORM_NAME);
 	spdlog::debug("");
 
 	string persistentPath = GetPersistentDirectory();
@@ -169,7 +169,7 @@ void Application::ProcessArgs(int argc, char** argv)
 
 		m_ExecutableDirectory = m_ExecutablePath.parent_path();
 
-		#if defined(AQUA_PLATFORM_MAC)
+		#if defined(YONAI_PLATFORM_MAC)
 		m_ExecutableDirectory = m_ExecutableDirectory.parent_path().append("Resources");
 		#endif
 	}
@@ -298,7 +298,7 @@ void WindowedApplication::OnWindowResized(glm::ivec2 resolution) { ((WindowedApp
 #pragma endregion
 
 #pragma region Managed Glue
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 ADD_MANAGED_METHOD(Application, Exit)
 { Application::Current()->Exit(); }
 
@@ -325,24 +325,24 @@ ADD_MANAGED_METHOD(Application, GetBuildType, unsigned char)
 #endif
 
 ADD_MANAGED_METHOD(Application, GetPlatform, unsigned char)
-#if defined(AQUA_PLATFORM_WINDOWS)
+#if defined(YONAI_PLATFORM_WINDOWS)
 { return 1; }
-#elif defined(AQUA_PLATFORM_MAC)
+#elif defined(YONAI_PLATFORM_MAC)
 { return 2; }
-#elif defined(AQUA_PLATFORM_LINUX)
+#elif defined(YONAI_PLATFORM_LINUX)
 { return 3; }
-#elif defined(AQUA_PLATFORM_iOS)
+#elif defined(YONAI_PLATFORM_iOS)
 { return 4; }
-#elif defined(AQUA_PLATFORM_ANDROID)
+#elif defined(YONAI_PLATFORM_ANDROID)
 { return 5; }
-#elif defined(AQUA_PLATFORM_UNIX)
+#elif defined(YONAI_PLATFORM_UNIX)
 { return 6; }
 #else
 { return 0; }
 #endif
 
 ADD_MANAGED_METHOD(Application, IsDesktop, bool)
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 { return true; }
 #else
 { return false; }

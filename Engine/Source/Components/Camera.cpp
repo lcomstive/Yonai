@@ -1,13 +1,13 @@
 #include <string>
 #include <spdlog/spdlog.h>
 #include <glm/gtx/quaternion.hpp>
-#include <AquaEngine/Components/Camera.hpp>
+#include <Yonai/Components/Camera.hpp>
 
 using namespace std;
 using namespace glm;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
 
 const vec3 WorldUp = { 0, 1, 0 };
 
@@ -50,7 +50,7 @@ void Camera::FillShader(Shader* shader, ivec2 resolution)
 }
 
 #pragma region Internal Calls
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 ADD_MANAGED_GET_SET(Camera, Far, float)
 ADD_MANAGED_GET_SET(Camera, Near, float)

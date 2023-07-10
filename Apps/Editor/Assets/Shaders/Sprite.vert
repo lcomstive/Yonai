@@ -11,7 +11,7 @@ void main()
 {
 	passTexCoords = texCoords;
 
-	passTexCoords.y = 1.0f - passTexCoords.y;
+	// passTexCoords.y = 1.0f - passTexCoords.y;
     
 	gl_Position = 	camera.ProjectionMatrix *
 					camera.ViewMatrix *

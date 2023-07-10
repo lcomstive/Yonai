@@ -1,9 +1,9 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Class.hpp>
+#include <Yonai/Scripting/Class.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Scripting;
 
 Class::Class(MonoClass* handle, MonoObject* instance) : Handle(handle), Instance(instance) { }
 

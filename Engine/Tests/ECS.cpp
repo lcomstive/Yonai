@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/Components/DebugName.hpp>
-#include <AquaEngine/Components/Transform.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Components/DebugName.hpp>
+#include <Yonai/Components/Transform.hpp>
 
 TEST(ECS, EntityCreation)
 {
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
-	EXPECT_NE(entity.ID(), AquaEngine::InvalidEntityID);
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
+	EXPECT_NE(entity.ID(), Yonai::InvalidEntityID);
 	EXPECT_TRUE(entity.IsValid());
 	EXPECT_FALSE(entity.HasComponents());
 	EXPECT_EQ(entity.GetWorld(), &world);
@@ -15,8 +15,8 @@ TEST(ECS, EntityCreation)
 
 TEST(ECS, EntityDestruction)
 {
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
 	EXPECT_TRUE(entity.IsValid());
 	entity.Destroy();
 	EXPECT_FALSE(entity.IsValid());
@@ -24,33 +24,33 @@ TEST(ECS, EntityDestruction)
 
 TEST(ECS, EntityAddComponent)
 {
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
 	EXPECT_TRUE(entity.IsValid());
 
-	AquaEngine::Components::DebugName* debugNameComponent = entity.AddComponent<AquaEngine::Components::DebugName>();
+	Yonai::Components::DebugName* debugNameComponent = entity.AddComponent<Yonai::Components::DebugName>();
 	EXPECT_NE(debugNameComponent, nullptr);
 	EXPECT_EQ(debugNameComponent->Name, "");
 	EXPECT_EQ(debugNameComponent->Entity.ID(), entity.ID());
-	EXPECT_TRUE(entity.HasComponent<AquaEngine::Components::DebugName>());
+	EXPECT_TRUE(entity.HasComponent<Yonai::Components::DebugName>());
 }
 
 TEST(ECS, EntityModifyNameComponent)
 {
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
 	EXPECT_TRUE(entity.IsValid());
 
-	AquaEngine::Components::DebugName* debugNameComponent = entity.AddComponent<AquaEngine::Components::DebugName>();
+	Yonai::Components::DebugName* debugNameComponent = entity.AddComponent<Yonai::Components::DebugName>();
 	EXPECT_NE(debugNameComponent, nullptr);
 	EXPECT_EQ(debugNameComponent->Name, "");
-	EXPECT_TRUE(entity.HasComponent<AquaEngine::Components::DebugName>());
+	EXPECT_TRUE(entity.HasComponent<Yonai::Components::DebugName>());
 
 	const std::string TestDebugName = "Test Debug";
 	debugNameComponent->Name = TestDebugName;
 
 	debugNameComponent = nullptr;
-	debugNameComponent = entity.GetComponent<AquaEngine::Components::DebugName>();
+	debugNameComponent = entity.GetComponent<Yonai::Components::DebugName>();
 	EXPECT_NE(debugNameComponent, nullptr);
 	EXPECT_EQ(debugNameComponent->Name, TestDebugName);
 }
@@ -58,45 +58,45 @@ TEST(ECS, EntityModifyNameComponent)
 TEST(ECS, EntityRemoveComponent)
 {
 	// Create entity
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
 	EXPECT_TRUE(entity.IsValid());
 
 	// Add debug name component
-	AquaEngine::Components::DebugName* debugNameComponent = entity.AddComponent<AquaEngine::Components::DebugName>();
+	Yonai::Components::DebugName* debugNameComponent = entity.AddComponent<Yonai::Components::DebugName>();
 	EXPECT_NE(debugNameComponent, nullptr);
 	EXPECT_EQ(debugNameComponent->Name, "");
-	EXPECT_TRUE(entity.HasComponent<AquaEngine::Components::DebugName>());
+	EXPECT_TRUE(entity.HasComponent<Yonai::Components::DebugName>());
 
 	// Remove debug name component
-	entity.RemoveComponent<AquaEngine::Components::DebugName>();
+	entity.RemoveComponent<Yonai::Components::DebugName>();
 
-	EXPECT_FALSE(entity.HasComponent<AquaEngine::Components::DebugName>());
+	EXPECT_FALSE(entity.HasComponent<Yonai::Components::DebugName>());
 }
 
 TEST(ECS, EntityAddComponentTwice)
 {
 	// Create entity
-	AquaEngine::World world;
-	AquaEngine::Entity entity = world.CreateEntity();
+	Yonai::World world;
+	Yonai::Entity entity = world.CreateEntity();
 	EXPECT_TRUE(entity.IsValid());
 
 	// Add debug name component
-	AquaEngine::Components::DebugName* debugNameComponent = entity.AddComponent<AquaEngine::Components::DebugName>();
+	Yonai::Components::DebugName* debugNameComponent = entity.AddComponent<Yonai::Components::DebugName>();
 	EXPECT_NE(debugNameComponent, nullptr);
 	EXPECT_EQ(debugNameComponent->Name, "");
-	EXPECT_TRUE(entity.HasComponent<AquaEngine::Components::DebugName>());
+	EXPECT_TRUE(entity.HasComponent<Yonai::Components::DebugName>());
 
-	AquaEngine::Components::DebugName* debugNameComponent2 = entity.AddComponent<AquaEngine::Components::DebugName>();
+	Yonai::Components::DebugName* debugNameComponent2 = entity.AddComponent<Yonai::Components::DebugName>();
 	EXPECT_EQ(debugNameComponent, debugNameComponent2);
 
-	debugNameComponent2 = entity.GetComponent<AquaEngine::Components::DebugName>();
+	debugNameComponent2 = entity.GetComponent<Yonai::Components::DebugName>();
 	EXPECT_EQ(debugNameComponent, debugNameComponent2);
 }
 
 TEST(ECS, TransformComponentChild)
 {
-	AquaEngine::World world;
+	Yonai::World world;
 
 	// Create entity1
 	auto entity1 = world.CreateEntity();
@@ -109,8 +109,8 @@ TEST(ECS, TransformComponentChild)
 	EXPECT_NE(entity1.ID(), entity2.ID());
 
 	// Create transforms
-	auto transform1 = entity1.AddComponent<AquaEngine::Components::Transform>();
-	auto transform2 = entity2.AddComponent<AquaEngine::Components::Transform>();
+	auto transform1 = entity1.AddComponent<Yonai::Components::Transform>();
+	auto transform2 = entity2.AddComponent<Yonai::Components::Transform>();
 
 	EXPECT_NE(transform1, nullptr);
 	EXPECT_NE(transform2, nullptr);
@@ -124,12 +124,12 @@ TEST(ECS, TransformComponentChild)
 
 TEST(ECS, WorldHasEntity)
 {
-	AquaEngine::World world;
+	Yonai::World world;
 
 	EXPECT_FALSE(world.HasEntity(123));
 
-	AquaEngine::Entity entity = world.CreateEntity();
-	AquaEngine::EntityID entityID = entity.ID();
+	Yonai::Entity entity = world.CreateEntity();
+	Yonai::EntityID entityID = entity.ID();
 	EXPECT_TRUE(entity.IsValid());
 	EXPECT_TRUE(world.HasEntity(entityID));
 
@@ -147,11 +147,11 @@ TEST(ECS, WorldHasEntity)
 TEST(ECS, WorldGetEntity)
 {
 	const unsigned int entityID = 123;
-	AquaEngine::World world;
+	Yonai::World world;
 
 	EXPECT_FALSE(world.HasEntity(entityID));
 
-	AquaEngine::Entity e = world.GetEntity(entityID);
+	Yonai::Entity e = world.GetEntity(entityID);
 	EXPECT_FALSE(e.IsValid());
 	EXPECT_FALSE(world.HasEntity(entityID));
 }

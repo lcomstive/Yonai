@@ -1,7 +1,7 @@
-#include <AquaEngine/Graphics/Pipelines/ScriptedPipeline.hpp>
+#include <Yonai/Graphics/Pipelines/ScriptedPipeline.hpp>
 
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Graphics::Pipelines;
+using namespace Yonai::Graphics;
+using namespace Yonai::Graphics::Pipelines;
 
 ScriptedRenderPipeline::ScriptedRenderPipeline() {}
 ScriptedRenderPipeline::~ScriptedRenderPipeline() {}

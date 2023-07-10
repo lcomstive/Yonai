@@ -1,20 +1,20 @@
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
-using namespace AquaEngine::Systems;
+using namespace Yonai::Systems;
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Class.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
 bool AudioSystem::s_EngineActive = false;
 Class* AudioSystem::s_ScriptClass = nullptr;
@@ -189,7 +189,7 @@ void AudioSystem::GetScriptClass()
 	if(s_ScriptClass)
 		delete s_ScriptClass;
 		
-	s_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Audio"), nullptr);
+	s_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Audio"), nullptr);
 
 	s_ScriptClass->Invoke("_RefreshDevices");
 	s_ScriptClass->Invoke("_OutputDeviceChanged");
