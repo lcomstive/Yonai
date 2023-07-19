@@ -243,8 +243,8 @@ namespace Yonai
 
 				Type resourceType = pair.Value.GetType();
 				resource["Type"] = resourceType.FullName;
-				if(!resourceType.Namespace.StartsWith("AquaEngine"))
-					resource["Type"] += ", " + resourceType.Assembly.GetName();
+				if (resourceType.Namespace != "Yonai")
+					resource["Type"] += ", " + resourceType.Assembly.GetName().Name;
 
 				resources.Add(resource);
 			}

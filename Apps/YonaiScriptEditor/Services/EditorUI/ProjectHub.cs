@@ -105,22 +105,24 @@ namespace YonaiEditor.Systems
 		{
 			ActiveProject = project;
 			Get<ProjectHubService>()?.Enable(false);
-			EditorWindow.Show(false);
 
 			// Add VFS mounts
 			VFS.Mount("project://", project.Path.ParentDirectory);
 			VFS.Mount("assets://", "project://Assets");
 
 			// Load project resources
-			try { Resource.LoadDatabase(); }
-			catch(System.Exception e) { Log.Exception(e, $"Failed to load resources when opening project '{project.Name}'"); }
-
-			// Load project assemblies
-			foreach (string assembly in project.Assemblies)
+			if (!Scripting.IsAssemblyReloading())
 			{
-				string vfsPath = VFS.ExpandPath(assembly, true);
-				if (VFS.Exists(vfsPath) && !Scripting.IsAssemblyLoaded(vfsPath))
-					Scripting.LoadAssembly(vfsPath, true /* Should watch */);
+				EditorWindow.Show(false);
+				Resource.LoadDatabase();
+
+				// Load project assemblies
+				foreach (string assembly in project.Assemblies)
+				{
+					string vfsPath = VFS.ExpandPath(assembly, true);
+					if (VFS.Exists(vfsPath) && !Scripting.IsAssemblyLoaded(vfsPath))
+						Scripting.LoadAssembly(vfsPath, true /* Should watch */);
+				}
 			}
 
 			// Add global systems
