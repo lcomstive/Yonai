@@ -83,6 +83,10 @@ namespace YonaiEditor
 			Remove<BehaviourSystem>();
 
 			Resource.SaveDatabase();
+
+			VFS.Unmount("app://");
+			VFS.Unmount("assets://");
+			VFS.Unmount("editor://");
 		}
 
 		private void InitialiseVFS()

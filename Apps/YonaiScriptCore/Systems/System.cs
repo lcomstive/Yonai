@@ -108,6 +108,8 @@ namespace Yonai
 		public static bool Remove(Type type) => World._RemoveSystem(GlobalWorldID, type);
 		#endregion
 
+		public static implicit operator bool(YonaiSystem system) => system != null;
+
 		#region Unmanaged Calls
 		// Called from C++
 		internal void _Initialise(ulong worldID) => World = worldID != UUID.Invalid ? World.Get(worldID) : null;

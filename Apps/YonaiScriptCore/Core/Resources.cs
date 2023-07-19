@@ -278,8 +278,8 @@ namespace Yonai
 				UUID id = (UUID)ulong.Parse(resource["ID"].Value<string>());
 				string resourcePath = resource["Path"].Value<string>();
 
-				if (Exists(id))
-					continue; // Already loaded
+				if (s_Instances.ContainsKey(id))
+					continue; // Already loaded in managed memory
 
 				string typeName = resource["Type"].Value<string>();
 				Type type = Type.GetType(typeName);
