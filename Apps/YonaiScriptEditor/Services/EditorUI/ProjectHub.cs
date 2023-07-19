@@ -104,7 +104,7 @@ namespace YonaiEditor.Systems
 		public static void SelectProject(ProjectFile project)
 		{
 			ActiveProject = project;
-			Get<ProjectHubService>().Enable(false);
+			Get<ProjectHubService>()?.Enable(false);
 			EditorWindow.Show(false);
 
 			// Add VFS mounts
