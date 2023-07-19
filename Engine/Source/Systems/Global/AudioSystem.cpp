@@ -19,6 +19,9 @@ using namespace Yonai::Components;
 bool AudioSystem::s_EngineActive = false;
 Class* AudioSystem::s_ScriptClass = nullptr;
 
+typedef void (*SoundSourceUpdateManagedStateFn)(MonoObject*, unsigned int, MonoException**);
+SoundSourceUpdateManagedStateFn SoundSourceUpdateManagedState;
+
 // Devices //
 ma_device AudioSystem::s_Device;
 ma_context AudioSystem::s_Context;
@@ -193,6 +196,12 @@ void AudioSystem::GetScriptClass()
 
 	s_ScriptClass->Invoke("_RefreshDevices");
 	s_ScriptClass->Invoke("_OutputDeviceChanged");
+
+	// Get SoundSource.UpdateState unmanaged thunk
+	MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SoundSource");
+	MonoMethod* method = mono_class_get_method_from_name(klass, "UpdateState", 1);
+
+	SoundSourceUpdateManagedState = method ? (SoundSourceUpdateManagedStateFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 }
 
 void AudioSystem::SetupResourceManager()

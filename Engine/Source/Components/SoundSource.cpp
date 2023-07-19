@@ -8,6 +8,8 @@ using namespace Yonai;
 using namespace Yonai::Systems;
 using namespace Yonai::Components;
 
+extern void (*SoundSourceUpdateManagedState)(MonoObject*, unsigned int, MonoException**);
+
 SoundSource::~SoundSource()
 {
 	// Clear sound
@@ -208,18 +210,14 @@ void SoundSource::SetMixer(ResourceID mixer)
 	ma_node_attach_output_bus(&m_Data, 0, output, 0);
 }
 
+ma_sound* SoundSource::GetHandle() { return &m_Data; }
+
 void SoundSource::UpdateManagedState()
 {
-	static MonoMethod* method = nullptr;
-	if (!method)
-	{
-		MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SoundSource");
-		method = mono_class_get_method_from_name(klass, "UpdateState", 1);
-	}
+	if (!SoundSourceUpdateManagedState) return;
 
-	unsigned int state = (unsigned int)m_State;
-	void* params = { &state };
-	mono_runtime_invoke(method, ManagedData.GetInstance(), &params, nullptr);
+	MonoException* exception = nullptr;
+	SoundSourceUpdateManagedState(ManagedData.GetInstance(), (unsigned int)m_State, &exception);
 }
 
 #pragma region Scripting Internal Calls
