@@ -27,8 +27,14 @@ ADD_MANAGED_METHOD(ImGUI, SetCurrentContext, void, (), YonaiEditor)
 
 ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), YonaiEditor)
 {
+	ImGUISystem* imguiSystem = SystemManager::Global()->Get<ImGUISystem>();
+	if (!imguiSystem)
+	{
+		spdlog::warn("ImGUI IniFilename not set - ImGUISystem not found in global systems");
+		return;
+	}
 	char* name = mono_string_to_utf8(pathRaw);
-	SystemManager::Global()->Get<ImGUISystem>()->m_IniFilepath = string(name);
+	imguiSystem->m_IniFilepath = string(name);
 	spdlog::trace("ImGUI IniFilename set to '{}'", name);
 	mono_free(name);
 }

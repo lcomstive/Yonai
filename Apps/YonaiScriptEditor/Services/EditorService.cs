@@ -48,13 +48,20 @@ namespace YonaiEditor
 				return;
 			}
 
-			EditorWindow.InitContext();
-			EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
-			EditorWindow.Create();
+			string projectPath = VFS.HasMount("project://") ? (VFS.ExpandPath("project://")?.FullPath as string) : Application.GetArg("projectpath", null);
+			Log.Debug($"Project path: {projectPath}");
+
+			if (!Scripting.IsAssemblyReloading())
+			{
+				EditorWindow.InitContext();
+				EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
+				EditorWindow.Create();
+			}
+
 			InitImGUI();
 
-			if (Application.HasArg("projectpath"))
-				ProjectHubService.SelectProject(Application.GetArg("projectpath"));
+			if (!string.IsNullOrEmpty(projectPath))
+				ProjectHubService.SelectProject(projectPath);
 			else
 				Add<ProjectHubService>();
 		}
@@ -64,12 +71,14 @@ namespace YonaiEditor
 			if (Application.HasArg("build"))
 				return; // Nothing below was loaded as we just built a project
 
-			EditorWindow.Destroy();
-			EditorWindow.DestroyContext();
+			if (!Scripting.IsAssemblyReloading())
+			{
+				EditorWindow.Destroy();
+				EditorWindow.DestroyContext();
+			}
 
 			Log.Error("Disabled editor service");
 
-			Remove<ImGUISystem>();
 			Remove<EditorUIService>();
 			Remove<BehaviourSystem>();
 
@@ -90,7 +99,7 @@ namespace YonaiEditor
 			// Settings save/load location
 			ImGUI.SetIniFilename(VFS.ExpandPath(ImGUIFile));
 
-			Add<ImGUISystem>().Enable(true);
+			Add<ImGUISystem>()?.Enable(true);
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);

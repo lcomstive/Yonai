@@ -15,9 +15,11 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool Reload();
-		
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsAssemblyReloading();
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _DebuggingEnabled();
-
 	}
 }

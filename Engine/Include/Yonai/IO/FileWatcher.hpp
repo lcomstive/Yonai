@@ -32,6 +32,8 @@ namespace Yonai::IO
 		// Constructor using default interval of 1000ms
 		YonaiAPI FileWatcher(std::string path, bool multithread);
 
+		YonaiAPI ~FileWatcher();
+
 		YonaiAPI void Start(std::function<void(const std::string&, FileWatchStatus)> callback);
 		YonaiAPI void Stop();
 	};

@@ -46,8 +46,7 @@ namespace Yonai
 			foreach (string path in JSON["Assemblies"].Values<string>())
 			{
 				VFSFile file = new VFSFile(path);
-				// _LoadAssembly(VFS.Read(AssemblyDir + path), file.FileNameWithoutExtension);
-				AppDomain.CurrentDomain.Load(VFS.Read(AssemblyDir + path));
+				_LoadAssembly(VFS.Read(AssemblyDir + path), file.FileNameWithoutExtension);
 			}
 		}
 

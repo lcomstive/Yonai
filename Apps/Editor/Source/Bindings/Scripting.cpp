@@ -24,3 +24,6 @@ ADD_MANAGED_METHOD(Scripting, IsAssemblyLoaded, bool, (MonoString* pathRaw), Yon
 	mono_free(path);
 	return loaded;
 }
+
+ADD_MANAGED_METHOD(Scripting, IsAssemblyReloading, bool, (), YonaiEditor)
+{ return ScriptEngine::IsReloading(); }

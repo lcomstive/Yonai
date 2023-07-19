@@ -12,6 +12,7 @@ namespace Yonai::Scripting
 	class ScriptEngine
 	{
 		static std::string s_CoreDLLPath;
+		static bool s_IsReloading;
 		static bool s_AwaitingReload;
 		static bool s_DebuggingEnabled;
 		static MonoDomain* s_AppDomain;
@@ -110,6 +111,9 @@ namespace Yonai::Scripting
 
 		/// <returns>True if a loaded assembly file was modified on disk</returns>
 		YonaiAPI static bool AwaitingReload();
+
+		/// <returns>True if assemblies are currently getting reloaded</returns>
+		YonaiAPI static bool IsReloading();
 
 		/// <returns>Inform the engine to reload when next avaialable</returns>
 		YonaiAPI static void SetAwaitingReload();

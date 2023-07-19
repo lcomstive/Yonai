@@ -29,6 +29,7 @@ const char* AppDomainName = "YonaiEngineAppDomain";
 const char* ScriptCoreFilename = "YonaiScriptCore.dll";
 
 string ScriptEngine::s_CoreDLLPath = "";
+bool ScriptEngine::s_IsReloading = false;
 bool ScriptEngine::s_AwaitingReload = false;
 bool ScriptEngine::s_DebuggingEnabled = false;
 MonoDomain* ScriptEngine::s_AppDomain = nullptr;
@@ -277,6 +278,7 @@ void ScriptEngine::OnAssemblyFileChanged(const std::string& path, IO::FileWatchS
 	s_AwaitingReload = true;
 }
 
+bool ScriptEngine::IsReloading() { return s_IsReloading; }
 bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
 void ScriptEngine::SetAwaitingReload() { s_AwaitingReload = true; }
 bool ScriptEngine::DebuggingEnabled() { return s_DebuggingEnabled; }
@@ -286,6 +288,7 @@ void ScriptEngine::Reload(bool force)
 	if (!s_AwaitingReload && !force)
 		return;
 	s_AwaitingReload = false;
+	s_IsReloading = true;
 
 	Timer timer;
 	timer.Start();
@@ -351,6 +354,8 @@ void ScriptEngine::Reload(bool force)
 
 	for (const function<void()>& callback : s_ReloadCallbacks)
 		callback();
+
+	s_IsReloading = false;
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());

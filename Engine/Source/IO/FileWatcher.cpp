@@ -28,6 +28,13 @@ FileWatcher::FileWatcher(string path, int intervalMs, bool multithread) :
 
 FileWatcher::FileWatcher(string path, bool multithread) : FileWatcher(path, 1000, multithread) { }
 
+FileWatcher::~FileWatcher()
+{
+	m_Running.store(false);
+	if(m_LoopThread.joinable())
+		m_LoopThread.join();
+}
+
 void FileWatcher::Start(function<void(const string&, FileWatchStatus)> callback)
 {
 	m_Callback = callback;
