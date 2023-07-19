@@ -41,12 +41,8 @@ bool Window::InitContext()
 		return false;
 	}
 
-	s_ManagedMethodResized = mono_class_get_method_from_name(
-		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
-		"_OnResized", 0);
-	s_ManagedMethodScaled = mono_class_get_method_from_name(
-		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
-		"_OnContentScaleChanged", 0);
+	ScriptEngine::AddReloadCallback(GetThunks);
+	GetThunks();
 
 	s_ContextInitialised = true;
 	return true;
@@ -213,6 +209,16 @@ void Window::Close()
 	// Clear pointers
 	s_Instance->m_Handle = nullptr;
 	s_Instance = nullptr;
+}
+
+void Window::GetThunks()
+{
+	s_ManagedMethodResized = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
+		"_OnResized", 0);
+	s_ManagedMethodScaled = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
+		"_OnContentScaleChanged", 0);
 }
 
 void Window::SetTitle(std::string title)

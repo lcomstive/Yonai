@@ -122,6 +122,8 @@ namespace Yonai
 
 		Window();
 
+		static void GetThunks();
+
 	public:
 		/// <summary>
 		/// Sets up the context for window creation
