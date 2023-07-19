@@ -326,6 +326,7 @@ void ScriptEngine::Reload(bool force)
 
 	for (FileWatcher* watcher : s_FileWatchers)
 		delete watcher;
+	s_FileWatchers.clear();
 
 	// Load YonaiScriptCore assembly
 	LoadCoreAssembly();

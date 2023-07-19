@@ -14,7 +14,7 @@ namespace YonaiEditor.Views
 	{
 		private float m_Padding = 12;
 		private Texture m_IconFolder;
-		private float m_ThumbnailSize = ThumbnailSizeRange.y;
+		private float m_ThumbnailSize = 0;
 
 		private VFSFile[] m_Files;
 		private string m_SelectedPath;
