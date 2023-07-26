@@ -53,9 +53,12 @@ namespace YonaiEditor.Systems
 				// CreateTestScene();
 				LoadTestScene();
 
-				if(Window.Resolution.x < 1600 || Window.Resolution.y < 900)
-					Window.Resolution = new IVector2(1600, 900);
-				EditorWindow.Show();
+				if (!Scripting.IsAssemblyReloading())
+				{
+					if (Window.Resolution.x < 1600 || Window.Resolution.y < 900)
+						Window.Resolution = new IVector2(1600, 900);
+					EditorWindow.Show();
+				}
 			}
 			catch (Exception e) { Log.Exception(e); }
 		}
