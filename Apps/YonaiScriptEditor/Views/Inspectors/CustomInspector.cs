@@ -6,11 +6,19 @@ using Yonai.Graphics;
 using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.Systems;
+using YonaiEditor.Commands;
 
 namespace YonaiEditor
 {
 	public class CustomInspector
 	{
+		/// <summary>
+		/// Holds the object of a field or property being currently modified.
+		/// The value gets modified each frame by ImGUI, but we want to undo to a point before the user interacted with the element.
+		/// For example, a user modified a float from 1.2 -> 1.5 does not want to undo incrementally (1.45, 1.4, 1.35, 1.3, etc.)
+		/// </summary>
+		private object m_OldValue = null;
+
 		public object Target { get; internal set; }
 
 		/// <summary>
@@ -75,14 +83,23 @@ namespace YonaiEditor
 				if (!show)
 					continue;
 
-				field.SetValue(
-					target,
-					DrawObject(
+				object previousValue = field.GetValue(target);
+				object value = DrawObject(
 						string.IsNullOrEmpty(serializeAttribute?.Label) ? field.Name : serializeAttribute.Label,
 						field.FieldType,
-						field.GetValue(target),
+						previousValue,
 						field.GetCustomAttributes().ToArray()
-				));
+				);
+
+				// Check if begin editing, store value prior to edit (for submitting to commandhistory after edit)
+				if (ImGUI.IsItemActivated())
+					m_OldValue = previousValue;
+
+				field.SetValue(target, value);
+
+				// Check if finished editing and submit to commandhistory queue
+				if (ImGUI.IsItemDeactivatedAfterEdit() && !value.Equals(m_OldValue))
+					CommandHistory.Execute(new CommandModifyField(target, field, m_OldValue, value));
 			}
 			foreach (var property in properties)
 			{
@@ -105,15 +122,26 @@ namespace YonaiEditor
 
 				if (!canWrite)
 					ImGUI.BeginDisabled();
+				object previousValue = property.GetValue(target);
 				object value = DrawObject(
 						string.IsNullOrEmpty(serializeAttribute?.Label) ? property.Name : serializeAttribute.Label,
 						property.PropertyType,
-						property.GetValue(target),
+						previousValue,
 						property.GetCustomAttributes().ToArray()
 					);
 
+				// Check if begin editing, store value prior to edit (for submitting to commandhistory after edit)
+				if (ImGUI.IsItemActivated())
+					m_OldValue = previousValue;
+
 				if (canWrite)
+				{
 					property.SetValue(target, value);
+
+					// Check if finished editing and submit to commandhistory queue
+					if (ImGUI.IsItemDeactivatedAfterEdit() && !value.Equals(m_OldValue))
+						CommandHistory.Execute(new CommandModifyProperty(target, property, m_OldValue, value));
+				}
 				else
 					ImGUI.EndDisabled();
 			}

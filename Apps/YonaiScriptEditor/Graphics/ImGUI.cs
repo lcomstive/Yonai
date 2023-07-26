@@ -1174,6 +1174,9 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActive();
 
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActivated();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemDeactivatedAfterEdit();
+
 		public static bool IsMouseClicked(MouseButton button) => _IsMouseClicked((int)button);
 		public static bool IsMouseDoubleClicked(MouseButton button) => _IsMouseDoubleClicked((int)button);
 		public static bool IsMouseDragging(MouseButton button) => _IsMouseDragging((int)button);

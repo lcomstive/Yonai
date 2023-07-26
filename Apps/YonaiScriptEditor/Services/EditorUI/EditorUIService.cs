@@ -1,15 +1,16 @@
-using System;
 using Yonai;
-using System.Linq;
+using System;
 using Yonai.IO;
+using System.Linq;
+using Yonai.Graphics;
 using Newtonsoft.Json;
 using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.EditorUI;
-using Yonai.Graphics;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+using YonaiEditor.Commands;
 using YonaiEditor.BuildProcess;
+using System.Collections.Generic;
 
 namespace YonaiEditor.Systems
 {
@@ -40,6 +41,7 @@ namespace YonaiEditor.Systems
 				Icons.Load();
 				CompileMenuItems();
 				InspectorView.GetCustomInspectors();
+				SetupShortcuts();
 
 				Open<GameView>();
 				Open<SceneView>();
@@ -77,6 +79,9 @@ namespace YonaiEditor.Systems
 					m_ActiveViews.Remove(view.GetType());
 				}
 			}
+
+			try { ShortcutManager.Update(); }
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		private const string SceneDir = "project://Assets/Scenes/";
@@ -125,6 +130,13 @@ namespace YonaiEditor.Systems
 				uiService.m_TestWorld = null;
 			}
 			uiService.CreateTestScene();
+		}
+
+		private void SetupShortcuts()
+		{
+			ShortcutManager.Map(Application.Exit, Key.LeftControl, Key.Q);
+			ShortcutManager.Map(CommandHistory.Undo, Key.LeftControl, Key.Z);
+			ShortcutManager.Map(CommandHistory.Redo, Key.LeftControl, Key.Y);
 		}
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()

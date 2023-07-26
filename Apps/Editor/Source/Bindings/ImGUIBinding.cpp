@@ -118,6 +118,8 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, _IsItemHovered, bool, (int flags), YonaiEditor) { return ImGui::IsItemHovered(flags); }
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), YonaiEditor) { return ImGui::IsItemClicked(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), YonaiEditor) { return ImGui::IsItemActive(); }
+ADD_MANAGED_METHOD(ImGUI, IsItemActivated, bool, (), YonaiEditor) { return ImGui::IsItemActivated(); }
+ADD_MANAGED_METHOD(ImGUI, IsItemDeactivatedAfterEdit, bool, (), YonaiEditor) { return ImGui::IsItemDeactivatedAfterEdit(); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), YonaiEditor) { return ImGui::IsMouseClicked(button); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseDoubleClicked, bool, (int button), YonaiEditor) { return ImGui::IsMouseDoubleClicked(button); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseDragging, bool, (int button), YonaiEditor) { return ImGui::IsMouseDragging(button); }

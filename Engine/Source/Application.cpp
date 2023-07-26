@@ -39,7 +39,7 @@ string Application::GetPersistentDirectory()
 {
 #if defined(YONAI_PLATFORM_WINDOWS)
 #pragma warning(disable : 4996) // "This function may be unsafe"
-		return string(getenv("appdata")) + "/Yonai/";
+	return string(getenv("appdata")) + "/Yonai/";
 #pragma warning(default : 4996) // Restore warning
 #elif defined(YONAI_PLATFORM_MAC)
 		return string(getenv("HOME")) + "/Library/Caches/Yonai/";
