@@ -138,6 +138,7 @@ namespace YonaiEditor.Systems
 		private void SetupShortcuts()
 		{
 			ShortcutManager.Map(Application.Exit, Key.LeftControl, Key.Q);
+			ShortcutManager.Map(CommandHistory.Redo, Key.LeftControl, Key.LeftShift, Key.Z);
 			ShortcutManager.Map(CommandHistory.Undo, Key.LeftControl, Key.Z);
 			ShortcutManager.Map(CommandHistory.Redo, Key.LeftControl, Key.Y);
 		}

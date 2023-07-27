@@ -20,12 +20,12 @@ namespace YonaiEditor
 				bool pressedThisFrame = false;
 				foreach(var key in shortcut.Key)
 				{
-					if (Input.IsKeyPressed(key))
+					if (ImGUI.IsKeyPressed(key))
 					{
 						pressedThisFrame = true;
 						continue;
 					}
-					if (Input.IsKeyDown(key))
+					if (ImGUI.IsKeyDown(key))
 						continue;
 
 					allKeysPressed = false;
@@ -33,7 +33,10 @@ namespace YonaiEditor
 				}
 
 				if (allKeysPressed && pressedThisFrame)
+				{
 					shortcut.Value?.Invoke();
+					break;
+				}
 			}
 		}
 
