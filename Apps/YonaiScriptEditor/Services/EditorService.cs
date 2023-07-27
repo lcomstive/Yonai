@@ -114,7 +114,11 @@ namespace YonaiEditor
 		{
 			Vector2 scaling = Window.ContentScaling;
 			ImGUI.SetDisplayFramebufferScale(scaling);
-			ImGUI.SetFontGlobalScale(scaling.x / 2.0f);
+
+			if (Application.Platform == Platform.Mac)
+				ImGUI.SetFontGlobalScale(scaling.x / 2.0f);
+			else
+				ImGUI.SetFontGlobalScale(scaling.x);
 		}
 
 		protected override void Update()
