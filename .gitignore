@@ -31,7 +31,10 @@ vcpkg_installed
 *.sln
 *.csproj
 
-# Except AquaScriptCore, used on Unix platforms
+# Except test game C# project
+!Apps/TestGame/Scripting/TestGame.csproj
+
+# Except these C# projects, used on Unix platforms
 !Apps/YonaiScriptCore/YonaiScriptCore.csproj
 !Apps/YonaiScriptCore/YonaiScriptEditor.csproj
 

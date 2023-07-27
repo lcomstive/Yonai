@@ -33,10 +33,8 @@ namespace TestGame
 			m_Target.FOV -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 			m_Target.OrthographicSize -= scrollDelta * Time.DeltaTime * ScrollSpeed;
 
-			/*
 			if(Input.IsKeyPressed(Key.Escape))
 				Input.MouseState = Input.MouseState == MouseState.Disabled ? MouseState.Normal : MouseState.Disabled;
-			*/
 			
 			// Reset FOV
 			if (Input.IsKeyPressed(Key.F5))
