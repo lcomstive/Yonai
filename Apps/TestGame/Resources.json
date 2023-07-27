@@ -165,11 +165,6 @@
     "Type": "Yonai.SoundMixer"
   },
   {
-    "ID": "12565187210805824134",
-    "Path": "assets://Shaders/NewSpriteShader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
-  },
-  {
     "ID": "5957016784081223613",
     "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"

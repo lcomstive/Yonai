@@ -16,12 +16,11 @@ ImGUISystem::ImGUISystem()
 {
 	IMGUI_CHECKVERSION();
 	m_Context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(m_Context);
 
 	m_IO = &ImGui::GetIO();
 	m_IO->IniFilename = nullptr; // Disable automatic saving and loading
-
-	// Activate docking & viewport features
-	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+	m_IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_ViewportsEnable;
 
 	// Scale with system
 	vec2 scaling = Window::GetContentScaling();
@@ -38,7 +37,9 @@ void ImGUISystem::OnEnabled()
 	if(!imguiInitialised)
 	{
 		ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
-		ImGui_ImplOpenGL3_Init();
+		ImGui_ImplOpenGL3_Init("#version 430 core");
+
+		imguiInitialised = true;
 	}
 
 	/*
@@ -50,10 +51,6 @@ void ImGUISystem::OnEnabled()
 
 	ImGui::LoadIniSettingsFromDisk(m_IniFilepath.c_str());
 
-	if(!imguiInitialised)
-		StartFrame();
-
-	imguiInitialised = true;
 	spdlog::trace("Enabled ImGUI system");
 }
 
@@ -76,12 +73,20 @@ void ImGUISystem::OnDisabled()
 	m_IO = nullptr;
 }
 
-void ImGUISystem::Draw()
+void ImGUISystem::PrepareDraw()
 {
-	EndFrame();
+	if (!glfwGetWindowAttrib(Window::GetNativeHandle(), GLFW_VISIBLE)) return;
+
 	StartFrame();
 
 	// ImGui::DockSpace();
+}
+
+void ImGUISystem::Draw()
+{
+	if (!glfwGetWindowAttrib(Window::GetNativeHandle(), GLFW_VISIBLE)) return;
+
+	EndFrame();
 }
 
 void ImGUISystem::StartFrame()
@@ -99,6 +104,17 @@ void ImGUISystem::EndFrame()
 	ivec2 resolution = Window::GetFramebufferResolution();
 	glViewport(0, 0, resolution.x, resolution.y);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#pragma region Viewport support
+
+	if (m_IO->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		GLFWwindow* handle = Window::GetNativeHandle();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		glfwMakeContextCurrent(handle);
+	}
+#pragma endregion
 }
 
 ImGuiIO* ImGUISystem::GetIO() { return m_IO; }

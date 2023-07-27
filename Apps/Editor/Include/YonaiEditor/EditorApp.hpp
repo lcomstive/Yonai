@@ -10,6 +10,7 @@
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Graphics/RenderTexture.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
+#include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <Yonai/Systems/Global/RenderSystem.hpp>
 
 namespace YonaiEditor
@@ -18,6 +19,7 @@ namespace YonaiEditor
 	{
 		ProjectInfo m_ProjectInfo = {};
 		std::filesystem::path m_ProjectPath;
+		Systems::ImGUISystem* m_ImGUISystem = nullptr;
 		Yonai::Systems::RenderSystem* m_RenderSystem = nullptr;
 
 		void Draw();

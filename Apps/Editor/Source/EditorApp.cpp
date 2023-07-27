@@ -53,8 +53,7 @@ void EditorApp::Setup()
 
 	if (!HasArg("build"))
 	{
-		ImGUISystem* imguiSystem = SystemManager::Global()->Add<ImGUISystem>(false);
-		ImGui::SetCurrentContext(imguiSystem->GetContext());
+		m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
 
 		// Disable drawing to default framebuffer.
 		// Instead store pointer to render system and call manually
@@ -111,6 +110,9 @@ void EditorApp::Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (m_ImGUISystem)
+		m_ImGUISystem->PrepareDraw();
+	
 	SystemManager::Global()->Draw();
 
 	Window::SwapBuffers();

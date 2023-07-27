@@ -20,6 +20,7 @@ namespace YonaiEditor::Systems
 		void OnEnabled() override;
 		void OnDisabled() override;
 
+		void PrepareDraw();
 		void Draw() override;
 
 		ImGuiIO* GetIO();
