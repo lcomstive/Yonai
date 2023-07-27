@@ -33,7 +33,7 @@ namespace YonaiEditor.Systems
 
 		protected override void Draw()
 		{
-			Vector2 res = Window.Resolution;
+			Vector2 res = Window.Resolution / Window.ContentScaling;
 			ImGUI.SetNextWindowPos(Vector2.Zero);
 			ImGUI.SetNextWindowSize(res);
 			ImGUI.Begin("##ProjectHub", ImGUI.WindowFlags.NoDecoration | ImGUI.WindowFlags.NoResize);

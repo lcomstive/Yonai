@@ -112,8 +112,9 @@ namespace YonaiEditor
 
 		private void OnWindowContentScaleChanged(Vector2 resolution)
 		{
-			ImGUI.SetDisplayFramebufferScale(Window.ContentScaling);
-			ImGUI.SetFontGlobalScale(Window.ContentScaling.x);
+			Vector2 scaling = Window.ContentScaling;
+			ImGUI.SetDisplayFramebufferScale(scaling);
+			ImGUI.SetFontGlobalScale(scaling.x / 2.0f);
 		}
 
 		protected override void Update()

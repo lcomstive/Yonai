@@ -248,7 +248,22 @@ ivec2 Window::GetFramebufferResolution(bool useImGui)
 	return resolution;
 }
 
-vec2 Window::GetContentScaling() { return s_Instance ? s_Instance->m_Scaling : vec2(); }
+vec2 Window::GetContentScaling()
+{
+	if(!s_Instance)
+		return {};
+
+	vec2 output;
+	glfwGetWindowContentScale(s_Instance->m_Handle, &output.x, &output.y);
+	if(output != s_Instance->m_Scaling)
+	{
+		s_Instance->m_Scaling = output;
+		mono_runtime_invoke(s_ManagedMethodScaled, nullptr, nullptr, nullptr);
+
+		spdlog::trace("Window content scaling set to ({}, {})", output.x, output.y);
+	}
+	return s_Instance->m_Scaling;
+}
 
 void Window::CenterOnDisplay()
 {
