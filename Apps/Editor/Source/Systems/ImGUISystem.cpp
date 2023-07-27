@@ -32,10 +32,14 @@ ImGUISystem::ImGUISystem()
 	ImGui::StyleColorsDark();
 }
 
+static bool imguiInitialised = false;
 void ImGUISystem::OnEnabled()
 {
-	ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
-	ImGui_ImplOpenGL3_Init();
+	if(!imguiInitialised)
+	{
+		ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
+		ImGui_ImplOpenGL3_Init();
+	}
 
 	/*
 	std::string fontPath = IO::VFS::GetAbsolutePath("assets://Fonts/OpenSans-Regular.ttf", true);
@@ -46,8 +50,10 @@ void ImGUISystem::OnEnabled()
 
 	ImGui::LoadIniSettingsFromDisk(m_IniFilepath.c_str());
 
-	StartFrame();
+	if(!imguiInitialised)
+		StartFrame();
 
+	imguiInitialised = true;
 	spdlog::trace("Enabled ImGUI system");
 }
 
@@ -59,10 +65,14 @@ void ImGUISystem::OnDisabled()
 	
 	ImGui::Render();
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	if(imguiInitialised)
+	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+	}
 
+	imguiInitialised = false;
 	m_IO = nullptr;
 }
 
