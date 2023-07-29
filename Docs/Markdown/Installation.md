@@ -1,11 +1,7 @@
 # Installation {#Installation}
-*AquaEngine*
+*Yonai*
 
-> *Aqua* is available in [binary](https://github.com/lcomstive/AquaEngine/releases) & [source code](https://github.com/lcomstive/AquaEngine) forms.
+> *Yonai* is available in [binary](https://github.com/lcomstive/Yonai/releases) & [source code](https://github.com/lcomstive/Yonai) forms.
 
 ## Requirements
-### Windows
-
-### Linux
-
-### Mac OS
+A C++17 compatible compiler, `msbuild` for compiling C#
