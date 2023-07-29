@@ -1076,6 +1076,9 @@ ADD_MANAGED_METHOD(ImGUI, Gizmo_SetDrawList, void, (), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, Gizmo_Enable, void, (bool enable), YonaiEditor)
 { ImGuizmo::Enable(enable); }
 
+ADD_MANAGED_METHOD(ImGUI, Gizmo_IsOver, bool, (), YonaiEditor)  { return ImGuizmo::IsOver(); }
+ADD_MANAGED_METHOD(ImGUI, Gizmo_IsUsing, bool, (), YonaiEditor) { return ImGuizmo::IsUsing(); }
+
 ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (void* cameraHandle, void* transformHandle, glm::vec2* drawRegion, unsigned int operation, bool local, float snapping), YonaiEditor)
 {
 	Components::Camera* camera = (Components::Camera*)cameraHandle;

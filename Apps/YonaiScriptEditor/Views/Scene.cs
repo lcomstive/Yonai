@@ -1,5 +1,6 @@
 using Yonai;
 using Yonai.Graphics;
+using YonaiEditor.Commands;
 using YonaiEditor.Systems;
 
 namespace YonaiEditor.Views
@@ -21,6 +22,17 @@ namespace YonaiEditor.Views
 		private ImGUI.ManipulateOperation m_GizmoMode = ImGUI.ManipulateOperation.Translate;
 
 		private const float HeaderHeight = 30;
+
+		#region Undo/redo handling
+		/// <summary>
+		/// Keeps track of if gizmo is currently being used to manipulate <see cref="m_Target"/> <see cref="Transform"/>
+		/// </summary>
+		private bool m_GizmoInUse = false;
+
+		// Cache of target transform prior to being manipulated by gizmo
+		private Vector3 m_GizmoCachePosition, m_GizmoCacheScale;
+		private Quaternion m_GizmoCacheRotation;
+		#endregion
 
 		[MenuItem("Window/Scene")]
 		private static void MenuCallback() => EditorUIService.Open<SceneView>();
@@ -125,6 +137,26 @@ namespace YonaiEditor.Views
 				snapping = m_SnappingAmountDegrees;
 			else if(m_Snapping)
 				snapping = m_SnappingAmount;
+
+			if (ImGUI.Gizmo.IsUsing && !m_GizmoInUse)
+			{
+				m_GizmoInUse = true;
+
+				m_GizmoCacheScale = target.LocalScale;
+				m_GizmoCachePosition = target.LocalPosition;
+				m_GizmoCacheRotation = target.LocalRotation;
+			}
+			else if(!ImGUI.Gizmo.IsUsing && m_GizmoInUse)
+			{
+				m_GizmoInUse = false;
+				CommandHistory.Execute(new CommandGizmoMove(
+					target,
+					m_GizmoCachePosition,
+					m_GizmoCacheScale,
+					m_GizmoCacheRotation
+				));
+			}
+
 			ImGUI.Gizmo.Manipulate(m_Camera, target, size, m_GizmoMode, m_GizmoModeLocal, snapping);
 		}
 

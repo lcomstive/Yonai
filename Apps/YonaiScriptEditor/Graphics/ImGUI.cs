@@ -2051,6 +2051,9 @@ namespace YonaiEditor
 		#region Gizmos
 		public static class Gizmo
 		{
+			public static bool IsOver => Gizmo_IsOver();
+			public static bool IsUsing => Gizmo_IsUsing();
+
 			public static void SetRect(float x, float y, float width, float height) => Gizmo_SetRect(x, y, width, height);
 			public static void SetRect(Vector2 position, Vector2 size) => Gizmo_SetRect(position.x, position.y, size.x, size.y);
 
@@ -2065,6 +2068,8 @@ namespace YonaiEditor
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool Gizmo_IsOver();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool Gizmo_IsUsing();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_SetRect(float x, float y, float width, float height);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_SetDrawList();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void Gizmo_Enable(bool enable);
