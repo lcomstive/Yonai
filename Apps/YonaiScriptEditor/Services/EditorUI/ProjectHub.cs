@@ -33,8 +33,9 @@ namespace YonaiEditor.Systems
 
 		protected override void Draw()
 		{
+			ImGUI.Viewport viewport = ImGUI.GetMainViewport();
 			Vector2 res = Window.Resolution / Window.ContentScaling;
-			ImGUI.SetNextWindowPos(Vector2.Zero);
+			ImGUI.SetNextWindowPos(viewport.Position);
 			ImGUI.SetNextWindowSize(res);
 			ImGUI.Begin("##ProjectHub", ImGUI.WindowFlags.NoDecoration | ImGUI.WindowFlags.NoResize);
 
@@ -49,7 +50,7 @@ namespace YonaiEditor.Systems
 					AddProject(projectDirectory);
 			}
 
-			ImGUI.SetNextWindowPos(res * 0.1f);
+			ImGUI.SetNextWindowPos(viewport.Position + res * 0.1f);
 			ImGUI.BeginChild("##ProjectList", res * 0.8f, true);
 
 			ProjectFile[] projects = m_Projects.Values.ToArray();

@@ -38,6 +38,7 @@ void ImGUISystem::OnEnabled()
 	{
 		ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
 		ImGui_ImplOpenGL3_Init("#version 430 core");
+		StartFrame();
 
 		imguiInitialised = true;
 	}
@@ -73,20 +74,10 @@ void ImGUISystem::OnDisabled()
 	m_IO = nullptr;
 }
 
-void ImGUISystem::PrepareDraw()
-{
-	if (!glfwGetWindowAttrib(Window::GetNativeHandle(), GLFW_VISIBLE)) return;
-
-	StartFrame();
-
-	// ImGui::DockSpace();
-}
-
 void ImGUISystem::Draw()
 {
-	if (!glfwGetWindowAttrib(Window::GetNativeHandle(), GLFW_VISIBLE)) return;
-
 	EndFrame();
+	StartFrame();
 }
 
 void ImGUISystem::StartFrame()
@@ -99,6 +90,7 @@ void ImGUISystem::StartFrame()
 
 void ImGUISystem::EndFrame()
 {
+	ImGui::EndFrame();
 	ImGui::Render();
 
 	ivec2 resolution = Window::GetFramebufferResolution();
@@ -106,7 +98,6 @@ void ImGUISystem::EndFrame()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 #pragma region Viewport support
-
 	if (m_IO->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		GLFWwindow* handle = Window::GetNativeHandle();

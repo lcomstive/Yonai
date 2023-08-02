@@ -110,9 +110,6 @@ void EditorApp::InitialiseScripting()
 void EditorApp::Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	if (m_ImGUISystem)
-		m_ImGUISystem->PrepareDraw();
 	
 	SystemManager::Global()->Draw();
 
