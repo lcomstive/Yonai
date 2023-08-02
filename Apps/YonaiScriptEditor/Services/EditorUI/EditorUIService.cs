@@ -246,7 +246,7 @@ namespace YonaiEditor.Systems
 		}
 		#endregion
 
-		private void BeginDockspace()
+		internal static void BeginDockspace()
 		{
 			// Create dockspace
 			ImGUI.Viewport viewport = ImGUI.GetMainViewport();
@@ -287,6 +287,7 @@ namespace YonaiEditor.Systems
 				menuItem.Render();
 
 			DrawPlayButton();
+			DrawVersionString();
 
 			ImGUI.PopStyleVar(2);
 			ImGUI.PopStyleColour();
@@ -310,6 +311,15 @@ namespace YonaiEditor.Systems
 				State = State == EditorState.Play ? EditorState.Pause : EditorState.Play;
 			if (state != EditorState.Edit && ImGUI.ButtonImage(Icons.Get("Next"), iconSize))
 				State = EditorState.Step;
+		}
+
+		private void DrawVersionString()
+		{
+			string versionString = "v" + Application.EngineVersion.ToLongString();
+
+			Vector2 textSize = ImGUI.CalculateTextWidth(versionString);
+			ImGUI.SetCursorPosX(ImGUI.WindowSize.x - textSize.x - 10);
+			ImGUI.Text(versionString, Colour.Grey);
 		}
 
 		#region Menu Items

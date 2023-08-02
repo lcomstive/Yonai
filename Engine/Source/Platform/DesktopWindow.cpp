@@ -7,7 +7,7 @@
 */
 #include <Yonai/API.hpp>
 
-#if defined(YONAI_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
+#if defined(YONAI_PLATFORM_DESKTOP) && !defined(YONAI_HEADLESS)
 #include <Yonai/Input.hpp>
 #include <Yonai/IO/Files.hpp>
 #include <spdlog/spdlog.h>
@@ -59,7 +59,7 @@ bool Window::ContextIsInitialised() { return s_ContextInitialised; }
 
 Window::Window() :
 	m_Handle(nullptr),
-	m_Title("Aqua Engine"),
+	m_Title("Yonai"),
 	m_FullscreenMode(FullscreenMode::None)
 {
 	if (s_Instance)

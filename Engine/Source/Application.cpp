@@ -327,6 +327,12 @@ ADD_MANAGED_METHOD(Application, GetBuildType, unsigned char)
 { return 1; }
 #endif
 
+ADD_MANAGED_METHOD(Application, GetVersionMajor, int) { return YONAI_VERSION_MAJOR; }
+ADD_MANAGED_METHOD(Application, GetVersionMinor, int) { return YONAI_VERSION_MINOR; }
+ADD_MANAGED_METHOD(Application, GetVersionPatch, int) { return YONAI_VERSION_PATCH; }
+ADD_MANAGED_METHOD(Application, GetVersionRevision, MonoString*) { return mono_string_new(mono_domain_get(), YONAI_VERSION_REV); }
+ADD_MANAGED_METHOD(Application, GetVersionBranch, MonoString*) { return mono_string_new(mono_domain_get(), YONAI_VERSION_BRANCH); }
+
 ADD_MANAGED_METHOD(Application, GetPlatform, unsigned char)
 #if defined(YONAI_PLATFORM_WINDOWS)
 { return 1; }

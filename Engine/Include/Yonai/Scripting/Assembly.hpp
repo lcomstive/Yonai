@@ -54,7 +54,7 @@ namespace Yonai::Scripting
 		std::vector<MonoClass*> m_ManagedSystemTypes = {};
 		std::vector<MonoClass*> m_ManagedComponentTypes = {};
 
-		/// Maps AquaScriptCore managed to unmanaged components (e.g. Transform)
+		/// Maps YonaiScriptCore managed to unmanaged components (e.g. Transform)
 		void LoadScriptCoreTypes();
 		
 		Assembly(MonoAssembly* handle, bool isCoreAssembly);

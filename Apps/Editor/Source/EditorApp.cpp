@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AssembliesDirectory = "/Assets/Mono";
-string AquaScriptEditorPath = AssembliesDirectory + "/YonaiScriptEditor.dll";
+string YonaiScriptEditorPath = AssembliesDirectory + "/YonaiScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -87,7 +87,8 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-	Assembly* assembly = ScriptEngine::LoadAssembly(GetExecutableDirectory().string() + AquaScriptEditorPath, true);
+	Assembly* assembly = ScriptEngine::LoadAssembly(GetExecutableDirectory().string() + YonaiScriptEditorPath
+		, true);
 	MonoType* editorService = assembly->GetTypeFromClassName("YonaiEditor", "EditorService");
 
 	// Let managed code add & remove native ImGUISystem
@@ -102,7 +103,7 @@ void EditorApp::InitialiseScripting()
 		// Allow debugging in debug builds
 		true);
 
-	// Add AquaScriptEditor internal methods
+	// Add YonaiScriptEditor internal methods
 	ScriptEngine::AddInternalCalls(_InternalMethods);
 }
 

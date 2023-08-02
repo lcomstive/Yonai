@@ -68,15 +68,15 @@ namespace Yonai
 
 		private static void LoadGlobalSystems()
 		{
-			Type aquaSystemType = typeof(YonaiSystem);
+			Type yonaiSystemType = typeof(YonaiSystem);
 			foreach(string className in JSON["GlobalSystems"])
 			{
 				Log.Trace($"Loading global system '{className}'");
 				Type systemType = Type.GetType(className);
-				if (systemType != null && aquaSystemType.IsAssignableFrom(systemType))
+				if (systemType != null && yonaiSystemType.IsAssignableFrom(systemType))
 					YonaiSystem.Add(systemType).Enable(false);
 				else
-					Log.Warning($"Could not find AquaSystem type '{className}'");
+					Log.Warning($"Could not find YonaiSystem type '{className}'");
 			}
 		}
 

@@ -83,14 +83,22 @@
 #endif
 
 #ifndef YONAI_VERSION_STRING
+#include <spdlog/fmt/fmt.h>
+
+#define YONAI_VERSION_STRING			\
+	fmt::format("{}.{}.{}",				\
+				YONAI_VERSION_MAJOR,	\
+				YONAI_VERSION_MINOR,	\
+				YONAI_VERSION_PATCH)
+
 #include <string>
-#define YONAI_VERSION_STRING \
-	std::string("v" + \
-			std::to_string(YONAI_VERSION_MAJOR) + "." + \
-			std::to_string(YONAI_VERSION_MINOR) + "." + \
-			std::to_string(YONAI_VERSION_PATCH)		+ \
-			"-" YONAI_VERSION_REV						  \
-			" [" YONAI_VERSION_BRANCH "]" )
+#define YONAI_VERSION_STRING_LONG		\
+	fmt::format("{}.{}.{}-{} [{}]",		\
+				YONAI_VERSION_MAJOR,	\
+				YONAI_VERSION_MINOR,	\
+				YONAI_VERSION_PATCH,	\
+				YONAI_VERSION_REV,		\
+				YONAI_VERSION_BRANCH)
 #endif
 
 // Silence errors

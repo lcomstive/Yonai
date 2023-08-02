@@ -29,7 +29,7 @@ void BaseGame::Setup()
 	resolution.y *= scaling.y;
 	m_RenderSystem->GetPipeline()->SetResolution(resolution);
 
-	// Call AquaEngine.Application.BaseGameLaunch()
+	// Launch BaseGameLauncher
 	Scripting::Class appClass(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "BaseGameLauncher"), nullptr);
 	Method method = appClass.GetMethod("Launch", 0);
 	method.Invoke();

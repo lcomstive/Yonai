@@ -13,12 +13,33 @@ namespace Yonai
 		Unix // Other Unix platform
 	}
 
+	public struct Version
+	{
+		public int Major;
+		public int Minor;
+		public int Patch;
+		public string Branch;
+		public string Revision;
+
+		public override string ToString() => $"{Major}.{Minor}.{Patch}";
+		public string ToLongString() => $"{Major}.{Minor}.{Patch}-{Revision} [{Branch}]";
+	}
+
 	public enum BuildType : byte { Debug, Release }
 
 	public static class Application
 	{
 		public static Platform Platform => (Platform)_GetPlatform();
 		public static BuildType Configuration => (BuildType)_GetBuildType();
+
+		public static Version EngineVersion => new Version()
+		{
+			Major = _GetVersionMajor(),
+			Minor = _GetVersionMinor(),
+			Patch = _GetVersionPatch(),
+			Revision = _GetVersionRevision(),
+			Branch = _GetVersionBranch()
+		};
 
 		public static bool IsDesktop => _IsDesktop();
 		public static bool IsMobile => !_IsDesktop();
@@ -58,6 +79,12 @@ namespace Yonai
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern byte _GetPlatform();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsDesktop();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetArg(string name, string defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetVersionMajor();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetVersionMinor();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetVersionPatch();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetVersionRevision();
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetVersionBranch();
 		#endregion
 	}
 }
