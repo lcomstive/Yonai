@@ -1,3 +1,7 @@
+#pragma warning(push)
+#pragma warning(disable : 4244) // Conversion from 'T' to float, possible loss of data
+#pragma warning(disable : 4312) // 'type cast': conversion from 'unsigned int' to 'ImTextureID' of greater size
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <glm/glm.hpp>
@@ -1114,3 +1118,4 @@ ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (void* cameraHandle, void* tr
 	
 	transform->Rotation = glm::quat(glm::radians(euler));
 }
+#pragma warning(pop) // Restore warning(s)
