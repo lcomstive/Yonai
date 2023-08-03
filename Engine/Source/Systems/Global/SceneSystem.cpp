@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <Yonai/Time.hpp>
 #include <Yonai/World.hpp>
+#include <Yonai/Resource.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
@@ -141,21 +142,21 @@ void SceneSystem::RemoveSceneCallback(SceneCallback callback)
 
 ADD_MANAGED_METHOD(SceneManager, Load, void, (uint64_t worldID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (world)
 		SceneSystem::LoadScene(world);
 }
 
 ADD_MANAGED_METHOD(SceneManager, LoadAdditive, void, (uint64_t worldID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (world)
 		SceneSystem::AddScene(world);
 }
 
 ADD_MANAGED_METHOD(SceneManager, Unload, void, (uint64_t worldID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (world)
 		SceneSystem::UnloadScene(world);
 	else

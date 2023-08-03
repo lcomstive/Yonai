@@ -71,7 +71,7 @@ ADD_MANAGED_METHOD(Renderer, Draw, void, (), Yonai.Graphics)
 
 ADD_MANAGED_METHOD(Renderer, DrawFromCamera, void, (unsigned int worldID, unsigned int entityID), Yonai.Graphics)
 {
-	Camera* camera = World::GetWorld(worldID)->GetEntity(entityID).GetComponent<Camera>();
+	Camera* camera = Resource::Get<World>(worldID)->GetEntity(entityID).GetComponent<Camera>();
 	SystemManager::Global()->Get<RenderSystem>()->Draw(camera);
 }
 

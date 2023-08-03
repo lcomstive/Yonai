@@ -1,23 +1,22 @@
 ﻿using System;
-using System.Linq;
 using Yonai.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Yonai
 {
-	public class World : ISerializable
+	public class World : NativeResourceBase, ISerializable
 	{
 		private string m_Name = string.Empty;
 		public string Name
 		{
 			get => m_Name;
-			set => _SetName(ID, m_Name = value);
+			internal set => m_Name = value;
 		}
 
-		public UUID ID { get; private set; } = UUID.Invalid;
+		public UUID ID => ResourceID;
 
 		private bool m_IsActive = false;
 		/// <summary>
@@ -36,34 +35,27 @@ namespace Yonai
 		private Dictionary<UUID, Entity> m_Entities = new Dictionary<UUID, Entity>();
 		private Dictionary<Type, YonaiSystem> m_Systems = new Dictionary<Type, YonaiSystem>();
 
-		private static Dictionary<UUID, World> s_Instances = new Dictionary<UUID, World>();
-
-		internal World(UUID id, string name)
+		protected override void OnLoad()
 		{
-			ID = id;
-			m_Name = name;
+			m_Name = new VFSFile(ResourcePath).FileNameWithoutExtension;
 
-			if (!s_Instances.ContainsKey(ID))
-				s_Instances.Add(ID, this);
+			ulong resourceID = ResourceID;
+			_Load(ResourcePath, out resourceID, out IntPtr handle);
+
+			Handle = handle;
+			ResourceID = resourceID;
 		}
 
-		/// <summary>
-		/// Removes this world and releases all associated resources
-		/// </summary>
-		/// <returns>Success state of destruction. Only fails if already destroyed.</returns>
-		public bool Destroy()
+		protected override void OnUnload()
 		{
+			SceneManager.Unload(this);
+
 			UUID[] keys = m_Entities.Keys.ToArray();
 			foreach (UUID entity in keys)
 				DestroyEntity(entity);
-
-			if (s_Instances.ContainsKey(ID))
-				s_Instances.Remove(ID);
-
-			return _Destroy(ID);
 		}
 
-		public World Clone() => Create(OnSerialize());
+		protected override void OnCloned(ResourceBase original) => OnDeserialize(((World)original).OnSerialize());
 
 		public JObject OnSerialize()
 		{
@@ -102,54 +94,56 @@ namespace Yonai
 			}
 			m_Entities.Clear();
 
-			Name = json["Name"].Value<string>();
-
-			// Create entities and their components
-			JArray entities = json["Entities"].Value<JArray>();
-			foreach(JObject entityJSON in entities)
+			try
 			{
-				ulong id = ulong.Parse(entityJSON["ID"].Value<string>());
-				UUID entityID = new UUID(id);
-				if(_CreateEntityID(ID, entityID) == UUID.Invalid)
+				// Create entities and their components
+				JArray entities = json["Entities"].Value<JArray>();
+				foreach (JObject entityJSON in entities)
 				{
-					Log.Warning($"Failed to deserialize entity with ID [{entityID}]");
-					continue;
-				}
-
-				Entity entity = new Entity(this, entityID);
-				entity.OnDeserialize(entityJSON);
-				m_Entities.Add(entityID, entity);
-			}
-
-			// Deserialize components in entities.
-			// This is done afterwards to keep references to components in other entities
-			foreach (JObject entityJSON in entities)
-			{
-				UUID entityID = new UUID(ulong.Parse(entityJSON["ID"].Value<string>()));
-				m_Entities[entityID].OnPostDeserialize(entityJSON);
-			}
-
-			// Add all systems
-			if (json.ContainsKey("Systems"))
-			{
-				Type YonaiSystemType = typeof(YonaiSystem);
-				JObject systems = json["Systems"].Value<JObject>();
-				foreach (JToken token in systems.Children())
-				{
-					JProperty systemJSON = token.Value<JProperty>();
-					Log.Trace(systemJSON.Name);
-					Type systemType = Type.GetType(systemJSON.Name);
-					if (systemType != null && YonaiSystemType.IsAssignableFrom(systemType))
+					ulong id = ulong.Parse(entityJSON["ID"].Value<string>());
+					UUID entityID = new UUID(id);
+					if (_CreateEntityID(ID, entityID) == UUID.Invalid)
 					{
-						YonaiSystem system = AddSystem(systemType);
-						system.Enable(m_IsActive);
-						JObject value = systemJSON.Value.Value<JObject>();
-						system.OnDeserialize(value);
+						Log.Warning($"Failed to deserialize entity with ID [{entityID}]");
+						continue;
 					}
-					else
-						Log.Warning($"Could not find YonaiSystem type '{systemJSON.Name}'");
+
+					Entity entity = new Entity(this, entityID);
+					entity.OnDeserialize(entityJSON);
+					m_Entities.Add(entityID, entity);
+				}
+
+				// Deserialize components in entities.
+				// This is done afterwards to keep references to components in other entities
+				foreach (JObject entityJSON in entities)
+				{
+					UUID entityID = new UUID(ulong.Parse(entityJSON["ID"].Value<string>()));
+					m_Entities[entityID].OnPostDeserialize(entityJSON);
+				}
+
+				// Add all systems
+				if (json.ContainsKey("Systems"))
+				{
+					Type YonaiSystemType = typeof(YonaiSystem);
+					JObject systems = json["Systems"].Value<JObject>();
+					foreach (JToken token in systems.Children())
+					{
+						JProperty systemJSON = token.Value<JProperty>();
+						Log.Trace(systemJSON.Name);
+						Type systemType = Type.GetType(systemJSON.Name);
+						if (systemType != null && YonaiSystemType.IsAssignableFrom(systemType))
+						{
+							YonaiSystem system = AddSystem(systemType);
+							system.Enable(m_IsActive);
+							JObject value = systemJSON.Value.Value<JObject>();
+							system.OnDeserialize(value);
+						}
+						else
+							Log.Warning($"Could not find YonaiSystem type '{systemJSON.Name}'");
+					}
 				}
 			}
+			catch(Exception e) { Log.Exception(e); }
 
 			// If enabled in SceneManager, enable and start all components & systems
 			if (m_IsActive)
@@ -394,67 +388,14 @@ namespace Yonai
 		public YonaiSystem[] GetSystems() => m_Systems.Values.ToArray();
 		#endregion
 
-		#region Static getters
-		/// <summary>
-		/// Gets <see cref="World"/> with <see cref="ID"/> equal to <paramref name="id"/>, or null if doesn't exist
-		/// </summary>
-		public static World Get(UUID id)
-		{
-			if (s_Instances.ContainsKey(id))
-				return s_Instances[id];
-			if (!_Get(id, out string name))
-				return null;
-			return new World(id, name);
-		}
-
-		public static World[] GetAll()
-		{
-			// Get all world IDs
-			_GetAll(out ulong[] worldIDs);
-
-			// Retrieve all worlds by ID
-			World[] worlds = new World[worldIDs.Length];
-			for (int i = 0; i < worldIDs.Length; i++)
-				worlds[i] = Get(worldIDs[i]);
-
-			return worlds;
-		}
-
-		/// <summary>
-		/// Generates a new <see cref="World"/>
-		/// </summary>
-		/// <param name="name">Display name</param>
-		/// <returns>Instance of generated world</returns>
-		public static World Create(string name)
-		{
-			UUID worldID = _Create(name);
-			return new World(worldID, name);
-		}
-
-		public static World Create(JObject json)
-		{
-			string name = json["Name"].Value<string>();
-			UUID worldID = _Create(name);
-			World world = new World(worldID, name);
-			world.OnDeserialize(json);
-			return world;
-		}
-
-		/// <returns>True if world exists with matching ID</returns>
-		public static bool Exists(UUID id) => _Exists(id);
-
-		public static implicit operator bool(World world) => world != null;
-		#endregion
+		// public static implicit operator bool(World world) => world != null;
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Destroy(ulong id);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _Create(string name);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(ulong worldID);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Get(ulong worldID, out string name);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAll(out ulong[] worldIDs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetName(ulong worldID, string name);
-
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetEntities(ulong worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type);

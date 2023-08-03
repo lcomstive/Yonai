@@ -13,6 +13,8 @@
 #include <Yonai/Scripting/ScriptEngine.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
 
+#include <Yonai/Resource.hpp>
+
 // For adding internal calls to mono. Binding C++ to C#
 #include <Yonai/Glue.hpp>
 

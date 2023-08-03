@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <spdlog/spdlog.h>
 #include <Yonai/ResourceID.hpp>
+#include <Yonai/ResourceBase.hpp>
 #include <Yonai/Scripting/Assembly.hpp>
 
 namespace Yonai
@@ -74,7 +75,13 @@ namespace Yonai
 			}
 
 			// Create new resource
-			s_Instances.emplace_back(ResourceInstance(new T(constructorArgs...), loadType));
+			T* instance = new T(constructorArgs...);
+
+			// Set resourceID in instance, if derived from ResourceBase
+			if (std::is_base_of<ResourceBase, T>())
+				((ResourceBase*)instance)->m_ResourceID = id;
+
+			s_Instances.emplace_back(ResourceInstance(instance, loadType));
 			s_InstancePaths.emplace(path, id);
 			s_ResourceIDs.emplace(id, s_Instances.size() - 1);
 

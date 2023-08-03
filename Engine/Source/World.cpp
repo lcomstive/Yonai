@@ -9,29 +9,36 @@ using namespace std;
 using namespace Yonai;
 using namespace Yonai::Components;
 
-unordered_map<UUID, World*> World::s_Worlds;
+vector<World*> World::s_Worlds;
 
 World::World(string name) : m_Name(name)
 {
-	s_Worlds.emplace(m_ID, this);
+	s_Worlds.push_back(this);
 
 	m_SystemManager = make_unique<Yonai::SystemManager>(this);
-	m_ComponentManager = make_unique<Yonai::ComponentManager>(m_ID);
+	m_ComponentManager = make_unique<Yonai::ComponentManager>(this);
 }
 
-UUID& World::ID() { return m_ID; }
 string& World::Name() { return m_Name; }
 void World::Name(string& name) { m_Name = name; }
 void World::Name(char* name) { m_Name = string(name); }
 
-void World::Destroy()
+World::~World()
 {
 	m_ComponentManager->Destroy();
 	m_ComponentManager = nullptr;
 
 	m_SystemManager->Destroy();
 
-	s_Worlds.erase(m_ID);
+	// Remove this world from all worlds list
+	for (size_t i = 0; i < s_Worlds.size(); i++)
+	{
+		if (s_Worlds[i] == this)
+		{
+			s_Worlds.erase(s_Worlds.begin() + i);
+			break;
+		}
+	}
 }
 
 void World::Update()
@@ -105,18 +112,7 @@ ComponentManager* World::GetComponentManager() { return m_ComponentManager.get()
 
 void World::ClearComponents(EntityID entity) { m_ComponentManager->Clear(entity); }
 
-World* World::GetWorld(UUID id)
-{ return s_Worlds.find(id) == s_Worlds.end() ? nullptr : s_Worlds[id]; }
-
-bool World::Exists(UUID id) { return s_Worlds.find(id) != s_Worlds.end(); }
-
-vector<World*> World::GetWorlds()
-{
-	vector<World*> worlds = {};
-	for (auto pair : s_Worlds)
-		worlds.push_back(pair.second);
-	return worlds;
-}
+vector<World*>& World::GetWorlds() { return s_Worlds; }
 
 #pragma region World::Entity
 EntityID World::Entity::ID() { return m_ID; }

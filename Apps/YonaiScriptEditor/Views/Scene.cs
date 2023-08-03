@@ -42,7 +42,7 @@ namespace YonaiEditor.Views
 			if (m_World)
 				return; // Already created world
 
-			m_World = World.Create("Scene View");
+			m_World = Resource.Load<World>("editor://SceneView.json");
 
 			m_Target = new RenderTexture(new IVector2(1920, 1080));
 
@@ -66,7 +66,9 @@ namespace YonaiEditor.Views
 			m_Target.Dispose();
 			m_Camera.RenderTarget = null;
 
-			m_World.Destroy();
+			// m_World.Destroy();
+			Resource.SaveToDisk(m_World);
+			Resource.Unload(m_World);
 
 			m_World = null;
 			m_Camera = null;

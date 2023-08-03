@@ -3,6 +3,7 @@
 #include <mono/jit/jit.h>
 #include <spdlog/spdlog.h>
 #include <Yonai/World.hpp>
+#include <Yonai/Resource.hpp>
 #include <Yonai/ComponentManager.hpp>
 #include <Yonai/Scripting/Assembly.hpp>
 #include <Yonai/Systems/ScriptSystem.hpp>
@@ -30,58 +31,21 @@ size_t _GetComponentType(MonoReflectionType* componentType)
 { return Assembly::GetTypeHash(mono_reflection_type_get_type(componentType)); }
 
 #pragma region World
-ADD_MANAGED_METHOD(World, Get, bool, (uint64_t worldID, MonoString** outName))
+ADD_MANAGED_METHOD(World, Load, void, (MonoString* pathRaw, uint64_t* resourceID, void** outHandle))
 {
-	World* world = World::GetWorld(worldID);
-	if (!world)
-	{
-		*outName = mono_string_new(mono_domain_get(), "");
-		return false;
-	}
+	if (*resourceID == InvalidResourceID)
+		*resourceID = ResourceID(); // Assign new resourceID
 
-	*outName = mono_string_new(mono_domain_get(), world->Name().c_str());
-
-	return true;
-}
-
-ADD_MANAGED_METHOD(World, GetAll, void, (MonoArray** outWorldIDs))
-{
-	vector<World*> worlds = World::GetWorlds();
-
-	*outWorldIDs = mono_array_new(mono_domain_get(), mono_get_uint64_class(), worlds.size());
-	for (size_t i = 0; i < worlds.size(); i++)
-		mono_array_set(*outWorldIDs, uint64_t, i, worlds[i]->ID());
-}
-
-ADD_MANAGED_METHOD(World, Exists, bool, (uint64_t worldID))
-{ return World::GetWorld(worldID) != nullptr; }
-
-ADD_MANAGED_METHOD(World, Destroy, bool, (uint64_t worldID))
-{
-	World* world = World::GetWorld(worldID);
-	if (!world)
-		return false;
-
-	// Unload from scenes if exists
-	Systems::SceneSystem::UnloadScene(world);
-
-	world->Destroy();
-	delete world;
-	return true;
-}
-
-ADD_MANAGED_METHOD(World, Create, uint64_t, (MonoString* nameRaw))
-{
-	char* name = mono_string_to_utf8(nameRaw);
-	World* world = new World(name);
-	mono_free(name);
-	return world->ID();
+	char* path = mono_string_to_utf8(pathRaw);
+	Resource::Load<World>(*resourceID, path);
+	*outHandle = Resource::Get<World>(*resourceID);
+	mono_free(path);
 }
 
 ADD_MANAGED_METHOD(World, SetName, void, (uint64_t worldID, MonoString* nameRaw))
 {
 	char* name = mono_string_to_utf8(nameRaw);
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (world)
 		world->Name(name);
 	mono_free(name);
@@ -89,32 +53,32 @@ ADD_MANAGED_METHOD(World, SetName, void, (uint64_t worldID, MonoString* nameRaw)
 
 ADD_MANAGED_METHOD(World, CreateEntity, uint64_t, (uint64_t worldID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	return world ? world->CreateEntity().ID() : InvalidEntityID;
 }
 
 ADD_MANAGED_METHOD(World, CreateEntityID, uint64_t, (uint64_t worldID, uint64_t entityID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	return world ? world->CreateEntity(entityID).ID() : InvalidEntityID;
 }
 
 ADD_MANAGED_METHOD(World, DestroyEntity, void, (uint64_t worldID, uint64_t entityID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (world)
 		world->DestroyEntity(entityID);
 }
 
 ADD_MANAGED_METHOD(World, HasEntity, bool, (uint64_t worldID, uint64_t entityID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	return world ? world->HasEntity(entityID) : false;
 }
 
 ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (uint64_t worldID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 	auto entities = world->Entities();
@@ -126,7 +90,7 @@ ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (uint64_t worldID))
 
 ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (uint64_t worldID, MonoReflectionType* componentType))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 	vector<EntityID> entities = world->GetComponentManager()->GetEntities(_GetComponentType(componentType));
@@ -138,7 +102,7 @@ ADD_MANAGED_METHOD(World, GetComponents, MonoArray*, (uint64_t worldID, MonoRefl
 
 ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, MonoArray* inputTypes))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 	vector<size_t> componentTypes;
@@ -158,7 +122,7 @@ ADD_MANAGED_METHOD(World, GetComponentsMultiple, MonoArray*, (uint64_t worldID, 
 #pragma region Entity
 ADD_MANAGED_METHOD(Entity, HasComponent, bool, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
@@ -169,7 +133,7 @@ ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_
 
 ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType, void** outHandle))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 
@@ -198,7 +162,7 @@ ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_
 
 ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world || !world->HasEntity(entityID))
 		return false;
 
@@ -220,7 +184,7 @@ ADD_MANAGED_METHOD(Entity, RemoveComponent, bool, (uint64_t worldID, uint64_t en
 
 ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_t entityID, MonoReflectionType* componentType))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 	MonoType* managedType = mono_reflection_type_get_type(componentType);
@@ -233,7 +197,7 @@ ADD_MANAGED_METHOD(Entity, GetComponent, MonoObject*, (uint64_t worldID, uint64_
 
 ADD_MANAGED_METHOD(Entity, GetComponents, MonoArray*, (uint64_t worldID, uint64_t entityID))
 {
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	if (!world)
 		return nullptr;
 
@@ -269,7 +233,7 @@ SystemManager* GetSystemManager(uint64_t worldID)
 	if (worldID == InvalidEntityID)
 		return SystemManager::Global();
 
-	World* world = World::GetWorld(worldID);
+	World* world = Resource::Get<World>(worldID);
 	return world ? world->GetSystemManager() : nullptr;
 }
 

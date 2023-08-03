@@ -1,3 +1,5 @@
+#include <Yonai/World.hpp>
+#include <Yonai/Resource.hpp>
 #include <Yonai/ComponentManager.hpp>
 #include <Yonai/Components/Component.hpp>
 
@@ -13,7 +15,7 @@ using namespace Yonai::Components;
 
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
-ComponentManager::ComponentManager(UUID worldID) : m_WorldID(worldID) { }
+ComponentManager::ComponentManager(World* world) : m_World(world) { }
 
 void ComponentManager::Destroy()
 {
@@ -169,7 +171,7 @@ Yonai::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typ
 	if (!managedType)
 	{
 		if (managedData.AddFn)
-			return managedData.AddFn(World::GetWorld(m_WorldID), entityID)->ManagedData;
+			return managedData.AddFn(m_World, entityID)->ManagedData;
 		return {};
 	}
 
@@ -179,7 +181,7 @@ Yonai::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typ
 
 	// Initialise component
 	MonoException* exception = nullptr;
-	ComponentMethodInitialise(instance, m_WorldID, entityID, &exception);
+	ComponentMethodInitialise(instance, m_World->ID(), entityID, &exception);
 
 	// Call constructor
 	mono_runtime_object_init(instance);

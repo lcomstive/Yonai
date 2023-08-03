@@ -107,8 +107,6 @@ namespace YonaiEditor.Systems
 			VFS.Mount("project://", project.Path.ParentDirectory);
 			VFS.Mount("assets://", "project://Assets");
 
-			Resource.LoadDatabase();
-
 			// Load project resources
 			if (!Scripting.IsAssemblyReloading())
 			{
@@ -122,6 +120,8 @@ namespace YonaiEditor.Systems
 						Scripting.LoadAssembly(vfsPath, true /* Should watch */);
 				}
 			}
+
+			Resource.LoadDatabase();
 
 			// Add global systems
 			Add<EditorUIService>();

@@ -87,7 +87,7 @@ namespace Yonai
 				if (m_ActiveWorlds.ContainsKey(worldIDs[i]))
 					continue; // Already added
 
-				World world = World.Get(worldIDs[i]);
+				World world = Resource.Get<World>(worldIDs[i]);
 				world.SetActive(true);
 				m_ActiveWorlds.Add(world.ID, world);
 				WorldChanged?.Invoke(world, true);

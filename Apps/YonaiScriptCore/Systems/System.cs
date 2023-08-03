@@ -112,7 +112,7 @@ namespace Yonai
 
 		#region Unmanaged Calls
 		// Called from C++
-		internal void _Initialise(ulong worldID) => World = worldID != UUID.Invalid ? World.Get(worldID) : null;
+		internal void _Initialise(ulong worldID) => World = worldID != UUID.Invalid ? Resource.Get<World>(worldID) : null;
 
 		// Called from C++
 		private void _Enable(bool enable)

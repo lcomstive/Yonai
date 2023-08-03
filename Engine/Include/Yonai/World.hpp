@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <Yonai/API.hpp>
-#include <Yonai/UUID.hpp>
+#include <Yonai/ResourceBase.hpp>
 #include <Yonai/SystemManager.hpp>
 #include <Yonai/ComponentManager.hpp>
 
@@ -14,16 +14,15 @@ namespace Yonai
 	namespace Systems { class SceneSystem;  }
 	namespace Components { struct Component; struct ScriptComponent; }
 
-	class World
+	class World : public ResourceBase
 	{
 	private:
-		UUID m_ID;
 		std::string m_Name;
 
 		std::unique_ptr<SystemManager> m_SystemManager;
 		std::unique_ptr<ComponentManager> m_ComponentManager;
 
-		static std::unordered_map<UUID, World*> s_Worlds;
+		static std::vector<World*> s_Worlds;
 
 		YonaiAPI void SetupEntityComponent(EntityID id, Components::Component* component);
 
@@ -111,13 +110,11 @@ namespace Yonai
 	public:
 
 		YonaiAPI World(std::string name = "World");
+		YonaiAPI ~World();
 
-		YonaiAPI UUID& ID();
 		YonaiAPI std::string& Name();
 		YonaiAPI void Name(char* name);
 		YonaiAPI void Name(std::string& name);
-
-		YonaiAPI void Destroy();
 
 #pragma region Entity
 		YonaiAPI Entity CreateEntity();
@@ -314,9 +311,7 @@ namespace Yonai
 		YonaiAPI Yonai::SystemManager* GetSystemManager();
 		YonaiAPI Yonai::ComponentManager* GetComponentManager();
 
-		static std::vector<World*> GetWorlds();
-		static World* GetWorld(UUID id);
-		static bool Exists(UUID id);
+		static std::vector<World*>& GetWorlds();
 #pragma endregion
 	};
 

@@ -62,7 +62,7 @@ void EditorApp::Setup()
 
 		SystemManager::Global()->Add<SceneSystem>();
 	}
-	
+		
 	LaunchEditorService();
 }
 

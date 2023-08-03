@@ -178,8 +178,10 @@ namespace YonaiEditor
 			for (int i = 0; i < activeScenes.Length; i++)
 			{
 				m_EditModeSceneIDs[i] = activeScenes[i].ID;
-				m_ClonedWorlds[i] = activeScenes[i].Clone();
-				m_ClonedWorlds[i].Name += " (Clone)";
+				m_ClonedWorlds[i] = Resource.Duplicate<World>(
+					activeScenes[i].ID,
+					activeScenes[i].ResourcePath + " (Clone)"
+				);
 				SceneManager.Load(m_ClonedWorlds[i], SceneAddType.Additive);
 			}
 		}
@@ -192,11 +194,13 @@ namespace YonaiEditor
 
 			// Destroy cloned worlds
 			foreach (World world in m_ClonedWorlds)
-				world?.Destroy();
+				// world?.Destroy();
+				Resource.Unload(world);
 
 			// Re-load all scenes that were active when entering play mode
 			foreach (UUID worldID in m_EditModeSceneIDs)
-				SceneManager.Load(World.Get(worldID), SceneAddType.Additive, false);
+				// SceneManager.Load(World.Get(worldID), SceneAddType.Additive, false);
+				SceneManager.Load(Resource.Get<World>(worldID), SceneAddType.Additive, false);
 
 			// Force mouse state to be normal when not in play mode
 			Input.MouseState = MouseState.Normal;

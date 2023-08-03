@@ -53,11 +53,16 @@ namespace Yonai
 		private static void LoadInitialScene()
 		{
 			string scenePath = JSON["Scenes"].Values<string>().FirstOrDefault();
+			/*
 			World initialWorld = World.Create(VFS.ReadJSON(scenePath));
 			if (initialWorld && initialWorld.ID != UUID.Invalid)
 				SceneManager.Load(initialWorld);
 			else
 				Log.Warning($"Failed to load initial scene '{scenePath}'");
+			*/
+			World world = Resource.Load<World>(scenePath);
+			if (world)
+				SceneManager.Load(world);
 		}
 
 		private static void LoadBaseSystems()

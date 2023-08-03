@@ -66,10 +66,11 @@
     <Compile Include="Core/FileDialog.cs" />
     <Compile Include="Core/Icons.cs" />
     <Compile Include="Core/ProjectFile.cs" />
+    <Compile Include="Core/SceneManagerHelper.cs" />
     <Compile Include="Core/Scripting.cs" />
     <Compile Include="Core/ShortcutManager.cs" />
     <Compile Include="Core/Commands/CommandHistory.cs" />
-    <Compile Include="Core/Commands/GizmoCommand.cs" />
+    <Compile Include="Core/Commands/GizmoCommands.cs" />
     <Compile Include="Core/Commands/ICommand.cs" />
     <Compile Include="Core/Commands/ModifyValueCommand.cs" />
     

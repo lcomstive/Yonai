@@ -85,7 +85,7 @@ namespace Yonai
 			}
 		};
 
-		UUID m_WorldID;
+		World* m_World;
 
 		bool m_WorldIsActive = false;
 		std::unordered_map<size_t, ComponentData> m_ComponentArrays;
@@ -104,7 +104,7 @@ namespace Yonai
 		friend class Scripting::ScriptEngine;
 
 	public:
-		YonaiAPI ComponentManager(UUID worldID);
+		YonaiAPI ComponentManager(World* world);
 
 		/// <summary>
 		/// Release all resources

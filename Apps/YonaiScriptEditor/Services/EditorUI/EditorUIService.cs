@@ -50,8 +50,7 @@ namespace YonaiEditor.Systems
 				Open<InspectorView>();
 				Open<ResourcesView>();
 
-				// CreateTestScene();
-				LoadTestScene();
+				SceneManager.Load(Resource.Load<World>("project://Assets/Scenes/Test World.json"), SceneAddType.Single, false);
 
 				if (!Scripting.IsAssemblyReloading())
 				{
@@ -65,7 +64,6 @@ namespace YonaiEditor.Systems
 
 		protected override void Destroyed()
 		{
-			m_TestWorld?.Destroy();
 			foreach (var view in m_ActiveViews.Values)
 				view._Close();
 		}
@@ -353,50 +351,6 @@ namespace YonaiEditor.Systems
 
 		public void AddMenuItem(Action callback, MenuItemAttribute attribute) => m_RootMenuItem.Add(callback, attribute);
 		public void AddMenuItemDirectory(string directory) => m_RootMenuItem.AddDirectory(directory);
-		#endregion
-
-		#region Test Scene
-		private World m_TestWorld = null;
-		private const string TestSceneName = "Test World";
-
-		private void CreateTestScene()
-		{
-			m_TestWorld = World.Create(TestSceneName);
-			SceneManager.Load(m_TestWorld, SceneAddType.Additive);
-
-			for (int i = 0; i < 15; i++)
-			{
-				Entity e = m_TestWorld.CreateEntity();
-				NameComponent nameComponent = e.AddComponent<NameComponent>();
-				nameComponent.Name = "Entity";
-
-				SpriteRenderer renderer = e.AddComponent<SpriteRenderer>();
-				renderer.Sprite = Resource.Load<Texture>("assets://Textures/Test.png");
-				renderer.Shader = Resource.Load<Shader>("assets://Shaders/Sprite.shader", new ShaderImportSettings()
-				{
-					VertexPath = "assets://Shaders/Sprite.vert",
-					FragmentPath = "assets://Shaders/Sprite.frag"
-				});
-
-				e.AddComponent<Transform>().Position = Vector3.Right * i * 2.5f;
-			}
-		}
-
-		private void LoadTestScene()
-		{
-			Resource.Load<Texture>("assets://Textures/texture_09.png");
-			Resource.Load<Shader>("assets://Shaders/Sprite.shader", new ShaderImportSettings()
-			{
-				VertexPath = "assets://Shaders/Sprite.vert",
-				FragmentPath = "assets://Shaders/NewSprite.frag"
-			});
-
-			if (!VFS.Exists($"{SceneDir}{TestSceneName}.json"))
-				return; // Not found
-
-			m_TestWorld = World.Create(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{TestSceneName}.json")));
-			SceneManager.Load(m_TestWorld, SceneAddType.Single, false);
-		}
 		#endregion
 	}
 }

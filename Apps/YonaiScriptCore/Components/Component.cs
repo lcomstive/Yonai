@@ -272,7 +272,7 @@ namespace Yonai
 
 		#region Internal Calls
 		// Called from C++
-		internal void _Initialise(ulong worldID, ulong entityID) => Entity = new Entity(World.Get(worldID), entityID);
+		internal void _Initialise(ulong worldID, ulong entityID) => Entity = new Entity(Resource.Get<World>(worldID), entityID);
 		#endregion
 	}
 }

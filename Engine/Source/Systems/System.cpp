@@ -1,4 +1,5 @@
 #include <Yonai/World.hpp>
+#include <Yonai/Resource.hpp>
 #include <Yonai/SystemManager.hpp>
 #include <Yonai/Systems/System.hpp>
 #include <Yonai/Scripting/Assembly.hpp>
@@ -32,7 +33,7 @@ ADD_MANAGED_METHOD(NativeSystem, GetHandle, void*, (unsigned int worldID, MonoRe
 
 	if (worldID != InvalidEntityID)
 	{
-		World* world = World::GetWorld(worldID);
+		World* world = Resource::Get<World>(worldID);
 		if (!world)
 			return nullptr;
 		systemManager = world->GetSystemManager();
