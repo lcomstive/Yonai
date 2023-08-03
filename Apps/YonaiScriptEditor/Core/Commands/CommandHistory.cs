@@ -7,56 +7,77 @@ namespace YonaiEditor.Commands
 	/// </summary>
 	public static class CommandHistory
 	{
-		private const uint MaxHistoryLength = 128;
+		private const int MaxHistoryLength = 128;
 
 		/// <summary>
-		/// Fixed-length array of commands, used cyclically for undoing and redoing
+		/// First item is edit-time command list
+		/// Second item is runtime command list
 		/// </summary>
-		private static List<ICommand> s_CommandBuffer = new List<ICommand>();
-		private static int s_CommandIndex = 0;
+		private static CommandList[] s_CommandBuffer = new CommandList[2] { new CommandList(), new CommandList() };
 
-		public static void Execute(ICommand command)
-		{
-			// If redo history is available, clear it
-			if (s_CommandIndex < s_CommandBuffer.Count)
-				s_CommandBuffer.RemoveRange(s_CommandIndex, s_CommandBuffer.Count - s_CommandIndex);
+		private static EditorState m_State => EditorService.State;
 
-			s_CommandBuffer.Add(command);
-			command.Execute();
-			s_CommandIndex++;
+		private static CommandList GetCommandList(EditorState state) =>
+			s_CommandBuffer[state == EditorState.Edit ? 0 : 1];
 
-			// Remove first element if too many items
-			if (s_CommandBuffer.Count > MaxHistoryLength)
-			{
-				s_CommandBuffer.RemoveAt(0);
-				s_CommandIndex--;
-			}
-		}
+		public static void Execute(ICommand command) => GetCommandList(m_State).Execute(command);
+		internal static void Execute(ICommand command, EditorState state) => GetCommandList(state).Execute(command);
 
 		[MenuItem("File/Undo", Shortcut = "CTRL + Z")]
-		public static void Undo()
-		{
-			if (s_CommandBuffer.Count == 0 ||
-				s_CommandIndex == 0)
-				return; // Nothing to undo
-
-			s_CommandBuffer[--s_CommandIndex].Undo();
-		}
+		public static void Undo() => GetCommandList(m_State).Undo();
 
 		[MenuItem("File/Redo", Shortcut = "CTRL + Y")]
-		public static void Redo()
-		{
-			if (s_CommandBuffer.Count == 0 ||
-				s_CommandIndex >= s_CommandBuffer.Count)
-				return; // Nothing left in buffer to redo
+		public static void Redo() => GetCommandList(m_State).Redo();
 
-			s_CommandBuffer[s_CommandIndex++].Execute();
-		}
+		public static void Clear() => GetCommandList(m_State).Clear();
 
-		public static void Clear()
+		private class CommandList
 		{
-			s_CommandIndex = 0;
-			s_CommandBuffer.Clear();
+			public int CommandIndex;
+			public List<ICommand> Commands;
+
+			public CommandList()
+			{
+				CommandIndex = 0;
+				Commands = new List<ICommand>();
+				Commands.Capacity = MaxHistoryLength; // Reserve enough memory for max items
+			}
+
+			public void Execute(ICommand command)
+			{
+				// If redo history is available, clear it
+				if (CommandIndex < Commands.Count)
+					Commands.RemoveRange(CommandIndex, Commands.Count - CommandIndex);
+
+				Commands.Add(command);
+				command.Execute();
+				CommandIndex++;
+
+				// Remove first element if too many items
+				if (Commands.Count > MaxHistoryLength)
+				{
+					Commands.RemoveAt(0);
+					CommandIndex--;
+				}
+			}
+
+			public void Undo()
+			{
+				if (Commands.Count > 0 && CommandIndex > 0)
+					Commands[--CommandIndex].Undo();
+			}
+
+			public void Redo()
+			{
+				if (Commands.Count > 0 && CommandIndex < Commands.Count)
+					Commands[CommandIndex++].Execute();
+			}
+
+			public void Clear()
+			{
+				Commands.Clear();
+				CommandIndex = 0;
+			}
 		}
 	}
 }

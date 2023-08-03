@@ -16,11 +16,11 @@ namespace YonaiEditor
 
 	public class EditorService : YonaiSystem
 	{
-		private EditorState m_State = EditorState.Edit;
-		public EditorState State
+		private static EditorState m_State = EditorState.Edit;
+		public static EditorState State
 		{
 			get => m_State;
-			set => UpdateState(value);
+			set => Get<EditorService>().UpdateState(value);
 		}
 
 		/// <summary>

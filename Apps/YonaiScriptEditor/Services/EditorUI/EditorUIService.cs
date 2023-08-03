@@ -27,8 +27,8 @@ namespace YonaiEditor.Systems
 
 		private EditorState State
 		{
-			get => Get<EditorService>().State;
-			set => Get<EditorService>().State = value;
+			get => EditorService.State;
+			set => EditorService.State = value;
 		}
 
 		protected override void Start()
