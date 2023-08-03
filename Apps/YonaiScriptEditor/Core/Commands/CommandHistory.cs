@@ -23,12 +23,8 @@ namespace YonaiEditor.Commands
 		public static void Execute(ICommand command) => GetCommandList(m_State).Execute(command);
 		internal static void Execute(ICommand command, EditorState state) => GetCommandList(state).Execute(command);
 
-		[MenuItem("File/Undo", Shortcut = "CTRL + Z")]
 		public static void Undo() => GetCommandList(m_State).Undo();
-
-		[MenuItem("File/Redo", Shortcut = "CTRL + Y")]
 		public static void Redo() => GetCommandList(m_State).Redo();
-
 		public static void Clear() => GetCommandList(m_State).Clear();
 
 		private class CommandList

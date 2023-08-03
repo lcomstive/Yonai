@@ -122,19 +122,6 @@ namespace YonaiEditor.Systems
 			}
 		}
 
-		[MenuItem("File/Scene/Recreate Test Scene", PrependSeparator = true)]
-		private static void RecreateTestScene()
-		{
-			EditorUIService uiService = Get<EditorUIService>();
-			if (uiService.m_TestWorld)
-			{
-				SceneManager.Unload(uiService.m_TestWorld);
-				uiService.m_TestWorld.Destroy();
-				uiService.m_TestWorld = null;
-			}
-			uiService.CreateTestScene();
-		}
-
 		private void SetupShortcuts()
 		{
 			ShortcutManager.Map(Application.Exit, Key.LeftControl, Key.Q);
@@ -327,7 +314,10 @@ namespace YonaiEditor.Systems
 		{
 			// Add default menu item directories
 			m_RootMenuItem.AddDirectory("File");
+			m_RootMenuItem.AddDirectory("File/Scene");
+			m_RootMenuItem.AddDirectory("File/Resources");
 			m_RootMenuItem.AddDirectory("Window");
+			m_RootMenuItem.AddDirectory("Build");
 
 			GameBuilder.ConstructBuildMenu();
 
