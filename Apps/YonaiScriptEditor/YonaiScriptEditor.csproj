@@ -73,6 +73,7 @@
     <Compile Include="Core/Commands/GizmoCommands.cs" />
     <Compile Include="Core/Commands/ICommand.cs" />
     <Compile Include="Core/Commands/ModifyValueCommand.cs" />
+    <Compile Include="Core/Commands/SceneManagerExtensions.cs" />
     
     <!-- Graphics -->
     <Compile Include="Graphics/EditorWindow.cs" />
