@@ -232,6 +232,6 @@ namespace YonaiEditor
 		}
 
 		public delegate void OnStateChanged(EditorState oldState, EditorState newState);
-		public event OnStateChanged StateChanged;
+		public static event OnStateChanged StateChanged;
 	}
 }

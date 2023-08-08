@@ -9,6 +9,18 @@ namespace YonaiEditor.Views
 		[MenuItem("Window/Game")]
 		private static void MenuCallback() => EditorUIService.Open<GameView>();
 
+		protected override void Opened()
+		{
+			EditorService.StateChanged += OnEditorStateChanged;
+		}
+
+		private void OnEditorStateChanged(EditorState oldState, EditorState newState)
+		{
+			// Set focus to game window
+			if (oldState != EditorState.Play && newState == EditorState.Play)
+				ImGUI.SetWindowFocus("Game");
+		}
+
 		protected override void Draw()
 		{
 			bool isOpen = true;

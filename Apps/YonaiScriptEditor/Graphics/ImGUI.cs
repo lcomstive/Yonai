@@ -1154,6 +1154,18 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SetNextWindowPos(ref Vector2 position);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetNextWindowFocus();
+
+		public static void SetWindowFocus() => _SetWindowFocus();
+		public static void SetWindowFocus(string windowTitle) => _SetWindowFocusNamed(windowTitle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _SetWindowFocus();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _SetWindowFocusNamed(string windowTitle);
+
 		public static void SetNextWindowSize(Vector2 size)
 			=> _SetNextWindowSize(ref size);
 

@@ -65,8 +65,8 @@ namespace YonaiEditor.Views
 		[MenuItem("Window/Inspector")]
 		private static void MenuCallback() => EditorUIService.Open<InspectorView>();
 
-		protected override void Opened() => YonaiSystem.Get<EditorService>().StateChanged += OnEditorStateChanged;
-		protected override void Closed() => YonaiSystem.Get<EditorService>().StateChanged -= OnEditorStateChanged;
+		protected override void Opened() => EditorService.StateChanged += OnEditorStateChanged;
+		protected override void Closed() => EditorService.StateChanged -= OnEditorStateChanged;
 
 		private void OnEditorStateChanged(EditorState oldState, EditorState newState)
 		{

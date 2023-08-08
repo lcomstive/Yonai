@@ -837,6 +837,19 @@ ADD_MANAGED_METHOD(ImGUI, _SetNextWindowSize, void, (glm::vec2* position), Yonai
 ADD_MANAGED_METHOD(ImGUI, SetNextWindowViewport, void, (unsigned int viewportID), YonaiEditor)
 { ImGui::SetNextWindowViewport(viewportID); }
 
+ADD_MANAGED_METHOD(ImGUI, SetNextWindowFocus, void, (), YonaiEditor)
+{ ImGui::SetNextWindowFocus(); }
+
+ADD_MANAGED_METHOD(ImGUI, _SetWindowFocus, void, (), YonaiEditor)
+{ ImGui::SetWindowFocus(); }
+
+ADD_MANAGED_METHOD(ImGUI, _SetWindowFocusNamed, void, (MonoString* titleRaw), YonaiEditor)
+{
+	char* title = mono_string_to_utf8(titleRaw);
+	ImGui::SetWindowFocus(title);
+	mono_free(title);
+}
+
 ADD_MANAGED_METHOD(ImGUI, _GetWindowContentRegionMin, void, (glm::vec2* outRegion), YonaiEditor)
 {
 	ImVec2 region = ImGui::GetWindowContentRegionMin();
