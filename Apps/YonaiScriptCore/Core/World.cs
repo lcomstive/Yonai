@@ -44,6 +44,8 @@ namespace Yonai
 
 			Handle = handle;
 			ResourceID = resourceID;
+
+			Loaded?.Invoke();
 		}
 
 		protected override void OnUnload()
@@ -54,8 +56,6 @@ namespace Yonai
 			foreach (UUID entity in keys)
 				DestroyEntity(entity);
 		}
-
-		protected override void OnCloned(ResourceBase original) => OnDeserialize(((World)original).OnSerialize());
 
 		public JObject OnSerialize()
 		{
@@ -86,7 +86,7 @@ namespace Yonai
 		public void OnDeserialize(JObject json)
 		{
 			// Destroy previous entities, will be recreating them
-			Entity[] previousEntities = GetEntities();
+			Entity[] previousEntities = GetEntities() ?? new Entity[0];
 			foreach (Entity entity in previousEntities)
 			{
 				entity.Destroy();
@@ -234,7 +234,7 @@ namespace Yonai
 
 			if(entity.TryGetComponent(out Transform transform))
 			{
-				// Destroy all childr entities before destroying this entity
+				// Destroy all child entities before destroying this entity
 				Transform[] children = transform.GetChildren();
 				foreach (Transform child in children)
 					DestroyEntity(child.Entity.ID);
@@ -424,5 +424,8 @@ namespace Yonai
 
 		public delegate void OnStateChanged(bool active);
 		public event OnStateChanged StateChanged;
+
+		private delegate void OnLoaded();
+		private event OnLoaded Loaded;
 	}
 }

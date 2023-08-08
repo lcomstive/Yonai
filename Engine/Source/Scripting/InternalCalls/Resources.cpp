@@ -6,12 +6,6 @@ using namespace std;
 using namespace Yonai;
 using namespace Yonai::Scripting;
 
-ADD_MANAGED_METHOD(Resource, Duplicate, uint64_t, (uint64_t originalID, MonoString* newPath))
-{
-	return Resource::IsValidResourceID(originalID) ?
-		Resource::Duplicate(originalID, mono_string_to_utf8(newPath)) : InvalidResourceID;
-}
-
 ADD_MANAGED_METHOD(Resource, GetPath, MonoString*, (uint64_t id))
 {
 	if (Resource::IsValidResourceID(id))

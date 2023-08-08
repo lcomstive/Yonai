@@ -1,15 +1,11 @@
-using Yonai.Graphics;
-using Yonai.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+using Yonai.IO;
+using Yonai.Graphics;
+using Newtonsoft.Json;
 using System.Reflection;
-using System.Resources;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Timers;
 
 namespace Yonai
 {
@@ -39,29 +35,6 @@ namespace Yonai
 		public static string GetPath(UUID resourceID) =>
 			_GetPath(resourceID) ?? (Exists(resourceID) ? s_Instances[resourceID].ResourcePath : null);
 
-		/// <summary>
-		/// Creates a copy of resource at <paramref name="resourceID"/>, with the given path
-		/// </summary>
-		/// <returns>ID of the newly created resource</returns>
-		public static UUID Duplicate(UUID resourceID, string newPath)
-		{
-			UUID newID = _Duplicate(resourceID, newPath);
-			if(newID == UUID.Invalid)
-				return newID;
-			ResourceBase resource = s_Instances[resourceID].Clone(newID, newPath);
-			resource._Load();
-			s_Instances.Add(newID, resource);
-			return newID;
-		}
-
-		public static T Duplicate<T>(UUID resourceID, string newPath) where T : ResourceBase, new()
-		{
-			UUID newID = Duplicate(resourceID, newPath);
-			if(newID == UUID.Invalid)
-				return null;
-			return (T)s_Instances[resourceID];
-		}
-
 		/// <returns>True if resource is found matching <paramref name="resourceID"/></returns>
 		public static bool Exists(UUID resourceID) => s_Instances.ContainsKey(resourceID) || _Exists(resourceID);
 
@@ -75,9 +48,10 @@ namespace Yonai
 		/// When resource is not found at virtual path, creates new one with given args.
 		/// </summary>
 		/// <param name="path">Asset filepath, usable from VFS</param>
-		/// <param name="args">Arguments to pass to resource during creation</param>
+		/// <param name="importSettings">Arguments to pass to resource during creation</param>
+		/// <param name="saveToDisk">When false, does not save loaded file to disk immediately after creation</param>
 		/// <returns>Found or created instance of resource</returns>
-		public static T Load<T>(string path, IImportSettings importSettings = null) where T : ResourceBase, new()
+		public static T Load<T>(string path, IImportSettings importSettings = null, bool saveToDisk = true) where T : ResourceBase, new()
 		{
 			// Check for existing cached instance 
 			UUID resourceID = GetID(path);
@@ -100,8 +74,8 @@ namespace Yonai
 
 				instance._Load();
 				if(instance.ResourceID == UUID.Invalid)
-					instance.ResourceID = _CreateID();
-
+					instance.ResourceID = _CreateID(); 
+				
 				instance.Import(importSettings);
 
 				// Cache created resource
@@ -115,10 +89,24 @@ namespace Yonai
 				s_Paths.Add(path, resourceID);
 			}
 
-			SaveToDisk(instance, true);
+			if(saveToDisk)
+				SaveToDisk(instance, true);
 
 			return instance;
 		}
+
+
+		/// <summary>
+		/// Loads a new resource with virtual path <paramref name="path"/>.
+		/// If resource at virtual path already exists, returns existing resource.
+		/// When resource is not found at virtual path, creates new one with given args.
+		/// </summary>
+		/// <param name="path">Asset filepath, usable from VFS</param>
+		/// <param name="saveToDisk">When false, does not save loaded file to disk immediately after creation</param>
+		/// <returns>Found or created instance of resource</returns>
+		public static T Load<T>(string path, bool saveToDisk) where T : ResourceBase, new()
+			=> Load<T>(path, null, saveToDisk);
+
 
 		internal static ResourceBase Load(UUID resourceID, string path, Type type)
 		{
@@ -146,6 +134,9 @@ namespace Yonai
 
 				// Cache created resource
 				s_Instances.Add(instance.ResourceID, instance);
+
+				if (instance is ISerializable && !LoadFromDisk(instance))
+					Log.Warning($"Failed to deserialize resource from disk [{resourceID}] '{path}'");
 			}
 			else
 				// Add found unmanaged resource, cache in s_Instances

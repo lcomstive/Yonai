@@ -1,5 +1,3 @@
-using System;
-
 namespace Yonai
 {
 	[System.Diagnostics.DebuggerDisplay("{m_Value}")]

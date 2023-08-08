@@ -24,24 +24,6 @@ namespace Yonai
 		/// </summary>
 		protected virtual void OnImported() { }
 
-		/// <summary>
-		/// This instance was created as a duplicate from <paramref name="original"/>.
-		/// Called before <see cref="OnLoad"/>.
-		/// </summary>
-		protected virtual void OnCloned(ResourceBase original) { }
-
-		internal ResourceBase Clone(UUID newID, string newPath)
-		{
-			ResourceBase clone = (ResourceBase)MemberwiseClone();
-
-			clone.ResourceID = newID;
-			clone.ResourcePath = newPath;
-			clone.ImportSettings = ImportSettings;
-			clone.OnCloned(this);
-
-			return clone;
-		}
-
 		internal void _Load() => OnLoad();
 		internal void _Unload() => OnUnload();
 
@@ -74,15 +56,13 @@ namespace Yonai
 	{
 		protected IntPtr Handle { get; set; }
 
+		internal IntPtr GetHandle() => Handle;
 		internal void SetHandle(IntPtr handle) => Handle = handle;
 
 		/// <summary>
 		/// Called instead of <see cref="ResourceBase.OnLoad"/> when loaded from an existing native resource
 		/// </summary>
 		protected virtual void OnNativeLoad() { }
-
-		protected override void OnCloned(ResourceBase original) =>
-			Handle = ((NativeResourceBase)original).Handle;
 
 		internal void _OnNativeLoad() => OnNativeLoad();
 	}

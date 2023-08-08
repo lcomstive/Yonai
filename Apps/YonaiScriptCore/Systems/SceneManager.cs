@@ -32,6 +32,9 @@ namespace Yonai
 		/// </summary>
 		public static void Unload(World world)
 		{
+			if (!m_ActiveWorlds.ContainsKey(world.ID))
+				return;
+
 			_Unload(world.ID);
 			world.SetActive(false);
 			m_ActiveWorlds.Remove(world.ID);

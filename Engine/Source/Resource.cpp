@@ -119,26 +119,6 @@ void Resource::PrintResourceTypes()
 	}
 }
 
-ResourceID Resource::Duplicate(ResourceID original, string newPath)
-{
-	ResourceInstance* originalInstance = GetInstance(original);
-	string originalPath = GetPath(original);
-	if (originalPath.empty() || !originalInstance)
-		return InvalidResourceID;
-
-	ResourceInstance resourceInstance;
-	resourceInstance.Type = originalInstance->Type;
-	resourceInstance.Data = malloc(sizeof(originalInstance->Data));
-	memcpy(resourceInstance.Data, originalInstance->Data, sizeof(originalInstance->Data));
-	
-	s_Instances.emplace_back(resourceInstance);
-
-	ResourceID id;
-	s_InstancePaths.emplace(newPath, id);
-
-	return id;
-}
-
 type_index Resource::GetType(ResourceID id)
 {
 	ResourceInstance* instance = GetInstance(id);

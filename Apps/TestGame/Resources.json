@@ -188,5 +188,15 @@
     "ID": "1651027823401074625",
     "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "8302840802280813915",
+    "Path": "project://Assets/Scenes/Test World.json",
+    "Type": "Yonai.World"
+  },
+  {
+    "ID": "3249409979704942351",
+    "Path": "assets://Shaders/NewSpriteShader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   }
 ]

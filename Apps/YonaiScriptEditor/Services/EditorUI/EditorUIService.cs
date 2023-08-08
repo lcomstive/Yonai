@@ -50,7 +50,8 @@ namespace YonaiEditor.Systems
 				Open<InspectorView>();
 				Open<ResourcesView>();
 
-				SceneManager.Load(Resource.Load<World>("project://Assets/Scenes/Test World.json"), SceneAddType.Single, false);
+				World world = Resource.Load<World>("project://Assets/Scenes/Test World.json");
+				SceneManager.Load(world, SceneAddType.Single, false);
 
 				if (!Scripting.IsAssemblyReloading())
 				{
@@ -83,41 +84,6 @@ namespace YonaiEditor.Systems
 
 			try { ShortcutManager.Update(); }
 			catch(Exception e) { Log.Exception(e); }
-		}
-
-		private const string SceneDir = "project://Assets/Scenes/";
-		[MenuItem("File/Scene/Save", Shortcut = "CTRL+S")]
-		private static void SaveScene()
-		{
-			if (!VFS.Exists(SceneDir))
-				VFS.CreateDirectory(SceneDir);
-
-			World[] activeScenes = SceneManager.GetActiveScenes();
-			foreach (World scene in activeScenes)
-			{
-				string json = JsonConvert.SerializeObject(scene.OnSerialize(), Formatting.Indented);
-				VFS.Write($"{SceneDir}{scene.Name}.json", json.Replace("\r\n", "\n"));
-			}
-		}
-
-		[MenuItem("File/Scene/Load")]
-		private static void LoadScene()
-		{
-			World[] scenes = SceneManager.GetActiveScenes();
-			SceneManager.UnloadAll();
-			foreach (World scene in scenes)
-			{
-				try
-				{
-					// Check if exists
-					if (!VFS.Exists($"{SceneDir}{scene.Name}.json"))
-						continue;
-
-					scene.OnDeserialize(JsonConvert.DeserializeObject<JObject>(VFS.ReadText($"{SceneDir}{scene.Name}.json")));
-					SceneManager.Load(scene, SceneAddType.Additive, false);
-				}
-				catch (Exception e) { Log.Exception(e); }
-			}
 		}
 
 		private void SetupShortcuts()
