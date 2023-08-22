@@ -23,7 +23,7 @@ do
 	esac
 done
 
-echo "Building AquaEngine in ${CONFIG} mode with ${GENERATOR}"
+echo "Building Yonai in ${CONFIG} mode with ${GENERATOR}"
 
 # Get script directory
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
@@ -33,13 +33,13 @@ ROOT=${SCRIPT_DIR}/../..
 # Configure CMake
 cmake -B ${ROOT}/build/ -G ${GENERATOR} -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
 
-# Build AquaScriptCore C# project manually
-msbuild ${ROOT}/Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}
+# Build YonaiScriptCore C# project
+msbuild ${ROOT}/Apps/YonaiScriptCore/YonaiScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}
 
-# Build AquaScriptEditor C# project manually
-msbuild ${ROOT}/Apps/AquaScriptEditor/AquaScriptEditor.csproj -verbosity:minimal -property:Configuration=${CONFIG}
+# Build YonaiScriptEditor C# project
+msbuild ${ROOT}/Apps/YonaiScriptEditor/YonaiScriptEditor.csproj -verbosity:minimal -property:Configuration=${CONFIG}
 
-# Build AquaEngine and apps
+# Build Yonai and apps
 cmake --build ${ROOT}/build --config ${CONFIG}
 
 # Check for build failure
@@ -50,7 +50,7 @@ fi
 
 # Run tests
 if [ "$TESTING" = true ]; then
-	${ROOT}/build/bin/AquaEngineTest
+	${ROOT}/build/bin/YonaiTest
 
 	# Check for test failure
 	if [ "$?" -ne "0" ]; then
