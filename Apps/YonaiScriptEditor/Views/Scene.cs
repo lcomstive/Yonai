@@ -117,6 +117,8 @@ namespace YonaiEditor.Views
 			m_Controller.Update();
 
 			if (Input.IsKeyPressed(Key.G)) m_GizmoModeLocal = !m_GizmoModeLocal;
+			if (Input.IsKeyDown(Key.LeftShift) && Input.IsKeyPressed(Key.O))
+				m_Camera.Orthographic = !m_Camera.Orthographic;
 
 			if (Input.IsKeyPressed(Key.Z)) m_GizmoMode = ImGUI.ManipulateOperation.Translate;
 			if (Input.IsKeyPressed(Key.X)) m_GizmoMode = ImGUI.ManipulateOperation.Rotate;

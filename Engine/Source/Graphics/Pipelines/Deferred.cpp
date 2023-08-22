@@ -248,7 +248,7 @@ void FillLightInfo(Shader* shader, vector<pair<Light*, Transform*>>& lights)
 	{
 		shader->Set("lights[" + to_string(lightIndex) + "].Colour", lightPair.first->Colour);
 		shader->Set("lights[" + to_string(lightIndex) + "].Radius", lightPair.first->Radius);
-		shader->Set("lights[" + to_string(lightIndex) + "].Position", lightPair.second->Position);
+		shader->Set("lights[" + to_string(lightIndex) + "].Position", lightPair.second->GetPosition());
 
 		if (++lightIndex >= MaxLights)
 			break;

@@ -1,3 +1,4 @@
+/*
 #include <Yonai/Time.hpp>
 #include <Yonai/Input.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -29,8 +30,8 @@ void CameraControlSystem::Update()
 		vec3 totalMovement = movement * cameraPair.second->Speed;
 		if(Input::IsKeyDown(Key::LeftShift))
 			totalMovement *= cameraPair.second->SprintMultiplier;
-		cameraPair.first->Position += inverse(cameraPair.first->Rotation) * totalMovement;
-		cameraPair.first->Rotation = rotation;
+		cameraPair.first->SetPosition(cameraPair.first->GetPosition() + inverse(cameraPair.first->GetRotation()) * totalMovement);
+		cameraPair.first->SetRotation(rotation);
 	}
 }
 
@@ -92,3 +93,4 @@ quat GetCameraRotation(float deltaTime)
 
 	return normalize(pitch * yaw);
 }
+*/

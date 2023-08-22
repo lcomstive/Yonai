@@ -17,10 +17,11 @@ mat4 Camera::GetViewMatrix()
 	if (!transform)
 		return mat4(1.0f);
 
-	quat rotation = transform->Rotation;
+	quat rotation = transform->GetRotation();
 	vec3 up = vec3(0, 1, 0) * rotation;
 	vec3 forward = vec3(0, 0, 1) * rotation;
-	return lookAt(transform->Position, transform->Position + forward, up);
+	vec3 position = transform->GetPosition();
+	return lookAt(position, position + forward, up);
 }
 
 mat4 Camera::GetProjectionMatrix(int resolutionWidth, int resolutionHeight)

@@ -96,8 +96,11 @@ void AudioSystem::Update()
 				source->Stop();
 
 			Transform* transform = source->Entity.GetComponent<Transform>();
-			if(transform)
-				ma_sound_set_position(&source->m_Data, transform->Position.x, transform->Position.y, transform->Position.z);
+			if (transform)
+			{
+				glm::vec3 position = transform->GetPosition();
+				ma_sound_set_position(&source->m_Data, position.x, position.y, position.z);
+			}
 		}
 	}
 }

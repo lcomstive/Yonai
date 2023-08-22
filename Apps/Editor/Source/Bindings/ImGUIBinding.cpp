@@ -5,8 +5,10 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <Yonai/Utils.hpp>
 #include <Yonai/Resource.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <Yonai/Graphics/Texture.hpp>
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Graphics/RenderTexture.hpp>
@@ -1100,35 +1102,28 @@ ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (void* cameraHandle, void* tr
 {
 	Components::Camera* camera = (Components::Camera*)cameraHandle;
 	Components::Transform* transform = (Components::Transform*)transformHandle;
+	Components::Transform* parent = transform->GetParent();
 
 	ImGuizmo::SetOrthographic(camera->Orthographic);
 
 	mat4 viewMatrix = camera->GetViewMatrix();
 	mat4 projectionMatrix = camera->GetProjectionMatrix(drawRegion->x, drawRegion->y);
 
-	mat4 modelMatrix = transform->GetModelMatrix(false);
+	mat4 modelMatrix = transform->GetModelMatrix();
 
 	float snapValues[3] = { snapping, snapping, snapping };
 
 	ImGuizmo::Manipulate(
-		&viewMatrix[0][0],
-		&projectionMatrix[0][0],
+		value_ptr(viewMatrix),
+		value_ptr(projectionMatrix),
 		(ImGuizmo::OPERATION)operation,
 		local ? ImGuizmo::LOCAL : ImGuizmo::WORLD,
-		&modelMatrix[0][0],
+		value_ptr(modelMatrix),
 		nullptr,
 		snapping > 0 ? snapValues : nullptr
 	);
 
-	// Extract modified matrix back into position, rotation and scale
-	vec3 euler;
-	ImGuizmo::DecomposeMatrixToComponents(
-		&modelMatrix[0][0],
-		&transform->Position[0],
-		&euler[0],
-		&transform->Scale[0]
-	);
-	
-	transform->Rotation = glm::quat(glm::radians(euler));
+	transform->SetModelMatrix(modelMatrix, true);
 }
+
 #pragma warning(pop) // Restore warning(s)

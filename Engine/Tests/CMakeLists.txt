@@ -5,7 +5,7 @@ project(YonaiTest)
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} GTest::gtest_main Yonai ${YONAI_DEPENDENCY_LIBS})
+target_link_libraries(${PROJECT_NAME} GTest::gtest_main Yonai ${YONAI_DEPENDENCY_LIBS} imgui)
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/../Include
 	${CMAKE_CURRENT_SOURCE_DIR}/../Vendor/googletest/googletest/include

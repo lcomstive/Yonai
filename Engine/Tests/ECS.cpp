@@ -115,8 +115,8 @@ TEST(ECS, TransformComponentChild)
 	EXPECT_NE(transform1, nullptr);
 	EXPECT_NE(transform2, nullptr);
 	EXPECT_NE(transform1, transform2);
-	EXPECT_EQ(transform1->Parent, nullptr);
-	EXPECT_EQ(transform2->Parent, nullptr);
+	EXPECT_EQ(transform1->GetParent(), nullptr);
+	EXPECT_EQ(transform2->GetParent(), nullptr);
 
 	// Set transform2 as child of transform1
 	// TODO: Hierarchy functions

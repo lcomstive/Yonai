@@ -5,10 +5,12 @@
 
 namespace Yonai::Systems
 {
+	/*
 	struct CameraControlSystem : public System
 	{
 		YonaiAPI void Update(Components::FPSCamera* fpsCamera);
 
 		YonaiAPI void Update() override;
 	};
+	*/
 }

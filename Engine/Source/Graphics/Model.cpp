@@ -37,9 +37,9 @@ void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 	aiVector3D position = {};
 	transformation.Decompose(scale, rotation, position);
 
-	transform->Scale = { scale.x, scale.y, scale.z };
-	transform->Position = { position.x, position.y, position.z };
-	transform->Rotation = eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z });
+	transform->SetScale({ scale.x, scale.y, scale.z });
+	transform->SetPosition({ position.x, position.y, position.z });
+	transform->SetRotation(eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z }));
 }
 
 bool Model::ImportMaterials() { return m_ImportMaterials; }
