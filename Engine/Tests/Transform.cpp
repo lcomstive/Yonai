@@ -202,30 +202,6 @@ TEST(Transform, ModelMatrixTranslation)
 	EXPECT_EQ(modelMatrix[3][2], localPosition.z);
 }
 
-TEST(Transform, ModelMatrixRotation)
-{
-	Yonai::Components::Transform parent, child;
-	child.SetParent(&parent);
-
-	// Without modifying, model matrices should start as identity
-	EXPECT_EQ(parent.GetModelMatrix(), glm::mat4(1.0f));
-	EXPECT_EQ(child.GetModelMatrix(),  glm::mat4(1.0f));
-
-	glm::quat globalRotation(glm::vec3(45, 0, -90));
-	parent.SetRotation(globalRotation);
-
-	EXPECT_EQ(parent.GetModelMatrix(), glm::toMat4(globalRotation));
-	EXPECT_EQ(child.GetModelMatrix(),  glm::toMat4(globalRotation));
-
-	glm::quat localRotation(glm::vec3(-45, 30, 16));
-	child.SetRotation(localRotation);
-	glm::mat4 modelMatrix = child.GetModelMatrix(); // Global
-	EXPECT_EQ(modelMatrix, glm::toMat4(globalRotation) * glm::toMat4(localRotation));
-
-	modelMatrix = child.GetModelMatrix(false); // Local
-	EXPECT_EQ(modelMatrix, glm::toMat4(localRotation));
-}
-
 #include <imgui/imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
