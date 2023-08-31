@@ -1,8 +1,8 @@
-# Aqua Engine
+# Yonai
 Author - [@lcomstive](https://lewiscomstive.com) | [GitHub](https://www.github.com/lcomstive)
 
-[![Version](https://img.shields.io/badge/Version-v0.0.1-4287f5?style=flat-square)](https://github.com/lcomstive/AquaEngine/releases)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/lcomstive/AquaEngine/AquaEngine.yaml?logo=GitHub&style=flat-square)](https://github.com/lcomstive/AquaEngine/actions/workflows/AquaEngine.yaml)
+[![Version](https://img.shields.io/badge/Version-v0.0.1-4287f5?style=flat-square)](https://github.com/lcomstive/Yonai/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/lcomstive/Yonai/Yonai.yaml?logo=GitHub&style=flat-square)](https://github.com/lcomstive/Yonai/actions/workflows/Yonai.yaml)
 
 Table of Contents
 ====================
@@ -50,27 +50,27 @@ This can be done by cloning or adding [the repository](https://github.com/lcomst
 Usage
 =====
 ## Creating a new application
-Inheriting from `AquaEngine::Application` provides basic functionality, or you can use `AquaEngine::WindowedApplication` for
+Inheriting from `Yonai::Application` provides basic functionality, or you can use `Yonai::WindowedApplication` for
 a graphical application.
 ```cpp
 class DemoApplication :
-    public AquaEngine::WindowedApplication
+    public Yonai::WindowedApplication
 {
 public:
 	// Application is being created
-	// 	[from AquaEngine::Application]
+	// 	[from Yonai::Application]
 	void Setup() override;
 
 	// Application is shutting down
-	// 	[from AquaEngine::Application]
+	// 	[from Yonai::Application]
 	void Cleanup() override;
 
 	// Called once per frame, prior to drawing
-	// 	[from AquaEngine::Application]
+	// 	[from Yonai::Application]
 	void OnUpdate() override;
 
 	// Called once per frame, after update
-	// 	[from AquaEngine::WindowedApplication]
+	// 	[from Yonai::WindowedApplication]
 	void OnDraw() override;
 };
 ```
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 	// Create instance of app
 	DemoApplication app;
 
-	// If DemoApplication inherits from AquaEngine::Application
+	// If DemoApplication inherits from Yonai::Application
 	app.ProcessArgs(argc, argv);
 
 	// Start the game loop

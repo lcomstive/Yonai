@@ -1,11 +1,11 @@
-#include <AquaEngine/Resource.hpp>
+#include <Yonai/Resource.hpp>
 
 using namespace std;
-using namespace AquaEngine;
+using namespace Yonai;
 
 vector<Resource::ResourceInstance> Resource::s_Instances;
 unordered_map<string, ResourceID> Resource::s_InstancePaths;
-unordered_map<ResourceID, unsigned int> Resource::s_ResourceIDs;
+unordered_map<ResourceID, size_t> Resource::s_ResourceIDs;
 
 string Resource::GetPath(ResourceID id)
 {
@@ -44,14 +44,14 @@ void Resource::Unload(ResourceID resource)
 	}
 
 	// Unload data & remove from instances
-	unsigned int instanceIndex = s_ResourceIDs[resource];
+	size_t instanceIndex = s_ResourceIDs[resource];
 	delete s_Instances[instanceIndex].Data;
 	s_Instances[instanceIndex].Data = nullptr;
 
 	// Put last instance into removed index, then erase the last element.
 	// This is done because with a traditional vector::erase all elements get relocated,
 	//	moving the final element to override the erased instance provides more efficiency
-	unsigned int lastIndex = (unsigned int)s_Instances.size() - 1;
+	size_t lastIndex = s_Instances.size() - 1;
 	if (instanceIndex < lastIndex)
 	{
 		// Move last instance to override erased one
@@ -98,15 +98,6 @@ Resource::ResourceInstance* Resource::GetInstance(ResourceID id)
 	return IsValidResourceID(id) ? &s_Instances[s_ResourceIDs[id]] : nullptr;
 }
 
-ResourceID Resource::AllocateID(unsigned int instanceIndex)
-{
-	ResourceID id = 0;
-	while (s_ResourceIDs.find(id) != s_ResourceIDs.end())
-		id++;
-	s_ResourceIDs.emplace(id, instanceIndex);
-	return id;
-}
-
 bool Resource::Exists(string path)
 {
 	return s_InstancePaths.find(path) != s_InstancePaths.end();
@@ -126,26 +117,6 @@ void Resource::PrintResourceTypes()
 		ResourceInstance* instance = GetInstance(pair.second);
 		spdlog::trace(" [{}->{}][{}] \t{}", pair.second, s_ResourceIDs[pair.second], instance->Type.name(), pair.first);
 	}
-}
-
-ResourceID Resource::Duplicate(ResourceID original, string newPath)
-{
-	ResourceInstance* originalInstance = GetInstance(original);
-	string originalPath = GetPath(original);
-	if (originalPath.empty() || !originalInstance)
-		return InvalidResourceID;
-
-	ResourceInstance resourceInstance;
-	resourceInstance.Type = originalInstance->Type;
-	resourceInstance.Data = malloc(sizeof(originalInstance->Data));
-	memcpy(resourceInstance.Data, originalInstance->Data, sizeof(originalInstance->Data));
-	
-	s_Instances.emplace_back(resourceInstance);
-
-	ResourceID id = AllocateID((unsigned int)s_Instances.size() - 1);
-	s_InstancePaths.emplace(newPath, id);
-
-	return id;
 }
 
 type_index Resource::GetType(ResourceID id)

@@ -1,22 +1,9 @@
-#include <EditorApp.hpp>
-#include <SpashScreen.hpp>
-#include <AquaEngine/API.hpp>
+#include <YonaiEditor/EditorApp.hpp>
 
 int main(int argc, char** argv)
 {
-#if 0 // !defined(BUILD_SHARED_LIBS) // Splashscreen currently does not work across .dll boundaries
-	AquaEditor::SplashScreenApp splashScreen;
-	splashScreen.ProcessArgs(argc, argv);
-	splashScreen.Run();
-
-	// Check if error occurred, or user requested closing
-	if(splashScreen.LaunchDisrupted())
-		return -1;
-#endif
-	
 	// Launch editor
-	AquaEditor::EditorApp app;
-	app.ProcessArgs(argc, argv);
+	YonaiEditor::EditorApp app(argc, argv);
 	
 	app.Run(); // Application loop
 
@@ -24,7 +11,7 @@ int main(int argc, char** argv)
 }
 
 // Check for Windows compilation, this will be with the "/ENTRY:WinMainCRTStartup" flag
-#if defined(NDEBUG) && defined(AQUA_PLATFORM_WINDOWS)
+#if defined(NDEBUG) && defined(YONAI_PLATFORM_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <stdlib.h>

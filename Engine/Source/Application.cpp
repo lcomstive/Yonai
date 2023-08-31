@@ -1,55 +1,50 @@
 #include <filesystem>
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Utils.hpp>
-#include <AquaEngine/Application.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Utils.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Application.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
 
 // spdlog //
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
 // Systems //
-#include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
-#include <AquaEngine/Systems/Global/ImGUISystem.hpp>
-
-// Virtual File System //
-#include <AquaEngine/IO/VFS.hpp>
-
-#include <AquaEngine/Window.hpp>
+#include <Yonai/SystemManager.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 // Platform Specific //
-#if defined(AQUA_PLATFORM_WINDOWS)
+#if defined(YONAI_PLATFORM_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-#elif defined(AQUA_PLATFORM_LINUX)
+#elif defined(YONAI_PLATFORM_LINUX)
 	#include <libgen.h>         // dirname
 	#include <unistd.h>         // readlink
 	#include <linux/limits.h>   // PATH_MAX
-#elif defined(AQUA_PLATFORM_APPLE)
+#elif defined(YONAI_PLATFORM_APPLE)
 	#include <mach-o/dyld.h>
 #endif
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Systems;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Systems;
 
 namespace fs = std::filesystem;
 
 Application* Application::s_Instance = nullptr;
 
-string GetPersistentDir()
+string Application::GetPersistentDirectory()
 {
-#if defined(AQUA_PLATFORM_WINDOWS)
+#if defined(YONAI_PLATFORM_WINDOWS)
 #pragma warning(disable : 4996) // "This function may be unsafe"
-		return string(getenv("appdata")) + "/Aqua Engine/";
+	return string(getenv("appdata")) + "/Yonai/";
 #pragma warning(default : 4996) // Restore warning
-#elif defined(AQUA_PLATFORM_MAC)
-		return string(getenv("HOME")) + "/Library/Caches/Aqua Engine/";
+#elif defined(YONAI_PLATFORM_MAC)
+		return string(getenv("HOME")) + "/Library/Caches/Yonai/";
 #else
-		return "./.data/";
+		return "./.data/Yonai/";
 #endif
 }
 
@@ -59,13 +54,17 @@ void Application::InitLogger()
 	auto consoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	consoleSink->set_pattern("%^[%=8n][%7l]%$ %v");
 
+	auto logLevel = (spdlog::level::level_enum)stoi(GetArg("LogLevel",
 #if !defined(NDEBUG) // Debug
-	consoleSink->set_level(spdlog::level::trace);
+		"0" // Trace
 #else // Release
-	consoleSink->set_level(spdlog::level::info);
+		"2" // Info
 #endif
+	));
 
-	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDir() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
+	consoleSink->set_level(logLevel);
+
+	auto fileSink = make_shared<spdlog::sinks::rotating_file_sink_mt>(GetPersistentDirectory() + LogFile, 1024 * 1024 /* 1MB max file size */, 3 /* Max files rotated */);
 	fileSink->set_pattern("[%H:%M:%S %z][%t][%=8n][%7l] %v");
 	fileSink->set_level(spdlog::level::trace);
 
@@ -74,65 +73,37 @@ void Application::InitLogger()
 	spdlog::set_default_logger(logger);
 }
 
-void Application::InitVFS()
-{
-	// Map persistent data
-	VFSMapping* mapping = VFS::Mount("data://", GetPersistentDir());
-
-	// Get executable path and directory
-#if defined(AQUA_PLATFORM_WINDOWS)
-	wchar_t exeResult[MAX_PATH];
-	if (GetModuleFileNameW(NULL, exeResult, MAX_PATH) > 0)
-#elif defined(AQUA_PLATFORM_LINUX)
-	char exeResult[PATH_MAX];
-	if (readlink("/proc/self/exe", exeResult, PATH_MAX) > 0)
-#elif defined(AQUA_PLATFORM_APPLE)
-	char exeResult[PATH_MAX];
-	uint32_t exeResultSize = PATH_MAX;
-	if (_NSGetExecutablePath(exeResult, &exeResultSize) == 0)
-#endif
-		m_ExecutablePath = std::filesystem::path(exeResult);
-
-	// Map app:// to launched executable directory
-#if defined(AQUA_PLATFORM_APPLE)
-	fs::path executableDir = m_ExecutablePath.parent_path();
-	if(executableDir.filename().compare("MacOS") == 0) // App Bundle
-		// Assets for app are found in Resources subfolder in the app bundle
-		VFS::Mount("app://", (executableDir.parent_path() / "Resources").string());
-	else
-		VFS::Mount("app://", executableDir.string());
-#else
-	VFS::Mount("app://", m_ExecutablePath.parent_path().string());
-#endif
-
-	VFS::Mount("file:///", "");
-}
-
 Application::Application()
 {
 	InitLogger();
-	InitVFS();
+
+	s_Instance = this;
+}
+
+Application::Application(int argc, char** argv)
+{
+	ProcessArgs(argc, argv);
+
+	InitLogger();
 
 	s_Instance = this;
 }
 
 void Application::Setup()
 {
-	SystemManager::Global()->Add<SceneSystem>();
-
 	#pragma region Log engine information
-	spdlog::info("{:>12}: v{}.{}.{}-{} [{}]",
-		"Engine",
-		AQUA_ENGINE_VERSION_MAJOR,
-		AQUA_ENGINE_VERSION_MINOR,
-		AQUA_ENGINE_VERSION_PATCH,
-		AQUA_ENGINE_VERSION_REV,
-		AQUA_ENGINE_VERSION_BRANCH
+	spdlog::info("{:>12} v{}.{}.{}-{} [{}]",
+		"Yonai Engine",
+		YONAI_VERSION_MAJOR,
+		YONAI_VERSION_MINOR,
+		YONAI_VERSION_PATCH,
+		YONAI_VERSION_REV,
+		YONAI_VERSION_BRANCH
 	);
-	spdlog::info("{:>12}: {}", "Platform", AQUA_PLATFORM_NAME);
-	spdlog::info("");
+	spdlog::debug("{:>12}: {}", "Platform", YONAI_PLATFORM_NAME);
+	spdlog::debug("");
 
-	string persistentPath = VFS::GetMapping("data://")->GetMountPath() + "/";
+	string persistentPath = GetPersistentDirectory();
 	spdlog::debug("{:>12}: {}", "Persistent", persistentPath);
 	spdlog::debug("{:>12}: {}", "Log File", persistentPath + LogFile);
 	spdlog::debug("{:>12}: {}", "Launch Dir", std::filesystem::current_path().string());
@@ -142,14 +113,22 @@ void Application::Setup()
 
 #if !defined(NDEBUG)
 	spdlog::debug("{:>12}: {}", "Configuration", "Debug");
+#else
+	spdlog::debug("{:>12}: {}", "Configuration", "Release");
 #endif
+
+	spdlog::trace("Arguments:");
+	for(auto& pair : m_Args)
+	{
+		if(pair.second.empty())
+			spdlog::trace("  {}", pair.first);
+		else
+			spdlog::trace("  {}: {}", pair.first, pair.second);
+	}
 #pragma endregion
 }
 
-void Application::Cleanup()
-{
-	SystemManager::Global()->Remove<SceneSystem>();
-}
+void Application::Cleanup() {}
 
 Application::~Application()
 {
@@ -184,6 +163,17 @@ Application* Application::Current() { return s_Instance; }
 
 void Application::ProcessArgs(int argc, char** argv)
 {
+	if(argc > 0)
+	{
+		m_ExecutablePath = fs::path(argv[0]);
+
+		m_ExecutableDirectory = m_ExecutablePath.parent_path();
+
+		#if defined(YONAI_PLATFORM_MAC)
+		m_ExecutableDirectory = m_ExecutableDirectory.parent_path().append("Resources");
+		#endif
+	}
+
 	size_t previousArgCount = m_Args.size();
 	for(int i = 0; i < argc; i++)
 	{
@@ -221,18 +211,6 @@ void Application::ProcessArgs(int argc, char** argv)
 			m_Args.emplace(key, value);
 		}
 	}
-
-	if(m_Args.size() == previousArgCount)
-		return; // Nothing new added
-
-	spdlog::debug("Added {} argument(s)", m_Args.size());
-	for(auto& pair : m_Args)
-	{
-		if(pair.second.empty())
-			spdlog::debug("  '{}'", pair.first);
-		else
-			spdlog::debug("  '{}' = '{}'", pair.first, pair.second);
-	}
 }
 
 bool Application::HasArg(std::string name)
@@ -248,25 +226,28 @@ std::string Application::GetArg(string name, string defaultValue)
 }
 
 filesystem::path& Application::GetExecutablePath() { return m_ExecutablePath; }
+filesystem::path& Application::GetExecutableDirectory() { return m_ExecutableDirectory; }
 
 #pragma region Windowed Application
 void WindowedApplication::Setup()
 {
 	Application::Setup();
-	SystemManager::Global()->Add<ImGUISystem>();
+	SystemManager::Global()->Add<SceneSystem>();
 
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 	m_RenderSystem->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
+
+	Window::AddResizedCallback(OnWindowResized);
 }
 
 void WindowedApplication::Cleanup()
 {
 	Application::Cleanup();
 	SystemManager::Global()->Remove<RenderSystem>();
-	SystemManager::Global()->Remove<ImGUISystem>();
+	SystemManager::Global()->Remove<SceneSystem>();
 }
 
-AquaAPI RenderSystem* WindowedApplication::GetRenderSystem()
+RenderSystem* WindowedApplication::GetRenderSystem()
 {
 	if (!m_RenderSystem)
 	{
@@ -295,8 +276,9 @@ void WindowedApplication::Run()
 		OnUpdate();
 		SystemManager::Global()->Update();
 			
-		OnDraw();
+		OnPreDraw();
 		SystemManager::Global()->Draw();
+		OnPostDraw();
 
 		Window::SwapBuffers();
 		Window::PollEvents();
@@ -307,11 +289,16 @@ void WindowedApplication::Run()
 	Window::Close();
 	Cleanup();
 	SystemManager::Global()->Destroy();
+
+	if(Window::ContextIsInitialised())
+		Window::DestroyContext();
 }
+
+void WindowedApplication::OnWindowResized(glm::ivec2 resolution) { ((WindowedApplication*)Application::Current())->m_RenderSystem->GetPipeline()->SetResolution(resolution); }
 #pragma endregion
 
 #pragma region Managed Glue
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 ADD_MANAGED_METHOD(Application, Exit)
 { Application::Current()->Exit(); }
 
@@ -321,6 +308,53 @@ ADD_MANAGED_METHOD(Application, GetArg, MonoString*, (MonoString* name, MonoStri
 	return mono_string_new(mono_domain_get(), value.c_str());
 }
 
+ADD_MANAGED_METHOD(Application, GetExecutablePath, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetExecutablePath().string().c_str()); }
+
+ADD_MANAGED_METHOD(Application, GetExecutableDirectory, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetExecutableDirectory().string().c_str()); }
+
+ADD_MANAGED_METHOD(Application, GetPersistentDirectory, MonoString*)
+{ return mono_string_new(mono_domain_get(), Application::Current()->GetPersistentDirectory().c_str()); }
+
 ADD_MANAGED_METHOD(Application, HasArg, bool, (MonoString* name))
 { return Application::Current()->HasArg(mono_string_to_utf8(name)); }
+
+ADD_MANAGED_METHOD(Application, GetBuildType, unsigned char)
+#ifndef NDEBUG // Debug mode
+{ return 0; }
+#else // Release mode
+{ return 1; }
+#endif
+
+ADD_MANAGED_METHOD(Application, GetVersionMajor, int) { return YONAI_VERSION_MAJOR; }
+ADD_MANAGED_METHOD(Application, GetVersionMinor, int) { return YONAI_VERSION_MINOR; }
+ADD_MANAGED_METHOD(Application, GetVersionPatch, int) { return YONAI_VERSION_PATCH; }
+ADD_MANAGED_METHOD(Application, GetVersionRevision, MonoString*) { return mono_string_new(mono_domain_get(), YONAI_VERSION_REV); }
+ADD_MANAGED_METHOD(Application, GetVersionBranch, MonoString*) { return mono_string_new(mono_domain_get(), YONAI_VERSION_BRANCH); }
+
+ADD_MANAGED_METHOD(Application, GetPlatform, unsigned char)
+#if defined(YONAI_PLATFORM_WINDOWS)
+{ return 1; }
+#elif defined(YONAI_PLATFORM_MAC)
+{ return 2; }
+#elif defined(YONAI_PLATFORM_LINUX)
+{ return 3; }
+#elif defined(YONAI_PLATFORM_iOS)
+{ return 4; }
+#elif defined(YONAI_PLATFORM_ANDROID)
+{ return 5; }
+#elif defined(YONAI_PLATFORM_UNIX)
+{ return 6; }
+#else
+{ return 0; }
+#endif
+
+ADD_MANAGED_METHOD(Application, IsDesktop, bool)
+#if defined(YONAI_PLATFORM_DESKTOP)
+{ return true; }
+#else
+{ return false; }
+#endif
+
 #pragma endregion

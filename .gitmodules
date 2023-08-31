@@ -26,6 +26,9 @@
 	path = Engine/Vendor/imgui
 	url = https://github.com/ocornut/imgui
 	branch = docking
-[submodule "Engine/Vendor/rapidjson"]
-	path = Engine/Vendor/rapidjson
-	url = https://github.com/tencent/rapidjson
+[submodule "Engine/Vendor/miniaudio"]
+	path = Engine/Vendor/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "Engine/Vendor/ImGuizmo"]
+	path = Engine/Vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

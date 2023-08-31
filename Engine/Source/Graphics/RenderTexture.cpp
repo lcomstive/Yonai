@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Graphics/RenderTexture.hpp>
+#include <Yonai/Graphics/RenderTexture.hpp>
 
 using namespace glm;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
-GLenum AquaEngine::Graphics::GetTextureTarget(TextureFormat target, bool multisampled)
+GLenum Yonai::Graphics::GetTextureTarget(TextureFormat target, bool multisampled)
 {
 	switch (target)
 	{
@@ -26,7 +26,7 @@ GLenum AquaEngine::Graphics::GetTextureTarget(TextureFormat target, bool multisa
 	}
 }
 
-GLenum AquaEngine::Graphics::TextureFormatToInternalGLFormat(TextureFormat format)
+GLenum Yonai::Graphics::TextureFormatToInternalGLFormat(TextureFormat format)
 {
 	switch (format)
 	{
@@ -39,7 +39,7 @@ GLenum AquaEngine::Graphics::TextureFormatToInternalGLFormat(TextureFormat forma
 	}
 }
 
-GLenum AquaEngine::Graphics::TextureFormatToGLFormat(TextureFormat format)
+GLenum Yonai::Graphics::TextureFormatToGLFormat(TextureFormat format)
 {
 	switch (format)
 	{
@@ -52,7 +52,7 @@ GLenum AquaEngine::Graphics::TextureFormatToGLFormat(TextureFormat format)
 	}
 }
 
-bool AquaEngine::Graphics::IsDepthFormat(TextureFormat format)
+bool Yonai::Graphics::IsDepthFormat(TextureFormat format)
 {
 	switch (format)
 	{
@@ -268,3 +268,41 @@ void RenderTexture::CopyTo(RenderTexture* destination)
 		1 // Source Depth
 	);
 }
+
+#pragma region Internal Calls
+#include <Yonai/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(RenderTexture, Load, void*, (glm::ivec2* resolution, unsigned char textureFormat, unsigned int samples), Yonai.Graphics)
+{ return new RenderTexture(*resolution, (TextureFormat)textureFormat, samples); }
+
+ADD_MANAGED_METHOD(RenderTexture, Destroy, void, (void* handle), Yonai.Graphics)
+{ if(handle) delete handle; }
+
+ADD_MANAGED_METHOD(RenderTexture, Bind, void, (void* handle, unsigned int index), Yonai.Graphics)
+{ ((RenderTexture*)handle)->Bind(index); }
+
+ADD_MANAGED_METHOD(RenderTexture, Unbind, void, (void* handle), Yonai.Graphics)
+{ ((RenderTexture*)handle)->Unbind(); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetFormat, void, (void* handle, unsigned char format), Yonai.Graphics)
+{ ((RenderTexture*)handle)->SetFormat((TextureFormat)format); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetSamples, void, (void* handle, unsigned int samples), Yonai.Graphics)
+{ ((RenderTexture*)handle)->SetSamples(samples); }
+
+ADD_MANAGED_METHOD(RenderTexture, SetResolution, void, (void* handle, glm::ivec2* resolution), Yonai.Graphics)
+{ ((RenderTexture*)handle)->SetResolution(*resolution); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetFormat, unsigned char, (void* handle), Yonai.Graphics)
+{ return (unsigned char)((RenderTexture*)handle)->GetFormat(); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetSamples, unsigned int, (void* handle), Yonai.Graphics)
+{ return ((RenderTexture*)handle)->GetSamples(); }
+
+ADD_MANAGED_METHOD(RenderTexture, GetResolution, void, (void* handle, glm::ivec2* resolution), Yonai.Graphics)
+{ *resolution = ((RenderTexture*)handle)->GetResolution(); }
+
+ADD_MANAGED_METHOD(RenderTexture, CopyTo, void, (void* handle, void* destination), Yonai.Graphics)
+{ ((RenderTexture*)handle)->CopyTo((RenderTexture*)destination); }
+
+#pragma endregion

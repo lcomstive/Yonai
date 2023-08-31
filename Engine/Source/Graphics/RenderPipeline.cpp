@@ -1,54 +1,47 @@
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Mesh.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Graphics/RenderPipeline.hpp>
-#include <AquaEngine/Window.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Mesh.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Components/Camera.hpp>
+#include <Yonai/Graphics/RenderPipeline.hpp>
+#include <Yonai/Window.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
-
-void RenderPipeline::DrawSkybox(ResourceID skyboxTextureID)
-{
-	Shader* skyboxShader = Resource::Get<Shader>(Resource::Load<Shader>("Shaders/Skybox", ShaderStageInfo
-		{
-			"/Assets/Shaders/Skybox.vs",
-			"/Assets/Shaders/Skybox.fs"
-		}));
-	skyboxShader->Bind();
-
-	Texture* skyboxTexture = Resource::Get<Texture>(skyboxTextureID);
-	if (!skyboxTexture)
-		return;
-
-	glDepthFunc(GL_LEQUAL);
-	
-	if (skyboxTexture)
-		skyboxTexture->Bind(5);
-	skyboxShader->Set("environmentMap", 5);
-	
-	Camera* camera = Camera::GetMainCamera();
-	skyboxShader->Set("view", camera->GetViewMatrix());
-	skyboxShader->Set("projection", camera->GetProjectionMatrix(Window::GetResolution()));
-
-	Resource::Get<Mesh>(Mesh::Cube())->Draw();
-
-	skyboxShader->Unbind();
-	glDepthFunc(GL_LESS);
-}
+using namespace Yonai;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
 
 void RenderPipeline::SetResolution(ivec2 resolution)
 {
 	if(m_Resolution == resolution)
 		return; // Same, ignore
 		
-	spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
+	// spdlog::trace("Resolution set to {}x{}", resolution.x, resolution.y);
 	m_Resolution = resolution;
 	OnResized(resolution);
 }
 
 ivec2 RenderPipeline::GetResolution() { return m_Resolution; }
+
+#pragma region Internal Calls
+#include <Yonai/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, Draw, void, (void* handle, void* cameraHandle), Yonai.Graphics.Pipelines)
+{
+	if(cameraHandle)
+		((RenderPipeline*)handle)->Draw((Camera*)cameraHandle);
+}
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, SetResolution, void, (void* handle, glm::ivec2* resolution), Yonai.Graphics.Pipelines)
+{ ((RenderPipeline*)handle)->SetResolution(*resolution); }
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, GetResolution, void, (void* handle, glm::ivec2* resolution), Yonai.Graphics.Pipelines)
+{ *resolution = ((RenderPipeline*)handle)->GetResolution(); }
+
+ADD_MANAGED_METHOD(NativeRenderPipeline, GetOutput, void*, (void* handle), Yonai.Graphics.Pipelines)
+{
+	Framebuffer* fb = ((RenderPipeline*)handle)->GetOutput();
+	return fb;
+}
+#pragma endregion

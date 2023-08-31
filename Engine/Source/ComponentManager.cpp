@@ -1,23 +1,21 @@
-#include <AquaEngine/ComponentManager.hpp>
-#include <AquaEngine/Components/Component.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/ComponentManager.hpp>
+#include <Yonai/Components/Component.hpp>
 
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
-#include <AquaEngine/Components/ScriptComponent.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Components/ScriptComponent.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
-extern EmptyMethodFn ComponentMethodStart;
-extern EmptyMethodFn ComponentMethodUpdate;
-extern EmptyMethodFn ComponentMethodDestroyed;
-extern ComponentMethodEnabledFn ComponentMethodEnabled;
 extern ComponentMethodInitialiseFn ComponentMethodInitialise;
 
-ComponentManager::ComponentManager(unsigned int worldID) : m_WorldID(worldID) { }
+ComponentManager::ComponentManager(World* world) : m_World(world) { }
 
 void ComponentManager::Destroy()
 {
@@ -33,7 +31,10 @@ vector<pair<size_t, void*>> ComponentManager::Get(EntityID id)
 		return components;
 
 	for (auto& type : m_EntityComponents[id])
-		components.emplace_back(type, m_ComponentArrays[type].Get(id));
+	{
+		Component* component = m_ComponentArrays[type].Get(id);
+			components.emplace_back(type, component);
+	}
 
 	return components;
 }
@@ -49,18 +50,18 @@ ScriptComponent* ComponentManager::Add(EntityID id, MonoType* managedType)
 	return component;
 }
 
-bool ComponentManager::IsEmpty(EntityID& id)
+bool ComponentManager::IsEmpty(EntityID id)
 {
 	return m_EntityComponents.find(id) == m_EntityComponents.end() ||
 		m_EntityComponents[id].size() == 0;
 }
 
-bool ComponentManager::Has(EntityID& id, size_t type)
+bool ComponentManager::Has(EntityID id, size_t type)
 {
 	return m_ComponentArrays.find(type) != m_ComponentArrays.end() && m_ComponentArrays[type].Has(id);
 }
 
-bool ComponentManager::Has(EntityID& id, type_info& type)
+bool ComponentManager::Has(EntityID id, type_info& type)
 {
 	return Has(id, type.hash_code());
 }
@@ -78,7 +79,7 @@ void ComponentManager::Clear(EntityID id)
 	m_EntityComponents[id].clear();
 }
 
-bool ComponentManager::Remove(EntityID& id, size_t type)
+bool ComponentManager::Remove(EntityID id, size_t type)
 {
 	if (!Has(id, type) || m_ComponentArrays.find(type) == m_ComponentArrays.end())
 		return false;
@@ -101,7 +102,6 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 	m_WorldIsActive = isActive;
 
 	MonoException* exception = nullptr;
-	// Call all components' Enabled/Disabled and Start functions
 	for (auto componentPair : m_ComponentArrays)
 	{
 		auto entities = componentPair.second.GetEntities();
@@ -110,15 +110,6 @@ void ComponentManager::OnWorldActiveStateChanged(bool isActive)
 			Component* instance = componentPair.second.Instances[entityPair.second];
 			if (!instance->ManagedData.IsValid())
 				instance->ManagedData = CreateManagedInstance(componentPair.first, entityPair.first);
-			if (!instance->ManagedData.IsValid() )
-				continue;
-
-			MonoObject* monoInstance = instance->ManagedData.GetInstance();
-			ComponentMethodEnabled(monoInstance, m_WorldIsActive, &exception);
-			if (m_WorldIsActive)
-				ComponentMethodStart(monoInstance, &exception);
-			else
-				ComponentMethodDestroyed(monoInstance, &exception);
 		}
 	}
 }
@@ -173,14 +164,14 @@ void ComponentManager::InvalidateAllManagedInstances()
 	}
 }
 
-AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, unsigned int entityID)
+Yonai::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_t typeHash, UUID entityID)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedComponentData managedData = ScriptEngine::GetCoreAssembly()->GetManagedComponentData(typeHash);
 	if (!managedType)
 	{
 		if (managedData.AddFn)
-			return managedData.AddFn(World::GetWorld(m_WorldID), entityID)->ManagedData;
+			return managedData.AddFn(m_World, entityID)->ManagedData;
 		return {};
 	}
 
@@ -190,7 +181,7 @@ AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_
 
 	// Initialise component
 	MonoException* exception = nullptr;
-	ComponentMethodInitialise(instance, m_WorldID, entityID, &exception);
+	ComponentMethodInitialise(instance, m_World->ID(), entityID, &exception);
 
 	// Call constructor
 	mono_runtime_object_init(instance);
@@ -200,33 +191,6 @@ AquaEngine::Scripting::ManagedData ComponentManager::CreateManagedInstance(size_
 		mono_gchandle_new(instance, false),
 		managedType
 	};
-}
-
-void ComponentManager::CallUpdateFn()
-{
-	if (!ScriptEngine::IsLoaded())
-		return;
-
-	// Make local copy incase m_ComponentArrays gets modified
-	auto componentArraysCopy = m_ComponentArrays;
-
-	// Call all components' Update function
-	for (auto componentPair : componentArraysCopy)
-	{
-		for (size_t i = 0; i < componentPair.second.Instances.size(); i++)
-		{
-			Component* instance = componentPair.second.Instances[i];
-
-			if (!instance->Entity.GetWorld())
-				continue; // Invalid entity, world is not set?
-
-			if (instance->ManagedData.IsValid() && instance->ManagedData.ShouldSendMessages)
-			{
-				MonoException* exception = nullptr;
-				ComponentMethodUpdate(instance->ManagedData.GetInstance(), &exception);
-			}
-		}
-	}
 }
 
 #pragma region ComponentData
@@ -251,15 +215,6 @@ void ComponentManager::ComponentData::Add(Component* instance, EntityID entity)
 	instance->ManagedData = Owner->CreateManagedInstance(TypeHash, entity);
 	if (!instance->ManagedData.IsValid())
 		return;
-
-	// If world is active, call Enabled and then Start
-	MonoException* exception = nullptr;
-	if (Owner->m_WorldIsActive)
-	{
-		MonoObject* monoInstance = instance->ManagedData.GetInstance();
-		ComponentMethodEnabled(monoInstance, true, &exception);
-		ComponentMethodStart(monoInstance, &exception);
-	}
 }
 
 Component* ComponentManager::ComponentData::Get(EntityID entity)
@@ -302,9 +257,9 @@ std::vector<EntityID> ComponentManager::ComponentData::GetEntities()
 {
 	std::vector<EntityID> entities;
 	entities.resize(EntityIndex.size());
-	unsigned int i = 0;
+	int i = 0;
 	for (const auto& pair : EntityIndex)
-		entities[i++] = pair.first;
+			entities[i++] = pair.first;
 	return entities;
 }
 #pragma endregion

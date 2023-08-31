@@ -1,9 +1,10 @@
-using AquaEngine;
+using Yonai;
 
 namespace TestGame
 {
-	public class DestroyAfterSeconds : Component
+	public class DestroyAfterSeconds : Behaviour
 	{
+		[Serialize]
 		private float m_SecondsRemaining = -1;
 		private bool m_Ticking = false;
 
@@ -27,7 +28,7 @@ namespace TestGame
 				m_Ticking = true;
 		}
 
-		protected override void Update()
+		public override void Update()
 		{
 			if (!m_Ticking)
 				return;

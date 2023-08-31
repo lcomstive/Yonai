@@ -1,9 +1,13 @@
 #include <algorithm>
-#include <AquaEngine/Utils.hpp>
+#include <glm/glm.hpp>
+#include <Yonai/Utils.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.inl>
 
 using namespace std;
+using namespace glm;
 
-string& AquaEngine::ToLower(string& input)
+string& Yonai::ToLower(string& input)
 {
 	transform(input.begin(), input.end(), input.begin(), ::tolower);
 	return input;

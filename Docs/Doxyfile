@@ -1,14 +1,14 @@
 DOXYFILE_ENCODING		= UTF-8
-PROJECT_NAME			= AquaEngine
+PROJECT_NAME			= Yonai
 # PROJECT_LOGO			= "Media/Logo.png"
-OUTPUT_DIRECTORY		= ./Dist/Public
+OUTPUT_DIRECTORY		= ./Dist/API
 CREATE_SUBDIRS			= NO
 ALLOW_UNICODE_NAMES		= NO
 OUTPUT_LANGUAGE			= English
 BRIEF_MEMBER_DESC		= YES
 REPEAT_BRIEF			= NO
 INPUT					= Markdown \
-							../Apps/AquaScriptCore
+							../Apps/YonaiScriptCore
 RECURSIVE				= YES
 GENERATE_LATEX			= NO
 INLINE_INHERITED_MEMB 	= YES
@@ -19,6 +19,9 @@ FULL_PATH_NAMES			= NO
 AUTOLINK_SUPPORT		= YES
 SHOW_USED_FILES			= NO
 LAYOUT_FILE				= DoxygenLayout.xml
+DOT_IMAGE_FORMAT		= svg
+DOT_TRANSPARENT			= YES
+INTERACTIVE_SVG			= YES # Scroll and zoom in big images
 
 # Theming
 GENERATE_TREEVIEW		= YES

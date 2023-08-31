@@ -12,14 +12,14 @@
 
 # Generated Documentation
 Docs/Dist/
+*.css.map
 
 # Generated files & artifacts
 [Bb]in/
 [Oo]bj/
 [Bb]uild/
 
-.aqua/
-AquaEngine*.zip
+Yonai*.zip
 
 # VCPKG packages
 vcpkg_installed
@@ -31,12 +31,13 @@ vcpkg_installed
 *.sln
 *.csproj
 
-# Except AquaScriptCore, used on Unix platforms
-!Apps/AquaScriptCore/AquaScriptCore.sln
-!Apps/AquaScriptCore/AquaScriptCore.csproj
+# Except test game C# project
+!Apps/TestGame/Scripting/TestGame.csproj
 
-# Keep template scripting output
-!Apps/Editor/Assets/ProjectTemplate/Scripting/bin/AquaProject.dll
+# Except these C# projects, used on Unix platforms
+!Apps/YonaiScriptCore/YonaiScriptCore.csproj
+!Apps/YonaiScriptCore/YonaiScriptEditor.csproj
 
-# Don't upload the generated glue file
-Engine/Include/AquaEngine/Glue.hpp
+# Don't upload the generated glue files
+Engine/Include/Yonai/Glue.hpp
+Apps/Editor/Include/YonaiEditor/Glue.hpp

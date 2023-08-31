@@ -1,27 +1,29 @@
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Mesh.hpp>
-#include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Components/Light.hpp>
-#include <AquaEngine/Graphics/Material.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/MeshRenderer.hpp>
-#include <AquaEngine/Components/SpriteRenderer.hpp>
-#include <AquaEngine/Graphics/Pipelines/Forward.hpp>
-#include <AquaEngine/Window.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Mesh.hpp>
+#include <Yonai/SystemManager.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Components/Light.hpp>
+#include <Yonai/Graphics/Material.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/MeshRenderer.hpp>
+#include <Yonai/Components/SpriteRenderer.hpp>
+#include <Yonai/Graphics/Pipelines/Forward.hpp>
+#include <Yonai/Window.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
-using namespace AquaEngine::Graphics::Pipelines;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
+using namespace Yonai::Graphics::Pipelines;
 
 ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 {
+	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	FramebufferSpec framebufferSpecs = { Window::GetResolution() };
 	framebufferSpecs.Attachments =

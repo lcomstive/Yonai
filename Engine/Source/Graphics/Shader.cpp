@@ -4,53 +4,24 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <AquaEngine/IO/VFS.hpp>
-#include <AquaEngine/Graphics/Shader.hpp>
+#include <Yonai/Graphics/Shader.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Graphics;
-
-// Replace all instances of '#include "<path>"' with contents of file at path
-void ProcessIncludeFiles(string& text)
-{
-	// regex expression for pattern to be searched
-	regex regexp("\\#include\\s+\\\"(.*)\\\"");
-	smatch match;
-
-	// regex_search that searches pattern regexp in the string mystr
-	while (regex_search(text, match, regexp))
-	{
-		// match.str(0) is the entire captured string
-		// match.str(1) is first capture group, in this case filename
-
-		text = text.replace(
-			match.prefix().length(),
-			match.length(),
-			VFS::ReadText(match.str(1))
-		);
-	}
-}
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Graphics;
 
 // Create a shader from source code
-GLuint Shader::CreateShader(const string& source, const GLenum type, const string& debugName)
+GLuint Shader::CreateShader(const string& contents, const GLenum type, const string& debugName)
 {
-	if (source.empty())
+	if (contents.empty())
 		return GL_INVALID_VALUE;
 
 	// Create shader object
 	const GLuint shader = glCreateShader(type);
 
-	// Add source text & compile
-	string readSource = VFS::ReadText(source);
-	if (readSource.empty())
-		return GL_INVALID_VALUE;
-
-	ProcessIncludeFiles(readSource);
-
-	const char* sourceRaw = readSource.c_str();
+	const char* sourceRaw = contents.c_str();
 	glShaderSource(shader, 1, &sourceRaw, nullptr);
 	glCompileShader(shader);
 
@@ -81,15 +52,7 @@ Shader::Shader(ShaderStageInfo stageInfo) : m_Program(GL_INVALID_VALUE)
 	UpdateStages(stageInfo);
 }
 
-Shader::~Shader()
-{
-	WatchShader(m_ShaderStages.VertexPath, false);
-	WatchShader(m_ShaderStages.FragmentPath, false);
-	WatchShader(m_ShaderStages.GeometryPath, false);
-	WatchShader(m_ShaderStages.ComputePath, false);
-
-	Destroy();
-}
+Shader::~Shader() { Destroy(); }
 
 void Shader::Destroy()
 {
@@ -100,38 +63,8 @@ void Shader::Destroy()
 
 ShaderStageInfo& Shader::GetStages() { return m_ShaderStages; }
 
-void Shader::WatchShader(string path, bool watch)
-{
-	if (path.empty())
-		return;
-	VFSMapping* mapping = VFS::GetMapping(path);
-	if (!mapping)
-	{
-		spdlog::warn("Can't watch shader '{} - no VFS mapping was found", path);
-		return;
-	}
-
-	if (watch)
-		mapping->Watch(path, std::bind(&Shader::ShaderSourceChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
-	else
-		mapping->Unwatch(path);
-}
-
 void Shader::UpdateStages(ShaderStageInfo stageInfo)
 {
-	// Check for same stages, in that case won't need to recreate shader program
-	if (stageInfo.VertexPath.compare(m_ShaderStages.VertexPath) == 0 &&
-		stageInfo.FragmentPath.compare(m_ShaderStages.FragmentPath) == 0 &&
-		stageInfo.GeometryPath.compare(m_ShaderStages.GeometryPath) == 0 &&
-		stageInfo.ComputePath.compare(m_ShaderStages.ComputePath) == 0)
-		return;
-
-	// Unwatch shaders
-	WatchShader(m_ShaderStages.VertexPath, false);
-	WatchShader(m_ShaderStages.FragmentPath, false);
-	WatchShader(m_ShaderStages.GeometryPath, false);
-	WatchShader(m_ShaderStages.ComputePath, false);
-
 	// Update & create new shaders
 	m_IsDirty = true;
 	m_ShaderStages = stageInfo;
@@ -154,10 +87,10 @@ void Shader::CreateShaders()
 
 	vector<GLuint> shaders =
 	{
-		CreateShader(m_ShaderStages.VertexPath, GL_VERTEX_SHADER, "vertex"),
-		CreateShader(m_ShaderStages.FragmentPath, GL_FRAGMENT_SHADER, "fragment"),
-		CreateShader(m_ShaderStages.ComputePath, GL_COMPUTE_SHADER, "compute"),
-		CreateShader(m_ShaderStages.GeometryPath, GL_GEOMETRY_SHADER, "geometry")
+		CreateShader(m_ShaderStages.VertexContents, GL_VERTEX_SHADER, "vertex"),
+		CreateShader(m_ShaderStages.FragmentContents, GL_FRAGMENT_SHADER, "fragment"),
+		CreateShader(m_ShaderStages.ComputeContents, GL_COMPUTE_SHADER, "compute"),
+		CreateShader(m_ShaderStages.GeometryContents, GL_GEOMETRY_SHADER, "geometry")
 	};
 
 	// Debug info
@@ -166,11 +99,6 @@ void Shader::CreateShaders()
 	if (!m_ShaderStages.FragmentPath.empty()) spdlog::debug("  Fragment: {}", m_ShaderStages.FragmentPath);
 	if (!m_ShaderStages.ComputePath.empty())  spdlog::debug("  Compute:  {}", m_ShaderStages.ComputePath);
 	if (!m_ShaderStages.GeometryPath.empty()) spdlog::debug("  Geometry: {}", m_ShaderStages.GeometryPath);
-
-	WatchShader(m_ShaderStages.VertexPath);
-	WatchShader(m_ShaderStages.FragmentPath);
-	WatchShader(m_ShaderStages.GeometryPath);
-	WatchShader(m_ShaderStages.ComputePath);
 
 	const bool invalidShaders = shaders.size() == 0 || shaders[0] == GL_INVALID_VALUE || shaders[1] == GL_INVALID_VALUE;
 	programID = invalidShaders ? GL_INVALID_VALUE : glCreateProgram();
@@ -298,124 +226,132 @@ ShaderUniform Shader::GetUniformInfo(std::string locationName) const
 }
 
 #pragma region Managed Binding
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Shader, Load0, void, (MonoString* path, unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Load, void, (MonoString* path, uint64_t* outResourceID, void** outHandle), Yonai.Graphics)
 {
-	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path));
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID(); // Assign resource ID
+	Resource::Load<Shader>(*outResourceID, mono_string_to_utf8(path));
 	*outHandle = Resource::Get<Shader>(*outResourceID);
 }
 
-ADD_MANAGED_METHOD(Shader, Load1, void,
-	(MonoString* path, MonoString* vertexPath, MonoString* fragmentPath,
-		MonoString* computePath, MonoString* geometryPath,
-		unsigned int* outResourceID, void** outHandle), AquaEngine.Graphics)
-{
-	ShaderStageInfo stageInfo =
-	{
-		vertexPath ? mono_string_to_utf8(vertexPath) : "",
-		fragmentPath ? mono_string_to_utf8(fragmentPath) : "",
-		computePath ? mono_string_to_utf8(computePath) : "",
-		geometryPath ? mono_string_to_utf8(geometryPath) : ""
-	};
-	*outResourceID = Resource::Load<Shader>(mono_string_to_utf8(path), stageInfo);
-	*outHandle = Resource::Get<Shader>(*outResourceID);
-}
-
-ADD_MANAGED_METHOD(Shader, Bind, void, (void* instance), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Bind, void, (void* instance), Yonai.Graphics)
 { ((Shader*)instance)->Bind(); }
 
-ADD_MANAGED_METHOD(Shader, Unbind, void, (void* instance), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Unbind, void, (void* instance), Yonai.Graphics)
 { ((Shader*)instance)->Unbind(); }
 
 ADD_MANAGED_METHOD(Shader, UpdateStages, void,
-	(void* instance, MonoString* vertexPath, MonoString* fragmentPath,
-		MonoString* computePath, MonoString* geometryPath), AquaEngine.Graphics)
+	(void* instance, MonoString* vertexPath, MonoString* vertexContents,
+		MonoString* fragmentPath, MonoString* fragmentContents,
+		MonoString* computePath, MonoString* computeContents,
+		MonoString* geometryPath, MonoString* geometryContents), Yonai.Graphics)
 {
-	ShaderStageInfo stageInfo =
-	{
-		vertexPath ? mono_string_to_utf8(vertexPath) : "",
-		fragmentPath ? mono_string_to_utf8(fragmentPath) : "",
-		computePath ? mono_string_to_utf8(computePath) : "",
-		geometryPath ? mono_string_to_utf8(geometryPath) : ""
-	};
+	ShaderStageInfo stageInfo = {};
+
+	stageInfo.VertexPath = vertexPath ? mono_string_to_utf8(vertexPath) : "";
+	stageInfo.VertexContents = vertexContents ? mono_string_to_utf8(vertexContents) : "";
+
+	stageInfo.FragmentPath = fragmentPath ? mono_string_to_utf8(fragmentPath) : "";
+	stageInfo.FragmentContents = fragmentContents ? mono_string_to_utf8(fragmentContents) : "";
+
+	stageInfo.ComputePath = computePath ? mono_string_to_utf8(computePath) : "";
+	stageInfo.ComputeContents = computeContents ? mono_string_to_utf8(computeContents) : "";
+
+	stageInfo.GeometryPath = geometryPath ? mono_string_to_utf8(geometryPath) : "";
+	stageInfo.GeometryContents = geometryContents ? mono_string_to_utf8(geometryContents) : "";
+
 	((Shader*)instance)->UpdateStages(stageInfo);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_int, void, (void* instance, int location, int value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, UnloadStages, void, (void* instance), Yonai.Graphics)
+{ ((Shader*)instance)->UpdateStages({}); }
+
+ADD_MANAGED_METHOD(Shader, GetStages, void, (void* instance, MonoString** outVertex, MonoString** outFragment, MonoString** outCompute, MonoString** outGeometry), Yonai.Graphics)
+{
+	Shader* shader = (Shader*)instance;
+	ShaderStageInfo& info = shader->GetStages();
+	*outVertex = info.VertexPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.VertexPath.c_str());
+	*outFragment = info.FragmentPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.FragmentPath.c_str());
+	*outCompute = info.ComputePath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.ComputePath.c_str());
+	*outGeometry = info.GeometryPath.empty() ? nullptr : mono_string_new(mono_domain_get(), info.GeometryPath.c_str());
+}
+
+ADD_MANAGED_METHOD(Shader, Set_int, void, (void* instance, int location, int value), Yonai.Graphics)
 { ((Shader*)instance)->Set(location, value); }
-ADD_MANAGED_METHOD(Shader, SetStr_int, void, (void* instance, MonoString* location, int value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_int, void, (void* instance, MonoString* location, int value), Yonai.Graphics)
 { ((Shader*)instance)->Set(mono_string_to_utf8(location), value); }
 
-ADD_MANAGED_METHOD(Shader, Set_bool, void, (void* instance, int location, bool value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_bool, void, (void* instance, int location, bool value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_bool, void, (void* instance, MonoString* location, bool value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_bool, void, (void* instance, MonoString* location, bool value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_float, void, (void* instance, int location, float value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_float, void, (void* instance, int location, float value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_float, void, (void* instance, MonoString* location, float value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_float, void, (void* instance, MonoString* location, float value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_double, void, (void* instance, int location, double value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_double, void, (void* instance, int location, double value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_double, void, (void* instance, MonoString* location, double value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_double, void, (void* instance, MonoString* location, double value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_vec2, void, (void* instance, int location, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_vec2, void, (void* instance, int location, glm::vec2* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_vec2, void, (void* instance, MonoString* location, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_vec2, void, (void* instance, MonoString* location, glm::vec2* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_vec3, void, (void* instance, int location, glm::vec3* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_vec3, void, (void* instance, int location, glm::vec3* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_vec3, void, (void* instance, MonoString* location, glm::vec3* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_vec3, void, (void* instance, MonoString* location, glm::vec3* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_vec4, void, (void* instance, int location, glm::vec4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_vec4, void, (void* instance, int location, glm::vec4* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_vec4, void, (void* instance, MonoString* location, glm::vec4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_vec4, void, (void* instance, MonoString* location, glm::vec4* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_mat3, void, (void* instance, int location, glm::mat3* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_mat3, void, (void* instance, int location, glm::mat3* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_mat3, void, (void* instance, MonoString* location, glm::mat3* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_mat3, void, (void* instance, MonoString* location, glm::mat3* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(mono_string_to_utf8(location), value);
 }
 
-ADD_MANAGED_METHOD(Shader, Set_mat4, void, (void* instance, int location, glm::mat4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, Set_mat4, void, (void* instance, int location, glm::mat4* value), Yonai.Graphics)
 {
 	((Shader*)instance)->Set(location, value);
 }
-ADD_MANAGED_METHOD(Shader, SetStr_mat4, void, (void* instance, MonoString* location, glm::mat4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Shader, SetStr_mat4, void, (void* instance, MonoString* location, glm::mat4* value), Yonai.Graphics)
 { ((Shader*)instance)->Set(mono_string_to_utf8(location), value); }
 
 #pragma endregion

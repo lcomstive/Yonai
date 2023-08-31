@@ -10,5 +10,5 @@ void main()
 {
 	FragColour = vec4(1.0);
 	
-	FragColour.rgb *= cos(time + outPosition) * 0.5 + 0.5;
+	// FragColour.rgb *= cos(time + outPosition) * 0.5 + 0.5;
 }
