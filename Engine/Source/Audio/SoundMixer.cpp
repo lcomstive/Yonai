@@ -1,17 +1,17 @@
-#include <AquaEngine/Audio/SoundMixer.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Audio/SoundMixer.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
+using namespace Yonai;
+using namespace Yonai::Systems;
 
-SoundMixer::SoundMixer(string name, ResourceID parent) : Name(name), m_Volume(1.0f)
+SoundMixer::SoundMixer(string name, ResourceID parent) : Name(name), m_Volume(1.0f), m_Parent(parent)
 {
 	ma_sound_group_config config = ma_sound_group_config_init();
 	ma_sound_group_init(AudioSystem::GetEngine(), 0, nullptr, &m_Group);
 
-	if(parent != InvalidResourceID)
-		SetParent(parent);
+	if(m_Parent != InvalidResourceID)
+		SetParent(m_Parent);
 }
 
 SoundMixer::~SoundMixer() { ma_sound_group_uninit(&m_Group); }
@@ -21,35 +21,38 @@ ma_sound_group* SoundMixer::GetHandle() { return &m_Group; }
 float SoundMixer::GetVolume() { return m_Volume; }
 void SoundMixer::SetVolume(float value)
 {
-	m_Volume = std::max(value, 0.0f);
+	m_Volume = (std::max)(value, 0.0f);
 	ma_sound_group_set_volume(&m_Group, m_Volume);
 }
 
 void SoundMixer::SetParent(ResourceID parent)
 {
+	m_Parent = parent;
 	ma_node* output = nullptr;
-	if(parent == InvalidResourceID || !Resource::IsValidType<SoundMixer>(parent)) // Set to output to the engine directly (AKA master)
+	if(m_Parent == InvalidResourceID || !Resource::IsValidType<SoundMixer>(m_Parent)) // Set to output to the engine directly (AKA master)
 		output = ma_engine_get_endpoint(AudioSystem::GetEngine());
 	else
-		output = &(Resource::Get<SoundMixer>(parent)->m_Group);
+		output = &(Resource::Get<SoundMixer>(m_Parent)->m_Group);
 
 	ma_node_attach_output_bus(&m_Group, 0, output, 0);
 }
 
+ResourceID SoundMixer::GetParent() { return m_Parent; }
+
 #pragma region Scripting Bindings
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(SoundMixer, Load0, void, (MonoString* path, MonoString* mixerName, unsigned int* outResourceID, void** outHandle))
+ADD_MANAGED_METHOD(SoundMixer, Load, void, (MonoString* pathRaw, uint64_t* outResourceID, void** outHandle))
 {
-	*outResourceID = Resource::Load<SoundMixer>(mono_string_to_utf8(path), mono_string_to_utf8(mixerName));
-	*outHandle = Resource::Get<SoundMixer>(*outResourceID);
-}
+	char* path = mono_string_to_utf8(pathRaw);
 
-ADD_MANAGED_METHOD(SoundMixer, Load1, void, (MonoString* path, MonoString* mixerName, unsigned int parent, unsigned int* outResourceID, void** outHandle))
-{
-	*outResourceID = Resource::Load<SoundMixer>(mono_string_to_utf8(path), mono_string_to_utf8(mixerName), parent);
+	if (*outResourceID == InvalidResourceID)
+		*outResourceID = ResourceID(); // If no resource ID, generate one
+	Resource::Load<SoundMixer>(*outResourceID, path);
+
 	*outHandle = Resource::Get<SoundMixer>(*outResourceID);
+	mono_free(path);
 }
 
 ADD_MANAGED_METHOD(SoundMixer, GetName, MonoString*, (void* handle))
@@ -63,4 +66,10 @@ ADD_MANAGED_METHOD(SoundMixer, GetVolume, float, (void* handle))
 
 ADD_MANAGED_METHOD(SoundMixer, SetVolume, void, (void* handle, float value))
 { ((SoundMixer*)handle)->SetVolume(value); }
+
+ADD_MANAGED_METHOD(SoundMixer, GetParent, uint64_t, (void* handle))
+{ return ((SoundMixer*)handle)->GetParent(); }
+
+ADD_MANAGED_METHOD(SoundMixer, SetParent, void, (void* handle, uint64_t value))
+{ return ((SoundMixer*)handle)->SetParent(value); }
 #pragma endregion

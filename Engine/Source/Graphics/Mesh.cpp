@@ -1,18 +1,20 @@
 #include <glad/glad.h>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Mesh.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Mesh.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
-Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(GL_INVALID_VALUE), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles) { }
+Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(GL_INVALID_VALUE), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles)
+{
+	Setup();
+}
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, DrawMode drawMode) : Mesh()
 {
-	m_DrawMode = drawMode;
-	SetData(vertices, indices);
+	Import(vertices, indices, drawMode);
 }
 
 Mesh::~Mesh()
@@ -25,11 +27,12 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &m_VAO);
 }
 
-void Mesh::SetData(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+void Mesh::Import(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, DrawMode drawMode)
 {
-	m_Vertices = vertices;
-	m_Indices = indices;
-	Setup();
+	m_DrawMode = drawMode;
+
+	SetIndices(indices);
+	SetVertices(vertices);
 }
 
 void Mesh::Setup()
@@ -40,16 +43,8 @@ void Mesh::Setup()
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
-	// Fill vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
-
-	// Fill index data
-	if (m_Indices.size() > 0)
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
-	}
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
 	// Vertex data layout
 	// Position
@@ -76,13 +71,36 @@ void Mesh::Draw()
 	glBindVertexArray(0);
 }
 
+vector<Mesh::Vertex>& Mesh::GetVertices() { return m_Vertices; }
+vector<unsigned int>& Mesh::GetIndices() { return m_Indices; }
+
+void Mesh::SetVertices(vector<Vertex>& vertices)
+{
+	m_Vertices = vertices;
+
+	glBindVertexArray(m_VAO);
+	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
+	glBindVertexArray(0);
+}
+
+void Mesh::SetIndices(vector<unsigned int>& indices)
+{
+	m_Indices = indices;
+	if (m_Indices.empty())
+		return;
+
+	glBindVertexArray(m_VAO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
+	glBindVertexArray(0);
+}
+
 ResourceID QuadID = InvalidResourceID;
 ResourceID CubeID = InvalidResourceID;
 ResourceID SphereID = InvalidResourceID;
 
-const string QuadMeshName   = "Meshes/Primitive/Quad";
-const string CubeMeshName   = "Meshes/Primitive/Cube";
-const string SphereMeshName = "Meshes/Primitive/Sphere";
+const string QuadMeshName   = "_Internal/ManagedMeshes/Primitive/Quad";
+const string CubeMeshName   = "_Internal/ManagedMeshes/Primitive/Cube";
+const string SphereMeshName = "_Internal/ManagedMeshes/Primitive/Sphere";
 
 ResourceID Mesh::Quad()
 {
@@ -233,20 +251,22 @@ ResourceID Mesh::Sphere()
 }
 
 #pragma region Internal Calls
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Mesh, Load0, void, (MonoString* path, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), Yonai.Graphics)
 {
-	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path));
+	if (*outID == InvalidResourceID)
+		*outID = ResourceID(); // Assign resource ID
+
+	char* path = mono_string_to_utf8(pathRaw);
+	Resource::Load<Mesh>(*outID, path);
 	*outHandle = Resource::Get<Mesh>(*outID);
 }
 
-ADD_MANAGED_METHOD(Mesh, Load1, void,
-	(MonoString* path, MonoArray* inVertices, MonoArray* inIndices,
-		unsigned char drawMode, unsigned int* outID, void** outHandle),
-	AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, Import, void,
+	(void* handle, MonoArray* inVertices, MonoArray* inIndices, unsigned char drawMode),
+	Yonai.Graphics)
 {
 	vector<Mesh::Vertex> vertices;
 	vector<unsigned int> indices;
@@ -260,17 +280,17 @@ ADD_MANAGED_METHOD(Mesh, Load1, void,
 	for(size_t i = 0; i < indices.size(); i++)
 		indices[i] = mono_array_get(inIndices, unsigned int, i);
 
-	*outID = Resource::Load<Mesh>(mono_string_to_utf8(path), vertices, indices, (Mesh::DrawMode)drawMode);
-	*outHandle = Resource::Get<Mesh>(*outID);
+	((Mesh*)handle)->Import(vertices, indices, (Mesh::DrawMode)drawMode);
 }
 
-#define GET_CLASS(name) Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", #name)
+#define GET_CLASS(name) Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", #name)
 
-ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositions, MonoArray** outNormals, MonoArray** outTexCoords), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositions, MonoArray** outNormals, MonoArray** outTexCoords), Yonai.Graphics)
 {
 	MonoClass* v3Class = GET_CLASS(Vector3);
 	MonoClass* v2Class = GET_CLASS(Vector2);
 
+	Mesh* mesh = (Mesh*)handle;
 	vector<Mesh::Vertex> vertices = ((Mesh*)handle)->GetVertices();
 	if(vertices.empty())
 		return;
@@ -286,7 +306,7 @@ ADD_MANAGED_METHOD(Mesh, GetVertices, void, (void* handle, MonoArray** outPositi
 	}
 }
 
-ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPositions, MonoArray* inNormals, MonoArray* inTexCoords), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPositions, MonoArray* inNormals, MonoArray* inTexCoords), Yonai.Graphics)
 {
 	size_t vertexCount = mono_array_length(inPositions);
 	vector<Mesh::Vertex> vertices;
@@ -298,11 +318,10 @@ ADD_MANAGED_METHOD(Mesh, SetVertices, void, (void* handle, MonoArray* inPosition
 		vertices[i].TexCoords = mono_array_get(inTexCoords, glm::vec2, i);
 	}
 	
-	Mesh* mesh = (Mesh*)handle;
-	mesh->SetData(vertices, mesh->GetIndices());
+	((Mesh*)handle)->SetVertices(vertices);
 }
 
-ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices), Yonai.Graphics)
 {
 	vector<unsigned int> indices = ((Mesh*)handle)->GetIndices();
 	*outIndices = mono_array_new(mono_domain_get(), mono_get_uint32_class(), indices.size());
@@ -310,7 +329,7 @@ ADD_MANAGED_METHOD(Mesh, GetIndices, void, (void* handle, MonoArray** outIndices
 		mono_array_set(*outIndices, unsigned int, i, indices[i]);
 }
 
-ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices), Yonai.Graphics)
 {
 	size_t indexCount = mono_array_length(inIndices);
 	vector<unsigned int> indices;
@@ -318,7 +337,6 @@ ADD_MANAGED_METHOD(Mesh, SetIndices, void, (void* handle, MonoArray* inIndices),
 	for(size_t i = 0; i < indexCount; i++)
 		indices[i] = mono_array_get(inIndices, unsigned int, i);
 	
-	Mesh* mesh = (Mesh*)handle;
-	mesh->SetData(mesh->GetVertices(), indices);
+	((Mesh*)handle)->SetIndices(indices);
 }
 #pragma endregion

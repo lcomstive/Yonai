@@ -1,31 +1,32 @@
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Scripting;
 
-ADD_MANAGED_METHOD(Resource, Duplicate, unsigned int, (unsigned int originalID, MonoString* newPath))
+ADD_MANAGED_METHOD(Resource, GetPath, MonoString*, (uint64_t id))
 {
-	return Resource::IsValidResourceID(originalID) ?
-		Resource::Duplicate(originalID, mono_string_to_utf8(newPath)) : InvalidResourceID;
+	if (Resource::IsValidResourceID(id))
+		return mono_string_new(mono_domain_get(), Resource::GetPath(id).c_str());
+	return nullptr;
 }
 
-ADD_MANAGED_METHOD(Resource, GetPath, MonoString*, (unsigned int id))
-{
-	return mono_string_new(mono_domain_get(),
-		(Resource::IsValidResourceID(id) ? Resource::GetPath(id) : string()).c_str());
-}
-
-ADD_MANAGED_METHOD(Resource, GetID, unsigned int, (MonoString* path))
+ADD_MANAGED_METHOD(Resource, GetID, uint64_t, (MonoString* path))
 { return Resource::GetID(mono_string_to_utf8(path)); }
 
-ADD_MANAGED_METHOD(Resource, Unload, void, (unsigned int resourceID))
+ADD_MANAGED_METHOD(Resource, CreateID, uint64_t, ())
+{ return UUID(); }
+
+ADD_MANAGED_METHOD(Resource, Unload, void, (uint64_t resourceID))
 { Resource::Unload(resourceID); }
 
-ADD_MANAGED_METHOD(Resource, GetInstance, void*, (unsigned int resourceID))
+ADD_MANAGED_METHOD(Resource, GetInstance, void*, (uint64_t resourceID))
 { return Resource::IsValidResourceID(resourceID) ? Resource::Get(resourceID) : nullptr; }
 
-ADD_MANAGED_METHOD(Resource, Exists, bool, (unsigned int resourceID))
+ADD_MANAGED_METHOD(Resource, Exists, bool, (uint64_t resourceID))
 { return Resource::IsValidResourceID(resourceID); }
+
+ADD_MANAGED_METHOD(Resource, Print)
+{ Resource::PrintResourceTypes(); }

@@ -1,70 +1,98 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Timer.hpp>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/Utils.hpp>
-#include <AquaEngine/IO/VFS.hpp>
+#include <Yonai/Timer.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Utils.hpp>
 #include <mono/metadata/threads.h>
+#include <Yonai/IO/Files.hpp>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/mono-debug.h>
-#include <AquaEngine/Application.hpp>
-#include <AquaEngine/SystemManager.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Application.hpp>
+#include <mono/metadata/mono-config.h>
+#include <Yonai/SystemManager.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+
+#include <Yonai/Resource.hpp>
+
+// For adding internal calls to mono. Binding C++ to C#
+#include <Yonai/Glue.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
-const char* AssembliesPath = "app://Assets/Mono/";
-const char* AppDomainName = "AquaEngineAppDomain";
+namespace fs = std::filesystem;
+
+const char* MonoDebugLogPath = "MonoDebugger.log";
+const char* AppDomainName = "YonaiEngineAppDomain";
+const char* ScriptCoreFilename = "YonaiScriptCore.dll";
 
 string ScriptEngine::s_CoreDLLPath = "";
+bool ScriptEngine::s_IsReloading = false;
 bool ScriptEngine::s_AwaitingReload = false;
 bool ScriptEngine::s_DebuggingEnabled = false;
 MonoDomain* ScriptEngine::s_AppDomain = nullptr;
 Assembly* ScriptEngine::s_CoreAssembly = nullptr;
 MonoDomain* ScriptEngine::s_RootDomain = nullptr;
 vector<Assembly*> ScriptEngine::s_Assemblies = {};
+vector<FileWatcher*> ScriptEngine::s_FileWatchers = {};
 vector<function<void()>> ScriptEngine::s_ReloadCallbacks = {};
+vector<function<void()>> ScriptEngine::s_PreReloadCallbacks = {};
 
 vector<ScriptEngine::AssemblyPath> ScriptEngine::s_AssemblyPaths = {};
 
-const char* MonoDebugLogPath = "data://MonoDebugger.log";
-
-vector<const char*> GenerateJITParseOptions(unsigned int debugPort)
+void JITParseOptions(unsigned int debugPort)
 {
 	Application* app = Application::Current();
-	vector<const char*> output = {};
+	vector<const char*> options = {};
+	bool waitForDebugger = app->HasArg("WaitForDebug");
 
-	output.emplace_back("--soft-breakpoints");
+	options.push_back("--soft-breakpoints");
 
-	string debugging = "--debugger-agent=transport=dt_socket,server=y,suspend=n,";
+	string debugging = "--debugger-agent=transport=dt_socket,server=y,";
+	debugging += "suspend=" + string(waitForDebugger ? "y" : "n") + ",";
 	debugging += "address=0.0.0.0:" + to_string(debugPort);
-	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "2");
-	debugging += ",logfile=" + VFS::GetAbsolutePath(MonoDebugLogPath);
-	output.emplace_back(debugging.c_str());
+	debugging += ",loglevel=" + app->GetArg("DebugLogLevel", "1");
+	debugging += ",logfile=" + Application::GetPersistentDirectory() + MonoDebugLogPath;
 
-	return output;
+	options.push_back(debugging.c_str());
+
+	if (waitForDebugger)
+		spdlog::info("Waiting for debugger to attach before proceeding...");
+
+	mono_jit_parse_options((int)options.size(), (char**)options.data());
 }
 
-void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
+bool TryLoadDebugSymbols(MonoImage* image, fs::path& path)
 {
-	s_CoreDLLPath = coreDllPath;
+	if (!fs::exists(path.string()))
+		return false;
+
+	auto pdbContents = IO::Read(path.string());
+	mono_debug_open_image_from_memory(image, (const mono_byte*)pdbContents.data(), (int)pdbContents.size());
+	spdlog::trace("Added debug symbols found at '{}'", path.string().c_str());
+	return true;
+}
+
+void ScriptEngine::Init(std::string assembliesPath, bool allowDebugging)
+{
+	s_CoreDLLPath = assembliesPath + "/" + ScriptCoreFilename;
 	if (s_RootDomain)
 		return; // Already initialised
 
 	s_DebuggingEnabled = allowDebugging;
 
-	string assembliesPath = VFS::GetAbsolutePath(AssembliesPath);
-	if (!VFS::Exists(assembliesPath))
-	{
-		spdlog::error("Mono assemblies path is invalid, disabling scripting");
-		return;
-	}
 	mono_set_assemblies_path(assembliesPath.c_str());
+
+	string configFile = assembliesPath + "/Config";
+	if (fs::exists(configFile))
+	{
+		mono_config_parse(configFile.c_str());
+		spdlog::debug("Mono config file: {}", configFile.c_str());
+	}
 
 	// Setup debugging session
 	if (allowDebugging)
@@ -73,14 +101,13 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 		try { debugPort = std::stoul(Application::Current()->GetArg("DebugPort", "5555")); }
 		catch(std::exception&) { spdlog::warn("'DebugPort' argument was not a valid number, defaulting to '5555'"); }
 
-		vector<const char*> jitOptions = GenerateJITParseOptions(debugPort);
-		mono_jit_parse_options((int)jitOptions.size(), (char**)jitOptions.data());
+		JITParseOptions(debugPort);
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
 		spdlog::debug("C# debugging is enabled on port {}", debugPort);
 	}
 
-	s_RootDomain = mono_jit_init("AquaEngineRuntime");
+	s_RootDomain = mono_jit_init("YonaiRuntime");
 	if (!s_RootDomain)
 	{
 		spdlog::critical("Failed to create mono domain");
@@ -96,12 +123,19 @@ void ScriptEngine::Init(std::string& coreDllPath, bool allowDebugging)
 	mono_domain_set(s_AppDomain, true);
 
 	LoadCoreAssembly();
+
+	// Add YonaiScriptCore internal methods
+	AddInternalCalls(_InternalMethods);
 }
 
 void ScriptEngine::Destroy()
 {
 	if (!s_RootDomain)
 		return; // Already destroyed
+
+	for (FileWatcher* watcher : s_FileWatchers)
+		delete watcher;
+	s_FileWatchers.clear();
 
 	mono_jit_cleanup(s_RootDomain);
 
@@ -117,14 +151,14 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 {
 	if (path.empty())
 		return nullptr;
-	if (!IO::VFS::Exists(path))
+	if (!fs::exists(path))
 	{
 		spdlog::warn("Failed to load '{}' - could not be found", path);
 		return nullptr;
 	}
 
 	spdlog::debug("Loading C# script from '{}'", path);
-	auto data = IO::VFS::Read(path);
+	auto data = IO::Read(path);
 	if (data.empty())
 	{
 		spdlog::warn("Failed to load '{}' - failed to read", path);
@@ -137,7 +171,11 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 
 		// Watch files and reload if any changes occur
 		if (shouldWatch)
-			IO::VFS::GetMapping(path)->Watch(path, ScriptEngine::OnAssemblyFileChanged);
+		{
+			FileWatcher* watcher = new FileWatcher(path);
+			watcher->Start(ScriptEngine::OnAssemblyFileChanged);
+			s_FileWatchers.push_back(watcher);
+		}
 	}
 
 	MonoImageOpenStatus status;
@@ -158,15 +196,18 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	// Load debugging info
 	if (DebuggingEnabled())
 	{
-		// Try and load .pdb file next to .dll file
+		// Try to load debug symbols for assembly
 		std::filesystem::path pdbPath(path);
+		
+#if !defined(YONAI_PLATFORM_WINDOWS) // .pdb files generated by Visual Studio don't work with mono
+		// Check for .pdb (must be compiled as 'portable')
 		pdbPath.replace_extension(".pdb");
-		if (VFS::Exists(pdbPath.string()))
-		{
-			auto pdbContents = VFS::Read(pdbPath.string());
-			mono_debug_open_image_from_memory(image, pdbContents.data(), (int)pdbContents.size());
-			spdlog::trace("Added debug symbols found at '{}'", pdbPath.string().c_str());
-		}
+		TryLoadDebugSymbols(image, pdbPath);
+#endif
+
+		// Try mono debug symbols if present
+		pdbPath.replace_extension(".dll.mdb");
+		TryLoadDebugSymbols(image, pdbPath);
 	}
 
 	MonoAssembly* assembly = mono_assembly_load_from_full(
@@ -182,8 +223,49 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	return instance;
 }
 
+Assembly* ScriptEngine::LoadAssembly(vector<unsigned char>& data, const char* friendlyName)
+{
+	if (data.empty())
+		return nullptr;
+
+	MonoImageOpenStatus status;
+	MonoImage* image = mono_image_open_from_data_full(
+		reinterpret_cast<char*>(data.data()),
+		(uint32_t)data.size(),
+		1, 	// Bool. Copy data to internal mono buffer
+		&status,
+		0	// Bool. Load in reflection mode
+	);
+
+	if (status != MONO_IMAGE_OK)
+	{
+		spdlog::error("Failed to load assembly '{}' from memory - '{}'", friendlyName, mono_image_strerror(status));
+		return nullptr;
+	}
+
+	MonoAssembly* assembly = mono_assembly_load_from_full(
+		image,
+		friendlyName, // Friendly name, used for warnings & errors
+		&status,
+		0	// Bool. Load in reflection mode
+	);
+	mono_image_close(image);
+
+	Assembly* instance = new Assembly(assembly, false /* isCoreAssembly */);
+	s_Assemblies.push_back(instance);
+	return instance;
+}
+
+vector<const char*> CoreAssemblyDependencies =
+{
+	// "app://Newtonsoft.Json.dll"
+};
+
 void ScriptEngine::LoadCoreAssembly()
 {
+	for(size_t i = 0; i < CoreAssemblyDependencies.size(); i++)
+		LoadAssembly(CoreAssemblyDependencies[i], false /* Watch for changes */);
+
 	s_CoreAssembly = LoadAssembly(s_CoreDLLPath, true, false);
 	if (s_CoreAssembly)
 		s_CoreAssembly->LoadScriptCoreTypes();
@@ -198,7 +280,9 @@ void ScriptEngine::OnAssemblyFileChanged(const std::string& path, IO::FileWatchS
 	s_AwaitingReload = true;
 }
 
+bool ScriptEngine::IsReloading() { return s_IsReloading; }
 bool ScriptEngine::AwaitingReload() { return s_AwaitingReload; }
+void ScriptEngine::SetAwaitingReload() { s_AwaitingReload = true; }
 bool ScriptEngine::DebuggingEnabled() { return s_DebuggingEnabled; }
 
 void ScriptEngine::Reload(bool force)
@@ -206,14 +290,19 @@ void ScriptEngine::Reload(bool force)
 	if (!s_AwaitingReload && !force)
 		return;
 	s_AwaitingReload = false;
+	s_IsReloading = true;
 
 	Timer timer;
 	timer.Start();
 
+	// Call pre-reload callbacks
+	for (const function<void()>& callback : s_PreReloadCallbacks)
+		callback();
+
 	// Call OnDisable & OnDestroyed in all managed components
 	SceneSystem* sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 	vector<World*> worlds = World::GetWorlds();
-	sceneSystem->UnloadAllScenes();
+
 	for (World* world : worlds)
 	{
 		world->GetSystemManager()->InvalidateAllManagedInstances();
@@ -237,13 +326,17 @@ void ScriptEngine::Reload(bool force)
 	std::vector<AssemblyPath> assemblyPaths = s_AssemblyPaths;
 	s_AssemblyPaths.clear();
 
-	// Load AquaScriptCore assembly
+	for (FileWatcher* watcher : s_FileWatchers)
+		delete watcher;
+	s_FileWatchers.clear();
+
+	// Load YonaiScriptCore assembly
 	LoadCoreAssembly();
 
 	// Load all previously loaded assemblies, in same order
 	for (AssemblyPath& assemblyPath : assemblyPaths)
 	{
-		if(!VFS::Exists(assemblyPath.Path))
+		if(!fs::exists(assemblyPath.Path))
 		{
 			spdlog::warn("Assembly '{}' no longer exists in filesystem", assemblyPath.Path);
 			// TODO: Check if continue watching assembly that has been removed causes issues.
@@ -252,25 +345,23 @@ void ScriptEngine::Reload(bool force)
 		}
 
 		spdlog::debug("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
-		if (assemblyPath.WatchForChanges)
-			VFS::GetMapping(assemblyPath.Path)->Unwatch(assemblyPath.Path);
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
 	}
 
 	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
 	SystemManager::Global()->CreateAllManagedInstances();
+	worlds = World::GetWorlds(); // Refresh worlds, as they can be created or destroyed with C# scripts
 	for (World* world : worlds)
-	{
 		world->GetSystemManager()->CreateAllManagedInstances();
-		sceneSystem->AddScene(world);
-	}
+
+	for (const function<void()>& callback : s_ReloadCallbacks)
+		callback();
+
+	s_IsReloading = false;
 
 	timer.Stop();
 	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
-
-	for(const function<void()>& callback : s_ReloadCallbacks)
-		callback();
 }
 
 /// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
@@ -287,3 +378,23 @@ MonoType* ScriptEngine::GetTypeFromHash(size_t hash)
 
 void ScriptEngine::AddReloadCallback(function<void()> callback)
 { s_ReloadCallbacks.emplace_back(callback); }
+
+void ScriptEngine::AddPreReloadCallback(function<void()> callback)
+{ s_PreReloadCallbacks.emplace_back(callback); }
+
+void ScriptEngine::AddInternalCall(const char* name, const void* fn)
+{ mono_add_internal_call(name, fn); }
+
+void ScriptEngine::AddInternalCalls(const vector<pair<const char*, const void*>>& methods)
+{
+	for (auto pair : methods)
+		AddInternalCall(pair.first, pair.second);
+}
+
+bool ScriptEngine::IsAssemblyLoaded(string path)
+{
+	for (auto assembly : s_AssemblyPaths)
+		if (assembly.Path.compare(path) == 0)
+			return true;
+	return false;
+}

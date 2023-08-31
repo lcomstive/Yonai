@@ -34,12 +34,26 @@ int main(int argc, char** argv)
 {
 	if (argc < 3)
 	{
-		cout << "Usage: " << argv[0] << " <Source Directory> <Output File>" << endl;
+		cout << "Usage: " << argv[0] << " [options] <Source Directory> <Output File>" << endl;
+		cout << "Options:" << endl;
+		cout << " -prefix=<string_prefix>\tSets the function name prefix when binding C# internal calls" << endl;
 		return -1;
 	}
 
-	string sourceDirectory = argv[1];
-	string outputFile = argv[2];
+	string sourceDirectory = argv[argc - 2];
+	string outputFile = argv[argc - 1];
+	string prefix = "";
+
+	for (int i = 0; i < argc; i++)
+	{
+		string arg(argv[i]);
+		if (arg.rfind("-prefix=", 0) == 0)
+			prefix = arg.substr(string("-prefix=").length());
+	}
+
+#if SHOW_DEBUG_OUTPUT // Debugging output
+	cout << "Prefix: " << prefix << endl;
+#endif
 
 	if (!fs::exists(sourceDirectory))
 	{
@@ -51,13 +65,14 @@ int main(int argc, char** argv)
 
 	// Find all internal methods in C++ source files
 	smatch matches;
-	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]+)\\)(,\\s*([\\w\\._]+))?)?)?");
+	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]*)\\)(,\\s*([\\w\\._]+))?)?)?");
 	regex propertyRegex("ADD_MANAGED_(GET|SET|GET_SET)\\((\\w+),\\s*(\\w+)(,\\s*(([_ A-Za-z\\*:0-9]+)(,\\s*([\\w\\._]+))?))?");
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{
 		fs::path path = it->path();
-		if (!path.has_extension() || path.extension().compare(".cpp") != 0)
-			continue; // Not a .cpp file
+		if (!path.has_extension() ||
+			(path.extension().compare(".cpp") != 0 && path.extension().compare(".mm") != 0))
+			continue; // Not a valid source file
 
 		string originalContent = ReadFile(path);
 
@@ -76,7 +91,7 @@ int main(int argc, char** argv)
 			// matches[8] = namespace
 			FunctionInfo info = { matches[1], matches[2] };
 			info.ReturnType = matches[4].matched ? matches[4] : string("void");
-			info.NamespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
+			info.NamespaceName = matches[8].matched ? matches[8] : string("Yonai");
 
 			if (matches[6].matched)
 			{
@@ -115,7 +130,7 @@ int main(int argc, char** argv)
 			auto className = matches[2];
 			auto propertyName = matches[3];
 			auto propertyType = matches[6];
-			auto namespaceName = matches[8].matched ? matches[8] : string("AquaEngine");
+			auto namespaceName = matches[8].matched ? matches[8] : string("Yonai");
 
 			if(type.compare("GET") == 0 || type.compare("GET_SET") == 0)
 				AddGetter(className, propertyName, propertyType, namespaceName);
@@ -138,7 +153,7 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < InternalMethods.size(); i++)
 	{
 		FunctionInfo info = InternalMethods[i];
-		contents += "\tMethodType(\"" + info.NamespaceName + "." + info.ClassName + "::_" + info.FunctionName + "\", ";
+		contents += "\tMethodType(\"" + info.NamespaceName + "." + info.ClassName + "::" + prefix + info.FunctionName + "\", ";
 		contents += "(const void*)_managed_internal_" + info.ClassName + info.FunctionName + ")";
 
 		if (i < InternalMethods.size() - 1)

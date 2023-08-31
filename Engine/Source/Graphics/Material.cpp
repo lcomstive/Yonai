@@ -1,14 +1,14 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Shader.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Graphics/Material.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Shader.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Graphics/Material.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
+using namespace Yonai;
+using namespace Yonai::Graphics;
 
 void BindTexture(unsigned int index, string shaderName, ResourceID textureID, Shader* shader)
 {
@@ -56,36 +56,41 @@ Shader* Material::PrepareShader()
 
 #pragma region Internal Calls
 // _Load(string path, out uint resourceID, out IntPtr handle);
-ADD_MANAGED_METHOD(Material, Load, void, (MonoString* path, unsigned int* resourceID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, Load, void, (MonoString* pathRaw, uint64_t* resourceID, void** outHandle), Yonai.Graphics)
 {
-	*resourceID = Resource::Load<Material>(mono_string_to_utf8(path));
+	if (*resourceID == InvalidResourceID)
+		*resourceID = ResourceID(); // Assign resource ID
+	
+	char* path = mono_string_to_utf8(pathRaw);
+	Resource::Load<Material>(*resourceID, path);
 	*outHandle = Resource::Get<Material>(*resourceID);
+	mono_free(path);
 }
 
-ADD_MANAGED_GET_SET(Material, Shader, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AlbedoMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AlphaClipping, bool, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AlphaClipThreshold, float, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, Roughness, float, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, RoughnessMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, Metalness, float, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, MetalnessMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, NormalMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, AmbientOcclusionMap, unsigned int, AquaEngine.Graphics)
-ADD_MANAGED_GET_SET(Material, Transparent, bool, AquaEngine.Graphics)
+ADD_MANAGED_GET_SET(Material, Shader, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, AlbedoMap, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, AlphaClipping, bool, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, AlphaClipThreshold, float, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, Roughness, float, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, RoughnessMap, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, Metalness, float, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, MetalnessMap, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, NormalMap, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, AmbientOcclusionMap, uint64_t, Yonai.Graphics)
+ADD_MANAGED_GET_SET(Material, Transparent, bool, Yonai.Graphics)
 
-ADD_MANAGED_METHOD(Material, GetAlbedo, void, (void* handle, glm::vec4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, GetAlbedo, void, (void* handle, glm::vec4* value), Yonai.Graphics)
 { *value = ((Material*)handle)->Albedo; }
-ADD_MANAGED_METHOD(Material, SetAlbedo, void, (void* handle, glm::vec4* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, SetAlbedo, void, (void* handle, glm::vec4* value), Yonai.Graphics)
 { ((Material*)handle)->Albedo = *value; }
 
-ADD_MANAGED_METHOD(Material, GetTextureCoordinateScale, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, GetTextureCoordinateScale, void, (void* handle, glm::vec2* value), Yonai.Graphics)
 { *value = ((Material*)handle)->TextureCoordinateScale; }
-ADD_MANAGED_METHOD(Material, SetTextureCoordinateScale, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, SetTextureCoordinateScale, void, (void* handle, glm::vec2* value), Yonai.Graphics)
 { ((Material*)handle)->TextureCoordinateScale = *value; }
 
-ADD_MANAGED_METHOD(Material, GetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, GetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), Yonai.Graphics)
 { *value = ((Material*)handle)->TextureCoordinateOffset; }
-ADD_MANAGED_METHOD(Material, SetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Material, SetTextureCoordinateOffset, void, (void* handle, glm::vec2* value), Yonai.Graphics)
 { ((Material*)handle)->TextureCoordinateOffset = *value; }
 #pragma endregion

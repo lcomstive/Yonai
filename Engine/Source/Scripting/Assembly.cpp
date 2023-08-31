@@ -1,22 +1,25 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
 
 // Components to map, unmanaged -> managed
-#include <AquaEngine/Components/Camera.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Components/MeshRenderer.hpp>
-#include <AquaEngine/Components/SpriteRenderer.hpp>
+#include <Yonai/Components/Camera.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Components/MeshRenderer.hpp>
+#include <Yonai/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
-#include <AquaEngine/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 unordered_map<MonoType*, size_t> Assembly::s_TypeHashes = {};
 unordered_map<size_t, MonoType*> Assembly::s_ReverseTypeHashes = {};
@@ -38,10 +41,7 @@ SystemMethodEnabledFn SystemMethodEnabled = nullptr;
 SystemMethodInitialiseFn SystemMethodInitialise = nullptr;
 
 Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), Image(mono_assembly_get_image(handle))
-{
-	CacheTypes(isCoreAssembly);
-	AddInternalCalls();
-}
+{ CacheTypes(isCoreAssembly); }
 
 MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className)
 // { return mono_class_from_name(Image, namespaceName, className); }
@@ -98,6 +98,9 @@ size_t Assembly::GetTypeHash(MonoType* type)
 	auto managedIt = s_InternalManagedComponentTypes.find(it->second);
 	if (managedIt != s_InternalManagedComponentTypes.end())
 		return managedIt->second.Type;
+	auto systemIt = s_InternalManagedSystemTypes.find(it->second);
+	if (systemIt != s_InternalManagedSystemTypes.end())
+		return systemIt->second.Type;
 	return it->second;
 }
 
@@ -160,12 +163,15 @@ size_t Assembly::GetUnmanagedHash(size_t managedHash)
 
 void Assembly::CacheTypes(bool isCore)
 {
+	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
+	if (!coreAssembly)
+		return;
+
 	const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(Image, MONO_TABLE_TYPEDEF);
 	int typeCount = mono_table_info_get_rows(typeDefinitionsTable);
 
-	Assembly* coreAssembly = isCore ? this : ScriptEngine::GetCoreAssembly();
-	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "AquaEngine", "Component");
-	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "AquaEngine", "AquaSystem");
+	MonoClass* coreComponentType = mono_class_from_name(coreAssembly->Image, "Yonai", "Component");
+	MonoClass* coreSystemType    = mono_class_from_name(coreAssembly->Image, "Yonai", "YonaiSystem");
 
 	// spdlog::trace("Assembly types for {}:", mono_assembly_name_get_name(mono_assembly_get_name(Handle)));
 	for (int i = 0; i < typeCount; i++)
@@ -185,17 +191,18 @@ void Assembly::CacheTypes(bool isCore)
 
 		if (!klass)
 		{
-			spdlog::warn("Failed to cache type '{}.{}'", _namespace, _name);
+			if(isCore && strcmp(_namespace, "") != 0)
+				spdlog::warn("Failed to cache type '{}.{}'", _namespace, _name);
 			continue;
 		}
 
-		// Check if derives from AquaEngine.System
+		// Check if derives from Yonai.System
 		if (klass != coreSystemType && mono_class_is_subclass_of(klass, coreSystemType, false))
 		{
 			m_ManagedSystemTypes.push_back(klass);
 			// spdlog::trace("  {}.{} [System][{}]", _namespace, _name, hash);
 		}
-		// Check if derives from AquaEngine.Component
+		// Check if derives from Yonai.Component
 		else if (klass != coreComponentType && mono_class_is_subclass_of(klass, coreComponentType, false))
 		{
 			m_ManagedComponentTypes.push_back(klass);
@@ -220,23 +227,25 @@ void Assembly::CacheTypes(bool isCore)
 
 void Assembly::LoadScriptCoreTypes()
 {
-	AddInternalManagedComponent<Components::Camera>("AquaEngine", "Camera");
-	AddInternalManagedComponent<Components::Transform>("AquaEngine", "Transform");
-	AddInternalManagedComponent<Components::SoundSource>("AquaEngine", "SoundSource");
-	AddInternalManagedComponent<Components::MeshRenderer>("AquaEngine", "MeshRenderer");
-	AddInternalManagedComponent<Components::SpriteRenderer>("AquaEngine", "SpriteRenderer");
+	BindManagedComponent<Components::Camera>("Yonai", "Camera");
+	BindManagedComponent<Components::Transform>("Yonai", "Transform");
+	BindManagedComponent<Components::SoundSource>("Yonai", "SoundSource");
+	BindManagedComponent<Components::MeshRenderer>("Yonai", "MeshRenderer");
+	BindManagedComponent<Components::SpriteRenderer>("Yonai", "SpriteRenderer");
 
-	AddInternalManagedSystem<Systems::SceneSystem>("AquaEngine", "SceneManager");
+	BindManagedSystem<Systems::SceneSystem>("Yonai", "SceneManager");
+	BindManagedSystem<Systems::AudioSystem>("Yonai.Systems", "AudioSystem");
+	BindManagedSystem<Systems::RenderSystem>("Yonai.Systems", "RenderSystem");
 
 #pragma region Component Methods
-	MonoClass* component = mono_class_from_name(Image, "AquaEngine", "Component");
+	MonoClass* component = mono_class_from_name(Image, "Yonai", "Component");
 
-	// Component.Initialise
-	MonoMethod* method = mono_class_get_method_from_name(component, "aqua_Initialise", 2);
+	// Component._Initialise
+	MonoMethod* method = mono_class_get_method_from_name(component, "_Initialise", 2);
 	ComponentMethodInitialise = (ComponentMethodInitialiseFn)mono_method_get_unmanaged_thunk(method);
 
 	// Component._Enable
-	method = mono_class_get_method_from_name(component, "aqua_Enable", 1);
+	method = mono_class_get_method_from_name(component, "_Enable", 1);
 	ComponentMethodEnabled = method ? (ComponentMethodEnabledFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	method = mono_class_get_method_from_name(component, "Update", 0);
@@ -248,14 +257,14 @@ void Assembly::LoadScriptCoreTypes()
 #pragma endregion
 
 #pragma region System Methods
-	MonoClass* system = mono_class_from_name(Image, "AquaEngine", "AquaSystem");
+	MonoClass* system = mono_class_from_name(Image, "Yonai", "YonaiSystem");
 
-	// System.aqua_Initialise
-	method = mono_class_get_method_from_name(system, "aqua_Initialise", 1);
-	SystemMethodInitialise = method ? (void(*)(MonoObject*, unsigned int, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
+	// System._Initialise
+	method = mono_class_get_method_from_name(system, "_Initialise", 1);
+	SystemMethodInitialise = method ? (void(*)(MonoObject*, uint64_t, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
-	// System.aqua_Enable
-	method = mono_class_get_method_from_name(system, "aqua_Enable", 1);
+	// System._Enable
+	method = mono_class_get_method_from_name(system, "_Enable", 1);
 	SystemMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
 	AddSystemMethod(Draw)
@@ -263,13 +272,4 @@ void Assembly::LoadScriptCoreTypes()
 	AddSystemMethod(Update)
 	AddSystemMethod(Destroyed)
 #pragma endregion
-}
-
-// Add internal calls to mono. Binding C++ to C#
-#include <AquaEngine/Glue.hpp>
-
-void Assembly::AddInternalCalls()
-{
-	for (auto pair : _InternalMethods)
-		mono_add_internal_call(pair.first, pair.second);
 }

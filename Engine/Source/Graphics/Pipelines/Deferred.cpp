@@ -1,18 +1,18 @@
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Mesh.hpp>
-#include <AquaEngine/Components/Light.hpp>
-#include <AquaEngine/Graphics/Material.hpp>
-#include <AquaEngine/Components/SpriteRenderer.hpp>
-#include <AquaEngine/Graphics/Pipelines/Deferred.hpp>
-#include <AquaEngine/Window.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Mesh.hpp>
+#include <Yonai/Components/Light.hpp>
+#include <Yonai/Graphics/Material.hpp>
+#include <Yonai/Components/SpriteRenderer.hpp>
+#include <Yonai/Graphics/Pipelines/Deferred.hpp>
+#include <Yonai/Window.hpp>
 
 using namespace glm;
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
-using namespace AquaEngine::Graphics::Pipelines;
+using namespace Yonai;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
+using namespace Yonai::Graphics::Pipelines;
 
 void FillLightInfo(Shader* shader, vector<pair<Light*, Transform*>>& lights);
 
@@ -248,7 +248,7 @@ void FillLightInfo(Shader* shader, vector<pair<Light*, Transform*>>& lights)
 	{
 		shader->Set("lights[" + to_string(lightIndex) + "].Colour", lightPair.first->Colour);
 		shader->Set("lights[" + to_string(lightIndex) + "].Radius", lightPair.first->Radius);
-		shader->Set("lights[" + to_string(lightIndex) + "].Position", lightPair.second->Position);
+		shader->Set("lights[" + to_string(lightIndex) + "].Position", lightPair.second->GetPosition());
 
 		if (++lightIndex >= MaxLights)
 			break;

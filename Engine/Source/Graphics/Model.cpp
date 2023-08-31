@@ -1,26 +1,34 @@
 #include <spdlog/spdlog.h>
 #include <assimp/Importer.hpp>
-#include <AquaEngine/Timer.hpp>
+#include <Yonai/Timer.hpp>
 #include <assimp/postprocess.h>
-#include <AquaEngine/IO/VFS.hpp>
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Graphics/Model.hpp>
-#include <AquaEngine/Graphics/Shader.hpp>
-#include <AquaEngine/Graphics/Texture.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/DebugName.hpp>
-#include <AquaEngine/Components/MeshRenderer.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Graphics/Model.hpp>
+#include <Yonai/Graphics/Shader.hpp>
+#include <Yonai/Graphics/Texture.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/DebugName.hpp>
+#include <Yonai/Components/MeshRenderer.hpp>
 
 using namespace glm;
 using namespace std;
 using namespace Assimp;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Graphics;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Graphics;
+using namespace Yonai::Components;
 
-Model::Model() : m_Path(""), m_Root(), m_MeshIDs() { }
-Model::Model(string path) : m_Path(path), m_Root(), m_MeshIDs() { Load(); }
+void Model::Import(string path, vector<unsigned char>& modelData, bool importMaterials)
+{
+	if (!m_Path.empty())
+		// Release previous model
+		m_Root = {};
+
+	m_Path = path;
+	m_ImportMaterials = importMaterials;
+
+	Load(modelData);
+}
 
 void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 {
@@ -29,19 +37,25 @@ void ApplyAssimpTransformation(aiMatrix4x4 transformation, Transform* transform)
 	aiVector3D position = {};
 	transformation.Decompose(scale, rotation, position);
 
-	transform->Scale = { scale.x, scale.y, scale.z };
-	transform->Position = { position.x, position.y, position.z };
-	transform->Rotation = eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z });
+	transform->SetScale({ scale.x, scale.y, scale.z });
+	transform->SetPosition({ position.x, position.y, position.z });
+	transform->SetRotation(eulerAngles(quat{ rotation.w, rotation.x, rotation.y, rotation.z }));
 }
 
+bool Model::ImportMaterials() { return m_ImportMaterials; }
 vector<ResourceID> Model::GetMeshes() { return m_MeshIDs; }
 
 void Model::CreateMeshMaterialPair(const MeshData& data, vector<pair<ResourceID, ResourceID>>& output)
 {
-	size_t count = std::min(data.MeshIDs.size(), data.MaterialIDs.size());
-	output.reserve(count);
-	for(size_t i = 0; i < count; i++)
-		output.emplace_back(make_pair(m_MeshIDs[data.MeshIDs[i]], data.MaterialIDs[i]));
+	size_t meshCount = data.MeshIDs.size();
+	size_t materialCount = data.MaterialIDs.size();
+	size_t max = std::max(meshCount, materialCount);
+	output.reserve(max);
+	for(size_t i = 0; i < max; i++)
+		output.emplace_back(make_pair(
+			i < meshCount ? m_MeshIDs[data.MeshIDs[i]] : InvalidResourceID,
+			i < materialCount ? data.MaterialIDs[i] : InvalidResourceID
+		));
 
 	for(const MeshData& child : data.Children)
 		CreateMeshMaterialPair(child, output);
@@ -50,28 +64,27 @@ void Model::CreateMeshMaterialPair(const MeshData& data, vector<pair<ResourceID,
 vector<pair<ResourceID, ResourceID>> Model::GetMeshesAndMaterials()
 {
 	vector<pair<ResourceID, ResourceID>> output;
-
 	CreateMeshMaterialPair(m_Root, output);
-
 	return output;
 } 
 
-void Model::Load()
+void Model::Load(vector<unsigned char>& modelData)
 {
+	if (m_Path.empty())
+		return;
+
 	Importer importer;
 
 	const aiScene* scene = nullptr;
 	unsigned int postProcessing = aiProcess_Triangulate | aiProcess_FlipUVs;
 
-	// Read in model file
-	vector<unsigned char> modelData = VFS::Read(m_Path);
 	if (modelData.size() == 0)
 	{
-		spdlog::error("Failed to load model '{}' - Could not find file in VFS", m_Path);
+		spdlog::error("Failed to load model '{}' - Empty data", m_Path);
 		return;
 	}
 	string extension = filesystem::path(m_Path).extension().string();
-	// Log::Debug("TESTING EXTENSION '" + extension + "'");
+
 	scene = importer.ReadFileFromMemory(
 		modelData.data(),
 		modelData.size(),
@@ -100,13 +113,13 @@ void LoadMaterialTextures(
 	string currentDirectory,
 	aiTextureType textureType,
 	aiMaterial* aiMat,
-	ResourceID& materialTexture)
+	ResourceID& outputID)
 {
 	int textureCount = aiMat->GetTextureCount(textureType);
 
 	if (aiMat->GetTextureCount(textureType) <= 0)
 	{
-		materialTexture = InvalidResourceID;
+		outputID = InvalidResourceID;
 		return;
 	}
 
@@ -116,7 +129,7 @@ void LoadMaterialTextures(
 	string texturePath = currentDirectory + aiTexturePath.C_Str();
 	replace(texturePath.begin(), texturePath.end(), '\\', '/');
 
-	materialTexture = Resource::Load<Texture>(texturePath, texturePath);
+	outputID = Resource::Load<Texture>(texturePath);
 }
 
 ResourceID Model::CreateMaterial(aiMaterial* aiMat)
@@ -150,6 +163,10 @@ void Model::ProcessNode(aiNode* node, MeshData* parent, const aiScene* scene)
 	{
 		meshData.MeshIDs.emplace_back(node->mMeshes[i]);
 
+		if (!m_ImportMaterials)
+			continue;
+
+		// Import material
 		aiMaterial* material = scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex];
 		meshData.MaterialIDs.emplace_back(CreateMaterial(material));
 	}
@@ -192,31 +209,45 @@ ResourceID Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			indices.emplace_back(mesh->mFaces[i].mIndices[j]);
 
 	return Resource::Load<Mesh>(
-		m_Path + "_MESH_" + mesh->mName.C_Str(),
+		m_Path + "/Mesh/" + mesh->mName.C_Str(),
 		vertices, indices);
 }
 
 
 #pragma region Internal Calls
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(Model, Load, void, (MonoString* path, MonoString* filepath, unsigned int* outID, void** outHandle), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Load, void, (MonoString* pathRaw, uint64_t* outID, void** outHandle), Yonai.Graphics)
 {
-	*outID = Resource::Load<Model>(mono_string_to_utf8(path), mono_string_to_utf8(filepath));
+	if (*outID == InvalidResourceID)
+		*outID = ResourceID(); // Assign resource ID
+
+	char* path = mono_string_to_utf8(pathRaw);
+	Resource::Load<Model>(*outID, path);
 	*outHandle = Resource::Get<Model>(*outID);
+	mono_free(path);
 }
 
-ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), AquaEngine.Graphics)
+ADD_MANAGED_METHOD(Model, Import, void, (void* handle, MonoString* filepath, MonoArray* modelData, bool importMaterials), Yonai.Graphics)
+{
+	vector<unsigned char> data;
+	data.resize(mono_array_length(modelData));
+	for (size_t i = 0; i < data.size(); i++)
+		data[i] = mono_array_get(modelData, unsigned char, i);
+	((Model*)handle)->Import(mono_string_to_utf8(filepath), data, importMaterials);
+}
+
+ADD_MANAGED_METHOD(Model, GetMeshes, void, (void* handle, MonoArray** outMeshIDs, MonoArray** outMaterialIDs), Yonai.Graphics)
 {
 	vector<pair<ResourceID, ResourceID>> meshes = ((Model*)handle)->GetMeshesAndMaterials();
-	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
-	*outMaterialIDs = mono_array_new(mono_domain_get(), mono_get_uint32_class(), meshes.size());
+	*outMeshIDs 	= mono_array_new(mono_domain_get(), mono_get_uint64_class(), meshes.size());
+	*outMaterialIDs = mono_array_new(mono_domain_get(), mono_get_uint64_class(), meshes.size());
 	for(size_t i = 0; i < meshes.size(); i++)
 	{
-		mono_array_set(*outMeshIDs, unsigned int, i, meshes[i].first);
-		mono_array_set(*outMaterialIDs, unsigned int, i, meshes[i].second);
+		mono_array_set(*outMeshIDs, uint64_t, i, meshes[i].first);
+		mono_array_set(*outMaterialIDs, uint64_t, i, meshes[i].second);
 	}
 }
 

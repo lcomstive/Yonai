@@ -1,0 +1,609 @@
+{
+  "Name": "Test World",
+  "Systems": {
+    "TestGame.TestSystem, TestGame": {},
+    "TestGame.CameraControlSystem, TestGame": {}
+  },
+  "Entities": [
+    {
+      "ID": "2654914000653199596",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -22.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "9336376843701531948",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "First"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 0.4422056,
+            "y": 1.55997753,
+            "z": -0.0007536225
+          },
+          "Rotation": {
+            "x": 1.0,
+            "y": 1.61329728E-15,
+            "z": -2.48154184E-23,
+            "w": 4.003465E-38
+          },
+          "Scale": {
+            "x": 0.5599935,
+            "y": 0.5599935,
+            "z": 0.5599041
+          },
+          "Parent": "16765798305678760197"
+        }
+      ]
+    },
+    {
+      "ID": "16765798305678760197",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Second"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "11523984441011527142",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 61.3888931
+          },
+          "Rotation": {
+            "x": 1.0,
+            "y": 1.898916E-09,
+            "z": -4.16334825E-16,
+            "w": 7.90577269E-25
+          },
+          "Scale": {
+            "x": 20.103363,
+            "y": 20.1033249,
+            "z": 20.102787
+          }
+        }
+      ]
+    },
+    {
+      "ID": "2432770377810913269",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -22.3565559,
+            "y": 1.3585614,
+            "z": 2.225293
+          },
+          "Rotation": {
+            "x": -0.593735039,
+            "y": -0.05207437,
+            "z": -0.7999036,
+            "w": 0.0701512247
+          },
+          "Scale": {
+            "x": 9.982737,
+            "y": 9.978056,
+            "z": 9.982791
+          }
+        }
+      ]
+    },
+    {
+      "ID": "5172316110957065007",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -5.0,
+            "y": 0.0,
+            "z": -15.4139395
+          },
+          "Rotation": {
+            "x": 3.51902365E-08,
+            "y": 9.092822E-07,
+            "z": 0.9992521,
+            "w": 0.0386695564
+          },
+          "Scale": {
+            "x": 28.0334587,
+            "y": 28.0337734,
+            "z": 28.0339985
+          }
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        }
+      ]
+    },
+    {
+      "ID": "5810792497182943223",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "5957016784081223613",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -3.46519351,
+            "y": -42.05599,
+            "z": 30.8290749
+          },
+          "Rotation": {
+            "x": 5.446143E-07,
+            "y": 7.28991E-07,
+            "z": 0.8011219,
+            "w": 0.598501265
+          },
+          "Scale": {
+            "x": 34.1144028,
+            "y": 34.1144028,
+            "z": 34.1144028
+          }
+        }
+      ]
+    },
+    {
+      "ID": "8831687503922809722",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "11523984441011527142",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 50.3168869,
+            "y": 2.57626987,
+            "z": 15.4084282
+          },
+          "Rotation": {
+            "x": 0.0541791022,
+            "y": 0.732073665,
+            "z": -0.0500915051,
+            "w": -0.6772176
+          },
+          "Scale": {
+            "x": 22.3149071,
+            "y": 22.3103523,
+            "z": 22.31491
+          }
+        }
+      ]
+    },
+    {
+      "ID": "16643791368294567827",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "16004628581658620464",
+          "Colour": {
+            "r": 1.0,
+            "g": 0.9843137,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 8.484665,
+            "y": 23.0819016,
+            "z": -1.26969743
+          },
+          "Rotation": {
+            "x": 5.914019E-07,
+            "y": 6.915752E-07,
+            "z": 0.760004,
+            "w": 0.6499184
+          },
+          "Scale": {
+            "x": 21.5220642,
+            "y": 21.522047,
+            "z": 21.522047
+          }
+        }
+      ]
+    },
+    {
+      "ID": "14304072608388693376",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -12.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "4888394632879399331",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -25.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "16315931371264259523",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -27.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "18258099385681715863",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -30.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "10345353490343126674",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -32.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "ID": "3947551982180446718",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -19.9576321,
+            "y": -2.7375645E-05,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "TestGame.LerpTest, TestGame",
+          "A": {
+            "x": -1.0,
+            "y": 1.0,
+            "z": 0.0
+          },
+          "B": {
+            "x": 1.0,
+            "y": -1.0,
+            "z": 0.0
+          },
+          "Speed": 1.0,
+          "m_TotalTime": 0.0,
+          "m_DeltaTime": 0.0,
+          "Enabled": true
+        }
+      ]
+    },
+    {
+      "ID": "1432599742301125144",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Camera"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -5.01970434,
+            "y": -3.73521325E-05,
+            "z": 15.9666557
+          },
+          "Rotation": {
+            "x": 0.838198662,
+            "y": -0.07510084,
+            "z": -0.539328337,
+            "w": 0.0301298648
+          },
+          "Scale": {
+            "x": 0.9999869,
+            "y": 0.999981046,
+            "z": 0.999987841
+          }
+        },
+        {
+          "ComponentType": "Yonai.Camera",
+          "FOV": 104.0,
+          "Near": 0.1,
+          "Far": 1000.0,
+          "Orthographic": false,
+          "OrthographicSize": 5.0
+        }
+      ]
+    }
+  ]
+}

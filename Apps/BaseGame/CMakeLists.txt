@@ -21,7 +21,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-	AquaEngine
+	Yonai
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -29,13 +29,15 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 	__STDC_FORMAT_MACROS
 )
 
+add_dependencies(${PROJECT_NAME} YonaiScriptCore)
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	# Copy standard assets to output directory
 	COMMAND echo Copying standard assets to output directory
 	
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Assets/
-		${AQUA_RESOURCES_DIR}/Assets/
+		${YONAI_RESOURCES_DIR}/Assets/
 )
 
 AddPlatformSpecifics()

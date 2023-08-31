@@ -1,0 +1,202 @@
+[
+  {
+    "ID": "2748351086442899399",
+    "Path": "assets://Shaders/Default3D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "1355725971930030094",
+    "Path": "assets://Materials/Default3D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "17654888519075789096",
+    "Path": "assets://Shaders/Default2D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "10488063715184953193",
+    "Path": "assets://Materials/Default2D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "16557712009601639622",
+    "Path": "assets://Textures/texture_09.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "9233319700737574020",
+    "Path": "assets://Shaders/Sprite.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "13249753376079074857",
+    "Path": "project://Assets/Textures/Aqua.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "11523984441011527142",
+    "Path": "project://Assets/Textures/texture_09.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "17893875029413000473",
+    "Path": "assets://Textures/Grid.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "2503069100298430186",
+    "Path": "assets://Models/Quad.fbx",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "3985969865926128624",
+    "Path": "assets://Models/Cube.fbx",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "7184245461181788760",
+    "Path": "assets://Models/Sphere.fbx",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "6050615051925314110",
+    "Path": "assets://Textures/Icons/Folder.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "3663844517421241844",
+    "Path": "assets://Textures/Icons/Kenney/BarsHorizontal.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "9402240873755294397",
+    "Path": "assets://Textures/Icons/Kenney/down.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "6491921991807415711",
+    "Path": "assets://Textures/Icons/Kenney/gear.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "1080511748264785827",
+    "Path": "assets://Textures/Icons/Kenney/Grid.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16066421722549635241",
+    "Path": "assets://Textures/Icons/Kenney/Info.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "9117397796306446457",
+    "Path": "assets://Textures/Icons/Kenney/larger.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "7811071467226727785",
+    "Path": "assets://Textures/Icons/Kenney/Left.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16322892570608267920",
+    "Path": "assets://Textures/Icons/Kenney/Next.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "13474973720486743408",
+    "Path": "assets://Textures/Icons/Kenney/Pause.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "9099140328764650650",
+    "Path": "assets://Textures/Icons/Kenney/power.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "17997262638793016084",
+    "Path": "assets://Textures/Icons/Kenney/Return.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "17634626943338067180",
+    "Path": "assets://Textures/Icons/Kenney/Right.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "3632991332004879151",
+    "Path": "assets://Textures/Icons/Kenney/save.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "5004917073059724037",
+    "Path": "assets://Textures/Icons/Kenney/Smaller.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "13390516027276647249",
+    "Path": "assets://Textures/Icons/Kenney/Stop.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "14125812079017782681",
+    "Path": "assets://Textures/Icons/Kenney/up.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "11564052244470401302",
+    "Path": "assets://Textures/Icons/OS/Mac.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16507977130444182504",
+    "Path": "assets://Textures/Icons/OS/Windows.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "8530925144490985122",
+    "Path": "assets://Audio/Fall.mp3",
+    "Type": "Yonai.Sound"
+  },
+  {
+    "ID": "3052826108601181513",
+    "Path": "assets://Audio/Mixers/SFX.mixer",
+    "Type": "Yonai.SoundMixer"
+  },
+  {
+    "ID": "5957016784081223613",
+    "Path": "project://Assets/Models/Backpack/1001_albedo.jpg",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "1171485554872307630",
+    "Path": "project://Assets/Models/Backpack/1001_AO.jpg",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "165162462275765726",
+    "Path": "project://Assets/Models/Backpack/1001_metallic.jpg",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16004628581658620464",
+    "Path": "project://Assets/Models/Backpack/1001_normal.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "1651027823401074625",
+    "Path": "project://Assets/Models/Backpack/1001_roughness.jpg",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "8302840802280813915",
+    "Path": "project://Assets/Scenes/Test World.json",
+    "Type": "Yonai.World"
+  },
+  {
+    "ID": "3249409979704942351",
+    "Path": "assets://Shaders/NewSpriteShader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  }
+]

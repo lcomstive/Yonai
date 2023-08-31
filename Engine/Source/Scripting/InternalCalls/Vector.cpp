@@ -1,7 +1,7 @@
 #include <glm/glm.hpp>
 #include <mono/jit/jit.h>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
 #pragma region Vector2
 ADD_MANAGED_METHOD(Vector2, Magnitude, float, (glm::vec2* input))

@@ -5,29 +5,61 @@
 * Uses the GLFW library to heavily simplify.
 *
 */
+#include <Yonai/API.hpp>
 
-#include <AquaEngine/Input.hpp>
-#include <AquaEngine/IO/Files.hpp>
-
-#if defined(AQUA_PLATFORM_DESKTOP) && !defined(AQUA_ENGINE_HEADLESS)
-#include <imgui.h>
+#if defined(YONAI_PLATFORM_DESKTOP) && !defined(YONAI_HEADLESS)
+#include <Yonai/Input.hpp>
+#include <Yonai/IO/Files.hpp>
 #include <spdlog/spdlog.h>
-#include <imgui_internal.h>
-#include <AquaEngine/Window.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
 using namespace glm;
-using namespace AquaEngine;
+using namespace Yonai;
+using namespace Yonai::Scripting;
 
 string GamepadMappingPath = "GamepadMappings.txt";
 Window* Window::s_Instance = nullptr;
+bool Window::s_ContextInitialised = false;
+vector<WindowResizeCallback> Window::s_WindowResizeCallbacks = {};
+MonoMethod* Window::s_ManagedMethodScaled = nullptr;
+MonoMethod* Window::s_ManagedMethodResized = nullptr;
 
 void GLFWErrorCallback(int error, const char* message);
 void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
 
+bool Window::InitContext()
+{
+	// Check if already initialised
+	if (s_ContextInitialised)
+		return true;
+
+	if (glfwInit() == GLFW_FALSE)
+	{
+		spdlog::critical("Failed to initialise GLFW");
+		return false;
+	}
+
+	ScriptEngine::AddReloadCallback(GetThunks);
+	GetThunks();
+
+	s_ContextInitialised = true;
+	return true;
+}
+
+void Window::DestroyContext()
+{
+	if (s_ContextInitialised)
+		glfwTerminate();
+	s_ContextInitialised = false;
+}
+
+bool Window::ContextIsInitialised() { return s_ContextInitialised; }
+
 Window::Window() :
 	m_Handle(nullptr),
-	m_Title("Aqua Engine"),
+	m_Title("Yonai"),
 	m_FullscreenMode(FullscreenMode::None)
 {
 	if (s_Instance)
@@ -39,26 +71,17 @@ Window::Window() :
 	// Set instance to this
 	s_Instance = this;
 
-	if (glfwInit() == GLFW_FALSE)
-	{
-		spdlog::critical("Failed to initialise GLFW");
-		return;
-	}
-
 	// Set initial resolution
 	m_Resolution.x = std::max(m_Resolution.x, 800);
 	m_Resolution.x = std::max(m_Resolution.y, 600);
 
-	// Reset window hints
-	glfwDefaultWindowHints();
+	if (!ContextIsInitialised())
+		InitContext();
 
 	// Window creation options //
-	// Set as resizable
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
 	// Set preferred OpenGL version 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-#if !defined(AQUA_PLATFORM_APPLE)
+#if !defined(YONAI_PLATFORM_APPLE)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 #else
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -121,9 +144,9 @@ Window::Window() :
 	SetVSync(true);
 
 	// Update gamepad mappings from local file
-	if (AquaEngine::IO::Exists(GamepadMappingPath))
+	if (Yonai::IO::Exists(GamepadMappingPath))
 	{
-		if (glfwUpdateGamepadMappings(AquaEngine::IO::ReadText(GamepadMappingPath).c_str()))
+		if (glfwUpdateGamepadMappings(Yonai::IO::ReadText(GamepadMappingPath).c_str()))
 			spdlog::debug("Updated gamepad mappings from file '{}'", GamepadMappingPath);
 		else
 			spdlog::warn("Failed to update gamepad mapping from file '{}'", GamepadMappingPath);
@@ -159,6 +182,7 @@ void Window::Destroy()
 		return;
 	s_Instance->Close();
 	delete s_Instance;
+	s_Instance = nullptr;
 }
 
 bool Window::RequestedToClose() { return s_Instance && s_Instance->m_Handle ? glfwWindowShouldClose(s_Instance->m_Handle) : true; }
@@ -181,11 +205,20 @@ void Window::Close()
 
 	// Release GLFW resources
 	glfwDestroyWindow(s_Instance->m_Handle);
-	glfwTerminate();
 
 	// Clear pointers
 	s_Instance->m_Handle = nullptr;
 	s_Instance = nullptr;
+}
+
+void Window::GetThunks()
+{
+	s_ManagedMethodResized = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
+		"_OnResized", 0);
+	s_ManagedMethodScaled = mono_class_get_method_from_name(
+		ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Window"),
+		"_OnContentScaleChanged", 0);
 }
 
 void Window::SetTitle(std::string title)
@@ -210,19 +243,27 @@ ivec2 Window::GetFramebufferResolution(bool useImGui)
 	ivec2 resolution(0, 0);
 	if(!s_Instance)
 		return resolution;
-
-	if(useImGui && GImGui && GImGui->CurrentWindow)
-	{
-		// If inside ImGui window, get window size
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		return { viewportPanelSize.x, viewportPanelSize.y };
-	}
 	
 	glfwGetFramebufferSize(s_Instance->m_Handle, &resolution.x, &resolution.y);
 	return resolution;
 }
 
-vec2 Window::GetContentScaling() { return s_Instance ? s_Instance->m_Scaling : vec2(); }
+vec2 Window::GetContentScaling()
+{
+	if(!s_Instance)
+		return {};
+
+	vec2 output;
+	glfwGetWindowContentScale(s_Instance->m_Handle, &output.x, &output.y);
+	if(output != s_Instance->m_Scaling)
+	{
+		s_Instance->m_Scaling = output;
+		mono_runtime_invoke(s_ManagedMethodScaled, nullptr, nullptr, nullptr);
+
+		spdlog::trace("Window content scaling set to ({}, {})", output.x, output.y);
+	}
+	return s_Instance->m_Scaling;
+}
 
 void Window::CenterOnDisplay()
 {
@@ -387,6 +428,8 @@ void Window::SetVideoMode(const VideoMode mode)
 	glViewport(0, 0, mode.Resolution.x, mode.Resolution.y);
 }
 
+void Window::AddResizedCallback(WindowResizeCallback callback) { s_WindowResizeCallbacks.push_back(callback); }
+
 #pragma region GLFW Callbacks
 void Window::GLFWWindowCloseCallback(GLFWwindow* window) { s_Instance->Close(); }
 
@@ -395,11 +438,18 @@ void Window::GLFWErrorCallback(int error, const char* description)
 	spdlog::error("[GLFW] {}", description);
 }
 
+#include <Yonai/Application.hpp>
 void Window::GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 {
-	s_Instance->m_Resolution = { width, height };
+	glm::ivec2 resolution = { width, height };
+	s_Instance->m_Resolution = resolution;
 	
 	glViewport(0, 0, width, height);
+
+	for (WindowResizeCallback callback : s_WindowResizeCallbacks)
+		callback(resolution);
+
+	mono_runtime_invoke(s_ManagedMethodResized, nullptr, nullptr, nullptr);
 }
 
 void Window::GLFWScrollCallback(GLFWwindow* window, double xOffset, double yOffset) { Input::s_ScrollDelta += (float)yOffset; }
@@ -441,14 +491,9 @@ void Window::GLFWWindowScaleCallback(GLFWwindow* window, float xScale, float ySc
 	if(s_Instance)
 		s_Instance->m_Scaling = { xScale, yScale };
 
-	spdlog::trace("Window content scaling set to ({}, {})", xScale, yScale);
+	mono_runtime_invoke(s_ManagedMethodScaled, nullptr, nullptr, nullptr);
 
-	if (ImGui::GetCurrentContext())
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplayFramebufferScale = { xScale, yScale };
-		io.FontGlobalScale = xScale;
-	}
+	spdlog::trace("Window content scaling set to ({}, {})", xScale, yScale);
 }
 
 void Window::GLFWJoystickCallback(int jid, int event)

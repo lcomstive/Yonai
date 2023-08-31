@@ -1,13 +1,17 @@
 #pragma once
-#include <AquaEngine/Application.hpp>
-#include <AquaEngine/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Application.hpp>
+#include <Yonai/Systems/Global/RenderSystem.hpp>
 
-class BaseGame : public AquaEngine::WindowedApplication
+class BaseGame : public Yonai::WindowedApplication
 {
-protected:
-	void OnUpdate() override;
-	void OnDraw() override;
+	Yonai::Systems::RenderSystem* m_RenderSystem = nullptr;
+	void InitialiseScripting();
 
+public:
+	BaseGame(int argc, char** argv);
+	
+protected:
 	void Setup() override;
-	void Cleanup() override;
+	void OnPreDraw() override;
+	void OnPostDraw() override;
 };

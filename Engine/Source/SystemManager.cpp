@@ -1,16 +1,17 @@
 #include <iostream>
-#include <AquaEngine/World.hpp>
-#include <AquaEngine/SystemManager.hpp>
+#include <Yonai/World.hpp>
+#include <Yonai/Window.hpp>
+#include <Yonai/SystemManager.hpp>
 
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Systems/ScriptSystem.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
-#include <AquaEngine/Scripting/UnmanagedThunks.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Systems/ScriptSystem.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/UnmanagedThunks.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Scripting;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Scripting;
 
 extern SystemMethodInitialiseFn SystemMethodInitialise;
 
@@ -40,6 +41,7 @@ void SystemManager::Destroy()
 			iterator.second->OnDisabled();
 		iterator.second->Destroy();
 		delete iterator.second;
+		m_Systems[iterator.first] = nullptr;
 	}
 	m_Systems.clear();
 
@@ -81,11 +83,19 @@ vector<System*> SystemManager::All()
 	return systems;
 }
 
-bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.end(); }
+bool SystemManager::Has(size_t hash) { return m_Systems.find(hash) != m_Systems.end() && m_Systems[hash]; }
 
-System* SystemManager::Get(size_t hash) { return Has(hash) ? m_Systems[hash] : nullptr; }
+System* SystemManager::Get(size_t hash)
+{
+	if (!Has(hash))
+		return nullptr;
+	System* system = m_Systems[hash];
+	if (system->ManagedData.GCHandle == 0 && ScriptEngine::IsLoaded())
+		system->ManagedData = CreateManagedInstance(hash);
+	return system;
+}
 
-AquaEngine::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t typeHash)
+Yonai::Scripting::ManagedData SystemManager::CreateManagedInstance(size_t typeHash)
 {
 	MonoType* managedType = ScriptEngine::GetTypeFromHash(typeHash);
 	Assembly::ManagedSystemData managedData = ScriptEngine::GetCoreAssembly()->GetManagedSystemData(typeHash);
@@ -115,6 +125,7 @@ void SystemManager::InvalidateAllManagedInstances()
 {
 	for (auto pair : m_Systems)
 	{
+		pair.second->OnScriptingReloadedBefore();
 		if (!pair.second->ManagedData.IsValid())
 			continue;
 		mono_gchandle_free(pair.second->ManagedData.GCHandle);
@@ -127,7 +138,7 @@ void SystemManager::CreateAllManagedInstances()
 	for (auto pair : m_Systems)
 	{
 		pair.second->ManagedData = CreateManagedInstance(pair.first);
-		pair.second->OnScriptingReloaded();
+		pair.second->OnScriptingReloadedAfter();
 	}
 }
 
@@ -151,7 +162,7 @@ ScriptSystem* SystemManager::Add(MonoType* managedType)
 		
 	System* rawSystem = (System*)system;
 	rawSystem->Init();
-	rawSystem->OnScriptingReloaded();
+	rawSystem->Enable();
 
 	return system;
 }
@@ -172,3 +183,6 @@ bool SystemManager::Remove(size_t hash)
 	m_Systems.erase(hash);
 	return true;
 }
+
+bool SystemManager::Remove(MonoType* managedType)
+{ return Remove(Scripting::Assembly::GetTypeHash(managedType)); }

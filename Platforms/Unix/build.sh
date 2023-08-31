@@ -1,27 +1,29 @@
 #!/bin/bash
 
 # Flags:
-#	c: Build type [debug, release, relwithdebinfo]
+#	c: Build type [Debug, Release]
+#	g: Generator (Unix Makefiles, Ninja, etc.)
 #	t: Run tests after building
 #	p: Package output
 
 CONFIG=Release
 TESTING=false
 PACKAGE=false
+GENERATOR="Unix Makefiles"
 
 # Parse input args
-while getopts c:tp flag
+while getopts c:g:tp flag
 do
-	echo "Flag: ${flag}"
 	case "${flag}" in
 		c) 	CONFIG=${OPTARG};;
+		g)	GENERATOR=${OPTARG};;
 		t)	TESTING=true;;
 		p)	PACKAGE=true;;
 		*) ;;
 	esac
 done
 
-echo "Building AquaEngine in ${CONFIG} mode"
+echo "Building Yonai in ${CONFIG} mode with ${GENERATOR}"
 
 # Get script directory
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
@@ -29,12 +31,15 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 ROOT=${SCRIPT_DIR}/../..
 
 # Configure CMake
-cmake -B ${ROOT}/build/ -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
+cmake -B ${ROOT}/build/ -G ${GENERATOR} -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
 
-# Build AquaScriptCore C# project manually
-msbuild ${ROOT}/Apps/AquaScriptCore/AquaScriptCore.csproj -verbosity:minimal -property:Configuration=Release
+# Build YonaiScriptCore C# project
+msbuild ${ROOT}/Apps/YonaiScriptCore/YonaiScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}
 
-# Build AquaEngine and apps
+# Build YonaiScriptEditor C# project
+msbuild ${ROOT}/Apps/YonaiScriptEditor/YonaiScriptEditor.csproj -verbosity:minimal -property:Configuration=${CONFIG}
+
+# Build Yonai and apps
 cmake --build ${ROOT}/build --config ${CONFIG}
 
 # Check for build failure
@@ -45,7 +50,7 @@ fi
 
 # Run tests
 if [ "$TESTING" = true ]; then
-	${ROOT}/build/bin/AquaEngineTest
+	${ROOT}/build/bin/YonaiTest
 
 	# Check for test failure
 	if [ "$?" -ne "0" ]; then

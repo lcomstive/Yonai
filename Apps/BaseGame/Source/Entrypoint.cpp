@@ -2,16 +2,12 @@
 
 int main(int argc, char** argv)
 {
-	BaseGame baseGame;
-	baseGame.ProcessArgs(argc, argv);
-	
-	baseGame.Run(); // Game loop
-
+	BaseGame(argc, argv).Run();
 	return 0;
 }
 
 // Check for Windows compilation, this will be with the "/ENTRY:WinMainCRTStartup" flag
-#if defined(NDEBUG) && defined(AQUA_PLATFORM_WINDOWS)
+#if defined(NDEBUG) && defined(YONAI_PLATFORM_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <stdlib.h>

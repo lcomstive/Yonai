@@ -1,11 +1,14 @@
-#include <AquaEngine/Resource.hpp>
-#include <AquaEngine/Audio/Sound.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Resource.hpp>
+#include <Yonai/Audio/Sound.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
-using namespace AquaEngine;
-using namespace AquaEngine::Systems;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::Systems;
+using namespace Yonai::Components;
+
+extern void (*SoundSourceUpdateManagedState)(MonoObject*, unsigned int, MonoException**);
 
 SoundSource::~SoundSource()
 {
@@ -26,12 +29,14 @@ void SoundSource::Play()
 
 	// Reset pause state
 	m_PausedFrames = 0;
+
+	UpdateManagedState();
 }
 
 void SoundSource::Pause()
 {
 	if (m_State != SoundState::Playing)
-		return;
+		return; // No change
 
 	m_State = SoundState::Paused;
 
@@ -40,12 +45,14 @@ void SoundSource::Pause()
 
 	// Stop playing sound
 	ma_sound_stop(&m_Data);
+
+	UpdateManagedState();
 }
 
 void SoundSource::Resume()
 {
 	if (m_State != SoundState::Paused)
-		return;
+		return; // No change
 
 	m_State = SoundState::Playing;
 
@@ -54,10 +61,15 @@ void SoundSource::Resume()
 
 	// Seek to previous position
 	ma_sound_seek_to_pcm_frame(&m_Data, m_PausedFrames);
+
+	UpdateManagedState();
 }
 
 void SoundSource::Stop()
 {
+	if (m_State == SoundState::Stopped)
+		return; // No change
+
 	// Set state
 	m_State = SoundState::Stopped;
 
@@ -66,6 +78,8 @@ void SoundSource::Stop()
 
 	// Reset pause state
 	m_PausedFrames = 0;
+
+	UpdateManagedState();
 }
 
 float SoundSource::GetVolume() { return m_Volume; }
@@ -158,9 +172,16 @@ void SoundSource::SetSound(ResourceID id)
 	m_Sound = id;
 	Sound* sound = Resource::Get<Sound>(m_Sound);
 
+	if (!sound || sound->GetLength() <= 0.0f)
+	{
+		spdlog::error("Failed to initialise sound source - invalid sound");
+		m_Sound = InvalidResourceID;
+		return;
+	}
+
 	ma_result result = ma_sound_init_copy(&AudioSystem::s_Engine, &sound->m_Sound, sound->c_Flags, nullptr, &m_Data);
 	if(result != MA_SUCCESS)
-		spdlog::error("Failed to initialise sound source [{}]", (int)result);
+		spdlog::error("Failed to initialise sound source - sound engine error [{}]", (int)result);
 
 	// Update values //
 	SetPitch(m_Pitch);
@@ -189,13 +210,23 @@ void SoundSource::SetMixer(ResourceID mixer)
 	ma_node_attach_output_bus(&m_Data, 0, output, 0);
 }
 
-#pragma region Scripting Internal Calls
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+ma_sound* SoundSource::GetHandle() { return &m_Data; }
 
-ADD_MANAGED_METHOD(SoundSource, GetSound, unsigned int, (void* instance))
+void SoundSource::UpdateManagedState()
+{
+	if (!SoundSourceUpdateManagedState) return;
+
+	MonoException* exception = nullptr;
+	SoundSourceUpdateManagedState(ManagedData.GetInstance(), (unsigned int)m_State, &exception);
+}
+
+#pragma region Scripting Internal Calls
+#include <Yonai/Scripting/InternalCalls.hpp>
+
+ADD_MANAGED_METHOD(SoundSource, GetSound, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetSound(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, unsigned int value))
+ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, uint64_t value))
 { ((SoundSource*)instance)->SetSound(value); }
 
 ADD_MANAGED_METHOD(SoundSource, Play, void, (void* instance))
@@ -217,10 +248,10 @@ ADD_MANAGED_METHOD(SoundSource, GetState, unsigned int, (void* instance))
 { return (unsigned int)((SoundSource*)instance)->GetState(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetPlayTime, float, (void* instance))
-{ return (unsigned int)((SoundSource*)instance)->GetPlayTime(); }
+{ return ((SoundSource*)instance)->GetPlayTime(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetLength, float, (void* instance))
-{ return (unsigned int)((SoundSource*)instance)->GetLength(); }
+{ return ((SoundSource*)instance)->GetLength(); }
 
 ADD_MANAGED_METHOD(SoundSource, GetLooping, bool, (void* instance))
 { return ((SoundSource*)instance)->IsLooping(); }
@@ -234,10 +265,10 @@ ADD_MANAGED_METHOD(SoundSource, GetSpatialization, bool, (void* instance))
 ADD_MANAGED_METHOD(SoundSource, SetSpatialization, void, (void* instance, bool value))
 { ((SoundSource*)instance)->SetSpatialization(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetMixer, unsigned int, (void* instance))
+ADD_MANAGED_METHOD(SoundSource, GetMixer, uint64_t, (void* instance))
 { return ((SoundSource*)instance)->GetMixer(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, unsigned int value))
+ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, uint64_t value))
 { ((SoundSource*)instance)->SetMixer(value); }
 
 ADD_MANAGED_METHOD(SoundSource, GetPanning, float, (void* instance))

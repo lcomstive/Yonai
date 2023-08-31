@@ -1,0 +1,383 @@
+@use "sass:math";
+@import url('https://fonts.googleapis.com/css2?family=Archivo');
+
+$font-colour: #fff;
+$font-secondary-colour: darken($font-colour, 7.5%);
+$font-stack: 'Archivo', sans-serif;
+$font-size: 18px;
+$font-size-small: $font-size * 0.8;
+
+$accent-colour: #6038ff;
+$background-colour: #12121c;
+
+$transition: all 0.1s ease-out;
+
+/* Spacing between sections (e.g. landing -> content, content -> footer) */
+$panel-spacing: 35px;
+$content-width: 50vw;
+
+$button-padding: 5px 15px;
+$button-border-width: 3px;
+$button-border-radius: 20px;
+$button-click-colour: darken($accent-colour, 7.5%);
+
+$landing-height: 550px;
+$landing-image-height: $landing-height * 0.45;
+
+/*
+$landing-button-colour: $font-colour;
+$landing-button-bg-colour: $accent-colour;
+$landing-button-shadow-colour: darken($landing-button-bg-colour, 5%);
+*/
+
+$navbar-height: 50px;
+$navbar-icon-height: 30px;
+$navbar-horizontal-padding: 35px;
+
+$footer-vertical-padding: 40px;
+
+$link-colour: lighten($accent-colour, 22.5%);
+$link-hover-colour: lighten($accent-colour, 10%);
+
+$code-padding: 25px;
+$code-background: darken($background-colour, 10%);
+
+// $landing-bg-colour: #1c1c30;
+// $landing-bg-colour: #121215;
+$landing-bg-colour: darken($background-colour, 5%);
+// $landing-bg-colour: #4778ff;
+// $landing-bg-colour: #2f66ff;
+
+$footer-link-underline-colour: $accent-colour;
+// $footer-link-underline-colour: lighten($landing-bg-colour, 15%);
+
+$font-contrast-colour: white; // For text to contrast again $landing-bg-colour
+// $font-contrast-colour: black;
+
+$landing-button-colour: $font-colour;
+$landing-button-bg-colour: $accent-colour;
+$landing-button-shadow-colour: darken($landing-button-bg-colour, 5%);
+
+// $navbar-bg-colour: $accent-colour;
+$navbar-bg-colour: $landing-bg-colour;
+
+html, body
+{
+	font-size: $font-size;
+	width: 100%;
+	margin: 0;
+	font-family: $font-stack;
+	color: $font-colour;
+	background-color: $background-colour;
+	min-height: 100vh;
+	overflow-x: hidden; /* Hide horizontal scrollbar */
+}
+
+button
+{
+	background: none;
+	color: $font-colour;
+	padding: $button-padding;
+	border: $button-border-width solid $accent-colour;
+	border-radius: $button-border-radius;
+	transition: $transition;
+}
+
+button:hover
+{
+	cursor: pointer;
+	background: $accent-colour;
+	transition: $transition;
+}
+
+button:active
+{
+	background: $button-click-colour;
+	border-color: $button-click-colour;
+	transition: $transition;
+}
+
+a { color: $link-colour; }
+a:hover { color: $link-hover-colour; }
+
+.subtitle { color: $font-secondary-colour; }
+
+section
+{
+	position: relative;
+	transition: $transition;
+}
+
+p { letter-spacing: 1.5px; }
+
+hr
+{
+	opacity: 0.5;
+	border-color: $landing-bg-colour;
+}
+
+.code
+{
+	display: block;
+	border-radius: 5px;
+	padding: $code-padding;
+	background-color: darken($background-colour, 5%);
+}
+
+#navbar
+{
+	z-index: 1;
+	background-color: $navbar-bg-colour;
+	justify-content: center;
+	display: flex;
+	font-size: $font-size-small;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: $navbar-height;
+	padding: 0 calc(100vw - $content-width) * 0.5;
+
+	align-items: center;
+
+	a
+	{
+		font-weight: 400;
+		color: white;
+
+		text-decoration: none;
+		padding-right: $navbar-horizontal-padding;
+	}
+
+	a:hover { color: $font-secondary-colour; }
+
+	#nav-home
+	{
+		height: 80%;
+		display: flex;
+		width: fit-content;
+		align-items: center;
+		transition: $transition;
+
+		img { height: $navbar-icon-height; }
+
+		p { padding-left: 5px; }
+	}
+
+	#nav-home:hover
+	{
+		opacity: 0.8;
+		transition: $transition;
+	}
+}
+
+#landing
+{
+	width: 100%;
+	height: $landing-height;
+	background: $landing-bg-colour;
+	text-align: center;
+	margin-bottom: $panel-spacing;
+
+	color: $font-contrast-colour;
+	letter-spacing: 3px;
+	
+	img
+	{
+		margin-top: $landing-height * 0.3 - math.div($landing-image-height, 2);
+		width: auto;
+		height: $landing-image-height;
+	}
+
+	button
+	{
+		letter-spacing: 2px;
+		font-size: $font-size;
+		transition: $transition;
+		color: $landing-button-colour;
+		background-color: $landing-button-bg-colour;
+		border-radius: $button-border-radius * 0.5;
+		border-color: $landing-button-bg-colour;
+		box-shadow: 0px 4px $landing-button-shadow-colour;
+
+		&:hover
+		{
+			border-color: lighten($accent-colour, 5%);
+			background-color: lighten($accent-colour, 5%);
+			transition: $transition;
+			transform: translateY(4px);
+			box-shadow: none;
+		}
+
+		&:active
+		{
+			border-color: lighten($accent-colour, 10%);
+			background-color: lighten($accent-colour, 10%);
+		}
+	}
+}
+
+#content
+{
+	display: block;
+	text-align: left;
+	width: $content-width;
+	padding: 0 calc(100vw - $content-width) * 0.5;
+}
+
+#footer
+{
+	font-size: $font-size-small;
+	
+	position: relative;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin-top: $panel-spacing;
+
+	background: $landing-bg-colour;
+	padding: $footer-vertical-padding * 2 0;
+	padding-left: (100vw - $content-width) * 0.5;
+	padding-right: (100vw - $content-width) * 0.5;
+
+	display: flex;
+	flex-wrap: wrap;
+
+	div:not(.footer-wave) { width: 33%; }
+
+	a
+	{
+		margin-right: 10px;
+		color: $font-colour;
+		text-decoration: underline 2px solid;
+		transition: $transition;
+
+		text-decoration-color: $footer-link-underline-colour;
+	}
+	a:hover
+	{
+		color: darken($font-colour, 15%);
+		transition: $transition;
+	}
+}
+
+/* Waves */
+.landing-wave
+{
+    left: 0;
+    width: 100%;
+    bottom: 0px;
+    line-height: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.landing-wave svg
+{
+    height: 73px;
+	display: block;
+    position: relative;
+    width: calc(149% + 1.3px);
+    transform: rotateY(180deg);
+}
+
+.landing-wave .shape-fill { fill: $background-colour; }
+
+.footer-wave
+{
+    top: 0;
+    left: 0;
+    width: 100%;
+    line-height: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.footer-wave svg
+{
+    height: 63px;
+	display: block;
+    position: relative;
+    width: calc(130% + 1.3px);
+}
+
+.footer-wave .shape-fill { fill: $background-colour; }
+
+.navbar-wave
+{
+    left: 0;
+	top: 0px;
+    width: 100%;
+    line-height: 0;
+    overflow: hidden;
+    position: absolute;
+    transform: rotate(180deg);
+}
+
+.navbar-wave svg
+{
+    height: 26px;
+	display: block;
+    position: relative;
+    width: calc(262% + 1.3px);
+}
+
+.navbar-wave .shape-fill { fill: $navbar-bg-colour; }
+
+/* Media Queries */
+@media screen and (max-width: 1100px)
+{
+	$content-width: 90vw;
+
+	#navbar { padding: 0 calc(100vw - $content-width) * 0.5; }
+
+	#content
+	{
+		width: $content-width;
+		padding: 0 calc(100vw - $content-width) * 0.5;
+	}
+	
+	#footer
+	{
+		padding-left: (100vw - $content-width) * 0.5;
+		padding-right: (100vw - $content-width) * 0.5;
+	}
+}
+
+@media screen and (max-width: 600px)
+{
+	#landing
+	{
+		p { padding: 0 5%; }
+
+		img
+		{
+			width: 75vw;
+			height: auto;
+		}
+	}
+
+	#footer
+	{
+		display: block;
+		padding: $footer-vertical-padding * 2 10%;
+
+		div:not(:first-child)
+		{
+			margin-left: auto;
+			margin-right: auto;
+			width: 80vw !important;
+			margin-bottom: $panel-spacing;
+		}
+	}
+}
+
+@media screen and (max-width: 300px)
+{
+	#navbar a
+	{
+		padding: 0;
+		width: 30%;
+		text-align: center;
+		img { display: none; }
+	}
+}

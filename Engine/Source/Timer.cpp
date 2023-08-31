@@ -1,8 +1,8 @@
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Timer.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Timer.hpp>
 
 using namespace std;
-using namespace AquaEngine;
+using namespace Yonai;
 using namespace std::chrono;
 
 const milliseconds Timer::DefaultInterval = milliseconds(1000);

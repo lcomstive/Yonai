@@ -1,23 +1,26 @@
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
-using namespace AquaEngine::Systems;
+using namespace Yonai::Systems;
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/IO/VFS.hpp>
-#include <AquaEngine/Components/Transform.hpp>
-#include <AquaEngine/Components/SoundSource.hpp>
-#include <AquaEngine/Scripting/ScriptEngine.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Components/Transform.hpp>
+#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
-using namespace AquaEngine;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Scripting;
-using namespace AquaEngine::Components;
+using namespace Yonai;
+using namespace Yonai::IO;
+using namespace Yonai::Scripting;
+using namespace Yonai::Components;
 
 bool AudioSystem::s_EngineActive = false;
 Class* AudioSystem::s_ScriptClass = nullptr;
+
+typedef void (*SoundSourceUpdateManagedStateFn)(MonoObject*, unsigned int, MonoException**);
+SoundSourceUpdateManagedStateFn SoundSourceUpdateManagedState;
 
 // Devices //
 ma_device AudioSystem::s_Device;
@@ -93,8 +96,11 @@ void AudioSystem::Update()
 				source->Stop();
 
 			Transform* transform = source->Entity.GetComponent<Transform>();
-			if(transform)
-				ma_sound_set_position(&source->m_Data, transform->Position.x, transform->Position.y, transform->Position.z);
+			if (transform)
+			{
+				glm::vec3 position = transform->GetPosition();
+				ma_sound_set_position(&source->m_Data, position.x, position.y, position.z);
+			}
 		}
 	}
 }
@@ -189,10 +195,16 @@ void AudioSystem::GetScriptClass()
 	if(s_ScriptClass)
 		delete s_ScriptClass;
 		
-	s_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("AquaEngine", "Audio"), nullptr);
+	s_ScriptClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "Audio"), nullptr);
 
 	s_ScriptClass->Invoke("_RefreshDevices");
 	s_ScriptClass->Invoke("_OutputDeviceChanged");
+
+	// Get SoundSource.UpdateState unmanaged thunk
+	MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SoundSource");
+	MonoMethod* method = mono_class_get_method_from_name(klass, "UpdateState", 1);
+
+	SoundSourceUpdateManagedState = method ? (SoundSourceUpdateManagedStateFn)mono_method_get_unmanaged_thunk(method) : nullptr;
 }
 
 void AudioSystem::SetupResourceManager()

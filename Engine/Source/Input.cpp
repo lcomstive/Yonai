@@ -1,11 +1,11 @@
 #include <map>
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Input.hpp>
-#include <AquaEngine/Window.hpp>
+#include <Yonai/Input.hpp>
+#include <Yonai/Window.hpp>
 
 using namespace std;
 using namespace glm;
-using namespace AquaEngine;
+using namespace Yonai;
 
 bool Input::s_Enabled = true;
 float Input::s_ScrollDelta = 0;
@@ -96,10 +96,10 @@ float Input::GetScrollDelta() { return s_Enabled ? s_ScrollDelta : 0; }
 
 void Input::SetMouseState(MouseState state)
 {
-	if (!s_Enabled)
+	if (!s_Enabled || !Window::GetNativeHandle())
 		return;
 
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 	int glfwState = GLFW_CURSOR_NORMAL;
 	if (state == MouseState::Hidden) glfwState = GLFW_CURSOR_HIDDEN;
 	else if (state == MouseState::Disabled) glfwState = GLFW_CURSOR_DISABLED;
@@ -120,7 +120,7 @@ bool Input::IsGamepadConnected(int index)
 	if (!s_Enabled)
 		return false;
 
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 	return s_ConnectedGamepads[index] != JoystickType::Disconnected;
 #endif
 }
@@ -130,7 +130,7 @@ bool Input::IsButtonUp(int gamepadIndex, GamepadButton button)
 	if (!s_Enabled)
 		return true;
 
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 	GLFWgamepadstate state;
 	if (!glfwGetGamepadState(gamepadIndex, &state))
 		return true; // Gamepad not found. Emulate key being up
@@ -144,7 +144,7 @@ bool Input::IsButtonDown(int gamepadIndex, GamepadButton button)
 	if (!s_Enabled)
 		return false;
 
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 	GLFWgamepadstate state;
 	if (!glfwGetGamepadState(gamepadIndex, &state))
 		return false; // Gamepad not found. Emulate key being up
@@ -158,7 +158,7 @@ float Input::GetAxis(int gamepadIndex, GamepadAxis axis)
 	if (!s_Enabled)
 		return 0;
 
-#if defined(AQUA_PLATFORM_DESKTOP)
+#if defined(YONAI_PLATFORM_DESKTOP)
 	GLFWgamepadstate state;
 	if (!glfwGetGamepadState(gamepadIndex, &state))
 		return 0; // Gamepad not found. Emulate axis being neutral

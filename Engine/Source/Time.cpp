@@ -1,7 +1,7 @@
 #include <spdlog/spdlog.h>
-#include <AquaEngine/Time.hpp>
+#include <Yonai/Time.hpp>
 
-using namespace AquaEngine;
+using namespace Yonai;
 using namespace std::chrono;
 
 double Time::s_FPS = 0;

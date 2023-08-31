@@ -1,7 +1,8 @@
 {
-	"name": "TestGame",
-	"assetsDir": "Assets",
-	"assemblies": [
+	"Name": "TestGame",
+	"AssetDir": "Assets",
+	"Assemblies": [
 		"project://Scripting/bin/TestGame.dll"
-	]
+	],
+	"EditorAssemblies": []
 }

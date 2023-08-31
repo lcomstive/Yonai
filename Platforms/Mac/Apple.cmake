@@ -48,12 +48,12 @@ function (SetRPath)
 
 	get_target_property(targetType ${PROJECT_NAME} TYPE)
 
-	#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		# Add @rpath to executable
-	#	COMMAND echo Adding rpath to executable ${PROJECT_NAME}
-	#	COMMAND install_name_tool -add_rpath @executable_path/../Resources/ $<TARGET_FILE:${PROJECT_NAME}> 	|| (exit 0) # Allow failure
-	#	COMMAND install_name_tool -add_rpath @executable_path/../lib/ $<TARGET_FILE:${PROJECT_NAME}>		|| (exit 0) # Allow failure
-	#)
+		COMMAND echo Adding rpath to executable ${PROJECT_NAME}
+		COMMAND install_name_tool -add_rpath @executable_path/../Resources/ $<TARGET_FILE:${PROJECT_NAME}> 	|| (exit 0) # Allow failure
+		COMMAND install_name_tool -add_rpath @executable_path/../lib/ $<TARGET_FILE:${PROJECT_NAME}>		|| (exit 0) # Allow failure
+	)
 
 	if(targetType STREQUAL "EXECUTABLE")
 		SET(CMAKE_INSTALL_RPATH "@executable_path/../Resources/")

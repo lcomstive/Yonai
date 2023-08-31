@@ -1,10 +1,8 @@
-#include <AquaEngine/IO/VFS.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
-#include <AquaEngine/Systems/Global/AudioSystem.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
+#include <Yonai/Systems/Global/AudioSystem.hpp>
 
 using namespace std;
-using namespace AquaEngine::IO;
-using namespace AquaEngine::Systems;
+using namespace Yonai::Systems;
 
 ADD_MANAGED_METHOD(Audio, GetDeviceCount, unsigned int)
 { return AudioSystem::GetDeviceCount(); }

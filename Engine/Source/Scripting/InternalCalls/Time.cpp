@@ -1,9 +1,9 @@
 #include <mono/jit/jit.h>
-#include <AquaEngine/Time.hpp>
-#include <AquaEngine/Scripting/Assembly.hpp>
-#include <AquaEngine/Scripting/InternalCalls.hpp>
+#include <Yonai/Time.hpp>
+#include <Yonai/Scripting/Assembly.hpp>
+#include <Yonai/Scripting/InternalCalls.hpp>
 
-using namespace AquaEngine;
+using namespace Yonai;
 
 ADD_MANAGED_METHOD(Time, FPS, float)
 { return (float)Time::FPS(); }
