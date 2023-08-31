@@ -7,7 +7,7 @@ namespace Yonai
 
 	struct ResourceBase
 	{
-		YonaiAPI UUID m_ResourceID;
+		UUID m_ResourceID;
 
 		friend class Yonai::Resource;
 

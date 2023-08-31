@@ -55,7 +55,7 @@
 		#define YONAI_IMPORT
 	#endif
 
-	#if defined(YONAI_ENGINE_EXPORT_DLL)
+	#if defined(YONAI_EXPORT_DLL)
 		#define YonaiAPI YONAI_EXPORT
 	#else
 		#define YonaiAPI YONAI_IMPORT

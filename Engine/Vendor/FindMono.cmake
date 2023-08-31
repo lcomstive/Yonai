@@ -26,7 +26,7 @@
 
 ]]
 
-set(MONO_FOUND       FALSE)
+set(MONO_FOUND FALSE)
 set(MONO_LIBRARY_DIRS "")
 set(MONO_INCLUDE_DIRS "")
 
@@ -40,12 +40,15 @@ function(CheckMonoInstallDir rootDir)
     set(MONO_INCLUDE_DIRS ${rootDir}/include/mono-2.0 PARENT_SCOPE)
     set(MONO_FOUND TRUE PARENT_SCOPE)
 
+	unset(MONO_LIBRARY CACHE)
+
     if(BUILD_SHARED_LIBS)
         find_file(MONO_LIBRARY NAMES
             mono-2.0-sgen.lib       # Windows
             libmonosgen-2.0.so      # Linux
             libmonosgen-2.0.dylib   # Mac
-            PATHS "${rootDir}/lib" REQUIRED)
+            PATHS "${rootDir}/lib"
+			NO_CACHE REQUIRED)
 
         if(NOT WIN32)
             set(MONO_SHARED_LIB ${MONO_LIBRARY} PARENT_SCOPE)
@@ -56,8 +59,9 @@ function(CheckMonoInstallDir rootDir)
         find_file(MONO_LIBRARY NAMES
             libmono-static-sgen.lib # Windows
             libmonosgen-2.0.a       # Linux / Mac
-            PATHS "${rootDir}/lib" REQUIRED)
-    endif()
+            PATHS "${rootDir}/lib"
+			NO_CACHE REQUIRED)
+	endif()
 
     message("Mono library: ${MONO_LIBRARY}")
 
@@ -84,8 +88,8 @@ elseif(UNIX)
 endif()
 
 foreach(monoDir IN LISTS MONO_POTENTIAL_DIRS)
-    CheckMonoInstallDir(${monoDir})
-    if(MONO_FOUND)
+	CheckMonoInstallDir(${monoDir})
+	if(MONO_FOUND)
         break()
     endif()
 endforeach()

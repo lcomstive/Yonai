@@ -123,8 +123,8 @@ namespace Yonai::Scripting
 		}
 
 	private:
-		YonaiAPI static std::unordered_map<MonoType*, size_t> s_TypeHashes;
-		YonaiAPI static std::unordered_map<size_t, MonoType*> s_ReverseTypeHashes;
+		static std::unordered_map<MonoType*, size_t> s_TypeHashes;
+		static std::unordered_map<size_t, MonoType*> s_ReverseTypeHashes;
 		
 		/// <summary>
 		/// Hashes all types.
