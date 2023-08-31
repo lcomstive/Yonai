@@ -48,7 +48,7 @@ function(CheckMonoInstallDir rootDir)
             libmonosgen-2.0.so      # Linux
             libmonosgen-2.0.dylib   # Mac
             PATHS "${rootDir}/lib"
-			NO_CACHE REQUIRED)
+			REQUIRED)
 
         if(NOT WIN32)
             set(MONO_SHARED_LIB ${MONO_LIBRARY} PARENT_SCOPE)
@@ -60,7 +60,7 @@ function(CheckMonoInstallDir rootDir)
             libmono-static-sgen.lib # Windows
             libmonosgen-2.0.a       # Linux / Mac
             PATHS "${rootDir}/lib"
-			NO_CACHE REQUIRED)
+			REQUIRED)
 	endif()
 
     message("Mono library: ${MONO_LIBRARY}")
