@@ -15,19 +15,22 @@ namespace Yonai
 
 			ResourceID = resourceID;
 			Handle = handle;
+
+			OnImported();
 		}
 
 		protected override void OnImported()
 		{
-			if(TryGetImportSettings(out SoundImportSettings importSettings))
-				_Import(Handle, VFS.ExpandPath(ResourcePath));
-			else
-				_Import(Handle, string.Empty);
+			SoundImportSettings settings;
+			if (TryGetImportSettings(out settings))
+				settings = new SoundImportSettings();
+
+			_Import(Handle, VFS.Read(ResourcePath));
 		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string audioFilePath);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, byte[] data);
 		#endregion
 	}
 }

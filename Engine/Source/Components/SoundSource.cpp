@@ -85,12 +85,7 @@ void SoundSource::Stop()
 float SoundSource::GetVolume() { return m_Volume; }
 SoundState SoundSource::GetState() { return m_State; }
 bool SoundSource::IsPlaying() { return m_State == SoundState::Playing; }
-float SoundSource::GetLength()
-{
-	float length;
-	ma_sound_get_length_in_seconds(&m_Data, &length);
-	return length;
-}
+float SoundSource::GetLength() { return m_Length; }
 
 float SoundSource::GetPlayTime()
 {
@@ -178,10 +173,18 @@ void SoundSource::SetSound(ResourceID id)
 		m_Sound = InvalidResourceID;
 		return;
 	}
-
-	ma_result result = ma_sound_init_copy(&AudioSystem::s_Engine, &sound->m_Sound, sound->c_Flags, nullptr, &m_Data);
-	if(result != MA_SUCCESS)
+	
+	ma_result result = ma_sound_init_from_data_source(
+		&AudioSystem::s_Engine,
+		&sound->m_Decoder,
+		0,
+		nullptr,
+		&m_Data
+	);
+	if (result != MA_SUCCESS)
 		spdlog::error("Failed to initialise sound source - sound engine error [{}]", (int)result);
+	else
+		ma_sound_get_length_in_seconds(&m_Data, &m_Length);
 
 	// Update values //
 	SetPitch(m_Pitch);

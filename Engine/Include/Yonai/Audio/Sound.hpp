@@ -12,20 +12,17 @@ namespace Yonai
 	struct Sound
 	{
 		YonaiAPI Sound();
-		YonaiAPI Sound(std::string& filepath);
+		YonaiAPI Sound(std::vector<unsigned char>& data);
 		YonaiAPI ~Sound();
 
-		YonaiAPI void Import(const char* filepath);
-		YonaiAPI void Import(std::string filepath);
+		YonaiAPI void Import(std::vector<unsigned char>& data);
 
 		/// <returns>Length of the clip, in seconds</returns>
 		YonaiAPI float GetLength();
 
 	private:
-		const unsigned int c_Flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE; // | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_ASYNC | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
-
-		ma_sound m_Sound;
-		std::string m_FilePath;
+		ma_decoder m_Decoder;
+		std::vector<unsigned char> m_Data;
 
 		friend struct Yonai::Components::SoundSource;
 	};

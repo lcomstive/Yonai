@@ -104,6 +104,9 @@ namespace Yonai
 			// Volume of output sound
 			float m_Volume = 1.0f;
 
+			// Length of loaded sound
+			float m_Length = 0.0f;
+
 			// Where to seek when resuming
 			ma_uint64 m_PausedFrames = 0;
 

@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <Yonai/Resource.hpp>
 #include <Yonai/Audio/Sound.hpp>
 #include <Yonai/Systems/Global/AudioSystem.hpp>
 
@@ -6,37 +7,36 @@ using namespace std;
 using namespace Yonai;
 using namespace Yonai::Systems;
 
-Sound::Sound() : m_Sound() { }
-Sound::Sound(string& filepath) : m_Sound() { Import(filepath); }
+Sound::Sound() : m_Decoder(), m_Data() { }
+Sound::Sound(std::vector<unsigned char>& data) : m_Decoder(), m_Data() { Import(data); }
 
-Sound::~Sound() { ma_sound_uninit(&m_Sound); }
+Sound::~Sound() { ma_decoder_uninit(&m_Decoder); }
 
 float Sound::GetLength()
 {
-	float output;
-	ma_sound_get_length_in_seconds(&m_Sound, &output);
-	return output;
+	float seconds = m_Data.empty() ? 0 : m_Data.size() / (float)AudioSystem::s_Engine.sampleRate;
+	spdlog::debug("Sound length is {}s", seconds);
+	return seconds;
 }
 
-void Sound::Import(const char* filepath) { Import(string(filepath)); }
-void Sound::Import(string filepath)
+void Sound::Import(vector<unsigned char>& data)
 {
-	if (!m_FilePath.empty())
+	if (!m_Data.empty())
 		// Unload previously loaded sound
-		ma_sound_uninit(&m_Sound);
+		ma_decoder_uninit(&m_Decoder);
 
-	m_FilePath = filepath;
+	// Copy data
+	m_Data = data;
 
 	// Check if there is a sound to load
-	if (m_FilePath.empty())
+	if (data.empty())
 		return;
 
-	ma_result result = ma_sound_init_from_file(&AudioSystem::s_Engine, m_FilePath.c_str(), c_Flags, nullptr, nullptr, &m_Sound);
+	// Create audio buffer
+	ma_decoder_config config = ma_decoder_config_init_default();
+	ma_result result = ma_decoder_init_memory(m_Data.data(), m_Data.size(), &config, &m_Decoder);
 	if (result != MA_SUCCESS)
-	{
-		spdlog::warn("Failed to create sound for '{}' [{}]", m_FilePath.c_str(), (int)result);
-		return;
-	}
+		spdlog::error("Failed to decode audio data [{}]", (int)result);
 }
 
 #pragma region Scripting Bindings
@@ -53,10 +53,13 @@ ADD_MANAGED_METHOD(Sound, Load, void, (MonoString* path, unsigned long long* out
 	mono_free(resourcePath);
 }
 
-ADD_MANAGED_METHOD(Sound, Import, void, (void* handle, MonoString* path))
+ADD_MANAGED_METHOD(Sound, Import, void, (void* instance, MonoArray* audioDataRaw))
 {
-	char* filepath = mono_string_to_utf8(path);
-	((Sound*)handle)->Import(filepath);
-	mono_free(filepath);
+	vector<unsigned char> audioData;
+	audioData.resize(mono_array_length(audioDataRaw));
+	for (size_t i = 0; i < audioData.size(); i++)
+		audioData[i] = mono_array_get(audioDataRaw, unsigned char, i);
+
+	((Sound*)instance)->Import(audioData);
 }
 #pragma endregion
