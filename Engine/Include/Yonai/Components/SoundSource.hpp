@@ -93,6 +93,7 @@ namespace Yonai
 
 		private:
 			ma_sound m_Data = {};
+			ma_decoder m_Decoder = {};
 			ResourceID m_Sound = InvalidResourceID;
 			ResourceID m_Mixer = InvalidResourceID;
 

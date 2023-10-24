@@ -13,7 +13,6 @@ namespace Yonai
 	{
 		YonaiAPI Sound();
 		YonaiAPI Sound(std::vector<unsigned char>& data);
-		YonaiAPI ~Sound();
 
 		YonaiAPI void Import(std::vector<unsigned char>& data);
 
@@ -21,7 +20,6 @@ namespace Yonai
 		YonaiAPI float GetLength();
 
 	private:
-		ma_decoder m_Decoder;
 		std::vector<unsigned char> m_Data;
 
 		friend struct Yonai::Components::SoundSource;

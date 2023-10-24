@@ -154,6 +154,7 @@ void SoundSource::SetSound(ResourceID id)
 		// Uninitialise
 		m_Sound = InvalidResourceID;
 		ma_sound_uninit(&m_Data);
+		ma_decoder_uninit(&m_Decoder);
 		return;
 	}
 
@@ -161,11 +162,16 @@ void SoundSource::SetSound(ResourceID id)
 		!Resource::IsValidType<Sound>(id)) // Not a valid sound
 		return; 
 
-	if(m_Sound != InvalidResourceID)
-		ma_sound_uninit(&m_Data); // Release previously loaded sound
+	if (m_Sound != InvalidResourceID)
+	{
+		// Release previously loaded sound
+		ma_sound_uninit(&m_Data);
+		ma_decoder_uninit(&m_Decoder);
+	}
 
 	m_Sound = id;
 	Sound* sound = Resource::Get<Sound>(m_Sound);
+	m_Length = 0;
 
 	if (!sound || sound->GetLength() <= 0.0f)
 	{
@@ -174,9 +180,14 @@ void SoundSource::SetSound(ResourceID id)
 		return;
 	}
 	
-	ma_result result = ma_sound_init_from_data_source(
+	ma_decoder_config config = ma_decoder_config_init_default();
+	ma_result result = ma_decoder_init_memory(sound->m_Data.data(), sound->m_Data.size(), &config, &m_Decoder);
+	if (result != MA_SUCCESS)
+		spdlog::error("Failed to decode audio data [{}]", (int)result);
+
+	result = ma_sound_init_from_data_source(
 		&AudioSystem::s_Engine,
-		&sound->m_Decoder,
+		&m_Decoder,
 		0,
 		nullptr,
 		&m_Data

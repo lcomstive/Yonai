@@ -6,45 +6,6 @@
   },
   "Entities": [
     {
-      "ID": "2654914000653199596",
-      "Components": [
-        {
-          "ComponentType": "Yonai.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "Yonai.SpriteRenderer",
-          "Sprite": null,
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": null
-        },
-        {
-          "ComponentType": "Yonai.Transform",
-          "Position": {
-            "x": -22.5,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
-        }
-      ]
-    },
-    {
       "ID": "9336376843701531948",
       "Components": [
         {
@@ -81,6 +42,45 @@
             "z": 0.5599041
           },
           "Parent": "16765798305678760197"
+        }
+      ]
+    },
+    {
+      "ID": "2654914000653199596",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -22.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
         }
       ]
     },
@@ -602,6 +602,46 @@
           "Far": 1000.0,
           "Orthographic": false,
           "OrthographicSize": 5.0
+        }
+      ]
+    },
+    {
+      "ID": "15523994241803870145",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Music"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 0.999390841,
+            "y": 1.70175509E-14,
+            "z": 0.0348994955,
+            "w": -5.94265928E-16
+          },
+          "Scale": {
+            "x": 0.999999642,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "Yonai.SoundSource",
+          "SoundID": "15564696848780762281",
+          "Sound": "15564696848780762281",
+          "MixerID": "3437626003313958651",
+          "Spatialise": true,
+          "Volume": 1.0,
+          "Panning": 0.0,
+          "Pitch": 1.0,
+          "IsLooping": false,
+          "State": "Stopped"
         }
       ]
     }
