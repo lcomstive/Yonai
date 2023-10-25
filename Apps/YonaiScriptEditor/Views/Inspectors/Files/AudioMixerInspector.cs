@@ -1,6 +1,7 @@
+using Newtonsoft.Json.Linq;
 using Yonai;
-using System;
 using Yonai.IO;
+using YonaiEditor.Commands;
 
 namespace YonaiEditor.Inspectors
 {
@@ -9,7 +10,7 @@ namespace YonaiEditor.Inspectors
 	{
 		private AudioMixer m_Target;
 		private string m_ParentMixerPath = string.Empty;
-		private SoundMixerImportSettings m_Settings;
+		private AudioMixerImportSettings m_Settings;
 
 		public override void OnTargetChanged()
 		{
@@ -39,6 +40,16 @@ namespace YonaiEditor.Inspectors
 			m_Settings.Name = Draw("Name", m_Settings.Name);
 			m_Settings.Volume = Draw("Volume", m_Settings.Volume, new RangeAttribute(1.0f));
 
+			if(m_Settings.Volume != m_Target.Volume && ImGUI.IsAnyMouseReleased())
+			{
+				float oldVolume = m_Target.Volume;
+				float newVolume = m_Settings.Volume;
+				CommandHistory.Execute(new CommandRelay(
+					() => m_Target.Volume = m_Settings.Volume = newVolume,
+					() => m_Target.Volume = m_Settings.Volume = oldVolume
+				));
+			}
+
 			if (DrawFilepath("Parent Mixer", m_ParentMixerPath, out VFSFile newParentMixerPath, m_Target.ResourceID /* Cannot select self */, ".mixer"))
 			{
 				m_ParentMixerPath = newParentMixerPath;
@@ -66,7 +77,7 @@ namespace YonaiEditor.Inspectors
 
 		private void RefreshSettings()
 		{
-			m_Settings = new SoundMixerImportSettings()
+			m_Settings = new AudioMixerImportSettings()
 			{
 				Name = m_Target.Name,
 				Volume = m_Target.Volume,

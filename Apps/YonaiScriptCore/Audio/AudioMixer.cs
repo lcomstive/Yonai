@@ -2,10 +2,11 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.CompilerServices;
+using System.Net.Configuration;
 
 namespace Yonai
 {
-	public struct SoundMixerImportSettings : IImportSettings
+	public struct AudioMixerImportSettings : IImportSettings
 	{
 		public string Name;
 		public float Volume;
@@ -73,12 +74,13 @@ namespace Yonai
 
 		protected override void OnImported()
 		{
-			if (!TryGetImportSettings(out SoundMixerImportSettings settings))
+			if (!TryGetImportSettings(out AudioMixerImportSettings settings))
 				return;
 
-			m_Name = settings.Name;
-			m_Volume = settings.Volume;
-			m_ParentMixerID = settings.ParentMixer;
+			_SetName(Handle, m_Name = settings.Name);
+			_SetVolume(Handle, m_Volume = settings.Volume);
+			_SetParent(Handle, m_ParentMixerID = settings.ParentMixer);
+
 			m_ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(ParentMixerID);
 		}
 
@@ -88,7 +90,7 @@ namespace Yonai
 				new JProperty("ParentMixer", ParentMixerID.ToString())
 			);
 
-		public void OnDeserialize(JObject json) => Import(new SoundMixerImportSettings()
+		public void OnDeserialize(JObject json) => Import(new AudioMixerImportSettings()
 		{
 			Name		= json["Name"].Value<string>(),
 			Volume		= json["Volume"].Value<float>(),
