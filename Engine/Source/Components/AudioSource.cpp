@@ -8,7 +8,7 @@ using namespace Yonai;
 using namespace Yonai::Systems;
 using namespace Yonai::Components;
 
-extern void (*SoundSourceUpdateManagedState)(MonoObject*, unsigned int, MonoException**);
+extern void (*AudioSourceUpdateManagedState)(MonoObject*, unsigned int, MonoException**);
 
 AudioSource::~AudioSource()
 {
@@ -228,10 +228,10 @@ ma_sound* AudioSource::GetHandle() { return &m_Data; }
 
 void AudioSource::UpdateManagedState()
 {
-	if (!SoundSourceUpdateManagedState) return;
+	if (!AudioSourceUpdateManagedState) return;
 
 	MonoException* exception = nullptr;
-	SoundSourceUpdateManagedState(ManagedData.GetInstance(), (unsigned int)m_State, &exception);
+	AudioSourceUpdateManagedState(ManagedData.GetInstance(), (unsigned int)m_State, &exception);
 }
 
 #pragma region Scripting Internal Calls
