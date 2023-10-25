@@ -103,6 +103,8 @@ void AudioSystem::Update()
 			}
 		}
 	}
+
+	
 }
 
 void AudioSystem::RefreshDevices()

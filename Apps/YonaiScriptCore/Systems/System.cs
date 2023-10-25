@@ -11,6 +11,13 @@ namespace Yonai
 		/// </summary>
 		public World World { get; private set; } = null;
 
+		private bool m_Enabled = false;
+		public bool IsEnabled
+		{
+			get => m_Enabled;
+			set => Enable(value);
+		}
+
 		/// <summary>
 		/// Called once per frame after <see cref="Update"/>,
 		/// when the screen is being drawn to
@@ -43,7 +50,7 @@ namespace Yonai
 		/// <summary>
 		/// Called when the attached <see cref="Entity"/> is about to be destroyed (after <see cref="OnDisabled"/>)
 		/// </summary>
-		protected virtual void Destroyed() { }
+		protected virtual void Destroyed() { Log.Trace("Destroyed " + GetType().Name);  }
 
 		public virtual JObject OnSerialize() => new JObject();
 
@@ -117,7 +124,8 @@ namespace Yonai
 		// Called from C++
 		private void _Enable(bool enable)
 		{
-			if (enable)
+			m_Enabled = enable;
+			if (m_Enabled)
 				Enabled();
 			else
 				Disabled();

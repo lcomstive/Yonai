@@ -63,7 +63,7 @@ size_t World::EntityCount() { return m_Entities.size(); }
 vector<Entity> World::Entities()
 {
 	vector<Entity> entities;
-	for (auto pair : m_Entities)
+	for (auto& pair : m_Entities)
 		entities.push_back(pair.second);
 	return entities;
 }

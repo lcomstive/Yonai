@@ -139,7 +139,7 @@ namespace TestGame
 			SoundSource source = e.AddComponent<SoundSource>();
 			source.Sound = m_Sound;
 			source.Spatialise = false;
-			source.Pitch += Random.Range(1.0f);
+			source.Pitch += Random.Range(3.0f);
 			source.Mixer = m_SoundMixer;
 			source.Volume = Random.Range(0.5f, 1.0f);
 			source.Play();

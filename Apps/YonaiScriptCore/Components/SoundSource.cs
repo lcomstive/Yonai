@@ -34,6 +34,7 @@ namespace Yonai
 			}
 		}
 
+		[Serialize(false)]
 		public Sound Sound
 		{
 			get => m_Sound;
@@ -96,6 +97,8 @@ namespace Yonai
 			set { if (m_Pitch != value) _SetPitch(Handle, m_Pitch = value); }
 		}
 
+		public bool PlayOnStart { get; set; } = true;
+
 		public bool IsPlaying => _IsPlaying(Handle);
 
 		/// <summary>
@@ -120,6 +123,7 @@ namespace Yonai
 		/// <summary>
 		/// Current play state of the sound source
 		/// </summary>
+		[Serialize(false)]
 		public SoundState State
 		{
 			get => m_State;
@@ -127,18 +131,25 @@ namespace Yonai
 			{
 				if (m_State == value) return; // No change
 
-				switch(m_State = value)
+				switch(value)
 				{
 					default:
 					case SoundState.Stopped: Stop(); break;
-					case SoundState.Playing: Play(); break;
 					case SoundState.Paused: Pause(); break;
+					case SoundState.Playing:
+						if (m_State == SoundState.Stopped)
+							Play();
+						else
+							Resume();
+						break;
 				}
+				m_State = value;
 			}
 		}
 
 		public void Play()	=> _Play(Handle);
 		public void Pause() => _Pause(Handle);
+		public void Resume()=> _Resume(Handle);
 		public void Stop()	=> _Stop(Handle);
 		public void Seek(float seconds) => _Seek(Handle, seconds);
 
@@ -160,17 +171,14 @@ namespace Yonai
 
 		#region Internal Calls
 		// Called from unmanaged code
-		private void UpdateState(uint newState)
-		{
-			if (newState != (uint)m_State)
-				m_State = (SoundState)newState;
-		}
+		private void UpdateState(uint newState) => m_State = (SoundState)newState;
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSound(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSound(IntPtr handle, ulong soundClip);
 	
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Play(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Pause(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Resume(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Stop(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Seek(IntPtr handle, float seconds);
 

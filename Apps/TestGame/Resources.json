@@ -80,6 +80,16 @@
     "Type": "Yonai.World"
   },
   {
+    "ID": "15564696848780762281",
+    "Path": "project://Assets/Audio/Lifelike.mp3",
+    "Type": "Yonai.Sound"
+  },
+  {
+    "ID": "3437626003313958651",
+    "Path": "project://Assets/Audio/Mixers/Music.mixer",
+    "Type": "Yonai.SoundMixer"
+  },
+  {
     "ID": "16671424069372627019",
     "Path": "assets://Textures/Grid.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
@@ -195,19 +205,9 @@
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "15564696848780762281",
-    "Path": "project://Assets/Audio/Lifelike.mp3",
-    "Type": "Yonai.Sound"
-  },
-  {
     "ID": "8228368604184070712",
     "Path": "project://Assets/Audio/Bell.mp3",
     "Type": "Yonai.Sound"
-  },
-  {
-    "ID": "3437626003313958651",
-    "Path": "project://Assets/Audio/Mixers/Music.mixer",
-    "Type": "Yonai.SoundMixer"
   },
   {
     "ID": "4313129052256872287",
@@ -223,10 +223,5 @@
     "ID": "7273131558815685237",
     "Path": "assets://Shaders/NewSpriteShader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
-  },
-  {
-    "ID": "16511887528996251469",
-    "Path": "project://Assets/Scenes/Test World.json (Clone)",
-    "Type": "Yonai.World"
   }
 ]

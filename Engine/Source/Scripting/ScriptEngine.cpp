@@ -295,6 +295,8 @@ void ScriptEngine::Reload(bool force)
 	Timer timer;
 	timer.Start();
 
+	spdlog::trace("Reloading script engine");
+
 	// Call pre-reload callbacks
 	for (const function<void()>& callback : s_PreReloadCallbacks)
 		callback();
@@ -344,11 +346,11 @@ void ScriptEngine::Reload(bool force)
 			continue;
 		}
 
-		spdlog::debug("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
+		spdlog::trace("Reloading assembly '{}' {}", assemblyPath.Path, assemblyPath.WatchForChanges ? " (watching for changes)" : "");
 		LoadAssembly(assemblyPath.Path, assemblyPath.WatchForChanges);
 	}
 
-	spdlog::debug("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
+	spdlog::trace("Loaded scripting assemblies in {}ms", timer.ElapsedTime().count());
 
 	SystemManager::Global()->CreateAllManagedInstances();
 	worlds = World::GetWorlds(); // Refresh worlds, as they can be created or destroyed with C# scripts
@@ -361,7 +363,7 @@ void ScriptEngine::Reload(bool force)
 	s_IsReloading = false;
 
 	timer.Stop();
-	spdlog::debug("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
+	spdlog::trace("Reloaded scripting engine in {}ms", timer.ElapsedTime().count());
 }
 
 /// <returns>The managed type with matching hash, or nullptr if not found in any loaded assembly</returns>
