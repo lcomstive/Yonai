@@ -110,15 +110,15 @@
             "z": 2.225293
           },
           "Rotation": {
-            "x": -0.593735039,
-            "y": -0.05207437,
-            "z": -0.7999036,
-            "w": 0.0701512247
+            "x": 0.593735158,
+            "y": 0.05207438,
+            "z": 0.7999035,
+            "w": -0.07015122
           },
           "Scale": {
-            "x": 9.982737,
+            "x": 9.982736,
             "y": 9.978056,
-            "z": 9.982791
+            "z": 9.98279
           }
         }
       ]
@@ -585,13 +585,13 @@
           },
           "Rotation": {
             "x": 0.838198662,
-            "y": -0.07510084,
+            "y": -0.07510086,
             "z": -0.539328337,
-            "w": 0.0301298648
+            "w": 0.0301298574
           },
           "Scale": {
             "x": 0.9999869,
-            "y": 0.999981046,
+            "y": 0.9999809,
             "z": 0.999987841
           }
         },
@@ -602,6 +602,9 @@
           "Far": 1000.0,
           "Orthographic": false,
           "OrthographicSize": 5.0
+        },
+        {
+          "ComponentType": "Yonai.AudioListener"
         }
       ]
     },
@@ -635,11 +638,61 @@
           "ComponentType": "Yonai.AudioSource",
           "SoundID": "15564696848780762281",
           "MixerID": "3437626003313958651",
-          "Is3D": true,
+          "Is3D": false,
           "Volume": 1.0,
           "Panning": 0.0,
           "Pitch": 1.0,
           "PlayOnStart": false,
+          "IsLooping": false
+        }
+      ]
+    },
+    {
+      "ID": "3792561804110777424",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "3D Audio Test"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 8.221973,
+            "y": 2.16969376E-08,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 7.383325E-09,
+            "y": 0.509892,
+            "z": 2.86941884E-08,
+            "w": 0.860238433
+          },
+          "Scale": {
+            "x": 0.999999642,
+            "y": 0.9999993,
+            "z": 1.00000012
+          }
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "11523984441011527142",
+          "Colour": {
+            "r": 0.313941777,
+            "g": 1.0,
+            "b": 0.247549,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        },
+        {
+          "ComponentType": "Yonai.AudioSource",
+          "SoundID": "15564696848780762281",
+          "MixerID": "0",
+          "Is3D": true,
+          "Volume": 1.0,
+          "Panning": 0.0,
+          "Pitch": 1.0,
+          "PlayOnStart": true,
           "IsLooping": false
         }
       ]

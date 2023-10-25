@@ -9,6 +9,7 @@
 #include <Yonai/Components/Transform.hpp>
 #include <Yonai/Components/AudioSource.hpp>
 #include <Yonai/Components/MeshRenderer.hpp>
+#include <Yonai/Components/AudioListener.hpp>
 #include <Yonai/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
@@ -231,6 +232,7 @@ void Assembly::LoadScriptCoreTypes()
 	BindManagedComponent<Components::Transform>("Yonai", "Transform");
 	BindManagedComponent<Components::AudioSource>("Yonai", "AudioSource");
 	BindManagedComponent<Components::MeshRenderer>("Yonai", "MeshRenderer");
+	BindManagedComponent<Components::AudioListener>("Yonai", "AudioListener");
 	BindManagedComponent<Components::SpriteRenderer>("Yonai", "SpriteRenderer");
 
 	BindManagedSystem<Systems::SceneSystem>("Yonai", "SceneManager");

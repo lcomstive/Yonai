@@ -223,5 +223,15 @@
     "ID": "2580468024421658715",
     "Path": "assets://Shaders/NewSpriteShader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "7075915977349235237",
+    "Path": "project://Assets/Audio/Fall.mp3",
+    "Type": "Yonai.AudioData"
+  },
+  {
+    "ID": "7104088910725108697",
+    "Path": "project://Assets/Scenes/Test World.json (Clone)",
+    "Type": "Yonai.World"
   }
 ]

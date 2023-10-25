@@ -9,6 +9,7 @@ using namespace Yonai::Systems;
 #include <Yonai/Components/Transform.hpp>
 #include <Yonai/Components/AudioSource.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
+#include <Yonai/Components/AudioListener.hpp>
 
 using namespace std;
 using namespace Yonai;
@@ -97,11 +98,14 @@ void AudioSystem::Update()
 	if (!sceneSystem)
 		sceneSystem = SystemManager::Global()->Get<SceneSystem>();
 
+	int listenerIndex = 0;
+
+	// Audio Source
 	vector<World*> scenes = sceneSystem->GetActiveScenes();
 	for (World* scene : scenes)
 	{
-		vector<AudioSource*> soundSources = scene->GetComponents<AudioSource>();
-		for (AudioSource* source : soundSources)
+		vector<AudioSource*> sources = scene->GetComponents<AudioSource>();
+		for (AudioSource* source : sources)
 		{
 			// Check if finished playing
 			if (source->IsPlaying() &&
@@ -109,11 +113,26 @@ void AudioSystem::Update()
 				source->Stop();
 
 			Transform* transform = source->Entity.GetComponent<Transform>();
-			if (transform)
-			{
-				glm::vec3 position = transform->GetPosition();
-				ma_sound_set_position(&source->m_Data, position.x, position.y, position.z);
-			}
+			if (!transform)
+				continue;
+
+			glm::vec3 pos = transform->GetGlobalPosition();
+			ma_sound_set_position(&source->m_Data, pos.x, pos.y, pos.z);
+		}
+
+		vector<AudioListener*> listeners = scene->GetComponents<AudioListener>();
+		for (AudioListener* listener : listeners)
+		{
+			Transform* transform = listener->Entity.GetComponent<Transform>();
+			if (!transform)
+				continue;
+
+			glm::vec3 pos = transform->GetGlobalPosition();
+			glm::vec3 forward = transform->GlobalForward();
+			ma_engine_listener_set_position(&s_Engine, listenerIndex, pos.x, pos.y, pos.z);
+			ma_engine_listener_set_direction(&s_Engine, listenerIndex, forward.x, forward.y, forward.z);
+
+			listenerIndex++;
 		}
 	}
 
