@@ -40,6 +40,8 @@ ma_uint32 AudioSystem::s_CurrentDevice = 99999;
 
 void AudioSystem::Init()
 {
+	ScriptSystem::Init();
+
 	spdlog::debug("Audio engine initialising");
 
 	if (ma_context_init(nullptr, 0, nullptr, &s_Context) != MA_SUCCESS)
@@ -59,11 +61,22 @@ void AudioSystem::Init()
 	SetOutputDevice(s_DefaultDeviceIndex);
 }
 
-void AudioSystem::OnEnabled() { s_EngineActive = true; }
-void AudioSystem::OnDisabled() { s_EngineActive = false; }
+void AudioSystem::OnEnabled()
+{
+	s_EngineActive = true;
+	ScriptSystem::OnEnabled();
+}
+
+void AudioSystem::OnDisabled()
+{
+	s_EngineActive = false;
+	ScriptSystem::OnDisabled();
+}
 
 void AudioSystem::Destroy()
 {
+	ScriptSystem::Destroy();
+
 	// Check if device is initialised
 	if (!s_Device.type)
 		return;
@@ -104,7 +117,7 @@ void AudioSystem::Update()
 		}
 	}
 
-	
+	ScriptSystem::Update();
 }
 
 void AudioSystem::RefreshDevices()

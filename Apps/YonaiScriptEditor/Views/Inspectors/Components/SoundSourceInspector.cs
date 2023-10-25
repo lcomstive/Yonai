@@ -27,6 +27,7 @@ namespace YonaiEditor.Inspectors
 			m_Target.Volume = Draw("Volume", m_Target.Volume, new RangeAttribute(1.0f));
 			m_Target.Panning = Draw("Panning", m_Target.Panning, new RangeAttribute(-1, 1));
 			m_Target.IsLooping = Draw("Loop", m_Target.IsLooping);
+			m_Target.PlayOnStart = Draw("Play on Start", m_Target.PlayOnStart);
 
 			if (EditorService.State != EditorState.Edit)
 			{
