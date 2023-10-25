@@ -69,7 +69,10 @@ namespace YonaiEditor.Systems
 
 				ImGUI.SetCursorPos(ImGUI.ContentRegionAvailable.x - 15, ImGUI.ContentRegionAvailable.y + 12.5f);
 				if (ImGUI.Button("X", new Vector2(20, 20)))
+				{
 					m_Projects.Remove(project.Path);
+					SaveProjects();
+				}
 				ImGUI.EndChild();
 
 				if (isHovered)
@@ -81,7 +84,10 @@ namespace YonaiEditor.Systems
 					HoveredProject = string.Empty;
 
 				if (ImGUI.IsItemClicked())
+				{
 					SelectProject(project);
+					SaveProjects();
+				}
 			}
 
 			ImGUI.EndChild();
@@ -176,6 +182,7 @@ namespace YonaiEditor.Systems
 			ProjectFile? projectFile = ReadProjectFile(directory);
 			if (projectFile.HasValue && !m_Projects.ContainsKey(projectFile.Value.Path))
 				m_Projects.Add(projectFile.Value.Path, projectFile.Value);
+			SaveProjects();
 		}
 
 		private static ProjectFile? ReadProjectFile(string directory)
