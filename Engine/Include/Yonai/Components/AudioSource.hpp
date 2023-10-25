@@ -74,12 +74,12 @@ namespace Yonai
 			/// <summary>
 			/// When enabled, sounds are altered in volume based on position
 			/// <summary>
-			YonaiAPI bool GetSpatialization();
+			YonaiAPI bool Get3D();
 
 			/// <summary>
 			/// When enabled, sounds are altered in volume based on position
 			/// <summary>
-			YonaiAPI void SetSpatialization(bool enable);
+			YonaiAPI void Set3D(bool enable);
 
 			/// <summary>
 			/// Sets the output mixer, or nullptr for master output
@@ -100,7 +100,7 @@ namespace Yonai
 			bool m_Looping = false;
 			float m_Panning = 0.0f;
 			float m_Pitch = 1.0f;
-			bool m_Spatialization = true;
+			bool m_Is3D = true;
 
 			// Volume of output sound
 			float m_Volume = 1.0f;

@@ -19,7 +19,7 @@ namespace Yonai
 		private float m_Volume;
 		private float m_Panning;
 		private bool m_IsLooping;
-		private bool m_Spatialise;
+		private bool m_Is3D;
 		private AudioMixer m_Mixer;
 		private SoundState m_State;
 
@@ -65,8 +65,8 @@ namespace Yonai
 		/// </summary>
 		public bool Is3D
 		{
-			get => m_Spatialise;
-			set { if(m_Spatialise != value) _SetSpatialization(Handle, m_Spatialise = value); }
+			get => m_Is3D;
+			set { if(m_Is3D != value) _SetSpatialization(Handle, m_Is3D = value); }
 		}
 
 		/// <summary>
@@ -163,7 +163,7 @@ namespace Yonai
 			m_Panning =	_GetPanning(Handle);
 			m_IsLooping = _GetLooping(Handle);
 			m_State = (SoundState)_GetState(Handle);
-			m_Spatialise = _GetSpatialization(Handle);
+			m_Is3D = _GetSpatialization(Handle);
 
 			m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<AudioData>(m_SoundID);
 			m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(m_MixerID);

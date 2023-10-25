@@ -138,10 +138,10 @@ void AudioSource::SetPitch(float pitch)
 	if (m_Sound != InvalidResourceID) ma_sound_set_pitch(&m_Data, m_Pitch);
 }
 
-bool AudioSource::GetSpatialization() { return m_Spatialization; }
-void AudioSource::SetSpatialization(bool enable)
+bool AudioSource::Get3D() { return m_Is3D; }
+void AudioSource::Set3D(bool enable)
 {
-	m_Spatialization = enable;
+	m_Is3D = enable;
 	if(m_Sound != InvalidResourceID) ma_sound_set_spatialization_enabled(&m_Data, enable);
 }
 
@@ -199,7 +199,7 @@ void AudioSource::SetSound(ResourceID id)
 
 	// Update values //
 	SetPitch(m_Pitch);
-	SetSpatialization(m_Spatialization);
+	Set3D(m_Is3D);
 
 	if(m_Mixer) // If mixer is not default output
 		SetMixer(m_Mixer);
@@ -273,11 +273,11 @@ ADD_MANAGED_METHOD(AudioSource, GetLooping, bool, (void* instance))
 ADD_MANAGED_METHOD(AudioSource, SetLooping, void, (void* instance, bool value))
 { ((AudioSource*)instance)->SetLooping(value); }
 
-ADD_MANAGED_METHOD(AudioSource, GetSpatialization, bool, (void* instance))
-{ return ((AudioSource*)instance)->GetSpatialization(); }
+ADD_MANAGED_METHOD(AudioSource, Get3D, bool, (void* instance))
+{ return ((AudioSource*)instance)->Get3D(); }
 
-ADD_MANAGED_METHOD(AudioSource, SetSpatialization, void, (void* instance, bool value))
-{ ((AudioSource*)instance)->SetSpatialization(value); }
+ADD_MANAGED_METHOD(AudioSource, Set3D, void, (void* instance, bool value))
+{ ((AudioSource*)instance)->Set3D(value); }
 
 ADD_MANAGED_METHOD(AudioSource, GetMixer, uint64_t, (void* instance))
 { return ((AudioSource*)instance)->GetMixer(); }
