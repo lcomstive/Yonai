@@ -89,12 +89,13 @@
     <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />
     <Compile Include="Views/Inspectors/EntityInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/AudioListenerInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/AudioSourceInspector.cs" />
     <Compile Include="Views/Inspectors/Components/CameraInspector.cs" />
-    <Compile Include="Views/Inspectors/Components/SoundSourceInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/AudioDataInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/AudioMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/MaterialInspector.cs" />
     <Compile Include="Views/Inspectors/Files/ShaderInspector.cs" />
-    <Compile Include="Views/Inspectors/Files/SoundInspector.cs" />
-    <Compile Include="Views/Inspectors/Files/SoundMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
 
