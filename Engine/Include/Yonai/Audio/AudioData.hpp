@@ -4,15 +4,15 @@
 
 namespace Yonai
 {
-	namespace Components { struct SoundSource; }
+	namespace Components { struct AudioSource; }
 
 	/// <summary>
 	/// Resource for an audio clip
 	/// </summary>
-	struct Sound
+	struct AudioData
 	{
-		YonaiAPI Sound();
-		YonaiAPI Sound(std::vector<unsigned char>& data);
+		YonaiAPI AudioData();
+		YonaiAPI AudioData(std::vector<unsigned char>& data);
 
 		YonaiAPI void Import(std::vector<unsigned char>& data);
 
@@ -22,6 +22,6 @@ namespace Yonai
 	private:
 		std::vector<unsigned char> m_Data;
 
-		friend struct Yonai::Components::SoundSource;
+		friend struct Yonai::Components::AudioSource;
 	};
 }

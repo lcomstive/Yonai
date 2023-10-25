@@ -10,17 +10,17 @@ namespace Yonai
 		Paused
 	}
 
-	public class SoundSource : Component
+	public class AudioSource : Component
 	{
 		private float m_Pitch;
-		private Sound m_Sound;
+		private AudioData m_Sound;
 		private UUID m_SoundID;
 		private UUID m_MixerID;
 		private float m_Volume;
 		private float m_Panning;
 		private bool m_IsLooping;
 		private bool m_Spatialise;
-		private SoundMixer m_Mixer;
+		private AudioMixer m_Mixer;
 		private SoundState m_State;
 
 		public UUID SoundID
@@ -30,12 +30,12 @@ namespace Yonai
 			{
 				if (m_SoundID == value) return; // No change
 				_SetSound(Handle, m_SoundID = value);
-				m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<Sound>(m_SoundID);
+				m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<AudioData>(m_SoundID);
 			}
 		}
 
 		[Serialize(false)]
-		public Sound Sound
+		public AudioData Sound
 		{
 			get => m_Sound;
 			set => SoundID = value?.ResourceID ?? UUID.Invalid;
@@ -48,12 +48,12 @@ namespace Yonai
 			{
 				if (m_MixerID == value) return; // No change
 				_SetMixer(Handle, m_MixerID = value);
-				m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(m_MixerID);
+				m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(m_MixerID);
 			}
 		}
 
 		[Serialize(false)]
-		public SoundMixer Mixer
+		public AudioMixer Mixer
 		{
 			get => m_Mixer;
 			// Sets mixer ID to desired mixer, or UUID.Invalid if null, which results in output directly to master output
@@ -63,7 +63,7 @@ namespace Yonai
 		/// <summary>
 		/// When enabled, sound is altered based on position in game world relative to listener
 		/// </summary>
-		public bool Spatialise
+		public bool Is3D
 		{
 			get => m_Spatialise;
 			set { if(m_Spatialise != value) _SetSpatialization(Handle, m_Spatialise = value); }
@@ -165,8 +165,8 @@ namespace Yonai
 			m_State = (SoundState)_GetState(Handle);
 			m_Spatialise = _GetSpatialization(Handle);
 
-			m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<Sound>(m_SoundID);
-			m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(m_MixerID);
+			m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<AudioData>(m_SoundID);
+			m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(m_MixerID);
 		}
 
 		#region Internal Calls

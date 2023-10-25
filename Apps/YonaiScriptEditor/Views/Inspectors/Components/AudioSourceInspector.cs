@@ -3,15 +3,15 @@ using Yonai;
 
 namespace YonaiEditor.Inspectors
 {
-	[CustomInspector(typeof(SoundSource))]
-	public class SoundSourceInspector : CustomInspector
+	[CustomInspector(typeof(AudioSource))]
+	public class AudioSourceInspector : CustomInspector
 	{
-		private SoundSource m_Target;
+		private AudioSource m_Target;
 
 		public override void OnTargetChanged()
 		{
 			base.OnTargetChanged();
-			m_Target = (SoundSource)Target;
+			m_Target = (AudioSource)Target;
 		}
 
 		public override void DrawInspector()
@@ -21,9 +21,9 @@ namespace YonaiEditor.Inspectors
 
 			SetupTable();
 
-			m_Target.SoundID = DrawResource<Sound>("Sound", m_Target.SoundID);
-			m_Target.MixerID = DrawResource<SoundMixer>("Mixer", m_Target.MixerID);
-			m_Target.Spatialise = Draw("3D Audio", m_Target.Spatialise);
+			m_Target.SoundID = DrawResource<AudioData>("Sound", m_Target.SoundID);
+			m_Target.MixerID = DrawResource<AudioMixer>("Mixer", m_Target.MixerID);
+			m_Target.Is3D = Draw("3D Audio", m_Target.Is3D);
 			m_Target.Volume = Draw("Volume", m_Target.Volume, new RangeAttribute(1.0f));
 			m_Target.Panning = Draw("Panning", m_Target.Panning, new RangeAttribute(-1, 1));
 			m_Target.IsLooping = Draw("Loop", m_Target.IsLooping);

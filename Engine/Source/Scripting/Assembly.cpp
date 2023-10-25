@@ -7,7 +7,7 @@
 // Components to map, unmanaged -> managed
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Components/Transform.hpp>
-#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Components/AudioSource.hpp>
 #include <Yonai/Components/MeshRenderer.hpp>
 #include <Yonai/Components/SpriteRenderer.hpp>
 
@@ -229,7 +229,7 @@ void Assembly::LoadScriptCoreTypes()
 {
 	BindManagedComponent<Components::Camera>("Yonai", "Camera");
 	BindManagedComponent<Components::Transform>("Yonai", "Transform");
-	BindManagedComponent<Components::SoundSource>("Yonai", "SoundSource");
+	BindManagedComponent<Components::AudioSource>("Yonai", "AudioSource");
 	BindManagedComponent<Components::MeshRenderer>("Yonai", "MeshRenderer");
 	BindManagedComponent<Components::SpriteRenderer>("Yonai", "SpriteRenderer");
 

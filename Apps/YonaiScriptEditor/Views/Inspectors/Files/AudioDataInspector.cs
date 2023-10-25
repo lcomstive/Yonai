@@ -3,13 +3,13 @@ using Yonai.IO;
 
 namespace YonaiEditor.Inspectors
 {
-	[CustomInspector(".mp3", ".wav")]
-	public class SoundInspector : CustomInspector
+	[CustomInspector(".mp3", ".wav", ".ogg")]
+	public class AudioDataInspector : CustomInspector
 	{
-		private Sound m_Target;
+		private AudioData m_Target;
 
 		public override void OnTargetChanged() =>
-			m_Target = Resource.Load<Sound>((VFSFile)Target);
+			m_Target = Resource.Load<AudioData>((VFSFile)Target);
 
 		public override void DrawInspector()
 		{

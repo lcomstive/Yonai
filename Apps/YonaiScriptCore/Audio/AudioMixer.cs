@@ -12,11 +12,11 @@ namespace Yonai
 		public UUID ParentMixer;
 	}
 
-	public class SoundMixer : NativeResourceBase, ISerializable
+	public class AudioMixer : NativeResourceBase, ISerializable
 	{
 		private string m_Name;
 		private float m_Volume;
-		private SoundMixer m_ParentMixer;
+		private AudioMixer m_ParentMixer;
 		private UUID m_ParentMixerID = UUID.Invalid;
 
 		public string Name
@@ -48,11 +48,11 @@ namespace Yonai
 					return; // No change
 
 				_SetParent(Handle, m_ParentMixerID = value);
-				ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(ParentMixerID);
+				ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(ParentMixerID);
 			}
 		}
 
-		public SoundMixer ParentMixer
+		public AudioMixer ParentMixer
 		{
 			get => m_ParentMixer;
 			set => ParentMixerID = value?.ResourceID ?? UUID.Invalid;
@@ -79,7 +79,7 @@ namespace Yonai
 			m_Name = settings.Name;
 			m_Volume = settings.Volume;
 			m_ParentMixerID = settings.ParentMixer;
-			m_ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<SoundMixer>(ParentMixerID);
+			m_ParentMixer = ParentMixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(ParentMixerID);
 		}
 
 		public JObject OnSerialize() => new JObject(

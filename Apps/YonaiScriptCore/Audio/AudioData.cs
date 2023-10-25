@@ -6,7 +6,7 @@ namespace Yonai
 {
 	public struct SoundImportSettings : IImportSettings {}
 
-	public class Sound : NativeResourceBase
+	public class AudioData : NativeResourceBase
 	{
 		protected override void OnLoad()
 		{

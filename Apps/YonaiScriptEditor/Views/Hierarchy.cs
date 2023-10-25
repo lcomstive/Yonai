@@ -98,7 +98,7 @@ namespace YonaiEditor.Views
 					CreateEntity(world, "Camera").AddComponent<Camera>();
 
 				if (ImGUI.Selectable("Sound Source"))
-					CreateEntity(world, "Sound Source").AddComponent<SoundSource>();
+					CreateEntity(world, "Sound Source").AddComponent<AudioSource>();
 
 				ImGUI.Separator();
 				ImGUI.Text("3D Objects", Colour.Grey);

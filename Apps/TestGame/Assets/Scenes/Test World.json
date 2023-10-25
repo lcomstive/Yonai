@@ -632,7 +632,7 @@
           }
         },
         {
-          "ComponentType": "Yonai.SoundSource",
+          "ComponentType": "Yonai.AudioSource",
           "SoundID": "15564696848780762281",
           "Sound": "15564696848780762281",
           "MixerID": "3437626003313958651",

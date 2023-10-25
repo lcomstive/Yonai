@@ -10,8 +10,8 @@ namespace Yonai.Systems
 			if (!added || !IsEnabled)
 				return;
 
-			SoundSource[] sources = world.GetComponents<SoundSource>();
-			foreach (SoundSource source in sources)
+			AudioSource[] sources = world.GetComponents<AudioSource>();
+			foreach (AudioSource source in sources)
 				if (source.PlayOnStart)
 					source.State = SoundState.Playing;
 		}

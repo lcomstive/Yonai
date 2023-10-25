@@ -6,7 +6,7 @@
 
 namespace Yonai
 {
-	class SoundMixer
+	class AudioMixer
 	{
 		float m_Volume;
 
@@ -16,8 +16,8 @@ namespace Yonai
 	public:
 		std::string Name;
 
-		YonaiAPI SoundMixer(std::string name = "Mixer", ResourceID parent = InvalidResourceID);
-		YonaiAPI ~SoundMixer();
+		YonaiAPI AudioMixer(std::string name = "Mixer", ResourceID parent = InvalidResourceID);
+		YonaiAPI ~AudioMixer();
 
 		YonaiAPI ma_sound_group* GetHandle();
 

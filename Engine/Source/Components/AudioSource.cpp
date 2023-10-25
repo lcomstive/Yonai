@@ -1,7 +1,7 @@
 #include <Yonai/Resource.hpp>
-#include <Yonai/Audio/Sound.hpp>
+#include <Yonai/Audio/AudioData.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
-#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Components/AudioSource.hpp>
 #include <Yonai/Systems/Global/AudioSystem.hpp>
 
 using namespace Yonai;
@@ -10,14 +10,14 @@ using namespace Yonai::Components;
 
 extern void (*SoundSourceUpdateManagedState)(MonoObject*, unsigned int, MonoException**);
 
-SoundSource::~SoundSource()
+AudioSource::~AudioSource()
 {
 	// Clear sound
 	if (m_Sound != InvalidResourceID)
 		ma_sound_uninit(&m_Data);
 }
 
-void SoundSource::Play()
+void AudioSource::Play()
 {	
 	if(IsPlaying() || 				  // Check if already playing
 		m_Sound == InvalidResourceID) // or sound not loaded
@@ -33,7 +33,7 @@ void SoundSource::Play()
 	UpdateManagedState();
 }
 
-void SoundSource::Pause()
+void AudioSource::Pause()
 {
 	if (m_State != SoundState::Playing)
 		return; // No change
@@ -49,7 +49,7 @@ void SoundSource::Pause()
 	UpdateManagedState();
 }
 
-void SoundSource::Resume()
+void AudioSource::Resume()
 {
 	if (m_State != SoundState::Paused)
 		return; // No change
@@ -65,7 +65,7 @@ void SoundSource::Resume()
 	UpdateManagedState();
 }
 
-void SoundSource::Stop()
+void AudioSource::Stop()
 {
 	if (m_State == SoundState::Stopped)
 		return; // No change
@@ -82,12 +82,12 @@ void SoundSource::Stop()
 	UpdateManagedState();
 }
 
-float SoundSource::GetVolume() { return m_Volume; }
-SoundState SoundSource::GetState() { return m_State; }
-bool SoundSource::IsPlaying() { return m_State == SoundState::Playing; }
-float SoundSource::GetLength() { return m_Length; }
+float AudioSource::GetVolume() { return m_Volume; }
+SoundState AudioSource::GetState() { return m_State; }
+bool AudioSource::IsPlaying() { return m_State == SoundState::Playing; }
+float AudioSource::GetLength() { return m_Length; }
 
-float SoundSource::GetPlayTime()
+float AudioSource::GetPlayTime()
 {
 	if (m_State == SoundState::Stopped)
 		return 0.0f;
@@ -97,7 +97,7 @@ float SoundSource::GetPlayTime()
 	return position;
 }
 
-void SoundSource::Seek(float seconds)
+void AudioSource::Seek(float seconds)
 {
 	// Check if sound is initialised
 	if (m_Sound == InvalidResourceID)
@@ -112,7 +112,7 @@ void SoundSource::Seek(float seconds)
 	ma_sound_seek_to_pcm_frame(&m_Data, pcmTime);
 }
 
-void SoundSource::SetVolume(float volume)
+void AudioSource::SetVolume(float volume)
 {
 	// Ensure volume is at least 0
 	m_Volume = (std::max)(volume, 0.0f);
@@ -121,32 +121,32 @@ void SoundSource::SetVolume(float volume)
 		ma_sound_set_volume(&m_Data, m_Volume);
 }
 
-bool SoundSource::IsLooping() { return m_Looping; }
-void SoundSource::SetLooping(bool loop) { ma_sound_set_looping(&m_Data, m_Looping = loop); }
+bool AudioSource::IsLooping() { return m_Looping; }
+void AudioSource::SetLooping(bool loop) { ma_sound_set_looping(&m_Data, m_Looping = loop); }
 
-float SoundSource::GetPanning() { return m_Panning; }
-void SoundSource::SetPanning(float pan)
+float AudioSource::GetPanning() { return m_Panning; }
+void AudioSource::SetPanning(float pan)
 {
 	m_Panning = std::clamp(pan, -1.0f, 1.0f);
 	if(m_Sound != InvalidResourceID) ma_sound_set_pan(&m_Data, m_Panning);
 }
 
-float SoundSource::GetPitch() { return m_Pitch; }
-void SoundSource::SetPitch(float pitch)
+float AudioSource::GetPitch() { return m_Pitch; }
+void AudioSource::SetPitch(float pitch)
 {
 	m_Pitch = (std::max)(pitch, 0.0f);
 	if (m_Sound != InvalidResourceID) ma_sound_set_pitch(&m_Data, m_Pitch);
 }
 
-bool SoundSource::GetSpatialization() { return m_Spatialization; }
-void SoundSource::SetSpatialization(bool enable)
+bool AudioSource::GetSpatialization() { return m_Spatialization; }
+void AudioSource::SetSpatialization(bool enable)
 {
 	m_Spatialization = enable;
 	if(m_Sound != InvalidResourceID) ma_sound_set_spatialization_enabled(&m_Data, enable);
 }
 
-ResourceID SoundSource::GetSound() { return m_Sound; }
-void SoundSource::SetSound(ResourceID id)
+ResourceID AudioSource::GetSound() { return m_Sound; }
+void AudioSource::SetSound(ResourceID id)
 {
 	// Check if clearing sound
 	if (id == InvalidResourceID && m_Sound != InvalidResourceID)
@@ -159,7 +159,7 @@ void SoundSource::SetSound(ResourceID id)
 	}
 
 	if(id == m_Sound || // No change, same resource id
-		!Resource::IsValidType<Sound>(id)) // Not a valid sound
+		!Resource::IsValidType<AudioData>(id)) // Not a valid sound
 		return; 
 
 	if (m_Sound != InvalidResourceID)
@@ -170,7 +170,7 @@ void SoundSource::SetSound(ResourceID id)
 	}
 
 	m_Sound = id;
-	Sound* sound = Resource::Get<Sound>(m_Sound);
+	AudioData* sound = Resource::Get<AudioData>(m_Sound);
 	m_Length = 0;
 
 	if (!sound || sound->GetLength() <= 0.0f)
@@ -205,8 +205,8 @@ void SoundSource::SetSound(ResourceID id)
 		SetMixer(m_Mixer);
 }
 
-ResourceID SoundSource::GetMixer() { return m_Mixer; }
-void SoundSource::SetMixer(ResourceID mixer)
+ResourceID AudioSource::GetMixer() { return m_Mixer; }
+void AudioSource::SetMixer(ResourceID mixer)
 {
 	m_Mixer = mixer;
 
@@ -216,17 +216,17 @@ void SoundSource::SetMixer(ResourceID mixer)
 	ma_node* output = nullptr;
 
 	// Check for valid mixer
-	if(mixer == InvalidResourceID || !Resource::IsValidType<SoundMixer>(mixer))
+	if(mixer == InvalidResourceID || !Resource::IsValidType<AudioMixer>(mixer))
 		output = ma_engine_get_endpoint(AudioSystem::GetEngine());
 	else
-		output = (ma_node*)Resource::Get<SoundMixer>(mixer)->GetHandle();
+		output = (ma_node*)Resource::Get<AudioMixer>(mixer)->GetHandle();
 
 	ma_node_attach_output_bus(&m_Data, 0, output, 0);
 }
 
-ma_sound* SoundSource::GetHandle() { return &m_Data; }
+ma_sound* AudioSource::GetHandle() { return &m_Data; }
 
-void SoundSource::UpdateManagedState()
+void AudioSource::UpdateManagedState()
 {
 	if (!SoundSourceUpdateManagedState) return;
 
@@ -237,70 +237,70 @@ void SoundSource::UpdateManagedState()
 #pragma region Scripting Internal Calls
 #include <Yonai/Scripting/InternalCalls.hpp>
 
-ADD_MANAGED_METHOD(SoundSource, GetSound, uint64_t, (void* instance))
-{ return ((SoundSource*)instance)->GetSound(); }
+ADD_MANAGED_METHOD(AudioSource, GetSound, uint64_t, (void* instance))
+{ return ((AudioSource*)instance)->GetSound(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetSound, void, (void* instance, uint64_t value))
-{ ((SoundSource*)instance)->SetSound(value); }
+ADD_MANAGED_METHOD(AudioSource, SetSound, void, (void* instance, uint64_t value))
+{ ((AudioSource*)instance)->SetSound(value); }
 
-ADD_MANAGED_METHOD(SoundSource, Play, void, (void* instance))
-{ ((SoundSource*)instance)->Play(); }
+ADD_MANAGED_METHOD(AudioSource, Play, void, (void* instance))
+{ ((AudioSource*)instance)->Play(); }
 
-ADD_MANAGED_METHOD(SoundSource, Pause, void, (void* instance))
-{ ((SoundSource*)instance)->Pause(); }
+ADD_MANAGED_METHOD(AudioSource, Pause, void, (void* instance))
+{ ((AudioSource*)instance)->Pause(); }
 
-ADD_MANAGED_METHOD(SoundSource, Stop, void, (void* instance))
-{ ((SoundSource*)instance)->Stop(); }
+ADD_MANAGED_METHOD(AudioSource, Stop, void, (void* instance))
+{ ((AudioSource*)instance)->Stop(); }
 
-ADD_MANAGED_METHOD(SoundSource, Seek, void, (void* instance, float seconds))
-{ ((SoundSource*)instance)->Seek(seconds); }
+ADD_MANAGED_METHOD(AudioSource, Seek, void, (void* instance, float seconds))
+{ ((AudioSource*)instance)->Seek(seconds); }
 
-ADD_MANAGED_METHOD(SoundSource, IsPlaying, bool, (void* instance))
-{ return ((SoundSource*)instance)->IsPlaying(); }
+ADD_MANAGED_METHOD(AudioSource, IsPlaying, bool, (void* instance))
+{ return ((AudioSource*)instance)->IsPlaying(); }
 
-ADD_MANAGED_METHOD(SoundSource, GetState, unsigned int, (void* instance))
-{ return (unsigned int)((SoundSource*)instance)->GetState(); }
+ADD_MANAGED_METHOD(AudioSource, GetState, unsigned int, (void* instance))
+{ return (unsigned int)((AudioSource*)instance)->GetState(); }
 
-ADD_MANAGED_METHOD(SoundSource, GetPlayTime, float, (void* instance))
-{ return ((SoundSource*)instance)->GetPlayTime(); }
+ADD_MANAGED_METHOD(AudioSource, GetPlayTime, float, (void* instance))
+{ return ((AudioSource*)instance)->GetPlayTime(); }
 
-ADD_MANAGED_METHOD(SoundSource, GetLength, float, (void* instance))
-{ return ((SoundSource*)instance)->GetLength(); }
+ADD_MANAGED_METHOD(AudioSource, GetLength, float, (void* instance))
+{ return ((AudioSource*)instance)->GetLength(); }
 
-ADD_MANAGED_METHOD(SoundSource, GetLooping, bool, (void* instance))
-{ return ((SoundSource*)instance)->IsLooping(); }
+ADD_MANAGED_METHOD(AudioSource, GetLooping, bool, (void* instance))
+{ return ((AudioSource*)instance)->IsLooping(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetLooping, void, (void* instance, bool value))
-{ ((SoundSource*)instance)->SetLooping(value); }
+ADD_MANAGED_METHOD(AudioSource, SetLooping, void, (void* instance, bool value))
+{ ((AudioSource*)instance)->SetLooping(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetSpatialization, bool, (void* instance))
-{ return ((SoundSource*)instance)->GetSpatialization(); }
+ADD_MANAGED_METHOD(AudioSource, GetSpatialization, bool, (void* instance))
+{ return ((AudioSource*)instance)->GetSpatialization(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetSpatialization, void, (void* instance, bool value))
-{ ((SoundSource*)instance)->SetSpatialization(value); }
+ADD_MANAGED_METHOD(AudioSource, SetSpatialization, void, (void* instance, bool value))
+{ ((AudioSource*)instance)->SetSpatialization(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetMixer, uint64_t, (void* instance))
-{ return ((SoundSource*)instance)->GetMixer(); }
+ADD_MANAGED_METHOD(AudioSource, GetMixer, uint64_t, (void* instance))
+{ return ((AudioSource*)instance)->GetMixer(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetMixer, void, (void* instance, uint64_t value))
-{ ((SoundSource*)instance)->SetMixer(value); }
+ADD_MANAGED_METHOD(AudioSource, SetMixer, void, (void* instance, uint64_t value))
+{ ((AudioSource*)instance)->SetMixer(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetPanning, float, (void* instance))
-{ return ((SoundSource*)instance)->GetPanning(); }
+ADD_MANAGED_METHOD(AudioSource, GetPanning, float, (void* instance))
+{ return ((AudioSource*)instance)->GetPanning(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetPanning, void, (void* instance, float value))
-{ ((SoundSource*)instance)->SetPanning(value); }
+ADD_MANAGED_METHOD(AudioSource, SetPanning, void, (void* instance, float value))
+{ ((AudioSource*)instance)->SetPanning(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetVolume, float, (void* instance))
-{ return ((SoundSource*)instance)->GetVolume(); }
+ADD_MANAGED_METHOD(AudioSource, GetVolume, float, (void* instance))
+{ return ((AudioSource*)instance)->GetVolume(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetVolume, void, (void* instance, float value))
-{ ((SoundSource*)instance)->SetVolume(value); }
+ADD_MANAGED_METHOD(AudioSource, SetVolume, void, (void* instance, float value))
+{ ((AudioSource*)instance)->SetVolume(value); }
 
-ADD_MANAGED_METHOD(SoundSource, GetPitch, float, (void* instance))
-{ return ((SoundSource*)instance)->GetPitch(); }
+ADD_MANAGED_METHOD(AudioSource, GetPitch, float, (void* instance))
+{ return ((AudioSource*)instance)->GetPitch(); }
 
-ADD_MANAGED_METHOD(SoundSource, SetPitch, void, (void* instance, float value))
-{ ((SoundSource*)instance)->SetPitch(value); }
+ADD_MANAGED_METHOD(AudioSource, SetPitch, void, (void* instance, float value))
+{ ((AudioSource*)instance)->SetPitch(value); }
 
 #pragma endregion

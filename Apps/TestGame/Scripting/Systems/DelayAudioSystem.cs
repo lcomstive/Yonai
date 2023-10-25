@@ -8,8 +8,8 @@ namespace TestGame.Systems
 		protected override void Update()
 		{
 			// Get all audio delays and sources in current scene
-			(DelayAudio[] delays, SoundSource[] audioSources) =
-				World.GetComponents<DelayAudio, SoundSource>();
+			(DelayAudio[] delays, AudioSource[] audioSources) =
+				World.GetComponents<DelayAudio, AudioSource>();
 
 			for(int i = 0; i < delays.Length; i++)
 			{

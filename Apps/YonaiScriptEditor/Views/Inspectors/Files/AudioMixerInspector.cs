@@ -4,10 +4,10 @@ using Yonai.Graphics;
 
 namespace YonaiEditor.Inspectors
 {
-	[CustomInspector(typeof(SoundMixer), ".mixer")]
-	public class SoundMixerInspector : CustomInspector
+	[CustomInspector(typeof(AudioMixer), ".mixer")]
+	public class AudioMixerInspector : CustomInspector
 	{
-		private SoundMixer m_Target;
+		private AudioMixer m_Target;
 		private string m_ParentMixerPath = string.Empty;
 		private SoundMixerImportSettings m_Settings;
 
@@ -17,10 +17,10 @@ namespace YonaiEditor.Inspectors
 			if (Target is VFSFile)
 			{
 				VFSFile file = (VFSFile)Target;
-				m_Target = Resource.Load<SoundMixer>(file.FullPath);
+				m_Target = Resource.Load<AudioMixer>(file.FullPath);
 			}
 			else // Is SoundMixer object
-				m_Target = Target as SoundMixer;
+				m_Target = Target as AudioMixer;
 
 			RefreshSettings();
 
@@ -45,7 +45,7 @@ namespace YonaiEditor.Inspectors
 			if (DrawFilepath("Parent Mixer", m_ParentMixerPath, out VFSFile newParentMixerPath, ".mixer"))
 			{
 				m_ParentMixerPath = newParentMixerPath;
-				m_Settings.ParentMixer = Resource.Get<SoundMixer>(m_ParentMixerPath)?.ResourceID ?? UUID.Invalid;
+				m_Settings.ParentMixer = Resource.Get<AudioMixer>(m_ParentMixerPath)?.ResourceID ?? UUID.Invalid;
 			}
 
 			ImGUI.EndTable();

@@ -7,9 +7,9 @@
 // Forward declarations
 namespace Yonai
 {
-	struct Sound;
+	struct AudioData;
 	namespace Scripting { struct Class; }
-	namespace Components { struct SoundSource; }
+	namespace Components { struct AudioSource; }
 }
 
 namespace Yonai::Systems
@@ -45,8 +45,8 @@ namespace Yonai::Systems
 
 		static void AudioDataCallback(ma_device*, void*, const void*, ma_uint32);
 
-		friend struct Yonai::Sound;
-		friend struct Yonai::Components::SoundSource;
+		friend struct Yonai::AudioData;
+		friend struct Yonai::Components::AudioSource;
 
 	public:
 		YonaiAPI void Init() override;

@@ -2,7 +2,7 @@
 #include <miniaudio.h>
 #include <Yonai/API.hpp>
 #include <Yonai/ResourceID.hpp>
-#include <Yonai/Audio/SoundMixer.hpp>
+#include <Yonai/Audio/AudioMixer.hpp>
 #include <Yonai/Components/Component.hpp>
 
 namespace Yonai
@@ -19,9 +19,9 @@ namespace Yonai
 			Paused
 		};
 
-		struct SoundSource : public Component
+		struct AudioSource : public Component
 		{
-			YonaiAPI ~SoundSource() override;
+			YonaiAPI ~AudioSource() override;
 
 			YonaiAPI void Play();
 			YonaiAPI void Stop();

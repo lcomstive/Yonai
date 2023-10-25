@@ -7,7 +7,7 @@ using namespace Yonai::Systems;
 #include <spdlog/spdlog.h>
 #include <Yonai/Scripting/Class.hpp>
 #include <Yonai/Components/Transform.hpp>
-#include <Yonai/Components/SoundSource.hpp>
+#include <Yonai/Components/AudioSource.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
@@ -42,7 +42,7 @@ void AudioSystem::Init()
 {
 	ScriptSystem::Init();
 
-	spdlog::debug("Audio engine initialising");
+	spdlog::debug("AudioData engine initialising");
 
 	if (ma_context_init(nullptr, 0, nullptr, &s_Context) != MA_SUCCESS)
 	{
@@ -81,7 +81,7 @@ void AudioSystem::Destroy()
 	if (!s_Device.type)
 		return;
 
-	spdlog::debug("Audio engine shutting down");
+	spdlog::debug("AudioData engine shutting down");
 
 	ma_engine_uninit(&s_Engine);
 	ma_device_uninit(&s_Device);
@@ -100,8 +100,8 @@ void AudioSystem::Update()
 	vector<World*> scenes = sceneSystem->GetActiveScenes();
 	for (World* scene : scenes)
 	{
-		vector<SoundSource*> soundSources = scene->GetComponents<SoundSource>();
-		for (SoundSource* source : soundSources)
+		vector<AudioSource*> soundSources = scene->GetComponents<AudioSource>();
+		for (AudioSource* source : soundSources)
 		{
 			// Check if finished playing
 			if (source->IsPlaying() &&
@@ -156,7 +156,7 @@ void AudioSystem::AudioDataCallback(ma_device* pDevice, void* pOutput, const voi
 
 void AudioDeviceCallback(const ma_device_notification* notification)
 {
-	spdlog::debug("Audio device callback: {}", (int)notification->type);
+	spdlog::debug("AudioData device callback: {}", (int)notification->type);
 }
 
 void AudioSystem::SetOutputDevice(unsigned int deviceIndex)
@@ -215,8 +215,8 @@ void AudioSystem::GetScriptClass()
 	s_ScriptClass->Invoke("_RefreshDevices");
 	s_ScriptClass->Invoke("_OutputDeviceChanged");
 
-	// Get SoundSource.UpdateState unmanaged thunk
-	MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "SoundSource");
+	// Get AudioSource.UpdateState unmanaged thunk
+	MonoClass* klass = Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "AudioSource");
 	MonoMethod* method = mono_class_get_method_from_name(klass, "UpdateState", 1);
 
 	SoundSourceUpdateManagedState = method ? (SoundSourceUpdateManagedStateFn)mono_method_get_unmanaged_thunk(method) : nullptr;
