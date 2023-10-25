@@ -1,6 +1,6 @@
 using Yonai;
+using System;
 using Yonai.IO;
-using Yonai.Graphics;
 
 namespace YonaiEditor.Inspectors
 {
@@ -23,9 +23,6 @@ namespace YonaiEditor.Inspectors
 				m_Target = Target as AudioMixer;
 
 			RefreshSettings();
-
-			if (m_Settings.ParentMixer != UUID.Invalid)
-				m_ParentMixerPath = Resource.GetPath(m_Settings.ParentMixer);
 		}
 
 		public override void DrawInspector()
@@ -42,7 +39,7 @@ namespace YonaiEditor.Inspectors
 			m_Settings.Name = Draw("Name", m_Settings.Name);
 			m_Settings.Volume = Draw("Volume", m_Settings.Volume, new RangeAttribute(1.0f));
 
-			if (DrawFilepath("Parent Mixer", m_ParentMixerPath, out VFSFile newParentMixerPath, ".mixer"))
+			if (DrawFilepath("Parent Mixer", m_ParentMixerPath, out VFSFile newParentMixerPath, m_Target.ResourceID /* Cannot select self */, ".mixer"))
 			{
 				m_ParentMixerPath = newParentMixerPath;
 				m_Settings.ParentMixer = Resource.Get<AudioMixer>(m_ParentMixerPath)?.ResourceID ?? UUID.Invalid;
@@ -73,8 +70,10 @@ namespace YonaiEditor.Inspectors
 			{
 				Name = m_Target.Name,
 				Volume = m_Target.Volume,
-				ParentMixer = m_Target.ParentMixer
+				ParentMixer = m_Target.ParentMixerID
 			};
+
+			m_ParentMixerPath = m_Settings.ParentMixer != UUID.Invalid ? Resource.GetPath(m_Settings.ParentMixer) : string.Empty;
 		}
 
 		private bool PendingChanges() => m_Settings.Name.CompareTo(m_Target.Name) != 0 ||

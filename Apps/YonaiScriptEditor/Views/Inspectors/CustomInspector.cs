@@ -380,7 +380,30 @@ namespace YonaiEditor
 		/// <param name="filepath">Contents of element</param>
 		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
 		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
-		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, params string[] allowedFileTypes)
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, params string[] allowedFileTypes) =>
+			DrawFilepath(label, filepath, out output, new UUID[0], allowedFileTypes);
+
+		/// <summary>
+		/// Draws a space for files to be dropped or pasted
+		/// </summary>
+		/// <param name="label">Label to display on left side</param>
+		/// <param name="filepath">Contents of element</param>
+		/// <param name="invalidResourceIDs">Resources with a matching ID are ignored</param>
+		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
+		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, UUID invalidResourceID, params string[] allowedFileTypes)
+			=> DrawFilepath(label, filepath, out output, new UUID[] { invalidResourceID }, allowedFileTypes);
+
+
+		/// <summary>
+		/// Draws a space for files to be dropped or pasted
+		/// </summary>
+		/// <param name="label">Label to display on left side</param>
+		/// <param name="filepath">Contents of element</param>
+		/// <param name="invalidResourceIDs">Resources with a matching ID are ignored</param>
+		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
+		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, UUID[] invalidResourceIDs, params string[] allowedFileTypes)
 		{
 			output = new VFSFile();
 			ImGUI.TableNextRow();
@@ -409,8 +432,10 @@ namespace YonaiEditor
 				}
 				ImGUI.EndPopup();
 
-				if (!string.IsNullOrEmpty(output.FullPath) || clear)
+				if (clear)
 					return true;
+				else if (!string.IsNullOrEmpty(output.FullPath))
+					return invalidResourceIDs == null ? true : !invalidResourceIDs.Contains(Resource.GetID(output.FullPath));
 			}
 
 			if (!ImGUI.BeginDragDropTarget())
@@ -422,6 +447,11 @@ namespace YonaiEditor
 				return false;
 
 			VFSFile payloadFile = (VFSFile)payload;
+
+			UUID resourceID = Resource.GetID(payloadFile);
+			if (invalidResourceIDs != null && invalidResourceIDs.Contains(resourceID))
+				return false;
+
 			if (allowedFileTypes == null || allowedFileTypes.Length == 0)
 			{
 				ImGUI.AcceptDragDropPayload("ResourcePath");
