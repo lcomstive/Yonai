@@ -6,6 +6,45 @@
   },
   "Entities": [
     {
+      "ID": "2654914000653199596",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -22.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
       "ID": "9336376843701531948",
       "Components": [
         {
@@ -42,45 +81,6 @@
             "z": 0.5599041
           },
           "Parent": "16765798305678760197"
-        }
-      ]
-    },
-    {
-      "ID": "2654914000653199596",
-      "Components": [
-        {
-          "ComponentType": "Yonai.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "Yonai.SpriteRenderer",
-          "Sprite": null,
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": null
-        },
-        {
-          "ComponentType": "Yonai.Transform",
-          "Position": {
-            "x": -22.5,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
         }
       ]
     },
@@ -579,9 +579,9 @@
         {
           "ComponentType": "Yonai.Transform",
           "Position": {
-            "x": -5.01970434,
-            "y": -3.73521325E-05,
-            "z": 15.9666557
+            "x": 0.0,
+            "y": 0.0,
+            "z": 20.0
           },
           "Rotation": {
             "x": 0.838198662,
@@ -642,6 +642,18 @@
           "Volume": 1.0,
           "Panning": 0.0,
           "Pitch": 1.0,
+          "Attenuation": {
+            "Distance": {
+              "x": 10.0,
+              "y": 10000.0
+            },
+            "Gain": {
+              "x": 0.0,
+              "y": 1.0
+            },
+            "Factor": 1.0,
+            "Model": 3
+          },
           "PlayOnStart": false,
           "IsLooping": false
         }
@@ -662,10 +674,10 @@
             "z": 0.0
           },
           "Rotation": {
-            "x": -6.782111E-08,
-            "y": 0.509892,
-            "z": 7.3270364E-08,
-            "w": 0.860238433
+            "x": 0.9999619,
+            "y": 0.008726535,
+            "z": -6.504971E-19,
+            "w": 5.67591343E-21
           },
           "Scale": {
             "x": 0.999999642,
@@ -688,12 +700,38 @@
           "ComponentType": "Yonai.AudioSource",
           "SoundID": "15564696848780762281",
           "MixerID": "3437626003313958651",
-          "Is3D": false,
+          "Is3D": true,
           "Volume": 1.0,
           "Panning": 0.0,
           "Pitch": 1.0,
+          "Attenuation": {
+            "Distance": {
+              "x": 2.0,
+              "y": 5.0
+            },
+            "Gain": {
+              "x": 0.0,
+              "y": 1.0
+            },
+            "Factor": 4.0,
+            "Model": 1
+          },
           "PlayOnStart": true,
           "IsLooping": false
+        },
+        {
+          "ComponentType": "TestGame.Components.MoveAlongPath, TestGame",
+          "Speed": 1.0,
+          "PointA": {
+            "x": -10.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "PointB": {
+            "x": 10.0,
+            "y": 0.0,
+            "z": 20.0
+          }
         }
       ]
     }

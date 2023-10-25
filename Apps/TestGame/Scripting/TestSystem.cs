@@ -1,4 +1,6 @@
-﻿using Yonai;
+﻿using TestGame.Components;
+using TestGame.Systems;
+using Yonai;
 using Yonai.Graphics;
 
 namespace TestGame
@@ -24,6 +26,8 @@ namespace TestGame
 			}
 
 			World.AddSystem<CameraControlSystem>();
+			World.AddSystem<DelayAudioSystem>();
+			World.AddSystem<MoveAlongPathSystem>();
 
 			// Load test texture
 			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");

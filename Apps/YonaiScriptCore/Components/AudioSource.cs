@@ -1,5 +1,7 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.CompilerServices;
+using Yonai.IO;
 
 namespace Yonai
 {
@@ -10,8 +12,51 @@ namespace Yonai
 		Paused
 	}
 
+	public enum AttenuationModel : int
+	{
+		None,          /* No distance attenuation and no spatialization. */
+		Inverse,       /* Equivalent to OpenAL's AL_INVERSE_DISTANCE_CLAMPED. */
+		Linear,        /* Linear attenuation. Equivalent to OpenAL's AL_LINEAR_DISTANCE_CLAMPED. */
+		Exponential    /* Exponential attenuation. Equivalent to OpenAL's AL_EXPONENT_DISTANCE_CLAMPED. */
+	}
+
 	public class AudioSource : Component
 	{
+		public struct AttenuationSettings : ISerializable
+		{
+			public Vector2 Distance;
+			public Vector2 Gain;
+			public float Factor;
+			public AttenuationModel Model;
+
+			public void OnDeserialize(JObject json)
+			{
+				Distance.OnDeserialize(json["Distance"].Value<JObject>());
+				Gain.OnDeserialize(json["Gain"].Value<JObject>());
+				Factor = json["Factor"].Value<float>();
+				Model = (AttenuationModel)json["Model"].Value<int>();
+			}
+
+			public JObject OnSerialize() => new JObject(
+				new JProperty("Distance", Distance.OnSerialize()),
+				new JProperty("Gain", Gain.OnSerialize()),
+				new JProperty("Factor", Factor),
+				new JProperty("Model", (int)Model)
+			);
+
+			public static bool operator ==(AttenuationSettings a, AttenuationSettings b) =>
+				a.Distance == b.Distance &&
+				a.Gain == b.Gain &&
+				a.Factor == b.Factor &&
+				a.Model == b.Model;
+
+			public static bool operator !=(AttenuationSettings a, AttenuationSettings b) =>
+				a.Distance != b.Distance ||
+				a.Gain != b.Gain ||
+				a.Factor != b.Factor ||
+				a.Model != b.Model;
+		}
+
 		private float m_Pitch;
 		private AudioData m_Sound;
 		private UUID m_SoundID;
@@ -22,6 +67,7 @@ namespace Yonai
 		private bool m_Is3D;
 		private AudioMixer m_Mixer;
 		private SoundState m_State;
+		private AttenuationSettings m_Attenuation;
 
 		public UUID SoundID
 		{
@@ -66,7 +112,7 @@ namespace Yonai
 		public bool Is3D
 		{
 			get => m_Is3D;
-			set { if(m_Is3D != value) _SetSpatialization(Handle, m_Is3D = value); }
+			set { if(m_Is3D != value) _SetIs3D(Handle, m_Is3D = value); }
 		}
 
 		/// <summary>
@@ -95,6 +141,26 @@ namespace Yonai
 		{
 			get => m_Pitch;
 			set { if (m_Pitch != value) _SetPitch(Handle, m_Pitch = value); }
+		}
+
+		/// <summary>
+		/// The maximum distance this sound can be heard from, when <see cref="Is3D"/> is enabled.
+		/// </summary>
+		public AttenuationSettings Attenuation
+		{
+			get => m_Attenuation;
+			set
+			{
+				if (m_Attenuation == value)
+					return; // No change
+
+				m_Attenuation = value;
+
+				_SetRolloffRange(Handle, ref m_Attenuation.Distance);
+				_SetRolloffGain(Handle, ref m_Attenuation.Gain);
+				_SetAttenuationRolloff(Handle, m_Attenuation.Factor);
+				_SetAttenuationModel(Handle, (int)m_Attenuation.Model);
+			}
 		}
 
 		public bool PlayOnStart { get; set; } = true;
@@ -162,8 +228,14 @@ namespace Yonai
 			m_Volume = _GetVolume(Handle);
 			m_Panning =	_GetPanning(Handle);
 			m_IsLooping = _GetLooping(Handle);
+			m_Is3D = _GetIs3D(Handle);
 			m_State = (SoundState)_GetState(Handle);
-			m_Is3D = _GetSpatialization(Handle);
+
+			m_Attenuation = new AttenuationSettings();
+			_GetRolloffRange(Handle, out m_Attenuation.Distance);
+			_GetRolloffGain(Handle, out m_Attenuation.Gain);
+			m_Attenuation.Factor = _GetAttenuationRolloff(Handle);
+			m_Attenuation.Model = (AttenuationModel)_GetAttenuationModel(Handle);
 
 			m_Sound = m_SoundID == UUID.Invalid ? null : Resource.Get<AudioData>(m_SoundID);
 			m_Mixer = m_MixerID == UUID.Invalid ? null : Resource.Get<AudioMixer>(m_MixerID);
@@ -190,8 +262,8 @@ namespace Yonai
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetLooping(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetLooping(IntPtr handle, bool value);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetSpatialization(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetSpatialization(IntPtr handle, bool value);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetIs3D(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetIs3D(IntPtr handle, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetMixer(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMixer(IntPtr handle, ulong value);
@@ -204,6 +276,18 @@ namespace Yonai
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetPitch(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetPitch(IntPtr handle, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRolloffRange(IntPtr handle, out Vector2 range);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRolloffRange(IntPtr handle, ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetRolloffGain(IntPtr handle, out Vector2 range);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRolloffGain(IntPtr handle, ref Vector2 range);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetAttenuationRolloff(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAttenuationRolloff(IntPtr handle, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetAttenuationModel(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAttenuationModel(IntPtr handle, int value);
 		#endregion
 	}
 }

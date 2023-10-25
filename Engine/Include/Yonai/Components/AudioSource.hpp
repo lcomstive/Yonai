@@ -1,5 +1,6 @@
 #pragma once
 #include <miniaudio.h>
+#include <glm/vec2.hpp>
 #include <Yonai/API.hpp>
 #include <Yonai/ResourceID.hpp>
 #include <Yonai/Audio/AudioMixer.hpp>
@@ -82,6 +83,32 @@ namespace Yonai
 			YonaiAPI void Set3D(bool enable);
 
 			/// <summary>
+			/// Min and max distance to apply rolloff when 3D enabled
+			/// </summary>
+			YonaiAPI void SetRolloffDistance(glm::vec2 minMax);
+
+			/// <summary>
+			/// Min and max distance to apply rolloff when 3D enabled
+			/// </summary>
+			YonaiAPI void SetRolloffDistance(float min, float max);
+
+			/// <summary>
+			/// Maximum distance this sound can be heard from, when 3D enabled
+			/// </summary>
+			YonaiAPI glm::vec2 GetRolloffDistance();
+
+			YonaiAPI glm::vec2 GetRolloffGain();
+
+			YonaiAPI void SetRolloffGain(glm::vec2 minMax);
+			YonaiAPI void SetRolloffGain(float min, float max);
+
+			YonaiAPI ma_attenuation_model GetAttenuationModel();
+			YonaiAPI void SetAttenuationModel(ma_attenuation_model model);
+
+			YonaiAPI float GetAttenuationRolloff();
+			YonaiAPI void SetAttenuationRolloff(float factor);
+
+			/// <summary>
 			/// Sets the output mixer, or nullptr for master output
 			/// <summary>
 			YonaiAPI void SetMixer(ResourceID parent);
@@ -101,6 +128,12 @@ namespace Yonai
 			float m_Panning = 0.0f;
 			float m_Pitch = 1.0f;
 			bool m_Is3D = true;
+
+			// Attenuation
+			glm::vec2 m_RolloffRange = { 10, 10000 };
+			glm::vec2 m_RolloffGain = { 0, 1 };
+			ma_attenuation_model m_AttenuationModel = ma_attenuation_model_exponential;
+			float m_RolloffFactor = 1.0f;
 
 			// Volume of output sound
 			float m_Volume = 1.0f;

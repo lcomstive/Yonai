@@ -145,6 +145,46 @@ void AudioSource::Set3D(bool enable)
 	if(m_Sound != InvalidResourceID) ma_sound_set_spatialization_enabled(&m_Data, enable);
 }
 
+glm::vec2 AudioSource::GetRolloffDistance() { return m_RolloffRange; }
+void AudioSource::SetRolloffDistance(float min, float max) { SetRolloffDistance(glm::vec2(min, max)); }
+void AudioSource::SetRolloffDistance(glm::vec2 range)
+{
+	m_RolloffRange = range;
+	if (m_Sound == InvalidResourceID)
+		return;
+
+	ma_sound_set_min_distance(&m_Data, m_RolloffRange.x);
+	ma_sound_set_max_distance(&m_Data, m_RolloffRange.y);
+}
+
+glm::vec2 AudioSource::GetRolloffGain() { return m_RolloffGain; }
+void AudioSource::SetRolloffGain(float min, float max) { SetRolloffGain(glm::vec2(min, max)); }
+void AudioSource::SetRolloffGain(glm::vec2 range)
+{
+	m_RolloffGain = range;
+	if (m_Sound == InvalidResourceID)
+		return;
+
+	ma_sound_set_min_gain(&m_Data, m_RolloffGain.x);
+	ma_sound_set_max_gain(&m_Data, m_RolloffGain.y);
+}
+
+float AudioSource::GetAttenuationRolloff() { return m_RolloffFactor; }
+void AudioSource::SetAttenuationRolloff(float factor)
+{
+	m_RolloffFactor = factor;
+	if (m_Sound != InvalidResourceID)
+		ma_sound_set_rolloff(&m_Data, m_RolloffFactor);
+}
+
+ma_attenuation_model AudioSource::GetAttenuationModel() { return m_AttenuationModel; }
+void AudioSource::SetAttenuationModel(ma_attenuation_model model)
+{
+	m_AttenuationModel = model;
+	if (m_Sound != InvalidResourceID)
+		ma_sound_set_attenuation_model(&m_Data, m_AttenuationModel);
+}
+
 ResourceID AudioSource::GetSound() { return m_Sound; }
 void AudioSource::SetSound(ResourceID id)
 {
@@ -198,9 +238,16 @@ void AudioSource::SetSound(ResourceID id)
 		ma_sound_get_length_in_seconds(&m_Data, &m_Length);
 
 	// Update values //
+	SetLooping(m_Looping);
+	SetPanning(m_Panning);
 	SetPitch(m_Pitch);
 	Set3D(m_Is3D);
 
+	SetRolloffGain(m_RolloffGain);
+	SetRolloffDistance(m_RolloffRange);
+	SetAttenuationRolloff(m_RolloffFactor);
+	SetAttenuationModel(m_AttenuationModel);
+	
 	if(m_Mixer) // If mixer is not default output
 		SetMixer(m_Mixer);
 }
@@ -273,10 +320,10 @@ ADD_MANAGED_METHOD(AudioSource, GetLooping, bool, (void* instance))
 ADD_MANAGED_METHOD(AudioSource, SetLooping, void, (void* instance, bool value))
 { ((AudioSource*)instance)->SetLooping(value); }
 
-ADD_MANAGED_METHOD(AudioSource, Get3D, bool, (void* instance))
+ADD_MANAGED_METHOD(AudioSource, GetIs3D, bool, (void* instance))
 { return ((AudioSource*)instance)->Get3D(); }
 
-ADD_MANAGED_METHOD(AudioSource, Set3D, void, (void* instance, bool value))
+ADD_MANAGED_METHOD(AudioSource, SetIs3D, void, (void* instance, bool value))
 { ((AudioSource*)instance)->Set3D(value); }
 
 ADD_MANAGED_METHOD(AudioSource, GetMixer, uint64_t, (void* instance))
@@ -302,5 +349,29 @@ ADD_MANAGED_METHOD(AudioSource, GetPitch, float, (void* instance))
 
 ADD_MANAGED_METHOD(AudioSource, SetPitch, void, (void* instance, float value))
 { ((AudioSource*)instance)->SetPitch(value); }
+
+ADD_MANAGED_METHOD(AudioSource, GetRolloffRange, void, (void* instance, glm::vec2* output))
+{ *output = ((AudioSource*)instance)->GetRolloffDistance(); }
+
+ADD_MANAGED_METHOD(AudioSource, SetRolloffRange, void, (void* instance, glm::vec2* input))
+{ ((AudioSource*)instance)->SetRolloffDistance(*input); }
+
+ADD_MANAGED_METHOD(AudioSource, GetRolloffGain, void, (void* instance, glm::vec2* output))
+{ *output = ((AudioSource*)instance)->GetRolloffGain(); }
+
+ADD_MANAGED_METHOD(AudioSource, SetRolloffGain, void, (void* instance, glm::vec2* input))
+{ ((AudioSource*)instance)->SetRolloffGain(*input); }
+
+ADD_MANAGED_METHOD(AudioSource, GetAttenuationRolloff, float, (void* instance))
+{ return ((AudioSource*)instance)->GetAttenuationRolloff(); }
+
+ADD_MANAGED_METHOD(AudioSource, SetAttenuationRolloff, void, (void* instance, float input))
+{ ((AudioSource*)instance)->SetAttenuationRolloff(input); }
+
+ADD_MANAGED_METHOD(AudioSource, GetAttenuationModel, int, (void* instance))
+{ return (int)((AudioSource*)instance)->GetAttenuationModel(); }
+
+ADD_MANAGED_METHOD(AudioSource, SetAttenuationModel, void, (void* instance, int input))
+{ ((AudioSource*)instance)->SetAttenuationModel((ma_attenuation_model)input); }
 
 #pragma endregion

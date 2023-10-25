@@ -29,6 +29,21 @@ namespace YonaiEditor.Inspectors
 			m_Target.IsLooping = Draw("Loop", m_Target.IsLooping);
 			m_Target.PlayOnStart = Draw("Play on Start", m_Target.PlayOnStart);
 
+			ImGUI.Space();
+
+			if(ImGUI.Foldout("Attenuation"))
+			{
+				AudioSource.AttenuationSettings attenuation = m_Target.Attenuation;
+				attenuation.Distance = Draw("Distance", attenuation.Distance);
+				attenuation.Gain = Draw("Gain", attenuation.Gain);
+				attenuation.Factor = Draw("Rolloff Factor", attenuation.Factor);
+				attenuation.Model = Draw("Gain", attenuation.Model);
+				
+				m_Target.Attenuation = attenuation;
+			}
+
+			ImGUI.Space();
+
 			if (EditorService.State != EditorState.Edit)
 			{
 				ImGUI.Space();
