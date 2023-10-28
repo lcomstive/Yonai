@@ -59,32 +59,38 @@
     <Compile Include="BuildProcess/MacBuildProcess.cs" />
     <Compile Include="BuildProcess/WindowsBuildProcess.cs" />
 
+	<!-- Commands -->
+    <Compile Include="Commands/CommandGizmoMove.cs" />
+    <Compile Include="Commands/CommandHistory.cs" />
+    <Compile Include="Commands/CommandModifyFieldsProperties.cs" />
+    <Compile Include="Commands/CommandRelay.cs" />
+    <Compile Include="Commands/ICommand.cs" />
+
     <!-- Components -->
     <Compile Include="Components/SceneViewCameraController.cs" />
 
     <!-- Core -->
     <Compile Include="Core/FileDialog.cs" />
     <Compile Include="Core/Icons.cs" />
+    <Compile Include="Core/LocalProjectSettings.cs" />
     <Compile Include="Core/ProjectFile.cs" />
     <Compile Include="Core/SceneManagerExtensions.cs" />
     <Compile Include="Core/Scripting.cs" />
     <Compile Include="Core/ShortcutManager.cs" />
-    <Compile Include="Core/Commands/CommandHistory.cs" />
-    <Compile Include="Core/Commands/GizmoCommands.cs" />
-    <Compile Include="Core/Commands/ICommand.cs" />
-    <Compile Include="Core/Commands/ModifyValueCommand.cs" />
     
     <!-- Graphics -->
     <Compile Include="Graphics/EditorWindow.cs" />
     <Compile Include="Graphics/ImGUI.cs" />
+	
+	<!-- Menu Items -->
+    <Compile Include="MenuItems/BasicMenuItem.cs" />
+    <Compile Include="MenuItems/MenuItemData.cs" />
 
     <!-- Services -->
     <Compile Include="Services/EditorService.cs" />
+    <Compile Include="Services/EditorUIService.cs" />
     <Compile Include="Services/ImGUISystem.cs" />
-    <Compile Include="Services/EditorUI/BasicMenuItems.cs" />
-    <Compile Include="Services/EditorUI/EditorUIService.cs" />
-    <Compile Include="Services/EditorUI/MenuItemData.cs" />
-    <Compile Include="Services/EditorUI/ProjectHub.cs" />
+    <Compile Include="Services/ProjectHub.cs" />
 
     <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />
