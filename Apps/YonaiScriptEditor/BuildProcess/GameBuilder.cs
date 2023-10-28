@@ -80,16 +80,16 @@ namespace YonaiEditor.BuildProcess
 
 		internal static bool Initialise()
 		{
-			// Default build platform is host platform
-			Platform platform = Application.Platform;
+			Platform platform = LocalProjectSettings.BuildTarget;
 
-			// If building from command line, check for platform arg and parse it,
-			// if fails then set back to default (host platform)
-			if (Application.HasArg("build") && Application.HasArg("platform") &&
-				!Enum.TryParse(Application.GetArg("platform"), out platform))
-					platform = Application.Platform;
+			if (!IsValidBuildPlatform(platform))
+				platform = Application.Platform; // Default to host platform
 
-			// TODO: Save project build settings to file and load desired platform from disk
+			// If building from command line, check for platform arg and parse it.
+			if (Application.HasArg("build") && Application.HasArg("platform") && // Check if args request building and have a platform
+				Enum.TryParse(Application.GetArg("platform"), out Platform argsPlatform) && // Try to parse the platform
+				IsValidBuildPlatform(argsPlatform)) // Ensure it's a valid buildable target from this host
+					platform = argsPlatform;
 
 			return SelectPlatform(platform);
 		}
@@ -100,7 +100,13 @@ namespace YonaiEditor.BuildProcess
 			editorUI.AddMenuItemDirectory("Build");
 
 			foreach (Platform platform in AvailableBuildPlatforms)
-				editorUI.AddMenuItem(() => SelectPlatform(platform), new MenuItemAttribute($"Build/Platform/{platform}") { Icon = PlatformIcons[platform] });
+				editorUI.AddMenuItem(() =>
+				{
+					LocalProjectSettings.BuildTarget = platform;
+					LocalProjectSettings.Save();
+
+					SelectPlatform(platform);
+				}, new MenuItemAttribute($"Build/Platform/{platform}") { Icon = PlatformIcons[platform] });
 
 			editorUI.AddMenuItem(StartBuildFromMenu, new MenuItemAttribute("Build/Start Build") { PrependSeparator = true, Shortcut = "CTRL+SHIFT+B" });
 		}

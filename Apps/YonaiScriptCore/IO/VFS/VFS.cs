@@ -119,8 +119,11 @@ namespace Yonai.IO
 						return mapping;
 				}
 			}
-			if (AllowAbsolutePaths && s_AbsolutePathMapping.Exists(file))
-				return s_AbsolutePathMapping;
+			if (AllowAbsolutePaths)
+			{
+				if((needExistingFile && s_AbsolutePathMapping.Exists(file)) || !needExistingFile)
+					return s_AbsolutePathMapping;
+			}
 			return null;
 		}
 		#endregion
@@ -159,7 +162,7 @@ namespace Yonai.IO
 		}
 		
 		/// <summary>
-		/// Converts <paramref name="target"/> to JSON using <see cref="ISerializable.OnSerialize"/> and writes contents to <paramref name="path"/>
+		/// Writes JSON contents to <paramref name="path"/>
 		/// </summary>
 		public static void WriteJSON(VFSFile path, JObject contents, bool indent = true) => Write(path, JsonConvert.SerializeObject(contents, indent ? Formatting.Indented : Formatting.None));
 

@@ -49,9 +49,9 @@ namespace Yonai
 
 		/// <summary>
 		/// Directory with persistent storage.<br>
-		/// Windows: %APPDATA%/Yonai.<br>
-		/// Mac: ~/Library/Caches/Yonai<br>
-		/// Linux: ./.data/Yonai
+		/// Windows: %APPDATA%/Yonai/<br>
+		/// Mac: ~/Library/Caches/Yonai/<br>
+		/// Linux: ./.data/Yonai/
 		/// </summary>
 		public static string PersistentDirectory => _GetPersistentDirectory();
 

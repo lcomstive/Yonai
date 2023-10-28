@@ -3,11 +3,9 @@ using System;
 using Yonai.IO;
 using System.Linq;
 using Yonai.Graphics;
-using Newtonsoft.Json;
 using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.EditorUI;
-using Newtonsoft.Json.Linq;
 using YonaiEditor.Commands;
 using YonaiEditor.BuildProcess;
 using System.Collections.Generic;
@@ -188,6 +186,8 @@ namespace YonaiEditor.Systems
 				m_ActiveViews[type]._Close(); // Inform of closure
 				m_ActiveViews.Remove(type);
 			}
+
+			LocalProjectSettings.Save();
 		}
 
 		public static T GetView<T>() where T : View

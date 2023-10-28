@@ -22,13 +22,19 @@ namespace YonaiEditor.Systems
 			Window.Resolution = new IVector2(600, 400);
 			EditorWindow.Show();
 
+			ActiveProject = new ProjectFile();
 			LoadProjects();
+
+			LocalProjectSettings.SetFilePath(string.Empty);
 		}
 
 		protected override void Destroyed()
 		{
 			EditorWindow.Show(false);
 			SaveProjects();
+
+			LocalProjectSettings.Save();
+			ActiveProject = new ProjectFile();
 		}
 
 		protected override void Draw()
@@ -108,6 +114,9 @@ namespace YonaiEditor.Systems
 		{
 			ActiveProject = project;
 			Get<ProjectHubService>()?.Enable(false);
+
+			// Load local project settings
+			LocalProjectSettings.SetFilePath(Application.PersistentDirectory + $"ProjectCache/{project.Name}.json");
 
 			// Add VFS mounts
 			VFS.Mount("project://", project.Path.ParentDirectory);
