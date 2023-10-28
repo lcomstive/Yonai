@@ -44,7 +44,6 @@ namespace YonaiEditor.Commands
 			m_Target.LocalScale		= m_OldScale;
 			m_Target.LocalPosition	= m_OldPosition;
 			m_Target.LocalRotation	= m_OldRotation;
-
 		}
 	}
 }

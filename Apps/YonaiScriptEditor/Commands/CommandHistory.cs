@@ -7,6 +7,9 @@ namespace YonaiEditor.Commands
 	/// </summary>
 	public static class CommandHistory
 	{
+		/// <summary>
+		/// Maximum amount of <see cref="ICommand"/>s to be stored in a single <see cref="CommandList"/>.
+		/// </summary>
 		private const int MaxHistoryLength = 128;
 
 		/// <summary>

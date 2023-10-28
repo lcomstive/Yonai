@@ -55,6 +55,9 @@ namespace Yonai
 				a.Gain != b.Gain ||
 				a.Factor != b.Factor ||
 				a.Model != b.Model;
+
+			public override int GetHashCode() => base.GetHashCode();
+			public override bool Equals(object obj) => obj is AttenuationSettings && ((AttenuationSettings)obj) == this;
 		}
 
 		private float m_Pitch;

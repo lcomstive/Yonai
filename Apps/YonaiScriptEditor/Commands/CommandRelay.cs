@@ -2,12 +2,9 @@ using System;
 
 namespace YonaiEditor.Commands
 {
-	public interface ICommand
-	{
-		void Execute();
-		void Undo();
-	}
-
+	/// <summary>
+	/// Executes an <see cref="Action"/>, and stores another for undoing.
+	/// </summary>
 	public struct CommandRelay : ICommand
 	{
 		private Action m_Execute;

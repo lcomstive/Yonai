@@ -2,6 +2,9 @@ using System.Reflection;
 
 namespace YonaiEditor.Commands
 {
+	/// <summary>
+	/// Stores <see cref="FieldInfo"/> to directly modify its value.
+	/// </summary>
 	public struct CommandModifyField : ICommand
 	{
 		private object Instance;
@@ -22,6 +25,9 @@ namespace YonaiEditor.Commands
 		public void Undo() => Field.SetValue(Instance, PreviousValue);
 	}
 
+	/// <summary>
+	/// Stores <see cref="PropertyInfo"/> to directly modify its value.
+	/// </summary>
 	public struct CommandModifyProperty : ICommand
 	{
 		private object Instance;
