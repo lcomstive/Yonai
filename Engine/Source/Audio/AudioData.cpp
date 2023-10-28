@@ -13,7 +13,6 @@ AudioData::AudioData(std::vector<unsigned char>& data) : m_Data() { Import(data)
 float AudioData::GetLength()
 {
 	float seconds = m_Data.empty() ? 0 : m_Data.size() / (float)AudioSystem::s_Device.playback.internalSampleRate;
-	spdlog::debug("AudioData length is {}s", seconds);
 	return seconds;
 }
 
