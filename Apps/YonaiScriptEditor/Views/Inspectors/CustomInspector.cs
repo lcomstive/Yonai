@@ -305,14 +305,15 @@ namespace YonaiEditor
 
 		private ResourceBase Draw(string label, Type type, ResourceBase resource)
 		{
-			if (ImGUI.Button(resource?.ResourcePath ?? string.Empty, new Vector2(ImGUI.ContentRegionAvailable.x, 0))
-					&& resource != null && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+			ImGUI.Button(resource?.ResourcePath ?? string.Empty, new Vector2(ImGUI.ContentRegionAvailable.x, 0));
+
+			if (ImGUI.IsItemHovered() && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 			{
 				// Navigate resources view to resource.ResourcePath and highlight/select resource
 				ResourcesView resourceView = EditorUIService.GetView<ResourcesView>();
 				if (resourceView == null)
 					resourceView = EditorUIService.Open<ResourcesView>();
-				resourceView.HighlightPath(resource.ResourcePath);
+				resourceView.HighlightPath(resource?.ResourcePath);
 			}
 
 			UUID dragDropID = HandleResourceDragDrop(type);
