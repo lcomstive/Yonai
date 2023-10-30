@@ -83,7 +83,7 @@
     <Compile Include="Graphics/ImGUI.cs" />
 	
 	<!-- Menu Items -->
-    <Compile Include="MenuItems/BasicMenuItem.cs" />
+    <Compile Include="MenuItems/BasicMenuItems.cs" />
     <Compile Include="MenuItems/MenuItemData.cs" />
 
     <!-- Services -->
