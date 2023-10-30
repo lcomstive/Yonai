@@ -132,6 +132,13 @@ namespace YonaiEditor.Views
 				ImGUI.EndMenu();
 			}
 
+			if(SceneManager.MultipleScenesActive)
+			{
+				ImGUI.Separator();
+				if (ImGUI.Selectable("Unload World"))
+					SceneManager.Unload(world);
+			}
+
 			ImGUI.EndPopup();
 		}
 

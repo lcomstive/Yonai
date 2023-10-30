@@ -8,6 +8,11 @@ namespace Yonai
 
 	public class SceneManager
 	{
+		/// <summary>
+		/// Checks if multiple worlds have been loaded, using <see cref="SceneAddType.Additive"/>
+		/// </summary>
+		public static bool MultipleScenesActive => m_ActiveWorlds.Count > 1;
+
 		private static Dictionary<UUID, World> m_ActiveWorlds = new Dictionary<UUID, World>();
 
 		/// <summary>
