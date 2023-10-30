@@ -48,7 +48,7 @@ namespace YonaiEditor.Systems
 				Open<InspectorView>();
 				Open<ResourcesView>();
 
-				World world = Resource.Load<World>("project://Assets/Scenes/Test World.json");
+				World world = Resource.Load<World>("project://Assets/Scenes/Test World.world");
 				SceneManager.Load(world, SceneAddType.Single, false);
 
 				if (!Scripting.IsAssemblyReloading())

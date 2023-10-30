@@ -22,7 +22,7 @@ namespace YonaiEditor.Views
 					World world = worlds[i];
 					if (!ImGUI.Foldout(world.Name, true))
 						continue;
-					Entity[] entities = world.GetEntities();
+					Entity[] entities = world.Entities;
 
 					Vector2 size = i < worlds.Length - 1 ? new Vector2(0, entities.Length * 21) : Vector2.Zero;
 					ImGUI.BeginChild($"{world.Name} [{world.ID}]", size);

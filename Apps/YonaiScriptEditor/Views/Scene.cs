@@ -42,7 +42,7 @@ namespace YonaiEditor.Views
 			if (m_World)
 				return; // Already created world
 
-			m_World = Resource.Load<World>("editor://SceneView.json");
+			m_World = Resource.Load<World>("editor://SceneView.world");
 
 			m_Target = new RenderTexture(new IVector2(1920, 1080));
 

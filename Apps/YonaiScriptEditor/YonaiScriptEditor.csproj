@@ -104,6 +104,7 @@
     <Compile Include="Views/Inspectors/Files/ShaderInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/WorldInspector.cs" />
 
     <!-- Views -->
     <Compile Include="Views/Console.cs" />

@@ -45,9 +45,6 @@ namespace TestGame
 			m_Sound = Resource.Load<AudioData>("assets://Audio/Fall.mp3");
 
 			m_SoundMixer = Resource.Load<AudioMixer>("assets://Audio/Mixers/SFX.mixer");
-
-			foreach (Entity e in World.GetEntities())
-				Log.Trace(e.GetComponent<NameComponent>()?.Name ?? $"[{e.ID}]");
 		}
 
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();

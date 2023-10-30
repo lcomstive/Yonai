@@ -11,15 +11,25 @@ namespace Yonai
 		private static Dictionary<UUID, World> m_ActiveWorlds = new Dictionary<UUID, World>();
 
 		/// <summary>
-		/// Clears all currently active scenes and loads a new one
+		/// Loads a world, either by clearing existing world(s) (<see cref="SceneAddType.Single"/>)
+		/// or alongside others (<see cref="SceneAddType.Additive"/>).
 		/// </summary>
 		public static void Load(World world, SceneAddType addType = SceneAddType.Single, bool active = true)
 		{
+			if (m_ActiveWorlds.ContainsKey(world))
+				// If loading existing world, assume a reload
+				Unload(world);
+
 			switch(addType)
 			{
 				default:
-				case SceneAddType.Single: _Load(world.ID); break;
-				case SceneAddType.Additive: _LoadAdditive(world.ID); break;
+				case SceneAddType.Single:
+						UnloadAll();
+						_Load(world.ID);
+						break;
+				case SceneAddType.Additive:
+						_LoadAdditive(world.ID);
+						break;
 			}
 			world.SetActive(active);
 

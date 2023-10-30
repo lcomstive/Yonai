@@ -9,12 +9,7 @@ namespace Yonai
 {
 	public class World : NativeResourceBase, ISerializable
 	{
-		private string m_Name = string.Empty;
-		public string Name
-		{
-			get => m_Name;
-			internal set => m_Name = value;
-		}
+		public string Name { get; private set; }
 
 		public UUID ID => ResourceID;
 
@@ -32,12 +27,36 @@ namespace Yonai
 			}
 		}
 
+		public Entity[] Entities
+		{
+			get
+			{
+				ulong[] entityIDs = _GetEntities(ID);
+				if (entityIDs == null)
+					return null;
+
+				// Get all entities from IDs
+				Entity[] entities = new Entity[entityIDs.Length];
+				for (int i = 0; i < entityIDs.Length; i++)
+				{
+					UUID id = entityIDs[i];
+					if (!m_Entities.ContainsKey(id))
+						m_Entities.Add(id, new Entity(this, id));
+					entities[i] = m_Entities[id];
+				}
+
+				return entities;
+			}
+		}
+
+		public int EntityCount => _GetEntityCount(ID);
+
 		private Dictionary<UUID, Entity> m_Entities = new Dictionary<UUID, Entity>();
 		private Dictionary<Type, YonaiSystem> m_Systems = new Dictionary<Type, YonaiSystem>();
 
 		protected override void OnLoad()
 		{
-			m_Name = new VFSFile(ResourcePath).FileNameWithoutExtension;
+			Name = new VFSFile(ResourcePath).FileNameWithoutExtension;
 
 			ulong resourceID = ResourceID;
 			_Load(ResourcePath, out resourceID, out IntPtr handle);
@@ -60,7 +79,6 @@ namespace Yonai
 		public JObject OnSerialize()
 		{
 			JObject json = new JObject();
-			json["Name"] = Name;
 
 			// Systems //
 			JObject systemsJSON = new JObject();
@@ -74,7 +92,7 @@ namespace Yonai
 
 			// Entities //
 			JArray entityArray = new JArray();
-			Entity[] entities = GetEntities();
+			Entity[] entities = Entities;
 			foreach (Entity entity in entities)
 				entityArray.Add(entity.OnSerialize());
 			json.Add("Entities", entityArray);
@@ -86,7 +104,7 @@ namespace Yonai
 		public void OnDeserialize(JObject json)
 		{
 			// Destroy previous entities, will be recreating them
-			Entity[] previousEntities = GetEntities() ?? new Entity[0];
+			Entity[] previousEntities = Entities ?? new Entity[0];
 			foreach (Entity entity in previousEntities)
 			{
 				entity.Destroy();
@@ -259,25 +277,6 @@ namespace Yonai
 			_DestroyEntity(ID, entityID);
 		}
 
-		public Entity[] GetEntities()
-		{
-			ulong[] entityIDs = _GetEntities(ID);
-			if(entityIDs == null)
-				return null;
-
-			// Get all entities from IDs
-			Entity[] entities = new Entity[entityIDs.Length];
-			for (int i = 0; i < entityIDs.Length; i++)
-			{
-				UUID id = entityIDs[i];
-				if (!m_Entities.ContainsKey(id))
-					m_Entities.Add(id, new Entity(this, id));
-				entities[i] = m_Entities[id];
-			}
-
-			return entities;
-		}
-
 		public Component[] GetComponents(Type type)
 		{
 			ulong[] entityIDs = _GetComponents(ID, type);
@@ -398,6 +397,7 @@ namespace Yonai
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetName(ulong worldID, string name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetEntities(ulong worldID);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetEntityCount(ulong worldID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponents(ulong worldID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong[] _GetComponentsMultiple(ulong worldID, Type[] types);
 

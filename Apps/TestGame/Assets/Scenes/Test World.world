@@ -1,5 +1,4 @@
 {
-  "Name": "Test World",
   "Systems": {
     "TestGame.TestSystem, TestGame": {},
     "TestGame.CameraControlSystem, TestGame": {}
@@ -65,15 +64,15 @@
         {
           "ComponentType": "Yonai.Transform",
           "Position": {
-            "x": 0.4422056,
+            "x": 0.442205638,
             "y": 1.55997753,
-            "z": -0.0007536225
+            "z": -0.000753402768
           },
           "Rotation": {
             "x": 1.0,
-            "y": 1.61329728E-15,
-            "z": -2.48154184E-23,
-            "w": 4.003465E-38
+            "y": 1.58605151E-15,
+            "z": 0.0,
+            "w": 0.0
           },
           "Scale": {
             "x": 0.5599935,
