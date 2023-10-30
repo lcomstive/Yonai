@@ -109,6 +109,7 @@ namespace YonaiEditor.BuildProcess
 				}, new MenuItemAttribute($"Build/Platform/{platform}") { Icon = PlatformIcons[platform] });
 
 			editorUI.AddMenuItem(StartBuildFromMenu, new MenuItemAttribute("Build/Start Build") { PrependSeparator = true, Shortcut = "CTRL+SHIFT+B" });
+			ShortcutManager.Map(StartBuildFromMenu, Key.LeftControl, Key.LeftShift, Key.B);
 		}
 
 		private static void StartBuildFromMenu() => StartBuild();
