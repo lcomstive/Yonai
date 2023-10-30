@@ -1,5 +1,5 @@
-﻿using Yonai.Graphics;
-using System;
+﻿using System;
+using Yonai.Graphics;
 using System.Runtime.CompilerServices;
 
 namespace Yonai
@@ -7,12 +7,24 @@ namespace Yonai
 	public class SpriteRenderer : Component
 	{
 		/// <summary>
-		/// Texture to draw
+		/// Texture to draw.
+		/// Sets <see cref="SpriteID"/>.
 		/// </summary>
 		public Texture Sprite
 		{
-			get => Resource.Get<Texture>(_GetSprite(Handle));
-			set => _SetSprite(Handle, value?.ResourceID ?? UUID.Invalid);
+			get => Resource.Get<Texture>(SpriteID);
+			set => SpriteID = value?.ResourceID ?? UUID.Invalid;
+		}
+
+		/// <summary>
+		/// ID of texture to draw.
+		/// Sets <see cref="Sprite"/>.
+		/// </summary>
+		[Serialize(false)]
+		public UUID SpriteID
+		{
+			get => _GetSprite(Handle);
+			set => _SetSprite(Handle, value);
 		}
 
 		/// <summary>
@@ -29,12 +41,24 @@ namespace Yonai
 		}
 
 		/// <summary>
-		/// Shader program to draw sprite
+		/// Shader used to draw sprite.
+		/// Sets <see cref="ShaderID"/>.
 		/// </summary>
 		public Shader Shader
 		{
-			get => Resource.Get<Shader>(_GetShader(Handle));
-			set => _SetShader(Handle, value?.ResourceID ?? UUID.Invalid);
+			get => Resource.Get<Shader>(ShaderID);
+			set => ShaderID = value?.ResourceID ?? UUID.Invalid;
+		}
+
+		/// <summary>
+		/// ID of shader used to draw sprite.
+		/// Sets <see cref="Shader"/>.
+		/// </summary>
+		[Serialize(false)]
+		public UUID ShaderID
+		{
+			get => _GetShader(Handle);
+			set => _SetShader(Handle, value);
 		}
 
 		#region Internal Calls

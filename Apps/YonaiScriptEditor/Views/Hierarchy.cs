@@ -1,6 +1,9 @@
 using Yonai;
+using System;
 using Yonai.Graphics;
+using Yonai.IO;
 using YonaiEditor.Systems;
+using System.Collections.Generic;
 
 namespace YonaiEditor.Views
 {
@@ -15,56 +18,66 @@ namespace YonaiEditor.Views
 		{
 			World[] worlds = SceneManager.GetActiveScenes();
 			bool isOpen = true;
-			if (ImGUI.Begin("Hierarchy", ref isOpen))
+			if (!ImGUI.Begin("Hierarchy", ref isOpen))
 			{
-				for(int i = 0; i < worlds.Length; i++)
+				EndDrawing(isOpen);
+				return;
+			}
+
+			for(int i = 0; i < worlds.Length; i++)
+			{
+				World world = worlds[i];
+				if (!ImGUI.Foldout(world.Name, true))
+					continue;
+				Entity[] entities = world.Entities;
+
+				Vector2 size = i < worlds.Length - 1 ? new Vector2(0, entities.Length * 21) : Vector2.Zero;
+				ImGUI.BeginChild($"{world.Name} [{world.ID}]", size);
+
+				foreach (Entity entity in entities)
 				{
-					World world = worlds[i];
-					if (!ImGUI.Foldout(world.Name, true))
-						continue;
-					Entity[] entities = world.Entities;
+					bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
 
-					Vector2 size = i < worlds.Length - 1 ? new Vector2(0, entities.Length * 21) : Vector2.Zero;
-					ImGUI.BeginChild($"{world.Name} [{world.ID}]", size);
+					if (isSelected)
+						ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
 
-					foreach (Entity entity in entities)
+					ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 17.5f));
+
+					NameComponent nameComponent;
+					if (!entity.TryGetComponent(out nameComponent))
 					{
-						bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
-
-						if (isSelected)
-							ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
-
-						ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 17.5f));
-
-						NameComponent nameComponent;
-						if (!entity.TryGetComponent(out nameComponent))
-						{
-							nameComponent = entity.AddComponent<NameComponent>();
-							nameComponent.Name = $"Entity {entity.ID}";
-						}
-
-						ImGUI.Selectable(nameComponent.Name);
-
-						if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
-							InspectorView.Target = entity;
-
-						if (isSelected)
-							ImGUI.PopStyleColour();
-
-						ImGUI.EndChild();
-
-						DrawContextMenu(entity);
+						nameComponent = entity.AddComponent<NameComponent>();
+						nameComponent.Name = $"Entity {entity.ID}";
 					}
+
+					ImGUI.Selectable(nameComponent.Name);
+
+					if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
+						InspectorView.Target = entity;
+
+					if (isSelected)
+						ImGUI.PopStyleColour();
 
 					ImGUI.EndChild();
 
-					// If selected empty space and entity is currently selected, deselect it
-					if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
-						InspectorView.Target = null;
-
-					DrawContextMenu(world);
+					DrawContextMenu(entity);
 				}
+
+				ImGUI.EndChild();
+
+				// If selected empty space and entity is currently selected, deselect it
+				if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
+					InspectorView.Target = null;
+
+				HandleDragDrop(world);
+				DrawContextMenu(world);
 			}
+
+			EndDrawing(isOpen);
+		}
+
+		private void EndDrawing(bool isOpen)
+		{
 			ImGUI.End();
 
 			// Check if window requested to be closed
@@ -143,5 +156,47 @@ namespace YonaiEditor.Views
 			spriteRenderer.Sprite = Resource.Get<Texture>("Textures/DefaultSprite");
 			spriteRenderer.Shader = Resource.Get<Shader>("Shaders/2D/Default");
 		}
+
+		#region Drag & Drop
+		private static readonly Dictionary<Type, Action<World, UUID>> DragDropFunctions = new Dictionary<Type, Action<World, UUID>>()
+		{
+			{ typeof(World), (world, resourceID) => SceneManager.Load(Resource.Get<World>(resourceID), SceneAddType.Additive) },
+			{ typeof(Texture), HandleDropTexture }
+		};
+
+		private void HandleDragDrop(World targetWorld)
+		{
+			if (!ImGUI.BeginDragDropTarget())
+				return;
+
+			object payload = ImGUI.AcceptDragDropPayload("ResourcePath", ImGUI.DragDropFlags.AcceptPeekOnly);
+			if (payload == null) return;
+
+			VFSFile payloadFile = (VFSFile)payload;
+			if (!Resource.Exists(payloadFile.FullPath)) return; // Invalid path
+
+			UUID resourceID = Resource.GetID(payloadFile.FullPath);
+			Type payloadType = Resource.GetType(resourceID);
+
+			if(DragDropFunctions.ContainsKey(payloadType))
+			{
+				ImGUI.AcceptDragDropPayload("ResourcePath");
+				if (ImGUI.DragDropPayloadIsDelivery())
+					DragDropFunctions[payloadType].Invoke(targetWorld, resourceID);
+			}
+
+			ImGUI.EndDragDropTarget();
+		}
+
+		private static void HandleDropTexture(World world, UUID resourceID)
+		{
+			Entity entity = world.CreateEntity();
+			entity.AddComponent<NameComponent>().Name = "Sprite";
+			entity.AddComponent<Transform>();
+
+			SpriteRenderer renderer = entity.AddComponent<SpriteRenderer>();
+			renderer.SpriteID = resourceID;
+		}
+		#endregion
 	}
 }
