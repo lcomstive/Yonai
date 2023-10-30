@@ -174,10 +174,10 @@ ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw, bool openByDefau
 }
 
 ADD_MANAGED_METHOD(ImGUI, Indent, void, (float width), YonaiEditor)
-{ ImGui::Indent(); }
+{ ImGui::Indent(width); }
 
 ADD_MANAGED_METHOD(ImGUI, Unindent, void, (float width), YonaiEditor)
-{ ImGui::Unindent(); }
+{ ImGui::Unindent(width); }
 
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosX, float, (), YonaiEditor) { return ImGui::GetCursorPosX(); }
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosY, float, (), YonaiEditor) { return ImGui::GetCursorPosY(); }

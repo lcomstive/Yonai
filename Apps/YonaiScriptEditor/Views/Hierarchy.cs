@@ -29,6 +29,7 @@ namespace YonaiEditor.Views
 				World world = worlds[i];
 				if (!ImGUI.Foldout(world.Name, true))
 					continue;
+
 				Entity[] entities = world.Entities;
 
 				Vector2 size = i < worlds.Length - 1 ? new Vector2(0, entities.Length * 21) : Vector2.Zero;
@@ -36,31 +37,9 @@ namespace YonaiEditor.Views
 
 				foreach (Entity entity in entities)
 				{
-					bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
-
-					if (isSelected)
-						ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
-
-					ImGUI.BeginChild($"{world.ID}:{entity.ID}", new Vector2(0, 17.5f));
-
-					NameComponent nameComponent;
-					if (!entity.TryGetComponent(out nameComponent))
-					{
-						nameComponent = entity.AddComponent<NameComponent>();
-						nameComponent.Name = $"Entity {entity.ID}";
-					}
-
-					ImGUI.Selectable(nameComponent.Name);
-
-					if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
-						InspectorView.Target = entity;
-
-					if (isSelected)
-						ImGUI.PopStyleColour();
-
-					ImGUI.EndChild();
-
-					DrawContextMenu(entity);
+					Transform transform = entity.GetComponent<Transform>();
+					if (!transform || transform.Parent == null)
+						DrawEntity(entity, transform);
 				}
 
 				ImGUI.EndChild();
@@ -74,6 +53,48 @@ namespace YonaiEditor.Views
 			}
 
 			EndDrawing(isOpen);
+		}
+
+		private const float IndentWidth = 10;
+		private void DrawEntity(Entity entity, Transform transform)
+		{
+			bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
+			ImGUI.Indent(IndentWidth);
+
+			if (isSelected)
+				ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
+
+			ImGUI.BeginGroup();
+
+			NameComponent nameComponent;
+			if (!entity.TryGetComponent(out nameComponent))
+			{
+				nameComponent = entity.AddComponent<NameComponent>();
+				nameComponent.Name = $"Entity {entity.ID}";
+			}
+
+			Transform[] children = transform?.GetChildren() ?? new Transform[0];
+			if (children.Length == 0)
+			{
+				ImGUI.HorizontalSpace(17.5f);
+				ImGUI.Selectable(nameComponent.Name);
+			}
+			else if(ImGUI.Foldout(nameComponent.Name))
+			{
+				foreach (Transform child in children)
+					DrawEntity(child.Entity, child);
+			}
+
+			if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
+				InspectorView.Target = entity;
+
+			if (isSelected)
+				ImGUI.PopStyleColour();
+
+			ImGUI.EndGroup();
+			ImGUI.Unindent(IndentWidth);
+
+			DrawContextMenu(entity);
 		}
 
 		private void EndDrawing(bool isOpen)
