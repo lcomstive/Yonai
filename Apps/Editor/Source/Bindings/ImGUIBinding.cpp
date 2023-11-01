@@ -124,6 +124,7 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, _IsItemHovered, bool, (int flags), YonaiEditor) { return ImGui::IsItemHovered(flags); }
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), YonaiEditor) { return ImGui::IsItemClicked(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), YonaiEditor) { return ImGui::IsItemActive(); }
+ADD_MANAGED_METHOD(ImGUI, IsAnyItemActive, bool, (), YonaiEditor) { return ImGui::IsAnyItemActive(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActivated, bool, (), YonaiEditor) { return ImGui::IsItemActivated(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemDeactivatedAfterEdit, bool, (), YonaiEditor) { return ImGui::IsItemDeactivatedAfterEdit(); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), YonaiEditor) { return ImGui::IsMouseClicked(button); }
@@ -134,6 +135,7 @@ ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), YonaiEditor) { return ImGui::I
 ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), YonaiEditor) { return ImGui::BeginDisabled(); }
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), YonaiEditor) { return ImGui::EndDisabled(); }
 ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), YonaiEditor) { ImGui::SetItemDefaultFocus(); }
+ADD_MANAGED_METHOD(ImGUI, SetKeyboardFocusHere, void, (int offset), YonaiEditor) { ImGui::SetKeyboardFocusHere(offset); }
 
 ADD_MANAGED_METHOD(ImGUI, _IsKeyDown, bool, (int key), YonaiEditor)
 { return ImGui::IsKeyDown((ImGuiKey)key); }
@@ -906,6 +908,12 @@ ADD_MANAGED_METHOD(ImGUI, _PushStyleColour, void, (int var, glm::vec4* value), Y
 
 ADD_MANAGED_METHOD(ImGUI, PopStyleColour, void, (int amount), YonaiEditor)
 { ImGui::PopStyleColor(amount); }
+
+ADD_MANAGED_METHOD(ImGUI, _GetStyleColour, void, (int var, glm::vec4* output), YonaiEditor)
+{
+	ImVec4 colour = ImGui::GetStyleColorVec4(var);
+	*output = glm::vec4(colour.x, colour.y, colour.z, colour.w);
+}
 
 // MENU //
 ADD_MANAGED_METHOD(ImGUI, BeginMenuBar, bool, (), YonaiEditor)

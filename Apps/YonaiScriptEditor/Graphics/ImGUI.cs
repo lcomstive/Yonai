@@ -1169,6 +1169,9 @@ namespace YonaiEditor
 		public static void SetNextWindowSize(Vector2 size)
 			=> _SetNextWindowSize(ref size);
 
+		public static void SetNextWindowSize(float width, float height)
+			=> SetNextWindowSize(new Vector2(width, height));
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SetNextWindowSize(ref Vector2 position);
 
@@ -1185,6 +1188,7 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemClicked();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActive();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsAnyItemActive();
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActivated();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemDeactivatedAfterEdit();
@@ -1212,6 +1216,7 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndDisabled();
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetKeyboardFocusHere(int offset = 0);
 
 		/// <returns>True if <paramref name="key"/> is not held down</returns>
 		public static bool IsKeyUp(Key key) => !IsKeyDown(key);
@@ -1832,6 +1837,15 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _PushStyleColour(int flag, ref Colour value);
+		
+		public static Colour GetStyleColour(StyleColour style)
+		{
+			_GetStyleColour((int)style, out Colour colour);
+			return colour;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetStyleColour(int flag, out Colour value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void PopStyleVar(int amount = 1);

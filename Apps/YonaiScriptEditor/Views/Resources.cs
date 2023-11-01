@@ -149,11 +149,25 @@ namespace YonaiEditor.Views
 
 				BreadcrumbDragDropTarget(GetDirectoryPath(directories, i));
 			}
-			ImGUI.EndChild();
 
 			ImGUI.PopStyleVar();
 			ImGUI.PopStyleColour();
 
+			ImGUI.SameLine(0, 0);
+			ImGUI.SetCursorPosX(ImGUI.ContentRegionAvailable.x - 20);
+			if (ImGUI.Button("Search"))
+			{
+				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
+				SearchView<VFSFile>.Search(files, (selectedFile) =>
+				{
+					if (selectedFile == null) return;
+					VFSFile file = (VFSFile)selectedFile;
+					Log.Debug($"Selected file '{file}'");
+					HighlightPath(file);
+				});
+			}
+
+			ImGUI.EndChild();
 			ImGUI.Separator();
 		}
 

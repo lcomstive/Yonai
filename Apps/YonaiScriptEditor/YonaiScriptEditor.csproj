@@ -113,6 +113,7 @@
     <Compile Include="Views/Inspector.cs" />
     <Compile Include="Views/Resources.cs" />
     <Compile Include="Views/Scene.cs" />
+    <Compile Include="Views/Search.cs" />
     <Compile Include="Views/Stats.cs" />
     <Compile Include="Views/View.cs" />
   </ItemGroup>
