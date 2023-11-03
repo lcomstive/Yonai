@@ -129,7 +129,7 @@ namespace YonaiEditor.Views
 
 		private bool DrawSearchResult(SearchResult value, float width)
 		{
-			Vector2 size = new Vector2(width, ImGUI.FontSize);
+			Vector2 size = new Vector2(width - 20, ImGUI.FontSize * 1.5f);
 			Vector2 pos = ImGUI.GetCursorScreenPos();
 			bool clicked = ImGUI.InvisibleButton(value, size);
 
@@ -140,11 +140,11 @@ namespace YonaiEditor.Views
 			Colour textColour = ImGUI.GetStyleColour(ImGUI.StyleColour.Text);
 			Colour textHighlightedColour = ImGUI.GetStyleColour(ImGUI.StyleColour.ButtonActive);
 
-			Vector2 offset = new Vector2(0, 20);
+			Vector2 offset = new Vector2(5, 2.5f);
 
-			ImGUI.AddRectFilled(pos, pos + size, buttonColour);
+			ImGUI.AddRectFilled(pos, pos + size, buttonColour, 2.5f);
 
-			ImGUI.SetCursorScreenPos(pos);
+			ImGUI.SetCursorScreenPos(pos + offset);
 
 			foreach ((string text, bool highlight) in value.Splits)
 			{
@@ -155,7 +155,7 @@ namespace YonaiEditor.Views
 
 			if (value.Splits.Count == 0)
 			{
-				ImGUI.SetCursorScreenPos(pos);
+				ImGUI.SetCursorScreenPos(pos + offset);
 				ImGUI.Text(value, textColour);
 			}
 
