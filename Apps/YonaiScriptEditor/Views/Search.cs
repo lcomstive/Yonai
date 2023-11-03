@@ -1,22 +1,70 @@
 using Yonai;
 using System;
 using YonaiEditor.Systems;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Linq;
 
 namespace YonaiEditor.Views
 {
-	public class SearchView<T> : View
+	public class SearchView : View
 	{
+		private struct SearchResult
+		{
+			public string Value;
+
+			public List<(string, bool)> Splits;
+
+			public SearchResult(string value)
+			{
+				Value = value;
+				Splits = new List<(string, bool)>();
+			}
+
+			public SearchResult(string value, string substring)
+			{
+				Value = value;
+				Splits = new List<(string, bool)>();
+				Highlight(substring);
+			}
+
+			public void Highlight(string substring)
+			{
+				substring = substring.ToLower();
+				Splits.Clear();
+
+				string value = string.Copy(Value);
+				int index = Value.ToLower().IndexOf(substring);
+				while(index > 0)
+				{
+					Splits.Add((value.Substring(0, index), false));
+					Splits.Add((value.Substring(index, substring.Length), true));
+					value = value.Substring(index + substring.Length);
+
+					index = value.ToLower().IndexOf(substring);
+				}
+
+				Splits.Add((value, false));
+			}
+
+			public static implicit operator string(SearchResult result) => result.Value;
+			public static implicit operator SearchResult(string result) => new SearchResult(result);
+		}
+
 		private string m_SearchInput = string.Empty;
 		private int m_HighlightedIndex = 0;
 
-		private static T[] m_Values = null;
+		private static string[] m_AllValues = null;
+		private static List<SearchResult> m_SearchResults = new List<SearchResult>();
 		private static Action<object> m_Callback = null;
 
 		private const float InputPadding = 5;
 
+		private const int MinInputLength = 3;
+
 		protected override void Draw()
 		{
-			if (m_Values == null)
+			if (m_SearchResults == null)
 				return; // Nothing to show
 
 			bool isOpen = true;
@@ -33,7 +81,8 @@ namespace YonaiEditor.Views
 				ImGUI.SetCursorPosY(ImGUI.GetCursorPosY() + (InputPadding * 2));
 				ImGUI.HorizontalSpace(InputPadding);
 				ImGUI.SetNextItemWidth(contentRegion.x - (InputPadding * 2));
-				ImGUI.Input(string.Empty, ref m_SearchInput, 256);
+				if(ImGUI.Input(string.Empty, ref m_SearchInput, 256))
+					DoSearch(m_SearchInput);
 
 				ImGUI.PopStyleColour();
 
@@ -42,25 +91,27 @@ namespace YonaiEditor.Views
 				ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, new Colour(0.25f, 0.25f, 0.25f));
 				ImGUI.PushStyleVar(ImGUI.StyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
 				ImGUI.BeginChild("SearchResults");
-				for(int i = 0; i < m_Values.Length; i++)
+				for(int i = 0; i < m_SearchResults.Count; i++)
 				{
 					ImGUI.PushStyleColour(ImGUI.StyleColour.Button,
 						i == m_HighlightedIndex ? selectedColour : Colour.None);
 
-					if (ImGUI.Button(m_Values[i].ToString(), new Vector2(contentRegion.x, 0)))
+					// if (ImGUI.Button(m_SearchResults[i].ToString(), new Vector2(contentRegion.x, 0)))
+					if (DrawSearchResult(m_SearchResults[i], contentRegion.x))
 						selectedIndex = i;
 					if (ImGUI.IsItemHovered())
 						m_HighlightedIndex = i;
 
 					ImGUI.PopStyleColour();
 				}
+
 				ImGUI.EndChild();
 				ImGUI.PopStyleVar();
 				ImGUI.PopStyleColour();
 
 				// Handle key input //
-				if (ImGUI.IsKeyPressed(Key.ArrowUp)) m_HighlightedIndex = MathUtils.Clamp(m_HighlightedIndex - 1, 0, m_Values.Length);
-				if (ImGUI.IsKeyPressed(Key.ArrowDown)) m_HighlightedIndex = MathUtils.Clamp(m_HighlightedIndex + 1, 0, m_Values.Length);
+				if (ImGUI.IsKeyPressed(Key.ArrowUp))   m_HighlightedIndex = MathUtils.Clamp(m_HighlightedIndex - 1, 0, m_SearchResults.Count);
+				if (ImGUI.IsKeyPressed(Key.ArrowDown)) m_HighlightedIndex = MathUtils.Clamp(m_HighlightedIndex + 1, 0, m_SearchResults.Count - 1);
 
 				if (ImGUI.IsKeyPressed(Key.Enter) || ImGUI.IsKeyPressed(Key.KP_ENTER))
 					// Select the highlighted item
@@ -72,15 +123,50 @@ namespace YonaiEditor.Views
 			if (!isOpen || selectedIndex >= 0)
 			{
 				Select(selectedIndex);
-				EditorUIService.Close<SearchView<T>>();
+				EditorUIService.Close<SearchView>();
 			}
+		}
+
+		private bool DrawSearchResult(SearchResult value, float width)
+		{
+			Vector2 size = new Vector2(width, ImGUI.FontSize);
+			Vector2 pos = ImGUI.GetCursorScreenPos();
+			bool clicked = ImGUI.InvisibleButton(value, size);
+
+			Colour buttonColour = ImGUI.IsItemHovered() ?
+				ImGUI.GetStyleColour(ImGUI.StyleColour.ButtonHovered) :
+				ImGUI.GetStyleColour(ImGUI.StyleColour.Button);
+
+			Colour textColour = ImGUI.GetStyleColour(ImGUI.StyleColour.Text);
+			Colour textHighlightedColour = ImGUI.GetStyleColour(ImGUI.StyleColour.ButtonActive);
+
+			Vector2 offset = new Vector2(0, 20);
+
+			ImGUI.AddRectFilled(pos, pos + size, buttonColour);
+
+			ImGUI.SetCursorScreenPos(pos);
+
+			foreach ((string text, bool highlight) in value.Splits)
+			{
+				ImGUI.SetCursorScreenPos(pos + new Vector2(offset.x));
+				ImGUI.Text(text, highlight ? textHighlightedColour : textColour);
+				offset.x += ImGUI.CalculateTextWidth(text).x;
+			}
+
+			if (value.Splits.Count == 0)
+			{
+				ImGUI.SetCursorScreenPos(pos);
+				ImGUI.Text(value, textColour);
+			}
+
+			return clicked;
 		}
 
 		private void Select(int index)
 		{
-			m_Callback.Invoke(index >= 0 ? (object)m_Values[index] : null);
+			m_Callback.Invoke(index >= 0 ? (object)m_SearchResults[index].Value : null);
 			m_Callback = null;
-			m_Values = null;
+			m_AllValues = null;
 		}
 
 		/// <summary>
@@ -89,17 +175,43 @@ namespace YonaiEditor.Views
 		/// <param name="values"></param>
 		/// <param name="callback"></param>
 		/// <returns>False if search already in progress</returns>
-		public static bool Search(T[] values, Action<object> callback)
+		public static bool Search<T>(T[] values, Action<object> callback)
 		{
 			if (m_Callback != null)
 				return false;
 
-			EditorUIService.Open<SearchView<T>>();
+			SearchView view = EditorUIService.Open<SearchView>();
 
 			m_Callback = callback;
-			m_Values = values;
+
+			m_AllValues = new string[values.Length];
+			for(int i = 0; i < values.Length; i++)
+				m_AllValues[i] = values[i].ToString();
+
+			view.DoSearch(string.Empty);
 
 			return true;
+		}
+
+		private void DoSearch(string input)
+		{
+			input = input.ToLower();
+			m_SearchResults.Clear();
+			m_HighlightedIndex = 0;
+
+			// Input length not long enough, add all search results
+			if(input.Length < MinInputLength)
+			{
+				foreach (string value in m_AllValues)
+					m_SearchResults.Add(new SearchResult(value));
+				return;
+			}
+
+			foreach (string value in m_AllValues)
+			{
+				if (value.ToLower().Contains(input))
+					m_SearchResults.Add(new SearchResult(value, input));
+			}
 		}
 	}
 }

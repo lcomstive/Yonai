@@ -1117,6 +1117,11 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetFontGlobalScale(float scale);
 
+		public static float FontSize => _GetFontSize();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float _GetFontSize();
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void AddFontFromFile(string filepath, int fontSize = 18);
 

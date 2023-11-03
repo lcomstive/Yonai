@@ -83,6 +83,9 @@ ADD_MANAGED_METHOD(ImGUI, AddFont, void, (MonoArray* dataRaw, int fontSize), Yon
 	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data.data(), (int)data.size(), fontSize);
 }
 
+ADD_MANAGED_METHOD(ImGUI, _GetFontSize, float, (), YonaiEditor)
+{ return ImGui::GetFontSize(); }
+
 ADD_MANAGED_METHOD(ImGUI, SetFontGlobalScale, void, (float scale), YonaiEditor)
 { ImGui::GetIO().FontGlobalScale = scale; }
 

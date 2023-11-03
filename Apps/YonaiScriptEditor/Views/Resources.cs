@@ -158,10 +158,10 @@ namespace YonaiEditor.Views
 			if (ImGUI.Button("Search"))
 			{
 				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
-				SearchView<VFSFile>.Search(files, (selectedFile) =>
+				SearchView.Search(files, (selectedFile) =>
 				{
-					if (selectedFile == null) return;
-					VFSFile file = (VFSFile)selectedFile;
+					string file = selectedFile as string;
+					if (string.IsNullOrEmpty(file)) return;
 					Log.Debug($"Selected file '{file}'");
 					HighlightPath(file);
 				});
