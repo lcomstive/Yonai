@@ -315,19 +315,20 @@ ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* s
 	);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBackground(bgCol->x, bgCol->g, bgCol->b, bgCol->a);
 
 	Texture* texture = Resource::Get<Texture>(textureID);
+	string id = "ImageButton_" + to_string(textureID);
 	return ImGui::ImageButton(
+		id.c_str(),
 		(ImTextureID)(texture ? texture->GetID() : 0),
 		imSize,
 		ImVec2(0, 1), // UV0
 		ImVec2(1, 0), // UV1
-		framePadding,
 		imBackground,
 		imTint
 	);

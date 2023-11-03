@@ -1492,13 +1492,13 @@ namespace YonaiEditor
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint, Colour border) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref border);
 
-		public static bool ButtonImage(ulong textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
+		public static bool ButtonImage(ulong textureID, Vector2 size) => _ImageButton(textureID, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint) => _ImageButton(textureID, ref size, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(textureID, ref size, ref tint, ref backgroundColour);
 
-		public static bool ButtonImage(Texture texture, Vector2 size, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref backgroundColour);
+		public static bool ButtonImage(Texture texture, Vector2 size) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Image(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
@@ -1507,7 +1507,7 @@ namespace YonaiEditor
 		private static extern void _ImageRenderTexture(IntPtr handle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
+		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour backgroundColour);
 		#endregion
 
 		#region Drag
