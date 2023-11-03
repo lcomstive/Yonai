@@ -75,7 +75,7 @@ namespace YonaiEditor.Views
 			{
 				DrawBreadcrumbs();
 				DrawContents();
-				DrawSizeSlider();
+				DrawBottomBar();
 			}
 			ImGUI.End();
 			
@@ -152,20 +152,6 @@ namespace YonaiEditor.Views
 
 			ImGUI.PopStyleVar();
 			ImGUI.PopStyleColour();
-
-			ImGUI.SameLine(0, 0);
-			ImGUI.SetCursorPosX(ImGUI.ContentRegionAvailable.x - 20);
-			if (ImGUI.Button("Search"))
-			{
-				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
-				SearchView.Search(files, (selectedFile) =>
-				{
-					string file = selectedFile as string;
-					if (string.IsNullOrEmpty(file)) return;
-					Log.Debug($"Selected file '{file}'");
-					HighlightPath(file);
-				});
-			}
 
 			ImGUI.EndChild();
 			ImGUI.Separator();
@@ -281,11 +267,39 @@ namespace YonaiEditor.Views
 			DrawContextMenu();
 		}
 
-		private void DrawSizeSlider()
+		private void DrawBottomBar()
 		{
+			Vector2 size = ImGUI.WindowContentRegionMax;
 			ImGUI.PushStyleVar(ImGUI.StyleVar.FramePadding, new Vector2(0, 0));
 
-			Vector2 size = ImGUI.WindowContentRegionMax;
+			// Search button //
+			ImGUI.PushStyleColour(ImGUI.StyleColour.Button, Colour.None);
+			if (ImGUI.ButtonImage(Icons.Get("Search"), new Vector2(20, 20)))
+			{
+				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
+				List<string> searchPaths = new List<string>();
+				foreach(VFSFile file in files)
+				{
+					if (file.Extension.Equals(".cache"))
+						continue; // Ignore cache files
+
+					string filepath = file.FullPath.Replace(RootDirectory + "/", "");
+					if (file.IsDirectory)
+						filepath += '/';
+					searchPaths.Add(filepath);
+				}
+
+				SearchView.Search(searchPaths.ToArray(), (selectedFile) =>
+				{
+					string file = selectedFile as string;
+					if (string.IsNullOrEmpty(file)) return;
+					Log.Debug($"Selected file '{file}'");
+					HighlightPath($"{RootDirectory}/{file}");
+				});
+			}
+			ImGUI.PopStyleColour();
+
+			// Thumbnail size slider //
 			ImGUI.SetCursorPos(new Vector2(size.x - (size.x / 4) - 30, size.y - 20));
 			ImGUI.Text("Size", Colour.Grey);
 			ImGUI.SameLine();
