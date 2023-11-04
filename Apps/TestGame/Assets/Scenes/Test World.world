@@ -5,6 +5,45 @@
   },
   "Entities": [
     {
+      "ID": "2654914000653199596",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Entity"
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": null,
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": null
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -22.5,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 9.099629E-07,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ]
+    },
+    {
       "ID": "9336376843701531948",
       "Components": [
         {
@@ -41,45 +80,6 @@
             "z": 0.5599041
           },
           "Parent": "16765798305678760197"
-        }
-      ]
-    },
-    {
-      "ID": "2654914000653199596",
-      "Components": [
-        {
-          "ComponentType": "Yonai.NameComponent",
-          "Name": "Entity"
-        },
-        {
-          "ComponentType": "Yonai.SpriteRenderer",
-          "Sprite": null,
-          "Colour": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
-          },
-          "Shader": null
-        },
-        {
-          "ComponentType": "Yonai.Transform",
-          "Position": {
-            "x": -22.5,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "Rotation": {
-            "x": 9.099629E-07,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          },
-          "Scale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-          }
         }
       ]
     },
@@ -762,14 +762,14 @@
         },
         {
           "ComponentType": "Yonai.SpriteRenderer",
-          "Sprite": "11523984441011527142",
+          "Sprite": "9104759881392213231",
           "Colour": {
             "r": 1.0,
             "g": 1.0,
             "b": 1.0,
             "a": 1.0
           },
-          "Shader": null
+          "Shader": "10486165663353448236"
         }
       ]
     }

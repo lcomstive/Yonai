@@ -7,6 +7,7 @@ using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.Systems;
 using YonaiEditor.Commands;
+using System.Collections.Generic;
 
 namespace YonaiEditor
 {
@@ -416,7 +417,27 @@ namespace YonaiEditor
 
 			ImGUI.TableSetColumnIndex(1);
 
-			ImGUI.Button(filepath.FullPath, new Vector2(ImGUI.ContentRegionAvailable.x, 0));
+			ImGUI.Button(filepath.FullPath, new Vector2(ImGUI.ContentRegionAvailable.x - 30, 0));
+			ImGUI.SameLine();
+			string searchID = $"DrawFilepathSearch_{label}";
+			ImGUI.PushID(searchID);
+			if(ImGUI.ButtonImage(Icons.Get("Search"), new Vector2(15, 15)))
+			{
+				string fileTypes = string.Empty;
+				foreach (string type in allowedFileTypes)
+					fileTypes += type + " ";
+
+				Log.Debug("Opening filepath search for types " + fileTypes);
+				List<VFSFile> files = VFS.GetFilesByExtension(allowedFileTypes);
+				SearchView.OpenSearch(searchID, files.ToArray());
+			}
+			ImGUI.PopID();
+
+			if (SearchView.IsSearchFinished(searchID, out string searchResult) && !string.IsNullOrEmpty(searchResult))
+			{
+				output = new VFSFile(searchResult);
+				return true;
+			}
 
 			bool clear = false;
 			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))

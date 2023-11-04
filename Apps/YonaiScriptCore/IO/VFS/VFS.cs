@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Yonai.IO
 {
@@ -183,6 +184,17 @@ namespace Yonai.IO
 		public static bool RemoveDirectory(VFSFile path) => GetMapping(path)?.RemoveDirectory(path) ?? false;
 
 		public static VFSFile[] GetFiles(VFSFile directory, bool recursive = false) => GetMapping(directory)?.GetFiles(directory, recursive) ?? new VFSFile[0];
+
+		public static List<VFSFile> GetFilesByExtension(params string[] extensions)
+		{
+			List<VFSFile> output = new List<VFSFile>();
+
+			var mappingsDict = s_Mappings.Values.ToArray();
+			foreach(List<VFSMapping> mappings in mappingsDict)
+				foreach(VFSMapping mapping in mappings)
+					output.AddRange(mapping.GetFilesByExtension(extensions));
+			return output;
+		}
 		#endregion
 	}
 }

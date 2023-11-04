@@ -162,18 +162,18 @@ namespace YonaiEditor.Systems
 			Type type = typeof(T);
 
 			// Check if window of type is already open
-			if (!m_ActiveViews.ContainsKey(type))
+			if (m_ActiveViews.ContainsKey(type))
+				return (T)m_ActiveViews[type];
+
+			T instance = new T();
+			try
 			{
-				T instance = new T();
-				try
-				{
-					// Inform of opening
-					instance._Open();
-					m_ActiveViews.Add(type, instance);
-					return instance;
-				}
-				catch (Exception e) { Log.Exception(e); }
+				// Inform of opening
+				instance._Open();
+				m_ActiveViews.Add(type, instance);
+				return instance;
 			}
+			catch (Exception e) { Log.Exception(e); }
 			return null;
 		}
 
@@ -195,6 +195,8 @@ namespace YonaiEditor.Systems
 			Type type = typeof(T);
 			return m_ActiveViews.ContainsKey(type) ? (T)m_ActiveViews[type] : null;
 		}
+
+		public static bool IsViewOpen<T>() => m_ActiveViews.ContainsKey(typeof(T));
 		#endregion
 
 		internal static void BeginDockspace()

@@ -488,5 +488,15 @@
     "ID": "11104607770119522765",
     "Path": "project://Assets/Textures/Kenney Simple Space/station_C.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "10486165663353448236",
+    "Path": "project://Assets/Shaders/Default2D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "17678307185778256738",
+    "Path": "project://Assets/Shaders/Default3D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   }
 ]

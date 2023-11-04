@@ -4,6 +4,7 @@ using YonaiEditor.Systems;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace YonaiEditor.Views
 {
@@ -51,15 +52,25 @@ namespace YonaiEditor.Views
 			public static implicit operator SearchResult(string result) => new SearchResult(result);
 		}
 
-		private string m_SearchInput = string.Empty;
 		private int m_HighlightedIndex = 0;
+		private string m_SearchInput = string.Empty;
 
 		private static string[] m_AllValues = null;
 		private static List<SearchResult> m_SearchResults = new List<SearchResult>();
-		private static Action<object> m_Callback = null;
+		private static Action<string> m_Callback = null;
+
+		/// <summary>
+		/// Last ID used when opening search in immediate mode.
+		/// Used with <see cref="IsSearchFinished(string, out string)"/> to validate if value should be returned.
+		/// </summary>
+		private static string m_IMSearchID = string.Empty;
+
+		/// <summary>
+		/// Last result returned from a search
+		/// </summary>
+		private static string m_IMSearchResult = string.Empty;
 
 		private const float InputPadding = 5;
-
 		private const int MinInputLength = 3;
 
 		protected override void Draw()
@@ -164,7 +175,9 @@ namespace YonaiEditor.Views
 
 		private void Select(int index)
 		{
-			m_Callback.Invoke(index >= 0 ? (object)m_SearchResults[index].Value : null);
+			m_IMSearchResult = index >= 0 ? m_SearchResults[index].Value : string.Empty;
+
+			m_Callback?.Invoke(m_IMSearchResult);
 			m_Callback = null;
 			m_AllValues = null;
 		}
@@ -175,7 +188,7 @@ namespace YonaiEditor.Views
 		/// <param name="values"></param>
 		/// <param name="callback"></param>
 		/// <returns>False if search already in progress</returns>
-		public static bool Search<T>(T[] values, Action<object> callback)
+		public static bool Search<T>(T[] values, Action<string> callback)
 		{
 			if (m_Callback != null)
 				return false;
@@ -183,14 +196,52 @@ namespace YonaiEditor.Views
 			SearchView view = EditorUIService.Open<SearchView>();
 
 			m_Callback = callback;
-
-			m_AllValues = new string[values.Length];
-			for(int i = 0; i < values.Length; i++)
-				m_AllValues[i] = values[i].ToString();
+			PopulateValues(values);
 
 			view.DoSearch(string.Empty);
 
 			return true;
+		}
+
+		/// <summary>
+		/// Opens a search window in an immediate-mode fashion
+		/// </summary>
+		/// <param name="ID"></param>
+		/// <param name="values"></param>
+		public static void OpenSearch<T>(string ID, T[] values)
+		{
+			SearchView view = EditorUIService.Open<SearchView>();
+			m_IMSearchID = ID;
+			m_IMSearchResult = string.Empty;
+			PopulateValues(values);
+
+			view.DoSearch(string.Empty);
+		}
+
+		private static void PopulateValues<T>(T[] values)
+		{
+			m_AllValues = new string[values.Length];
+			for (int i = 0; i < values.Length; i++)
+				m_AllValues[i] = values[i].ToString();
+		}
+
+		public static bool IsSearchOpen(string ID) => m_IMSearchID.Equals(ID);
+
+		/// <summary>
+		/// Checks if search has been completed
+		/// </summary>
+		/// <param name="result">Search output, or <see cref="string.Empty"/> if cancelled</param>
+		/// <returns>True if search has been finished and result returned</returns>
+		public static bool IsSearchFinished(string ID, out string result)
+		{
+			result = string.Empty;
+			if (IsSearchOpen(ID) && !EditorUIService.IsViewOpen<SearchView>())
+			{
+				result = m_IMSearchResult;
+				m_IMSearchID = m_IMSearchResult = string.Empty;
+				return true;
+			}
+			return false;
 		}
 
 		private void DoSearch(string input)

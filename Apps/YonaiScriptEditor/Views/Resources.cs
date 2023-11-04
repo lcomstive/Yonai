@@ -291,10 +291,8 @@ namespace YonaiEditor.Views
 
 				SearchView.Search(searchPaths.ToArray(), (selectedFile) =>
 				{
-					string file = selectedFile as string;
-					if (string.IsNullOrEmpty(file)) return;
-					Log.Debug($"Selected file '{file}'");
-					HighlightPath($"{RootDirectory}/{file}");
+					if (!string.IsNullOrEmpty(selectedFile))
+						HighlightPath($"{RootDirectory}/{selectedFile}");
 				});
 			}
 			ImGUI.PopStyleColour();
