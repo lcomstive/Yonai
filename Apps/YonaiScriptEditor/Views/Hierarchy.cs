@@ -33,6 +33,10 @@ namespace YonaiEditor.Views
 				if (!ImGUI.TreeNode(world.Name, ImGUI.TreeNodeFlags.OpenOnDoubleClick))
 					continue;
 
+				// Inspect world
+				if(ImGUI.IsItemClicked())
+					InspectorView.Target = world;
+
 				Entity[] entities = world.Entities;
 
 				foreach (Entity entity in entities)

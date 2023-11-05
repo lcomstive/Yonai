@@ -16,12 +16,38 @@ namespace YonaiEditor.Inspectors
 			{
 				VFSFile file = (VFSFile)Target;
 				m_Target = Resource.Load<World>(file.FullPath);
-			}
-			else // Is world object
-				m_Target = Target as World;
 
-			SceneManager.Load(m_Target);
-			InspectorView.Target = null;
+				// Load scene from file
+				SceneManager.Load(m_Target);
+				InspectorView.Target = null;
+			}
+			else // Is world object, wanting to inspect
+				m_Target = Target as World;
+		}
+
+		public override void DrawInspector()
+		{
+			ImGUI.Text(m_Target.ResourcePath, Colour.Grey);
+			ImGUI.Text($"Entities: {m_Target.EntityCount}", Colour.Grey);
+			
+			ImGUI.BeginChild("WorldInspectorSystems");
+			{
+				YonaiSystem[] systems = m_Target.GetSystems();
+				ImGUI.Text($"Systems: {systems.Length}", Colour.Grey);
+				ImGUI.Space();
+
+				foreach (YonaiSystem system in systems)
+				{
+					ImGUI.Separator();
+					if (!ImGUI.Foldout(system.GetType().Name, true))
+						continue;
+
+					SetupTable();
+					DrawInspector(system);
+					ImGUI.EndTable();
+				}
+			}
+			ImGUI.EndChild();
 		}
 	}
 }
