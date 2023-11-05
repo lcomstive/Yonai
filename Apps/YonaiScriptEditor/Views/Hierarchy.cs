@@ -78,13 +78,13 @@ namespace YonaiEditor.Views
 					(m_IsArrowKeyDown || Input.IsMousePressed(MouseButton.Left))) // Mouse click
 					InspectorView.Target = entity;
 
+				DrawContextMenu(entity);
+
 				foreach (Transform child in children)
 					DrawEntity(child.Entity, child);
 
 				ImGUI.TreePop();
 			}
-
-			DrawContextMenu(entity);
 		}
 
 		private void EndDrawing(bool isOpen)
