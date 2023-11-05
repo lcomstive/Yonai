@@ -2,9 +2,6 @@ using Yonai;
 using System;
 using YonaiEditor.Systems;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace YonaiEditor.Views
 {
@@ -36,9 +33,10 @@ namespace YonaiEditor.Views
 
 				string value = string.Copy(Value);
 				int index = Value.ToLower().IndexOf(substring);
-				while(index > 0)
+				while(index >= 0)
 				{
-					Splits.Add((value.Substring(0, index), false));
+					if(index > 0)
+						Splits.Add((value.Substring(0, index), false));
 					Splits.Add((value.Substring(index, substring.Length), true));
 					value = value.Substring(index + substring.Length);
 
