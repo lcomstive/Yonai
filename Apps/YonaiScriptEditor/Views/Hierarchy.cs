@@ -9,6 +9,7 @@ namespace YonaiEditor.Views
 {
 	public class HierarchyView : View
 	{
+		private bool m_IsArrowKeyDown = false;
 		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.25f);
 
 		[MenuItem("Window/Hierarchy")]
@@ -24,16 +25,15 @@ namespace YonaiEditor.Views
 				return;
 			}
 
+			m_IsArrowKeyDown = Input.IsKeyDown(Key.ArrowDown, Key.ArrowLeft, Key.ArrowUp, Key.ArrowRight);
+
 			for(int i = 0; i < worlds.Length; i++)
 			{
 				World world = worlds[i];
-				if (!ImGUI.Foldout(world.Name, true))
+				if (!ImGUI.TreeNode(world.Name, ImGUI.TreeNodeFlags.OpenOnDoubleClick))
 					continue;
 
 				Entity[] entities = world.Entities;
-
-				Vector2 size = i < worlds.Length - 1 ? new Vector2(0, entities.Length * 21) : Vector2.Zero;
-				ImGUI.BeginChild($"{world.Name} [{world.ID}]", size);
 
 				foreach (Entity entity in entities)
 				{
@@ -42,30 +42,17 @@ namespace YonaiEditor.Views
 						DrawEntity(entity, transform);
 				}
 
-				ImGUI.EndChild();
-
-				// If selected empty space and entity is currently selected, deselect it
-				if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
-					InspectorView.Target = null;
-
 				HandleDragDrop(world);
 				DrawContextMenu(world);
+
+				ImGUI.TreePop();
 			}
 
 			EndDrawing(isOpen);
 		}
 
-		private const float IndentWidth = 10;
 		private void DrawEntity(Entity entity, Transform transform)
 		{
-			bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
-			ImGUI.Indent(IndentWidth);
-
-			if (isSelected)
-				ImGUI.PushStyleColour(ImGUI.StyleColour.ChildBg, m_SelectedColour);
-
-			ImGUI.BeginGroup();
-
 			NameComponent nameComponent;
 			if (!entity.TryGetComponent(out nameComponent))
 			{
@@ -74,25 +61,28 @@ namespace YonaiEditor.Views
 			}
 
 			Transform[] children = transform?.GetChildren() ?? new Transform[0];
+
+			bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
+			ImGUI.TreeNodeFlags flags = ImGUI.TreeNodeFlags.OpenOnDoubleClick;
+			flags |= ImGUI.TreeNodeFlags.OpenOnArrow | ImGUI.TreeNodeFlags.SpanFullWidth;
+			if (isSelected)
+				flags |= ImGUI.TreeNodeFlags.Selected;
+			flags |= ImGUI.TreeNodeFlags.NavLeftJumpsBackHere;
+			flags |= ImGUI.TreeNodeFlags.OpenOnArrow;
 			if (children.Length == 0)
+				flags |= ImGUI.TreeNodeFlags.Leaf;
+
+			if(ImGUI.TreeNode($"{nameComponent.Name}##{entity.World.ID}:{entity.ID}", flags))
 			{
-				ImGUI.HorizontalSpace(17.5f);
-				ImGUI.Selectable(nameComponent.Name);
-			}
-			else if(ImGUI.Foldout(nameComponent.Name))
-			{
+				if (ImGUI.IsItemHovered() &&
+					(m_IsArrowKeyDown || Input.IsMousePressed(MouseButton.Left))) // Mouse click
+					InspectorView.Target = entity;
+
 				foreach (Transform child in children)
 					DrawEntity(child.Entity, child);
+
+				ImGUI.TreePop();
 			}
-
-			if (ImGUI.IsItemHovered() && ImGUI.IsAnyMouseClicked())
-				InspectorView.Target = entity;
-
-			if (isSelected)
-				ImGUI.PopStyleColour();
-
-			ImGUI.EndGroup();
-			ImGUI.Unindent(IndentWidth);
 
 			DrawContextMenu(entity);
 		}
@@ -100,6 +90,10 @@ namespace YonaiEditor.Views
 		private void EndDrawing(bool isOpen)
 		{
 			ImGUI.End();
+
+			// If selected empty space and entity is currently selected, deselect it
+			if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
+				InspectorView.Target = null;
 
 			// Check if window requested to be closed
 			if (!isOpen)

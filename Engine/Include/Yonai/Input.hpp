@@ -42,6 +42,7 @@ namespace Yonai
 		static float s_ScrollDelta;
 		static MouseState s_MouseState;
 		static glm::vec2 s_MousePosition;
+		static bool s_KeyPressedThisFrame;
 		static glm::vec2 s_LastMousePosition;
 		static std::map<Key, KeyState> s_KeyStates;
 		static std::map<int, KeyState> s_MouseStates;
@@ -71,6 +72,9 @@ namespace Yonai
 
 		/// <returns>True if the key is was released this frame</returns>
 		YonaiAPI static bool IsKeyReleased(Key key);
+
+		/// <returns>True if a key was pressed down this frame</returns>
+		YonaiAPI static bool IsAnyKeyPressed();
 #pragma endregion
 
 #pragma region Mouse

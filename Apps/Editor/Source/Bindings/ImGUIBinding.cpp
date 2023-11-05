@@ -64,14 +64,6 @@ ADD_MANAGED_METHOD(ImGUI, SaveIniSettingsToDisk, void, (MonoString* pathRaw), Yo
 	mono_free(name);
 }
 
-ADD_MANAGED_METHOD(ImGUI, AddFontFromFile, void, (MonoString* pathRaw, int fontSize), YonaiEditor)
-{
-	char* name = mono_string_to_utf8(pathRaw);
-	ImGui::GetIO().Fonts->AddFontFromFileTTF(name, fontSize);
-	spdlog::trace("Added font '{}' to ImGUI", name);
-	mono_free(name);
-}
-
 ADD_MANAGED_METHOD(ImGUI, AddFont, void, (MonoArray* dataRaw, int fontSize), YonaiEditor)
 {
 	vector<unsigned char> data;
@@ -210,6 +202,28 @@ ADD_MANAGED_METHOD(ImGUI, _SetMouseCursor, void, (int type), YonaiEditor) { ImGu
 
 ADD_MANAGED_METHOD(ImGUI, BeginGroup, void, (), YonaiEditor) { ImGui::BeginGroup(); }
 ADD_MANAGED_METHOD(ImGUI, EndGroup, void, (), YonaiEditor) { ImGui::EndGroup(); }
+
+ADD_MANAGED_METHOD(ImGUI, _SetNextItemOpen, void, (bool value, int condition), YonaiEditor)
+{ ImGui::SetNextItemOpen(value, (ImGuiCond)condition); }
+
+// TREE NODE ///
+ADD_MANAGED_METHOD(ImGUI, _TreeNode, bool, (MonoString* labelRaw, int flags), YonaiEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	bool result = ImGui::TreeNodeEx(label, (ImGuiTreeNodeFlags)flags);
+	mono_free(label);
+	return result;
+}
+
+ADD_MANAGED_METHOD(ImGUI, TreePush, void, (MonoString* labelRaw), YonaiEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImGui::TreePush(label);
+	mono_free(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, TreePop, void, (), YonaiEditor)
+{ ImGui::TreePop(); }
 
 // DRAG & DROP ///
 ADD_MANAGED_METHOD(ImGUI, _BeginDragDropSource, bool, (int flags), YonaiEditor)

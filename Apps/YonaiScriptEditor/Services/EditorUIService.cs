@@ -94,10 +94,11 @@ namespace YonaiEditor.Systems
 
 		private static readonly Dictionary<ImGUI.StyleVar, float> StyleVarFloats = new Dictionary<ImGUI.StyleVar, float>()
 		{
-			{ ImGUI.StyleVar.FrameRounding, 2 },
-			{ ImGUI.StyleVar.ChildRounding, 2 },
-			{ ImGUI.StyleVar.ScrollbarRounding, 2 },
-			{ ImGUI.StyleVar.ScrollbarSize, 15 }
+			{ ImGUI.StyleVar.FrameRounding,		2  },
+			{ ImGUI.StyleVar.ChildRounding,		2  },
+			{ ImGUI.StyleVar.ScrollbarRounding, 2  },
+			{ ImGUI.StyleVar.ScrollbarSize,		15 },
+			{ ImGUI.StyleVar.IndentSpacing,		10 }
 		};
 
 		private static readonly Dictionary<ImGUI.StyleVar, Vector2> StyleVarVectors = new Dictionary<ImGUI.StyleVar, Vector2>()
@@ -119,9 +120,6 @@ namespace YonaiEditor.Systems
 			{ ImGUI.StyleColour.SeparatorActive, Colour.FromHex("#5E6B7C") },
 
 			{ ImGUI.StyleColour.Border, Colour.FromHex("#212428") },
-			{ ImGUI.StyleColour.Header, new Colour(0, 0, 0, 0) },
-			{ ImGUI.StyleColour.HeaderHovered, new Colour(1, 1, 1, 0.1f) },
-			{ ImGUI.StyleColour.HeaderActive, new Colour(1, 1, 1, 0.15f) },
 			{ ImGUI.StyleColour.TextSelectedBg, new Colour(1, 1, 1, 0.2f) },
 		};
 
