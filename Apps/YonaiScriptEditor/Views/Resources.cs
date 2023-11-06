@@ -166,13 +166,29 @@ namespace YonaiEditor.Views
 			ImGUI.Separator();
 		}
 
+		/// <summary>
+		/// Maps file extensions to functions that return the icon or image to display to the user
+		/// </summary>
+		private static Dictionary<string, Func<VFSFile, Texture>> ImageExtensionImages = new Dictionary<string, Func<VFSFile, Texture>>()
+		{
+			{ ".png",		GetTexturePreview			},
+			{ ".jpg",		GetTexturePreview			},
+			{ ".jpeg",		GetTexturePreview			},
+			{ ".dds",		GetTexturePreview			},
+			{ ".mp3",		GetAudioPreview				},
+			{ ".ogg",		GetAudioPreview				},
+			{ ".wav",		GetAudioPreview             },
+			{ ".mixer",		(_) => Icons.Get("Mixer")	},
+			{ ".shader",	(_) => Icons.Get("Shader")	},
+			{ ".world",		(_) => Icons.Get("World")	},
+			{ ".material",	(_) => Icons.Get("Material")},
+		};
+
 		private Texture ChooseImage(VFSFile file)
 		{
-			if (!ValidTextureExtensions.Contains(file.Extension.ToLower()))
-				return null;
-			if (!Resource.Exists(file.FullPath))
-				return Resource.Load<Texture>(file.FullPath);
-			return Resource.Get<Texture>(file.FullPath);
+			if(ImageExtensionImages.TryGetValue(file.Extension, out Func<VFSFile, Texture> imageFunc))
+				return imageFunc(file);
+			return Icons.Get("File");
 		}
 
 		private void DrawContents()
@@ -210,8 +226,13 @@ namespace YonaiEditor.Views
 				}
 				else
 				{
-					ImGUI.Image(texture, new Vector2(ImGUI.TextLineHeight, ImGUI.TextLineHeight));
-					ImGUI.SameLine();
+					if (file.IsDirectory)
+					{
+						ImGUI.Image(texture, new Vector2(ImGUI.TextLineHeight, ImGUI.TextLineHeight));
+						ImGUI.SameLine();
+					}
+					else
+						ImGUI.HorizontalSpace(ImGUI.TextLineHeight);
 					ImGUI.Selectable(file.FileName, selected);
 				}
 
@@ -425,5 +446,16 @@ namespace YonaiEditor.Views
 			}
 			ImGUI.EndPopup();
 		}
-	}
+
+		#region File Images
+		private static Texture GetTexturePreview(VFSFile file)
+		{
+			if (!Resource.Exists(file.FullPath))
+				return Resource.Load<Texture>(file.FullPath);
+			return Resource.Get<Texture>(file.FullPath);
+		}
+
+		private static Texture GetAudioPreview(VFSFile _) => Icons.Get("Audio");
+	#endregion
+}
 }

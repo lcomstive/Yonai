@@ -498,5 +498,45 @@
     "ID": "17678307185778256738",
     "Path": "project://Assets/Shaders/Default3D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "8003635715733802638",
+    "Path": "assets://Textures/Icons/World.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "1373368705450245474",
+    "Path": "assets://Textures/Icons/Shader.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "922193726117539532",
+    "Path": "assets://Textures/Icons/Kenney/Music.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "5966403927075558364",
+    "Path": "assets://Textures/Icons/Mixer.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16959071433567588611",
+    "Path": "assets://Textures/Icons/File.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "17312711766738142391",
+    "Path": "assets://Textures/Icons/Audio.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "7286241268657880648",
+    "Path": "project://Assets/Materials/Default2D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "9362680961468506621",
+    "Path": "assets://Textures/Icons/Material.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   }
 ]
