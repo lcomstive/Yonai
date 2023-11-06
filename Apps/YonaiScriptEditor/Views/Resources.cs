@@ -39,7 +39,8 @@ namespace YonaiEditor.Views
 		private const string RootDirectory = "project://Assets";
 		private static readonly IVector2 ThumbnailSizeRange = new IVector2(32, 96);
 
-		private const string LocalSettingsPropertyName = "ResourcesThumbnailSize";
+		private const string LocalSettingsLastDirectoryName = "ResourcesLastDirectory";
+		private const string LocalSettingsThumbnailSizeName = "ResourcesThumbnailSize";
 
 		[MenuItem("Window/Resources")]
 		private static void MenuCallback() => EditorUIService.Open<ResourcesView>();
@@ -47,12 +48,20 @@ namespace YonaiEditor.Views
 		protected override void Opened()
 		{
 			m_IconFolder = Resource.Get<Texture>("assets://Textures/Icons/Folder.png");
-			m_ThumbnailSize = LocalProjectSettings.Get(LocalSettingsPropertyName, 0.0f);
+			m_ThumbnailSize = LocalProjectSettings.Get(LocalSettingsThumbnailSizeName, 0.0f);
 
-			OpenDirectory(RootDirectory);
+			if(LocalProjectSettings.TryGet(LocalSettingsLastDirectoryName, out string lastDirectory) &&
+				lastDirectory.StartsWith(RootDirectory) && VFS.Exists(lastDirectory))
+				OpenDirectory(lastDirectory);
+			else
+				OpenDirectory(RootDirectory);
 		}
 
-		protected override void Closed() => LocalProjectSettings.Set(LocalSettingsPropertyName, m_ThumbnailSize);
+		protected override void Closed()
+		{
+			LocalProjectSettings.Set(LocalSettingsLastDirectoryName, m_CurrentDirectory);
+			LocalProjectSettings.Set(LocalSettingsThumbnailSizeName, m_ThumbnailSize);
+		}
 
 		/// <summary>
 		/// Scans current directory for files and refreshes any changes
