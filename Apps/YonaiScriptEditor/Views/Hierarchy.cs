@@ -31,14 +31,17 @@ namespace YonaiEditor.Views
 				World world = worlds[i];
 
 				ImGUI.BeginGroup();
-				if (!ImGUI.TreeNode(world.Name, ImGUI.TreeNodeFlags.OpenOnDoubleClick))
-					continue;
+				ImGUI.SetNextItemOpen(true, ImGUI.Condition.Once);
+				bool nodeOpen = ImGUI.TreeNode(world.Name, ImGUI.TreeNodeFlags.OpenOnDoubleClick | ImGUI.TreeNodeFlags.OpenOnArrow);
 
 				// Inspect world
-				if(ImGUI.IsItemClicked())
+				if (ImGUI.IsItemClicked())
 					InspectorView.Target = world;
-				
+
 				DrawContextMenu(world);
+
+				if (!nodeOpen)
+					continue;
 
 				Entity[] entities = world.Entities;
 
