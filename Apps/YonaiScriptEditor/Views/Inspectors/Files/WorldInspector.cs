@@ -18,7 +18,7 @@ namespace YonaiEditor.Inspectors
 				m_Target = Resource.Load<World>(file.FullPath);
 
 				// Load scene from file
-				SceneManager.Load(m_Target);
+				SceneManager.Load(m_Target, SceneAddType.Single, false);
 				InspectorView.Target = null;
 			}
 			else // Is world object, wanting to inspect

@@ -1263,6 +1263,14 @@ namespace YonaiEditor
 		/// <returns>True if <paramref name="key"/> is held down</returns>
 		public static bool IsKeyDown(Key key) => _IsKeyDown((int)key);
 
+		public static bool IsKeyDown(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyDown((int)key))
+					return true;
+			return false;
+		}
+
 		/// <returns>True if <paramref name="key"/> went down this frame</returns>
 		public static bool IsKeyPressed(Key key) => _IsKeyPressed((int)key);
 

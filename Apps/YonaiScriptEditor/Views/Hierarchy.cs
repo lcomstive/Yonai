@@ -24,7 +24,7 @@ namespace YonaiEditor.Views
 				return;
 			}
 
-			m_IsArrowKeyDown = Input.IsKeyDown(Key.ArrowDown, Key.ArrowLeft, Key.ArrowUp, Key.ArrowRight);
+			m_IsArrowKeyDown = ImGUI.IsKeyDown(Key.ArrowDown, Key.ArrowLeft, Key.ArrowUp, Key.ArrowRight);
 
 			for(int i = 0; i < worlds.Length; i++)
 			{
@@ -94,7 +94,7 @@ namespace YonaiEditor.Views
 			if(ImGUI.TreeNode($"{nameComponent.Name}##{entity.World.ID}:{entity.ID}", flags))
 			{
 				if (ImGUI.IsItemHovered() &&
-					(m_IsArrowKeyDown || Input.IsMousePressed(MouseButton.Left))) // Mouse click
+					(m_IsArrowKeyDown || ImGUI.IsMouseClicked(MouseButton.Left))) // Mouse click
 					InspectorView.Target = entity;
 
 				DrawContextMenu(entity);
