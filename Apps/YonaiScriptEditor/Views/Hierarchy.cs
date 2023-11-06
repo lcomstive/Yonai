@@ -10,7 +10,6 @@ namespace YonaiEditor.Views
 	public class HierarchyView : View
 	{
 		private bool m_IsArrowKeyDown = false;
-		private Colour m_SelectedColour = new Colour(1, 1, 1, 0.25f);
 
 		[MenuItem("Window/Hierarchy")]
 		private static void MenuCallback() => EditorUIService.Open<HierarchyView>();
@@ -30,12 +29,16 @@ namespace YonaiEditor.Views
 			for(int i = 0; i < worlds.Length; i++)
 			{
 				World world = worlds[i];
+
+				ImGUI.BeginGroup();
 				if (!ImGUI.TreeNode(world.Name, ImGUI.TreeNodeFlags.OpenOnDoubleClick))
 					continue;
 
 				// Inspect world
 				if(ImGUI.IsItemClicked())
 					InspectorView.Target = world;
+				
+				DrawContextMenu(world);
 
 				Entity[] entities = world.Entities;
 
@@ -46,11 +49,20 @@ namespace YonaiEditor.Views
 						DrawEntity(entity, transform);
 				}
 
-				HandleDragDrop(world);
-				DrawContextMenu(world);
-
 				ImGUI.TreePop();
+				ImGUI.EndGroup();
+
+				HandleDragDrop(world);
 			}
+
+			Vector2 remainingSpace = ImGUI.ContentRegionAvailable;
+			remainingSpace.y = Math.Max(remainingSpace.y, 30);
+			ImGUI.Dummy(remainingSpace);
+
+			// If selected empty space, deselect inspector
+			if (ImGUI.IsItemClicked() && ImGUI.IsWindowFocused())
+				InspectorView.Target = null;
+			HandleDragDrop(worlds[worlds.Length - 1]);
 
 			EndDrawing(isOpen);
 		}
@@ -95,10 +107,6 @@ namespace YonaiEditor.Views
 		{
 			ImGUI.End();
 
-			// If selected empty space and entity is currently selected, deselect it
-			if (ImGUI.IsItemClicked() && InspectorView.Target is Entity)
-				InspectorView.Target = null;
-
 			// Check if window requested to be closed
 			if (!isOpen)
 				EditorUIService.Close<HierarchyView>();
@@ -113,6 +121,10 @@ namespace YonaiEditor.Views
 			if (ImGUI.Selectable("Delete"))
 				entity.Destroy();
 
+			ImGUI.Separator();
+
+			DrawContextMenuContents(entity.World);
+
 			ImGUI.EndPopup();
 		}
 
@@ -121,6 +133,13 @@ namespace YonaiEditor.Views
 			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{world.ID}", ImGUI.PopupFlags.MouseButtonRight))
 				return;
 
+			DrawContextMenuContents(world);
+
+			ImGUI.EndPopup();
+		}
+
+		private void DrawContextMenuContents(World world)
+		{
 			if (ImGUI.BeginMenu("New"))
 			{
 				if (ImGUI.Selectable("Entity"))
@@ -151,14 +170,12 @@ namespace YonaiEditor.Views
 				ImGUI.EndMenu();
 			}
 
-			if(SceneManager.MultipleScenesActive)
+			if (SceneManager.MultipleScenesActive)
 			{
 				ImGUI.Separator();
 				if (ImGUI.Selectable("Unload World"))
 					SceneManager.Unload(world);
 			}
-
-			ImGUI.EndPopup();
 		}
 
 		private Entity CreateEntity(World world, string name)
@@ -190,7 +207,7 @@ namespace YonaiEditor.Views
 			{ typeof(Texture), HandleDropTexture }
 		};
 
-		private void HandleDragDrop(World targetWorld)
+		internal static void HandleDragDrop(World targetWorld)
 		{
 			if (!ImGUI.BeginDragDropTarget())
 				return;
@@ -222,6 +239,7 @@ namespace YonaiEditor.Views
 
 			SpriteRenderer renderer = entity.AddComponent<SpriteRenderer>();
 			renderer.SpriteID = resourceID;
+			renderer.Shader = Resource.Get<Shader>("assets://Shaders/Sprite.shader");
 		}
 		#endregion
 	}

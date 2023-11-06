@@ -12,6 +12,7 @@ namespace YonaiEditor.Views
 		private static RenderTexture m_Target = null;
 
 		private bool m_IsFocused = false;
+		private World m_ActiveWorld = null;
 		private SceneViewCameraController m_Controller = null;
 
 		// Gizmo Settings //
@@ -59,6 +60,15 @@ namespace YonaiEditor.Views
 			// Camera controller
 			m_Controller = entity.AddComponent<SceneViewCameraController>();
 			m_Controller.Start();
+
+			SceneManager.WorldChanged += OnSceneManagerWorldChanged;
+			OnSceneManagerWorldChanged();
+		}
+
+		private void OnSceneManagerWorldChanged(World _ = null, bool __ = false)
+		{
+			World[] worlds = SceneManager.GetActiveScenes();
+			m_ActiveWorld = worlds.Length > 0 ? worlds[0] : null;
 		}
 
 		protected override void Closed()
@@ -97,6 +107,9 @@ namespace YonaiEditor.Views
 
 				// ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
 				ImGUI.Image(m_Target, viewportSize);
+
+				if(m_ActiveWorld)
+					HierarchyView.HandleDragDrop(m_ActiveWorld);
 
 				DrawTransformGizmo();
 			}
