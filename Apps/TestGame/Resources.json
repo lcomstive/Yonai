@@ -538,5 +538,10 @@
     "ID": "9362680961468506621",
     "Path": "assets://Textures/Icons/Material.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "15796141513249479350",
+    "Path": "assets://Textures/Icons/Kenney/cross.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   }
 ]

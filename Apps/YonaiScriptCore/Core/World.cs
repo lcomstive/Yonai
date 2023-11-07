@@ -354,7 +354,7 @@ namespace Yonai
 
 		#region Systems
 		public bool HasSystem<T>() => HasSystem(typeof(T));
-		public bool HasSystem(Type type) => _HasSystem(ID, type);
+		public bool HasSystem(Type type) => m_Systems.ContainsKey(type);
 
 		public T AddSystem<T>() where T : YonaiSystem => (T)AddSystem(typeof(T));
 		public YonaiSystem AddSystem(Type type)

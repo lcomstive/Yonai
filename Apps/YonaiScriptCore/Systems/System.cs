@@ -20,6 +20,9 @@ namespace Yonai
 			set => Enable(value);
 		}
 
+		[Serialize(false)]
+		public virtual bool IsGlobal { get; } = false;
+
 		/// <summary>
 		/// Called once per frame after <see cref="Update"/>,
 		/// when the screen is being drawn to

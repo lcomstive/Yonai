@@ -70,6 +70,7 @@ namespace YonaiEditor.Views
 
 		private const float InputPadding = 5;
 		private const int MinInputLength = 3;
+		private const string NoSearchResultsMessage = "Nothing showed up...";
 
 		protected override void Draw()
 		{
@@ -112,6 +113,14 @@ namespace YonaiEditor.Views
 						m_HighlightedIndex = i;
 
 					ImGUI.PopStyleColour();
+				}
+
+				if (m_SearchResults.Count == 0)
+				{
+					Vector2 textSize = ImGUI.CalculateTextWidth(NoSearchResultsMessage);
+					ImGUI.SetCursorPos(contentRegion / 2.0f - textSize / 2.0f);
+					ImGUI.SetCursorPosY(ImGUI.GetCursorPosY() - textSize.y * 4);
+					ImGUI.Text(NoSearchResultsMessage, Colour.Grey);
 				}
 
 				ImGUI.EndChild();
