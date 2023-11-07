@@ -10,6 +10,7 @@ using namespace Yonai;
 bool Input::s_Enabled = true;
 float Input::s_ScrollDelta = 0;
 vec2 Input::s_MousePosition = { 0, 0 };
+bool Input::s_KeyPressedThisFrame = false;
 vec2 Input::s_LastMousePosition = { 0, 0 };
 map<Key, Input::KeyState> Input::s_KeyStates;
 map<int, Input::KeyState> Input::s_MouseStates;
@@ -51,6 +52,9 @@ bool Input::IsKeyReleased(Key key)
 	auto it = s_KeyStates.find(key);
 	return it != s_KeyStates.end() ? it->second == KeyState::Released : false;
 }
+
+bool Input::IsAnyKeyPressed()
+{ return s_Enabled && s_KeyPressedThisFrame; }
 #pragma endregion
 
 #pragma region Mouse Buttons
@@ -211,4 +215,6 @@ void Input::UpdateKeyStates()
 
 	// Reset scroll delta every frame
 	s_ScrollDelta = 0;
+
+	s_KeyPressedThisFrame = false;
 }

@@ -11,17 +11,44 @@ namespace Yonai
 		}
 
 		#region Keys
-		/// <returns>True if the key is not pressed down</returns>
-		public static bool IsKeyUp(Key key)			=> _IsKeyUp((int)key);
+		/// <returns>True if one of the keys is not pressed down</returns>
+		public static bool IsKeyUp(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyUp((int)key))
+					return true;
+			return false;
+		}
 
-		/// <returns>True if the key is currently pressed down</returns>
-		public static bool IsKeyDown(Key key)		=> _IsKeyDown((int)key);
+		/// <returns>True if one of the keys are currently pressed down</returns>
+		public static bool IsKeyDown(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyDown((int)key))
+					return true;
+			return false;
+		}
 
-		/// <returns>True if the key is was pressed down this frame</returns>
-		public static bool IsKeyPressed(Key key)	=> _IsKeyPressed((int)key);
+		/// <returns>True if one of the keys is was pressed down this frame</returns>
+		public static bool IsKeyPressed(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyPressed((int)key))
+					return true;
+			return false;
+		}
 
-		/// <returns>True if the key is was released this frame</returns>
-		public static bool IsKeyReleased(Key key)	=> _IsKeyReleased((int)key);
+		/// <returns>True if one of the keys is was released this frame</returns>
+		public static bool IsKeyReleased(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyReleased((int)key))
+					return true;
+			return false;
+		}
+
+		/// <returns>True if any key was pressed this frame</returns>
+		public static bool IsAnyKeyPressed() => _IsAnyKeyPressed();
 		#endregion
 
 		#region Mouse
@@ -69,17 +96,41 @@ namespace Yonai
 		/// </summary>
 		public static bool IsMouseShowing => _IsMouseShowing();
 
-		/// <returns>True if the button is not pressed down</returns>
-		public static bool IsMouseUp(MouseButton button) => _IsMouseUp((int)button);
+		/// <returns>True if any of the button(s) are not pressed down</returns>
+		public static bool IsMouseUp(params MouseButton[] buttons)
+		{
+			foreach (MouseButton button in buttons)
+				if (_IsMouseUp((int)button))
+					return true;
+			return false;
+		}
 
-		/// <returns>True if the button is currently pressed down</returns>
-		public static bool IsMouseDown(MouseButton button) => _IsMouseDown((int)button);
+		/// <returns>True if any of the button(s) are currently pressed down</returns>
+		public static bool IsMouseDown(params MouseButton[] buttons)
+		{
+			foreach (MouseButton button in buttons)
+				if (_IsMouseDown((int)button))
+					return true;
+			return false;
+		}
 
 		/// <returns>True if the button is was pressed down this frame</returns>
-		public static bool IsMousePressed(MouseButton button) => _IsMousePressed((int)button);
+		public static bool IsMousePressed(params MouseButton[] buttons)
+		{
+			foreach (MouseButton button in buttons)
+				if (_IsMousePressed((int)button))
+					return true;
+			return false;
+		}
 
 		/// <returns>True if the button is was released this frame</returns>
-		public static bool IsMouseReleased(MouseButton button) => _IsMouseReleased((int)button);
+		public static bool IsMouseReleased(params MouseButton[] buttons)
+		{
+			foreach (MouseButton button in buttons)
+				if (_IsMouseReleased((int)button))
+					return true;
+			return false;
+		}
 		#endregion
 
 		#region Gamepad
@@ -90,10 +141,22 @@ namespace Yonai
 		public static float GetAxis(int gamepadIndex, GamepadAxis axis) => _GetAxis(gamepadIndex, (int)axis);
 
 		/// <returns>True if button is not pressed on gamepad at <paramref name="gamepadIndex"/></returns>
-		public static bool IsButtonUp(int gamepadIndex, GamepadButton button) => _IsButtonUp(gamepadIndex, (int)button);
+		public static bool IsButtonUp(int gamepadIndex, params GamepadButton[] buttons)
+		{
+			foreach (GamepadButton button in buttons)
+				if (_IsButtonUp(gamepadIndex, (int)button))
+					return true;
+			return false;
+		}
 
 		/// <returns>True if button is pressed on gamepad at <paramref name="gamepadIndex"/></returns>
-		public static bool IsButtonDown(int gamepadIndex, GamepadButton button) => _IsButtonDown(gamepadIndex, (int)button);
+		public static bool IsButtonDown(int gamepadIndex, params GamepadButton[] buttons)
+		{
+			foreach (GamepadButton button in buttons)
+				if (_IsButtonDown(gamepadIndex, (int)button))
+					return true;
+			return false;
+		}
 		#endregion
 
 		#region Internal Calls
@@ -102,6 +165,7 @@ namespace Yonai
 
 		// Keys
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsKeyUp(int key);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsAnyKeyPressed();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsKeyDown(int key);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsKeyPressed(int key);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _IsKeyReleased(int key);

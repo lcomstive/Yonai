@@ -24,6 +24,12 @@ namespace YonaiEditor
 		}
 
 		/// <summary>
+		/// Check if editor is in play mode, versus edit mode.
+		/// Also returns true if <see cref="State"/> is <see cref="EditorState.Pause"/>.
+		/// </summary>
+		public static bool InPlayMode => State != EditorState.Edit;
+
+		/// <summary>
 		/// IDs of scenes loaded before entering play mode
 		/// </summary>
 		private UUID[] m_EditModeSceneIDs = new UUID[0];

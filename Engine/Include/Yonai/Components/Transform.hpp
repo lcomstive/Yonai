@@ -35,7 +35,7 @@ namespace Yonai::Components
 		YonaiAPI void SetGlobalScale(glm::vec3 scale);
 
 		/// <param name="euler">Euler rotation, in degrees</param>
-		YonaiAPI void SetGlobalRotation(glm::vec3 euler);
+		YonaiAPI void SetGlobalRotation(glm::vec3 euler, bool degrees = true);
 
 		/// <summary>
 		/// Updates local and global model matrices to 
@@ -65,6 +65,10 @@ namespace Yonai::Components
 		YonaiAPI glm::vec3 Up();
 		YonaiAPI glm::vec3 Right();
 		YonaiAPI glm::vec3 Forward();
+
+		YonaiAPI glm::vec3 GlobalUp();
+		YonaiAPI glm::vec3 GlobalRight();
+		YonaiAPI glm::vec3 GlobalForward();
 
 		template<typename T>
 		T* GetComponentInChildren()

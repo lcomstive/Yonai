@@ -71,6 +71,7 @@ namespace Yonai
 			if (!Has<T>())
 				return false;
 			size_t type = typeid(T).hash_code();
+			m_Systems[type]->Destroy();
 			delete m_Systems[type];
 			m_Systems.erase(type);
 			return true;

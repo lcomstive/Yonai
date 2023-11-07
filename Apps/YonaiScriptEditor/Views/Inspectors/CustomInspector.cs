@@ -7,6 +7,7 @@ using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.Systems;
 using YonaiEditor.Commands;
+using System.Collections.Generic;
 
 namespace YonaiEditor
 {
@@ -305,14 +306,15 @@ namespace YonaiEditor
 
 		private ResourceBase Draw(string label, Type type, ResourceBase resource)
 		{
-			if (ImGUI.Button(resource?.ResourcePath ?? string.Empty, new Vector2(ImGUI.ContentRegionAvailable.x, 0))
-					&& resource != null && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+			ImGUI.Button(resource?.ResourcePath ?? string.Empty, new Vector2(ImGUI.ContentRegionAvailable.x, 0));
+
+			if (ImGUI.IsItemHovered() && ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 			{
 				// Navigate resources view to resource.ResourcePath and highlight/select resource
 				ResourcesView resourceView = EditorUIService.GetView<ResourcesView>();
 				if (resourceView == null)
 					resourceView = EditorUIService.Open<ResourcesView>();
-				resourceView.HighlightPath(resource.ResourcePath);
+				resourceView.HighlightPath(resource?.ResourcePath);
 			}
 
 			UUID dragDropID = HandleResourceDragDrop(type);
@@ -380,7 +382,30 @@ namespace YonaiEditor
 		/// <param name="filepath">Contents of element</param>
 		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
 		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
-		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, params string[] allowedFileTypes)
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, params string[] allowedFileTypes) =>
+			DrawFilepath(label, filepath, out output, new UUID[0], allowedFileTypes);
+
+		/// <summary>
+		/// Draws a space for files to be dropped or pasted
+		/// </summary>
+		/// <param name="label">Label to display on left side</param>
+		/// <param name="filepath">Contents of element</param>
+		/// <param name="invalidResourceIDs">Resources with a matching ID are ignored</param>
+		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
+		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, UUID invalidResourceID, params string[] allowedFileTypes)
+			=> DrawFilepath(label, filepath, out output, new UUID[] { invalidResourceID }, allowedFileTypes);
+
+
+		/// <summary>
+		/// Draws a space for files to be dropped or pasted
+		/// </summary>
+		/// <param name="label">Label to display on left side</param>
+		/// <param name="filepath">Contents of element</param>
+		/// <param name="invalidResourceIDs">Resources with a matching ID are ignored</param>
+		/// <param name="allowedFileTypes">If matching file extension (including '.' at start), allows item to be dropped. Leave empty if all file extensions are allowed</param>
+		/// <returns>True if <paramref name="output"/> data was set. May be empty if user chose to clear selection.</returns>
+		protected bool DrawFilepath(string label, VFSFile filepath, out VFSFile output, UUID[] invalidResourceIDs, params string[] allowedFileTypes)
 		{
 			output = new VFSFile();
 			ImGUI.TableNextRow();
@@ -392,7 +417,27 @@ namespace YonaiEditor
 
 			ImGUI.TableSetColumnIndex(1);
 
-			ImGUI.Button(filepath.FullPath, new Vector2(ImGUI.ContentRegionAvailable.x, 0));
+			ImGUI.Button(filepath.FullPath, new Vector2(ImGUI.ContentRegionAvailable.x - 30, 0));
+			ImGUI.SameLine();
+			string searchID = $"DrawFilepathSearch_{label}";
+			ImGUI.PushID(searchID);
+			if(ImGUI.ButtonImage(Icons.Get("Search"), new Vector2(15, 15)))
+			{
+				string fileTypes = string.Empty;
+				foreach (string type in allowedFileTypes)
+					fileTypes += type + " ";
+
+				Log.Debug("Opening filepath search for types " + fileTypes);
+				List<VFSFile> files = VFS.GetFilesByExtension(allowedFileTypes);
+				SearchView.OpenSearch(searchID, files.ToArray());
+			}
+			ImGUI.PopID();
+
+			if (SearchView.IsSearchFinished(searchID, out string searchResult) && !string.IsNullOrEmpty(searchResult))
+			{
+				output = new VFSFile(searchResult);
+				return true;
+			}
 
 			bool clear = false;
 			if (ImGUI.BeginPopupContextItem(label + ":ContextMenu", ImGUI.PopupFlags.MouseButtonRight))
@@ -409,8 +454,10 @@ namespace YonaiEditor
 				}
 				ImGUI.EndPopup();
 
-				if (!string.IsNullOrEmpty(output.FullPath) || clear)
+				if (clear)
 					return true;
+				else if (!string.IsNullOrEmpty(output.FullPath))
+					return invalidResourceIDs == null ? true : !invalidResourceIDs.Contains(Resource.GetID(output.FullPath));
 			}
 
 			if (!ImGUI.BeginDragDropTarget())
@@ -422,6 +469,11 @@ namespace YonaiEditor
 				return false;
 
 			VFSFile payloadFile = (VFSFile)payload;
+
+			UUID resourceID = Resource.GetID(payloadFile);
+			if (invalidResourceIDs != null && invalidResourceIDs.Contains(resourceID))
+				return false;
+
 			if (allowedFileTypes == null || allowedFileTypes.Length == 0)
 			{
 				ImGUI.AcceptDragDropPayload("ResourcePath");

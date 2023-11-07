@@ -19,16 +19,18 @@ namespace Yonai
 		{
 			void* Data;
 			std::type_index Type;
+			bool IsResourceBaseType;
 
-			ResourceInstance() : Data(nullptr), Type(typeid(void)) { }
-			ResourceInstance(ResourceInstance& other) : Data(other.Data), Type(other.Type) { }
-			ResourceInstance(const ResourceInstance& other) : Data(other.Data), Type(other.Type) { }
-			ResourceInstance(void* data, std::type_index& type) : Data(data), Type(type) { }
+			ResourceInstance() : Data(nullptr), Type(typeid(void)), IsResourceBaseType(false) { }
+			ResourceInstance(ResourceInstance& other) : Data(other.Data), Type(other.Type), IsResourceBaseType(other.IsResourceBaseType) { }
+			ResourceInstance(const ResourceInstance& other) : Data(other.Data), Type(other.Type), IsResourceBaseType(other.IsResourceBaseType) { }
+			ResourceInstance(void* data, std::type_index& type) : Data(data), Type(type), IsResourceBaseType(false) { }
 
 			ResourceInstance& operator =(ResourceInstance& other)
 			{
 				Data = other.Data;
 				Type = other.Type;
+				IsResourceBaseType = other.IsResourceBaseType;
 				return *this;
 			}
 		};
@@ -76,12 +78,16 @@ namespace Yonai
 
 			// Create new resource
 			T* instance = new T(constructorArgs...);
+			ResourceInstance resourceInstance(instance, loadType);
 
 			// Set resourceID in instance, if derived from ResourceBase
 			if (std::is_base_of<ResourceBase, T>())
+			{
 				((ResourceBase*)instance)->m_ResourceID = id;
+				resourceInstance.IsResourceBaseType = true;
+			}
 
-			s_Instances.emplace_back(ResourceInstance(instance, loadType));
+			s_Instances.emplace_back(resourceInstance);
 			s_InstancePaths.emplace(path, id);
 			s_ResourceIDs.emplace(id, s_Instances.size() - 1);
 
@@ -97,11 +103,6 @@ namespace Yonai
 		{
 			return Get<T>(Load<T>(path, constructorArgs...));
 		}
-
-		/// <summary>
-		/// Duplicates a resource at the new given path
-		/// </summary>
-		YonaiAPI static ResourceID Duplicate(ResourceID original, std::string newPath);
 
 		/// <summary>
 		/// Gets the C++ type related to a resource, or type of void if not found

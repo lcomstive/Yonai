@@ -1,4 +1,6 @@
-﻿using Yonai;
+﻿using TestGame.Components;
+using TestGame.Systems;
+using Yonai;
 using Yonai.Graphics;
 
 namespace TestGame
@@ -8,8 +10,8 @@ namespace TestGame
 		private Shader m_SpriteShader;
 		private Texture m_Texture;
 
-		private Sound m_Sound;
-		private SoundMixer m_SoundMixer;
+		private AudioData m_Sound;
+		private AudioMixer m_SoundMixer;
 		private uint m_AudioDeviceIndex = 0;
 		private float m_Pitch = 1.0f;
 
@@ -24,6 +26,8 @@ namespace TestGame
 			}
 
 			World.AddSystem<CameraControlSystem>();
+			World.AddSystem<DelayAudioSystem>();
+			World.AddSystem<MoveAlongPathSystem>();
 
 			// Load test texture
 			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");
@@ -38,12 +42,9 @@ namespace TestGame
 			Log.Debug(v);
 
 			m_AudioDeviceIndex = Audio.OutputDevice.Index;
-			m_Sound = Resource.Load<Sound>("assets://Audio/Fall.mp3");
+			m_Sound = Resource.Load<AudioData>("assets://Audio/Fall.mp3");
 
-			m_SoundMixer = Resource.Load<SoundMixer>("assets://Audio/Mixers/SFX.mixer");
-
-			foreach (Entity e in World.GetEntities())
-				Log.Trace(e.GetComponent<NameComponent>()?.Name ?? $"[{e.ID}]");
+			m_SoundMixer = Resource.Load<AudioMixer>("assets://Audio/Mixers/SFX.mixer");
 		}
 
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
@@ -136,9 +137,9 @@ namespace TestGame
 			e.AddComponent<RigidbodyTest>().AddForce(cameraTransform.Forward * ProjectileForce);
 			e.AddComponent<DestroyAfterSeconds>().StartCountdown(5.0f);
 
-			SoundSource source = e.AddComponent<SoundSource>();
+			AudioSource source = e.AddComponent<AudioSource>();
 			source.Sound = m_Sound;
-			source.Spatialise = false;
+			source.Is3D = false;
 			source.Pitch += Random.Range(1.0f);
 			source.Mixer = m_SoundMixer;
 			source.Volume = Random.Range(0.5f, 1.0f);

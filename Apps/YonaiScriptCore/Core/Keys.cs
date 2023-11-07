@@ -7,7 +7,7 @@
 		/* Printable keys */
 		Space = 32,
 		Apostrophe = 39,  /* ' */
-		Comman = 44,  /* , */
+		Comma = 44,  /* , */
 		Minus = 45,  /* - */
 		Period = 46,  /* . */
 		Slash = 47,  /* / */

@@ -36,6 +36,10 @@ vec3 Transform::Up()	  { return vec3(0, 1, 0) * Rotation; }
 vec3 Transform::Right()	  { return vec3(1, 0, 0) * Rotation; }
 vec3 Transform::Forward() { return vec3(0, 0, 1) * Rotation; }
 
+vec3 Transform::GlobalUp()		{ return vec3(0, 1, 0) * GetGlobalRotation(); }
+vec3 Transform::GlobalRight()	{ return vec3(1, 0, 0) * GetGlobalRotation(); }
+vec3 Transform::GlobalForward() { return vec3(0, 0, 1) * GetGlobalRotation(); }
+
 Transform* Transform::GetParent() { return m_Parent; }
 void Transform::SetParent(Transform* parent)
 {
@@ -106,9 +110,9 @@ void Transform::SetGlobalPosition(vec3 position)
 	m_IsDirty = true;
 }
 
-void Transform::SetGlobalRotation(vec3 euler)
+void Transform::SetGlobalRotation(vec3 euler, bool degrees)
 {
-	Rotation = glm::quat(glm::radians(euler));
+	Rotation = glm::quat(degrees ? glm::radians(euler) : euler);
 	if (m_Parent)
 		Rotation = m_Parent->GetGlobalRotation() * inverse(Rotation);
 	m_IsDirty = true;

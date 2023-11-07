@@ -9,7 +9,19 @@ namespace Yonai
 		/// <summary>
 		/// World that created this system
 		/// </summary>
+		[Serialize(false)]
 		public World World { get; private set; } = null;
+
+		private bool m_Enabled = false;
+		[HideInInspector]
+		public bool IsEnabled
+		{
+			get => m_Enabled;
+			set => Enable(value);
+		}
+
+		[Serialize(false)]
+		public virtual bool IsGlobal { get; } = false;
 
 		/// <summary>
 		/// Called once per frame after <see cref="Update"/>,
@@ -43,11 +55,11 @@ namespace Yonai
 		/// <summary>
 		/// Called when the attached <see cref="Entity"/> is about to be destroyed (after <see cref="OnDisabled"/>)
 		/// </summary>
-		protected virtual void Destroyed() { }
+		protected virtual void Destroyed() { Log.Trace("Destroyed " + GetType().Name);  }
 
-		public virtual JObject OnSerialize() => new JObject();
+		public virtual JObject OnSerialize() => SerializableHelper.OnSerializeDefault(this);
 
-		public virtual void OnDeserialize(JObject json) { }
+		public virtual void OnDeserialize(JObject json) => SerializableHelper.OnDeserializeDefault(this, json);
 
 		public void Enable(bool enable = true) =>
 			World._EnableSystem(World?.ID ?? GlobalWorldID, GetType(), enable);
@@ -117,7 +129,8 @@ namespace Yonai
 		// Called from C++
 		private void _Enable(bool enable)
 		{
-			if (enable)
+			m_Enabled = enable;
+			if (m_Enabled)
 				Enabled();
 			else
 				Disabled();

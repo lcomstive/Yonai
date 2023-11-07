@@ -13,5 +13,7 @@ namespace Yonai
 
 	public:
 		YonaiAPI UUID& ID() { return m_ResourceID; }
+
+		YonaiAPI virtual ~ResourceBase() {}
 	};
 }

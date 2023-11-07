@@ -1,5 +1,5 @@
-{
-  "Name": "Mixer",
-  "Volume": 1.0,
-  "ParentMixer": "0"
+{
+  "Name": "SFX",
+  "Volume": 1.0,
+  "ParentMixer": "3952827590572299403"
 }

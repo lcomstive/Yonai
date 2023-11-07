@@ -21,9 +21,6 @@
 #include <Yonai/Scripting/Assembly.hpp>
 #include <Yonai/Components/ScriptComponent.hpp>
 
-#include <Yonai/Audio/Sound.hpp>
-#include <Yonai/Components/SoundSource.hpp>
-
 using namespace std;
 using namespace glm;
 using namespace YonaiEditor;

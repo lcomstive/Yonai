@@ -20,6 +20,8 @@ ADD_MANAGED_METHOD(Input, IsKeyPressed, bool, (int key))
 { return Input::IsKeyPressed((Key)key); }
 ADD_MANAGED_METHOD(Input, IsKeyReleased, bool, (int key))
 { return Input::IsKeyReleased((Key)key); }
+ADD_MANAGED_METHOD(Input, IsAnyKeyPressed, bool, ())
+{ return Input::IsAnyKeyPressed(); }
 
 // Mouse
 ADD_MANAGED_METHOD(Input, ScrollDelta, float)

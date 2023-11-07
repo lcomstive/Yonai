@@ -6,6 +6,8 @@ namespace Yonai.Systems
 {
 	public class BehaviourSystem : YonaiSystem
 	{
+		public override bool IsGlobal => true;
+
 		private List<Type> m_BehaviourTypes = new List<Type>();
 
 		protected override void Enabled()
