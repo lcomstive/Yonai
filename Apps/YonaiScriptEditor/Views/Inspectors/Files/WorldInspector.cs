@@ -54,22 +54,28 @@ namespace YonaiEditor.Inspectors
 				{
 					YonaiSystem system = systems[i];
 
-					ImGUI.SetCursorPosX(availableWidth - 60);
-					if (ImGUI.ButtonImage(Icons.Get("Cross"), new Vector2(15, 15)))
-					{
-						m_Target.RemoveSystem(system.GetType());
-						continue;
-					}
-					if(ImGUI.IsItemHovered()) ImGUI.SetTooltip("Delete system");
-
-					ImGUI.SameLine();
-					ImGUI.SetCursorPosX(0);
 					if (!ImGUI.Foldout(system.GetType().Name, true))
 						continue;
 
 					SetupTable();
 					DrawInspector(system);
 					ImGUI.EndTable();
+
+					Vector2 buttonSize = new Vector2(15, 15);
+					ImGUI.SetCursorPosX(availableWidth - buttonSize.x * 4);
+					if (ImGUI.ButtonImage(Icons.Get("Return"), buttonSize))
+					{
+						m_Target.RemoveSystem(system.GetType());
+						m_Target.AddSystem(system.GetType());
+					}
+					if (ImGUI.IsItemHovered()) ImGUI.SetTooltip("Reset to default values");
+
+					ImGUI.SameLine();
+					if (ImGUI.ButtonImage(Icons.Get("Cross"), buttonSize))
+						m_Target.RemoveSystem(system.GetType());
+					if (ImGUI.IsItemHovered()) ImGUI.SetTooltip("Remove system");
+					
+					ImGUI.Space();
 				}
 
 				ImGUI.Space();
@@ -83,12 +89,7 @@ namespace YonaiEditor.Inspectors
 		private void AddSystemPrompt()
 		{
 			// Get all systems available
-			Type[] types = s_SystemTypes.Where(x =>
-			{
-				bool hasSystem = m_Target.HasSystem(x);
-				Log.Debug($"World has '{x.FullName}'? " + (hasSystem ? "yes" : "no"));
-				return !hasSystem;
-			}).ToArray();
+			Type[] types = s_SystemTypes.Where(x => !m_Target.HasSystem(x)).ToArray();
 
 			string[] typeNames = new string[types.Length];
 			for (int i = 0; i < types.Length; i++)
@@ -97,8 +98,10 @@ namespace YonaiEditor.Inspectors
 			// Show search panel
 			SearchView.Search(typeNames, (typeString) =>
 			{
-				if (!string.IsNullOrEmpty(typeString))
-					m_Target.AddSystem(Type.GetType(typeString));
+				if (string.IsNullOrEmpty(typeString))
+					return;
+				YonaiSystem system = m_Target.AddSystem(Type.GetType(typeString));
+				system.Enable(EditorService.State != EditorState.Edit);
 			});
 		}
 

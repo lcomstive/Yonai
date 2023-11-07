@@ -373,9 +373,9 @@ namespace Yonai
 		public bool RemoveSystem<T>() where T : YonaiSystem => RemoveSystem(typeof(T));
 		public bool RemoveSystem(Type type)
 		{
-			bool result = _RemoveSystem(ID, type);
-			result = result || m_Systems.Remove(type);
-			return result;
+			bool nativeResult = _RemoveSystem(ID, type);
+			bool result = m_Systems.Remove(type);
+			return nativeResult || result;
 		}
 
 		public void EnableSystem<T>(bool enable) => _EnableSystem(ID, typeof(T), enable);
