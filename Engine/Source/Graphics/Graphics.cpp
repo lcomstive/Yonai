@@ -35,7 +35,7 @@ void Graphics::Init()
 
 void Graphics::Destroy()
 {
-	if(s_Backend)
+	if (s_Backend)
 		s_Backend.reset();
 	s_Backend = nullptr;
 }

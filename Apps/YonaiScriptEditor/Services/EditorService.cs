@@ -65,12 +65,13 @@ namespace YonaiEditor
 				if (Application.HasArg("GraphicsAPI"))
 					Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI);
 
-				Log.Debug($"Setting graphics API to '{Enum.GetName(typeof(GraphicsAPI), graphicsAPI)}'");
-				Graphics._SetAPI((int)graphicsAPI);
-
 				EditorWindow.InitContext();
 				EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
 				EditorWindow.Create();
+				EditorWindow.Show();
+
+				Log.Debug($"Setting graphics API to '{Enum.GetName(typeof(GraphicsAPI), graphicsAPI)}'");
+				Graphics._SetAPI((int)graphicsAPI);
 			}
 
 			// InitImGUI();

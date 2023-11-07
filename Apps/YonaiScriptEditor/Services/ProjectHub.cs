@@ -125,7 +125,7 @@ namespace YonaiEditor.Systems
 			// Load project resources
 			if (!Scripting.IsAssemblyReloading())
 			{
-				EditorWindow.Show(false);
+				// EditorWindow.Show(false);
 
 				// Load project assemblies
 				foreach (string assembly in project.Assemblies)
@@ -136,7 +136,7 @@ namespace YonaiEditor.Systems
 				}
 			}
 
-			Resource.LoadDatabase();
+			// Resource.LoadDatabase();
 
 			// Add global systems
 			// Add<EditorUIService>();
