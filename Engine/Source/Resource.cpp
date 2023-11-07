@@ -45,6 +45,12 @@ void Resource::Unload(ResourceID resource)
 
 	// Unload data & remove from instances
 	size_t instanceIndex = s_ResourceIDs[resource];
+
+	// Call destructor if inherits from ResourceBase
+	ResourceInstance& resourceInstance = s_Instances[instanceIndex];
+	if (resourceInstance.IsResourceBaseType)
+		((ResourceBase*)resourceInstance.Data)->~ResourceBase();
+
 	delete s_Instances[instanceIndex].Data;
 	s_Instances[instanceIndex].Data = nullptr;
 

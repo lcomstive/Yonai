@@ -1,5 +1,7 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Yonai.IO
 {
@@ -58,6 +60,19 @@ namespace Yonai.IO
 		public abstract bool RemoveDirectory(VFSFile target);
 
 		public abstract VFSFile[] GetFiles(VFSFile directory, bool recursive = false);
+
+		public List<VFSFile> GetFilesByExtension(params string[] extensions)
+		{
+			List<VFSFile> output = new List<VFSFile>();
+			VFSFile[] files = GetFiles("/", true);
+
+			string mountPoint = MountPoint.Substring(0, MountPoint.Length - 1);
+			foreach (VFSFile file in files)
+				if (extensions.Contains(file.Extension))
+					output.Add(mountPoint + file);
+
+			return output;
+		}
 
 		public static implicit operator bool(VFSMapping x) => x != null;
 	}

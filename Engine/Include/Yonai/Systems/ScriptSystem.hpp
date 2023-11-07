@@ -1,5 +1,6 @@
 #pragma once
 #include <mono/jit/jit.h>
+#include <Yonai/UUID.hpp>
 #include <Yonai/Systems/System.hpp>
 
 namespace Yonai::Systems

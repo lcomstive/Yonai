@@ -132,7 +132,7 @@ namespace YonaiEditor.Views
 						if (instance != null)
 							AddCustomInspector(attribute, instance);
 						else
-							Log.Warning($"CustomInspector attribute is on class '{type.Name}', but this class does not inherit AquaEditor.CustomInspector");
+							Log.Warning($"CustomInspector attribute is on class '{type.Name}', but this class does not inherit YonaiEditor.CustomInspector");
 					}
 				}
 				catch { }

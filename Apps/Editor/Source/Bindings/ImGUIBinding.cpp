@@ -64,14 +64,6 @@ ADD_MANAGED_METHOD(ImGUI, SaveIniSettingsToDisk, void, (MonoString* pathRaw), Yo
 	mono_free(name);
 }
 
-ADD_MANAGED_METHOD(ImGUI, AddFontFromFile, void, (MonoString* pathRaw, int fontSize), YonaiEditor)
-{
-	char* name = mono_string_to_utf8(pathRaw);
-	ImGui::GetIO().Fonts->AddFontFromFileTTF(name, fontSize);
-	spdlog::trace("Added font '{}' to ImGUI", name);
-	mono_free(name);
-}
-
 ADD_MANAGED_METHOD(ImGUI, AddFont, void, (MonoArray* dataRaw, int fontSize), YonaiEditor)
 {
 	vector<unsigned char> data;
@@ -82,6 +74,9 @@ ADD_MANAGED_METHOD(ImGUI, AddFont, void, (MonoArray* dataRaw, int fontSize), Yon
 	data.resize(mono_array_length(dataRaw));
 	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data.data(), (int)data.size(), fontSize);
 }
+
+ADD_MANAGED_METHOD(ImGUI, _GetFontSize, float, (), YonaiEditor)
+{ return ImGui::GetFontSize(); }
 
 ADD_MANAGED_METHOD(ImGUI, SetFontGlobalScale, void, (float scale), YonaiEditor)
 { ImGui::GetIO().FontGlobalScale = scale; }
@@ -124,6 +119,7 @@ ADD_MANAGED_METHOD(ImGUI, EndChild, void, (), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, _IsItemHovered, bool, (int flags), YonaiEditor) { return ImGui::IsItemHovered(flags); }
 ADD_MANAGED_METHOD(ImGUI, IsItemClicked, bool, (), YonaiEditor) { return ImGui::IsItemClicked(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActive, bool, (), YonaiEditor) { return ImGui::IsItemActive(); }
+ADD_MANAGED_METHOD(ImGUI, IsAnyItemActive, bool, (), YonaiEditor) { return ImGui::IsAnyItemActive(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemActivated, bool, (), YonaiEditor) { return ImGui::IsItemActivated(); }
 ADD_MANAGED_METHOD(ImGUI, IsItemDeactivatedAfterEdit, bool, (), YonaiEditor) { return ImGui::IsItemDeactivatedAfterEdit(); }
 ADD_MANAGED_METHOD(ImGUI, _IsMouseClicked, bool, (int button), YonaiEditor) { return ImGui::IsMouseClicked(button); }
@@ -134,6 +130,7 @@ ADD_MANAGED_METHOD(ImGUI, IsItemEdited, bool, (), YonaiEditor) { return ImGui::I
 ADD_MANAGED_METHOD(ImGUI, BeginDisabled, void, (), YonaiEditor) { return ImGui::BeginDisabled(); }
 ADD_MANAGED_METHOD(ImGUI, EndDisabled, void, (), YonaiEditor) { return ImGui::EndDisabled(); }
 ADD_MANAGED_METHOD(ImGUI, SetItemDefaultFocus, void, (), YonaiEditor) { ImGui::SetItemDefaultFocus(); }
+ADD_MANAGED_METHOD(ImGUI, SetKeyboardFocusHere, void, (int offset), YonaiEditor) { ImGui::SetKeyboardFocusHere(offset); }
 
 ADD_MANAGED_METHOD(ImGUI, _IsKeyDown, bool, (int key), YonaiEditor)
 { return ImGui::IsKeyDown((ImGuiKey)key); }
@@ -174,10 +171,10 @@ ADD_MANAGED_METHOD(ImGUI, Foldout, bool, (MonoString* labelRaw, bool openByDefau
 }
 
 ADD_MANAGED_METHOD(ImGUI, Indent, void, (float width), YonaiEditor)
-{ ImGui::Indent(); }
+{ ImGui::Indent(width); }
 
 ADD_MANAGED_METHOD(ImGUI, Unindent, void, (float width), YonaiEditor)
-{ ImGui::Unindent(); }
+{ ImGui::Unindent(width); }
 
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosX, float, (), YonaiEditor) { return ImGui::GetCursorPosX(); }
 ADD_MANAGED_METHOD(ImGUI, GetCursorPosY, float, (), YonaiEditor) { return ImGui::GetCursorPosY(); }
@@ -205,6 +202,28 @@ ADD_MANAGED_METHOD(ImGUI, _SetMouseCursor, void, (int type), YonaiEditor) { ImGu
 
 ADD_MANAGED_METHOD(ImGUI, BeginGroup, void, (), YonaiEditor) { ImGui::BeginGroup(); }
 ADD_MANAGED_METHOD(ImGUI, EndGroup, void, (), YonaiEditor) { ImGui::EndGroup(); }
+
+ADD_MANAGED_METHOD(ImGUI, _SetNextItemOpen, void, (bool value, int condition), YonaiEditor)
+{ ImGui::SetNextItemOpen(value, (ImGuiCond)condition); }
+
+// TREE NODE ///
+ADD_MANAGED_METHOD(ImGUI, _TreeNode, bool, (MonoString* labelRaw, int flags), YonaiEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	bool result = ImGui::TreeNodeEx(label, (ImGuiTreeNodeFlags)flags);
+	mono_free(label);
+	return result;
+}
+
+ADD_MANAGED_METHOD(ImGUI, TreePush, void, (MonoString* labelRaw), YonaiEditor)
+{
+	char* label = mono_string_to_utf8(labelRaw);
+	ImGui::TreePush(label);
+	mono_free(label);
+}
+
+ADD_MANAGED_METHOD(ImGUI, TreePop, void, (), YonaiEditor)
+{ ImGui::TreePop(); }
 
 // DRAG & DROP ///
 ADD_MANAGED_METHOD(ImGUI, _BeginDragDropSource, bool, (int flags), YonaiEditor)
@@ -310,19 +329,20 @@ ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* s
 	);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, int framePadding, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBackground(bgCol->x, bgCol->g, bgCol->b, bgCol->a);
 
 	Texture* texture = Resource::Get<Texture>(textureID);
+	string id = "ImageButton_" + to_string(textureID);
 	return ImGui::ImageButton(
+		id.c_str(),
 		(ImTextureID)(texture ? texture->GetID() : 0),
 		imSize,
 		ImVec2(0, 1), // UV0
 		ImVec2(1, 0), // UV1
-		framePadding,
 		imBackground,
 		imTint
 	);
@@ -906,6 +926,12 @@ ADD_MANAGED_METHOD(ImGUI, _PushStyleColour, void, (int var, glm::vec4* value), Y
 
 ADD_MANAGED_METHOD(ImGUI, PopStyleColour, void, (int amount), YonaiEditor)
 { ImGui::PopStyleColor(amount); }
+
+ADD_MANAGED_METHOD(ImGUI, _GetStyleColour, void, (int var, glm::vec4* output), YonaiEditor)
+{
+	ImVec4 colour = ImGui::GetStyleColorVec4(var);
+	*output = glm::vec4(colour.x, colour.y, colour.z, colour.w);
+}
 
 // MENU //
 ADD_MANAGED_METHOD(ImGUI, BeginMenuBar, bool, (), YonaiEditor)

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Yonai.Systems
 {
-	public class NativeSystem : YonaiSystem
+	public abstract class NativeSystem : YonaiSystem
 	{
 		private IntPtr m_Handle = IntPtr.Zero;
 		protected IntPtr Handle

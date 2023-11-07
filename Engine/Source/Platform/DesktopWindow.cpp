@@ -471,7 +471,10 @@ void Window::GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int acti
 	switch (action)
 	{
 	default: break;
-	case GLFW_PRESS:	Input::s_KeyStates[(Key)key] = Input::KeyState::Pressed; break;
+	case GLFW_PRESS:
+		Input::s_KeyPressedThisFrame = true;
+		Input::s_KeyStates[(Key)key] = Input::KeyState::Pressed;
+		break;
 	case GLFW_RELEASE:	Input::s_KeyStates[(Key)key] = Input::KeyState::Released; break;
 	}
 }

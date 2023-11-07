@@ -19,18 +19,18 @@ namespace YonaiEditor
 			foreach (VFSFile file in files)
 				if (file.Extension.Equals(".png"))
 					// Load texture
-					s_Icons.Add(file.FileNameWithoutExtension, Resource.Load<Texture>(file.FullPath, new TextureImportSettings() { Filtering = TextureFiltering.Linear }));
+					s_Icons.Add(file.FileNameWithoutExtension.ToLower(), Resource.Load<Texture>(file.FullPath, new TextureImportSettings() { Filtering = TextureFiltering.Linear }));
 
 			Log.Debug($"Loaded {s_Icons.Count} icons");
 		}
 
 		public static Texture Get(string name)
 		{
-			if (s_Icons.TryGetValue(name, out Texture result))
+			if (s_Icons.TryGetValue(name.ToLower(), out Texture result))
 				return result;
 			return null;
 		}
 
-		public static bool Has(string name) => s_Icons.ContainsKey(name);
+		public static bool Has(string name) => s_Icons.ContainsKey(name.ToLower());
 	}
 }

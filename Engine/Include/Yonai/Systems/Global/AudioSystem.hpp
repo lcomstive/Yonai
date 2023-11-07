@@ -1,20 +1,20 @@
 #pragma once
 
 #include <miniaudio.h>
-#include <Yonai/Systems/System.hpp>
+#include <Yonai/Systems/ScriptSystem.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
 
 // Forward declarations
 namespace Yonai
 {
-	struct Sound;
+	struct AudioData;
 	namespace Scripting { struct Class; }
-	namespace Components { struct SoundSource; }
+	namespace Components { struct AudioSource; }
 }
 
 namespace Yonai::Systems
 {
-	class AudioSystem : public System
+	class AudioSystem : public ScriptSystem
 	{
 		/// <summary>
 		/// Matches state of AudioSystem::IsEnabled()
@@ -42,12 +42,11 @@ namespace Yonai::Systems
 		static void RefreshDevices();
 		static void GetScriptClass();
 		static void SetupResourceManager();
-		static void ReleaseResourceManager();
 
 		static void AudioDataCallback(ma_device*, void*, const void*, ma_uint32);
 
-		friend struct Yonai::Sound;
-		friend struct Yonai::Components::SoundSource;
+		friend struct Yonai::AudioData;
+		friend struct Yonai::Components::AudioSource;
 
 	public:
 		YonaiAPI void Init() override;

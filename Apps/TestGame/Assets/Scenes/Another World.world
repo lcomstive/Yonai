@@ -1,0 +1,119 @@
+{
+  "Systems": {},
+  "Entities": [
+    {
+      "ID": "9890085380124609575",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Camera"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -6.319811E-09,
+            "y": 0.7113858,
+            "z": -4.380267
+          },
+          "Rotation": {
+            "x": 0.9999619,
+            "y": -8.328428E-16,
+            "z": 0.008726556,
+            "w": 7.267432E-18
+          },
+          "Scale": {
+            "x": 0.999996,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "Yonai.Camera",
+          "FOV": 60.0,
+          "Near": 0.1,
+          "Far": 1000.0,
+          "Orthographic": false,
+          "OrthographicSize": 5.0
+        }
+      ]
+    },
+    {
+      "ID": "9427247202412295021",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Sprite"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 1.328268,
+            "y": 1.19169963E-08,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 4.371139E-08,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "11523984441011527142",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        }
+      ]
+    },
+    {
+      "ID": "14714959480570914371",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Sprite"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -1.36504388,
+            "y": 1.05854678,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 0.9833785,
+            "y": 0.009834376,
+            "z": -0.0059003504,
+            "w": 0.181204647
+          },
+          "Scale": {
+            "x": 0.9999977,
+            "y": 0.9999972,
+            "z": 0.9999999
+          }
+        },
+        {
+          "ComponentType": "Yonai.SpriteRenderer",
+          "Sprite": "13249753376079074857",
+          "Colour": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "Shader": "9233319700737574020"
+        }
+      ]
+    }
+  ]
+}

@@ -39,13 +39,28 @@ namespace YonaiEditor.Views
 		private const string RootDirectory = "project://Assets";
 		private static readonly IVector2 ThumbnailSizeRange = new IVector2(32, 96);
 
+		private const string LocalSettingsLastDirectoryName = "ResourcesLastDirectory";
+		private const string LocalSettingsThumbnailSizeName = "ResourcesThumbnailSize";
+
 		[MenuItem("Window/Resources")]
 		private static void MenuCallback() => EditorUIService.Open<ResourcesView>();
 
 		protected override void Opened()
 		{
 			m_IconFolder = Resource.Get<Texture>("assets://Textures/Icons/Folder.png");
-			OpenDirectory(RootDirectory);
+			m_ThumbnailSize = LocalProjectSettings.Get(LocalSettingsThumbnailSizeName, 0.0f);
+
+			if(LocalProjectSettings.TryGet(LocalSettingsLastDirectoryName, out string lastDirectory) &&
+				lastDirectory.StartsWith(RootDirectory) && VFS.Exists(lastDirectory))
+				OpenDirectory(lastDirectory);
+			else
+				OpenDirectory(RootDirectory);
+		}
+
+		protected override void Closed()
+		{
+			LocalProjectSettings.Set(LocalSettingsLastDirectoryName, m_CurrentDirectory);
+			LocalProjectSettings.Set(LocalSettingsThumbnailSizeName, m_ThumbnailSize);
 		}
 
 		/// <summary>
@@ -69,7 +84,7 @@ namespace YonaiEditor.Views
 			{
 				DrawBreadcrumbs();
 				DrawContents();
-				DrawSizeSlider();
+				DrawBottomBar();
 			}
 			ImGUI.End();
 			
@@ -143,21 +158,37 @@ namespace YonaiEditor.Views
 
 				BreadcrumbDragDropTarget(GetDirectoryPath(directories, i));
 			}
-			ImGUI.EndChild();
 
 			ImGUI.PopStyleVar();
 			ImGUI.PopStyleColour();
 
+			ImGUI.EndChild();
 			ImGUI.Separator();
 		}
 
+		/// <summary>
+		/// Maps file extensions to functions that return the icon or image to display to the user
+		/// </summary>
+		private static Dictionary<string, Func<VFSFile, Texture>> ImageExtensionImages = new Dictionary<string, Func<VFSFile, Texture>>()
+		{
+			{ ".png",		GetTexturePreview			},
+			{ ".jpg",		GetTexturePreview			},
+			{ ".jpeg",		GetTexturePreview			},
+			{ ".dds",		GetTexturePreview			},
+			{ ".mp3",		GetAudioPreview				},
+			{ ".ogg",		GetAudioPreview				},
+			{ ".wav",		GetAudioPreview             },
+			{ ".mixer",		(_) => Icons.Get("Mixer")	},
+			{ ".shader",	(_) => Icons.Get("Shader")	},
+			{ ".world",		(_) => Icons.Get("World")	},
+			{ ".material",	(_) => Icons.Get("Material")},
+		};
+
 		private Texture ChooseImage(VFSFile file)
 		{
-			if (!ValidTextureExtensions.Contains(file.Extension.ToLower()))
-				return null;
-			if (!Resource.Exists(file.FullPath))
-				return Resource.Load<Texture>(file.FullPath);
-			return Resource.Get<Texture>(file.FullPath);
+			if(ImageExtensionImages.TryGetValue(file.Extension, out Func<VFSFile, Texture> imageFunc))
+				return imageFunc(file);
+			return Icons.Get("File");
 		}
 
 		private void DrawContents()
@@ -195,8 +226,13 @@ namespace YonaiEditor.Views
 				}
 				else
 				{
-					ImGUI.Image(texture, new Vector2(ImGUI.TextLineHeight, ImGUI.TextLineHeight));
-					ImGUI.SameLine();
+					if (file.IsDirectory)
+					{
+						ImGUI.Image(texture, new Vector2(ImGUI.TextLineHeight, ImGUI.TextLineHeight));
+						ImGUI.SameLine();
+					}
+					else
+						ImGUI.HorizontalSpace(ImGUI.TextLineHeight);
 					ImGUI.Selectable(file.FileName, selected);
 				}
 
@@ -261,11 +297,37 @@ namespace YonaiEditor.Views
 			DrawContextMenu();
 		}
 
-		private void DrawSizeSlider()
+		private void DrawBottomBar()
 		{
+			Vector2 size = ImGUI.WindowContentRegionMax;
 			ImGUI.PushStyleVar(ImGUI.StyleVar.FramePadding, new Vector2(0, 0));
 
-			Vector2 size = ImGUI.WindowContentRegionMax;
+			// Search button //
+			ImGUI.PushStyleColour(ImGUI.StyleColour.Button, Colour.None);
+			if (ImGUI.ButtonImage(Icons.Get("Search"), new Vector2(20, 20)))
+			{
+				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
+				List<string> searchPaths = new List<string>();
+				foreach(VFSFile file in files)
+				{
+					if (file.Extension.Equals(".cache"))
+						continue; // Ignore cache files
+
+					string filepath = file.FullPath.Replace(RootDirectory + "/", "");
+					if (file.IsDirectory)
+						filepath += '/';
+					searchPaths.Add(filepath);
+				}
+
+				SearchView.Search(searchPaths.ToArray(), (selectedFile) =>
+				{
+					if (!string.IsNullOrEmpty(selectedFile))
+						HighlightPath($"{RootDirectory}/{selectedFile}");
+				});
+			}
+			ImGUI.PopStyleColour();
+
+			// Thumbnail size slider //
 			ImGUI.SetCursorPos(new Vector2(size.x - (size.x / 4) - 30, size.y - 20));
 			ImGUI.Text("Size", Colour.Grey);
 			ImGUI.SameLine();
@@ -384,5 +446,16 @@ namespace YonaiEditor.Views
 			}
 			ImGUI.EndPopup();
 		}
-	}
+
+		#region File Images
+		private static Texture GetTexturePreview(VFSFile file)
+		{
+			if (!Resource.Exists(file.FullPath))
+				return Resource.Load<Texture>(file.FullPath);
+			return Resource.Get<Texture>(file.FullPath);
+		}
+
+		private static Texture GetAudioPreview(VFSFile _) => Icons.Get("Audio");
+	#endregion
+}
 }

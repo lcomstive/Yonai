@@ -720,9 +720,7 @@ namespace YonaiEditor
 			/// <summary>
 			/// Status: is hovered by mouse
 			/// </summary>
-			IsHovered = 1 << 27,  
-
-
+			IsHovered = 1 << 27,
 		}
 
 		[Flags]
@@ -1105,6 +1103,37 @@ namespace YonaiEditor
 			NoSharedDelay				 = 1 << 13,
 		};
 
+		[Flags]
+		public enum TreeNodeFlags : int
+		{
+			None                 = 0,
+			Selected             = 1 << 0,   // Draw as selected
+			Framed               = 1 << 1,   // Draw frame with background (e.g. for CollapsingHeader)
+			AllowOverlap         = 1 << 2,   // Hit testing to allow subsequent widgets to overlap this one
+			NoTreePushOnOpen     = 1 << 3,   // Don't do a TreePush() when open (e.g. for CollapsingHeader) = no extra indent nor pushing on ID stack
+			NoAutoOpenOnLog      = 1 << 4,   // Don't automatically and temporarily open node when Logging is active (by default logging will automatically open tree nodes)
+			DefaultOpen          = 1 << 5,   // Default node to be open
+			OpenOnDoubleClick    = 1 << 6,   // Need double-click to open node
+			OpenOnArrow          = 1 << 7,   // Only open when clicking on the arrow part. If ImGuiTreeNodeFlags_OpenOnDoubleClick is also set, single-click arrow or double-click all box to open.
+			Leaf                 = 1 << 8,   // No collapsing, no arrow (use as a convenience for leaf nodes).
+			Bullet               = 1 << 9,   // Display a bullet instead of arrow
+			FramePadding         = 1 << 10,  // Use FramePadding (even for an unframed text node) to vertically align text baseline to regular widget height. Equivalent to calling AlignTextToFramePadding().
+			SpanAvailWidth       = 1 << 11,  // Extend hit box to the right-most edge, even if not framed. This is not the default in order to allow adding other items on the same line. In the future we may refactor the hit system to be front-to-back, allowing natural overlaps and then this can become the default.
+			SpanFullWidth        = 1 << 12,  // Extend hit box to the left-most and right-most edges (bypass the indented area).
+			NavLeftJumpsBackHere = 1 << 13,  // (WIP) Nav: left direction may move to this TreeNode() from any of its child (items submitted between TreeNode and TreePop)
+			//NoScrollOnOpen     = 1 << 14,  // FIXME: TODO: Disable automatic scroll on TreePop() if node got just open and contents is not visible
+			CollapsingHeader     = Framed | NoTreePushOnOpen | NoAutoOpenOnLog,
+		}
+
+		public enum Condition : int
+		{
+			None          = 0,        // No condition (always set the variable), same as _Always
+			Always        = 1 << 0,   // No condition (always set the variable), same as _None
+			Once          = 1 << 1,   // Set the variable once per runtime session (only the first call will succeed)
+			FirstUseEver  = 1 << 2,   // Set the variable if the object/window has no persistently saved data (no entry in .ini file)
+			Appearing     = 1 << 3,   // Set the variable if the object/window is appearing after being hidden/inactive (or the first time)
+		};
+
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetIniFilename(string path);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SaveIniSettingsToDisk(string path);
@@ -1114,14 +1143,18 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetDisplayFramebufferScale(float scaleX, float scaleY);
 
+		#region Font
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetFontGlobalScale(float scale);
 
+		public static float FontSize => _GetFontSize();
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void AddFontFromFile(string filepath, int fontSize = 18);
+		public static extern float _GetFontSize();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void AddFont(byte[] data, int fontSize = 18);
+		#endregion
 
 		#region Window
 		public static void Begin(string label, WindowFlags flags = WindowFlags.None) => _Begin(label, (int)flags);
@@ -1169,11 +1202,20 @@ namespace YonaiEditor
 		public static void SetNextWindowSize(Vector2 size)
 			=> _SetNextWindowSize(ref size);
 
+		public static void SetNextWindowSize(float width, float height)
+			=> SetNextWindowSize(new Vector2(width, height));
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SetNextWindowSize(ref Vector2 position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetNextWindowViewport(ulong viewportID);
+
+		public static bool SetNextItemOpen(bool value, Condition condition = Condition.None) =>
+			_SetNextItemOpen(value, (int)condition);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _SetNextItemOpen(bool value, int condition);
 		#endregion
 
 		#region State
@@ -1185,6 +1227,7 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemClicked();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemEdited();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActive();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsAnyItemActive();
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemActivated();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern bool IsItemDeactivatedAfterEdit();
@@ -1212,12 +1255,21 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void EndDisabled();
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetItemDefaultFocus();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void SetKeyboardFocusHere(int offset = 0);
 
 		/// <returns>True if <paramref name="key"/> is not held down</returns>
 		public static bool IsKeyUp(Key key) => !IsKeyDown(key);
 
 		/// <returns>True if <paramref name="key"/> is held down</returns>
 		public static bool IsKeyDown(Key key) => _IsKeyDown((int)key);
+
+		public static bool IsKeyDown(params Key[] keys)
+		{
+			foreach (Key key in keys)
+				if (_IsKeyDown((int)key))
+					return true;
+			return false;
+		}
 
 		/// <returns>True if <paramref name="key"/> went down this frame</returns>
 		public static bool IsKeyPressed(Key key) => _IsKeyPressed((int)key);
@@ -1403,6 +1455,15 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Dummy(ref Vector2 size);
 		#endregion
 
+		#region Tree Node
+		public static bool TreeNode(string label, TreeNodeFlags flags = TreeNodeFlags.None) => _TreeNode(label, (int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _TreeNode(string label, int flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void TreePush(string label);
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void TreePop();
+		#endregion
+
+
 		#region Input
 		public static bool Input(string label, ref string value, int maxCharacters = 128, TextFlags flags = TextFlags.None)
 			=> _InputText(label, ref value, maxCharacters, (int)flags);
@@ -1482,13 +1543,13 @@ namespace YonaiEditor
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(RenderTexture texture, Vector2 size, Colour tint, Colour border) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref border);
 
-		public static bool ButtonImage(ulong textureID, Vector2 size, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(textureID, ref size, framePadding, ref tint, ref backgroundColour);
+		public static bool ButtonImage(ulong textureID, Vector2 size) => _ImageButton(textureID, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint) => _ImageButton(textureID, ref size, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(textureID, ref size, ref tint, ref backgroundColour);
 
-		public static bool ButtonImage(Texture texture, Vector2 size, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour, int framePadding = -1) => _ImageButton(texture?.ResourceID ?? 0, ref size, framePadding, ref tint, ref backgroundColour);
+		public static bool ButtonImage(Texture texture, Vector2 size) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ButtonImageDefaultBackground);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Image(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
@@ -1497,7 +1558,7 @@ namespace YonaiEditor
 		private static extern void _ImageRenderTexture(IntPtr handle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, int framePadding, ref Colour tint, ref Colour backgroundColour);
+		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour backgroundColour);
 		#endregion
 
 		#region Drag
@@ -1809,7 +1870,6 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool _IsWindowHovered(int flags);
 
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _IsWindowCollapsed();
 		#endregion
@@ -1832,6 +1892,15 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _PushStyleColour(int flag, ref Colour value);
+		
+		public static Colour GetStyleColour(StyleColour style)
+		{
+			_GetStyleColour((int)style, out Colour colour);
+			return colour;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _GetStyleColour(int flag, out Colour value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void PopStyleVar(int amount = 1);
@@ -2021,12 +2090,6 @@ namespace YonaiEditor
 		public static void AddBezierCubic(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness = 1.0f, int segments = 0) =>
 			_AddBezierCubic(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCubic(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
-
-		/*
-		public static void AddBezierCurve(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Colour colour, float thickness = 1.0f, int segments = 0) =>
-			_AddBezierCurve(ref p1, ref p2, ref p3, ref p4, ref colour, thickness, segments);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierCurve(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Vector2 p4, ref Colour colour, float thickness, int segments);
-		*/
 
 		public static void AddBezierQuadratic(Vector2 p1, Vector2 p2, Vector2 p3, Colour colour, float thickness = 1.0f, int segments = 0) =>
 			_AddBezierQuadratic(ref p1, ref p2, ref p3, ref colour, thickness, segments);

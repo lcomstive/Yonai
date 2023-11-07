@@ -54,10 +54,10 @@ void ScriptSystem::Init()
 
 void ScriptSystem::Destroy()
 {
-	TRACE_SYSTEM("Destroying")
-
 	if (!ManagedData.IsValid())
 		return;
+
+	TRACE_SYSTEM("Destroying")
 
 	MonoException* exception = nullptr;
 	SystemMethodDestroyed(ManagedData.GetInstance(), &exception);

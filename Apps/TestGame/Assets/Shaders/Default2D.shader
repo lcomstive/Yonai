@@ -1,6 +1,6 @@
 {
-  "Vertex": "project://Assets/Shaders/Unlit.vert",
-  "Fragment": "project://Assets/Shaders/Unlit.frag",
+  "Vertex": "app://Assets/Shaders/Sprite.vert",
+  "Fragment": "app://Assets/Shaders/Sprite.frag",
   "Compute": "",
   "Geometry": ""
 }

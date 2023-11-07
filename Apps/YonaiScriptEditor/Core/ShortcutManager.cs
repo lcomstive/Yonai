@@ -1,10 +1,12 @@
+using Yonai;
 using System;
 using System.Collections.Generic;
-using Yonai;
-using YonaiEditor.Commands;
 
 namespace YonaiEditor
 {
+	/// <summary>
+	/// Stores key combinations, executing a function when all keys are pressed.
+	/// </summary>
 	public static class ShortcutManager
 	{
 		/// <summary>

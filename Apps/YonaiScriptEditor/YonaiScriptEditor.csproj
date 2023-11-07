@@ -59,44 +59,52 @@
     <Compile Include="BuildProcess/MacBuildProcess.cs" />
     <Compile Include="BuildProcess/WindowsBuildProcess.cs" />
 
+	<!-- Commands -->
+    <Compile Include="Commands/CommandGizmoMove.cs" />
+    <Compile Include="Commands/CommandHistory.cs" />
+    <Compile Include="Commands/CommandModifyFieldsProperties.cs" />
+    <Compile Include="Commands/CommandRelay.cs" />
+    <Compile Include="Commands/ICommand.cs" />
+
     <!-- Components -->
     <Compile Include="Components/SceneViewCameraController.cs" />
 
     <!-- Core -->
     <Compile Include="Core/FileDialog.cs" />
     <Compile Include="Core/Icons.cs" />
+    <Compile Include="Core/LocalProjectSettings.cs" />
     <Compile Include="Core/ProjectFile.cs" />
     <Compile Include="Core/SceneManagerExtensions.cs" />
     <Compile Include="Core/Scripting.cs" />
     <Compile Include="Core/ShortcutManager.cs" />
-    <Compile Include="Core/Commands/CommandHistory.cs" />
-    <Compile Include="Core/Commands/GizmoCommands.cs" />
-    <Compile Include="Core/Commands/ICommand.cs" />
-    <Compile Include="Core/Commands/ModifyValueCommand.cs" />
     
     <!-- Graphics -->
     <Compile Include="Graphics/EditorWindow.cs" />
     <Compile Include="Graphics/ImGUI.cs" />
+	
+	<!-- Menu Items -->
+    <Compile Include="MenuItems/BasicMenuItems.cs" />
+    <Compile Include="MenuItems/MenuItemData.cs" />
 
     <!-- Services -->
     <Compile Include="Services/EditorService.cs" />
+    <Compile Include="Services/EditorUIService.cs" />
     <Compile Include="Services/ImGUISystem.cs" />
-    <Compile Include="Services/EditorUI/BasicMenuItems.cs" />
-    <Compile Include="Services/EditorUI/EditorUIService.cs" />
-    <Compile Include="Services/EditorUI/MenuItemData.cs" />
-    <Compile Include="Services/EditorUI/ProjectHub.cs" />
+    <Compile Include="Services/ProjectHub.cs" />
 
     <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />
     <Compile Include="Views/Inspectors/EntityInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/AudioListenerInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/AudioSourceInspector.cs" />
     <Compile Include="Views/Inspectors/Components/CameraInspector.cs" />
-    <Compile Include="Views/Inspectors/Components/SoundSourceInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/AudioDataInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/AudioMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/MaterialInspector.cs" />
     <Compile Include="Views/Inspectors/Files/ShaderInspector.cs" />
-    <Compile Include="Views/Inspectors/Files/SoundInspector.cs" />
-    <Compile Include="Views/Inspectors/Files/SoundMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/WorldInspector.cs" />
 
     <!-- Views -->
     <Compile Include="Views/Console.cs" />
@@ -105,6 +113,7 @@
     <Compile Include="Views/Inspector.cs" />
     <Compile Include="Views/Resources.cs" />
     <Compile Include="Views/Scene.cs" />
+    <Compile Include="Views/Search.cs" />
     <Compile Include="Views/Stats.cs" />
     <Compile Include="Views/View.cs" />
   </ItemGroup>

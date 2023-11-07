@@ -52,7 +52,7 @@ void SceneSystem::Draw()
 
 void SceneSystem::OnScriptEnginePreReloaded()
 {
-	// UnloadAllScenes();
+	UnloadAllScenes();
 	SceneChangedMethod = nullptr;
 }
 
