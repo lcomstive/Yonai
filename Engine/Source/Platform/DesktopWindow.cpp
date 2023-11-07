@@ -317,8 +317,10 @@ GLFWwindow* Window::GetNativeHandle() { return s_Instance ? s_Instance->m_Handle
 
 void Window::SwapBuffers()
 {
+	/*
 	if (s_Instance && s_Instance->m_Handle)
 		glfwSwapBuffers(s_Instance->m_Handle);
+	*/
 }
 
 void Window::PollEvents()

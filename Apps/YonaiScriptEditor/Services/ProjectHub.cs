@@ -139,7 +139,7 @@ namespace YonaiEditor.Systems
 			Resource.LoadDatabase();
 
 			// Add global systems
-			Add<EditorUIService>();
+			// Add<EditorUIService>();
 			Add<AudioSystem>();
 
 			BehaviourSystem behaviourSystem = Add<BehaviourSystem>();

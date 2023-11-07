@@ -73,7 +73,7 @@ namespace YonaiEditor
 				EditorWindow.Create();
 			}
 
-			InitImGUI();
+			// InitImGUI();
 
 			if (!string.IsNullOrEmpty(projectPath))
 				ProjectHubService.SelectProject(projectPath);
@@ -118,7 +118,7 @@ namespace YonaiEditor
 			// Settings save/load location
 			ImGUI.SetIniFilename(VFS.ExpandPath(ImGUIFile));
 
-			// Add<ImGUISystem>()?.Enable(true);
+			Add<ImGUISystem>()?.Enable(true);
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);

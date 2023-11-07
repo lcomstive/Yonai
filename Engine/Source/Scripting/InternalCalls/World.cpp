@@ -79,7 +79,7 @@ ADD_MANAGED_METHOD(World, HasEntity, bool, (uint64_t worldID, uint64_t entityID)
 ADD_MANAGED_METHOD(World, GetEntityCount, int, (uint64_t worldID))
 {
 	World* world = Resource::Get<World>(worldID);
-	return world ? world->EntityCount() : 0;
+	return world ? (int)world->EntityCount() : 0;
 }
 
 ADD_MANAGED_METHOD(World, GetEntities, MonoArray*, (uint64_t worldID))
