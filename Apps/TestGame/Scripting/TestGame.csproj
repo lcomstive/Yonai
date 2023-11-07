@@ -41,7 +41,14 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="YonaiScriptCore">
-      <HintPath>..\..\..\Build\bin\RelWithDebInfo\YonaiScriptCore.dll</HintPath>
+	  <!-- Windows -->
+      <HintPath>..\..\..\Build\bin\RelWithDebInfo\Assets\Mono\YonaiScriptCore.dll</HintPath>
+      <HintPath>..\..\..\Build\bin\Release\Assets\Mono\YonaiScriptCore.dll</HintPath>
+      <HintPath>..\..\..\Build\bin\Debug\Assets\Mono\YonaiScriptCore.dll</HintPath>
+      <HintPath>..\..\..\Build\bin\MinSizeRel\Assets\Mono\YonaiScriptCore.dll</HintPath>
+
+	  <!-- Mac OS -->
+      <HintPath>..\..\..\build\bin\Yonai Editor.app\Contents\Resources\Assets\Mono\YonaiScriptCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
