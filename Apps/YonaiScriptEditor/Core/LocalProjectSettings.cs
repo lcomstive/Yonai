@@ -22,14 +22,16 @@ namespace YonaiEditor
 		{
 			get
 			{
-				string target = Settings["BuildTarget"]?.Value<string>();
+				if(!Settings.ContainsKey("BuildTarget"))
+					return BuildTarget = Application.Platform;
+
+				string target = Settings["BuildTarget"].Value<string>();
 				if (!string.IsNullOrEmpty(target) && Enum.TryParse(target, out Platform platform))
 					return platform;
 				else if (!string.IsNullOrEmpty(target))
 					Log.Warning($"Failed to parse local project settings build target '{target}', defaulting to host platform '{Application.Platform}'");
 
-				BuildTarget = Application.Platform;
-				return Application.Platform;
+				return BuildTarget = Application.Platform;
 			}
 			set
 			{
