@@ -37,7 +37,7 @@ void ImGUISystem::OnEnabled()
 	if(!imguiInitialised)
 	{
 		ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
-		ImGui_ImplOpenGL3_Init("#version 430 core");
+		ImGui_ImplOpenGL3_Init("#version 410 core");
 		StartFrame();
 
 		imguiInitialised = true;
