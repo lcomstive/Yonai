@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include <Yonai/Resource.hpp>
 #include <Yonai/Graphics/Mesh.hpp>
 
@@ -7,7 +6,7 @@ using namespace std;
 using namespace Yonai;
 using namespace Yonai::Graphics;
 
-Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(GL_INVALID_VALUE), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles)
+Mesh::Mesh() : m_Vertices(), m_Indices(), m_VAO(0), m_VBO(), m_EBO(), m_DrawMode(DrawMode::Triangles)
 {
 	Setup();
 }
@@ -19,12 +18,8 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, DrawMode drawM
 
 Mesh::~Mesh()
 {
-	if (m_VAO == GL_INVALID_VALUE)
+	if (m_VAO == 0)
 		return; // Not set up
-
-	glDeleteBuffers(1, &m_VBO);
-	glDeleteBuffers(1, &m_EBO);
-	glDeleteVertexArrays(1, &m_VAO);
 }
 
 void Mesh::Import(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, DrawMode drawMode)
@@ -37,38 +32,11 @@ void Mesh::Import(std::vector<Vertex>& vertices, std::vector<unsigned int>& indi
 
 void Mesh::Setup()
 {
-	// Generate buffers
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-
-	// Vertex data layout
-	// Position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	// Normal
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	// Texture Coords
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-
-	// Unbind VAO to prevent data being overriden accidentally
-	glBindVertexArray(0);
+	
 }
 
 void Mesh::Draw()
 {
-	glBindVertexArray(m_VAO);
-	if (m_Indices.size() > 0)
-		glDrawElements((GLenum)m_DrawMode, (GLsizei)m_Indices.size(), GL_UNSIGNED_INT, 0);
-	else
-		glDrawArrays((GLenum)m_DrawMode, 0, (GLint)m_Vertices.size());
-	glBindVertexArray(0);
 }
 
 vector<Mesh::Vertex>& Mesh::GetVertices() { return m_Vertices; }
@@ -77,10 +45,6 @@ vector<unsigned int>& Mesh::GetIndices() { return m_Indices; }
 void Mesh::SetVertices(vector<Vertex>& vertices)
 {
 	m_Vertices = vertices;
-
-	glBindVertexArray(m_VAO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
-	glBindVertexArray(0);
 }
 
 void Mesh::SetIndices(vector<unsigned int>& indices)
@@ -88,10 +52,6 @@ void Mesh::SetIndices(vector<unsigned int>& indices)
 	m_Indices = indices;
 	if (m_Indices.empty())
 		return;
-
-	glBindVertexArray(m_VAO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
-	glBindVertexArray(0);
 }
 
 ResourceID QuadID = InvalidResourceID;

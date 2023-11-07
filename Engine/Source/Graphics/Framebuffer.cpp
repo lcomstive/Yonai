@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include <spdlog/spdlog.h>
 #include <Yonai/Resource.hpp>
 #include <Yonai/Graphics/Mesh.hpp>
@@ -10,7 +9,7 @@ using namespace std;
 using namespace Yonai;
 using namespace Yonai::Graphics;
 
-Framebuffer::Framebuffer(FramebufferSpec& specs) : m_Specs(specs), m_ID(GL_INVALID_VALUE), m_DepthAttachment(nullptr)
+Framebuffer::Framebuffer(FramebufferSpec& specs) : m_Specs(specs), m_ID(0), m_DepthAttachment(nullptr)
 {
 	if (m_Specs.SwapchainTarget)
 		m_ID = 0;
@@ -22,12 +21,7 @@ Framebuffer::~Framebuffer() { Destroy(); }
 
 void Framebuffer::Destroy()
 {
-	// Check if already destroyed
-	if (m_ID == GL_INVALID_VALUE)
-		return;
-
-	glDeleteFramebuffers(1, &m_ID);
-	m_ID = GL_INVALID_VALUE;
+	m_ID = 0;
 
 	for (auto& texture : m_ColourAttachments)
 		delete texture;
@@ -43,7 +37,6 @@ void Framebuffer::Create()
 	if (m_Specs.SwapchainTarget)
 		return;
 
-	glGenFramebuffers(1, &m_ID);
 	Bind();
 
 	for (unsigned int i = 0; i < m_Specs.Attachments.size(); i++)
@@ -56,7 +49,6 @@ void Framebuffer::Create()
 				m_Specs.Samples
 			);
 			m_DepthAttachment = texture;
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texture->GetID());
 		}
 		else
 		{
@@ -67,39 +59,11 @@ void Framebuffer::Create()
 			);
 			m_ColourAttachments.emplace_back(texture);
 
-			if (m_Specs.Attachments[i] != TextureFormat::Cubemap)
-				glFramebufferTexture2D(
-					GL_FRAMEBUFFER,
-					(GLenum)(GL_COLOR_ATTACHMENT0 + (m_ColourAttachments.size() - 1)),
-					GetTextureTarget(m_Specs.Attachments[i], m_Specs.Samples > 1),
-					texture->GetID(),
-					0 // Mipmap Level
-				);
-			else
-				for (int i = 0; i < 6; i++)
-					glFramebufferTexture2D(
-						GL_FRAMEBUFFER,
-						(GLenum)(GL_COLOR_ATTACHMENT0 + (m_ColourAttachments.size() - 1)),
-						GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-						texture->GetID(),
-						0 // Mipmap level
-					);
+			
 		}
 	}
 
-	// Draw buffers
-	vector<GLenum> colourBuffers;
-	for (unsigned int i = 0; i < m_ColourAttachments.size(); i++)
-		colourBuffers.emplace_back(GL_COLOR_ATTACHMENT0 + i);
-
-	if (colourBuffers.size() > 1)
-		glDrawBuffers((GLsizei)colourBuffers.size(), colourBuffers.data());
-	else if (colourBuffers.empty())
-		glDrawBuffer(GL_NONE); // Only depth-pass
-
-	// Finalise
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		spdlog::error("Failed to create framebuffer");
+	
 
 	Unbind();
 }
@@ -108,9 +72,6 @@ void Framebuffer::Recreate()
 {
 	if (m_Specs.SwapchainTarget)
 		return;
-
-	if(m_ID == GL_INVALID_VALUE)
-		glGenFramebuffers(1, &m_ID);
 
 	Bind();
 
@@ -128,58 +89,24 @@ void Framebuffer::Recreate()
 	}
 }
 
-void Framebuffer::BlitTo(Framebuffer* other, GLbitfield bufferFlags, GLenum filter)
+void Framebuffer::BlitTo(Framebuffer* other)
 {
 	ivec2 destRes = other ? other->m_Specs.Resolution : m_Specs.Resolution;
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_ID);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, other ? other->m_ID : 0);
-	glBlitFramebuffer(
-		// Source x,y, width, height
-		0, 0,
-		m_Specs.Resolution.x,
-		m_Specs.Resolution.y,
-		// Destination x,y, width, height
-		0, 0,
-		destRes.x,
-		destRes.y,
-		// Mask (e.g. Colour, Depth)
-		bufferFlags,
-		// Filter
-		filter
-	);
+	
 }
 
 void Framebuffer::CopyAttachmentTo(RenderTexture* destination, unsigned int colourAttachment)
 {
-	// GetColourAttachment(colourAttachment)->CopyTo(destination);
-
 	Bind();
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-
 	destination->Bind();
-	glCopyTexSubImage2D(
-		GetTextureTarget(destination->GetFormat(), destination->GetSamples() > 1),
-		0, // Level
-		0, 0, // (x, y) offset
-		0, 0, // (x, y) / (left, top)
-		destination->GetResolution().x,
-		destination->GetResolution().y
-	);
 
 	destination->Unbind();
 	Unbind();
 }
 
-void Framebuffer::Bind()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, m_ID);
-	glViewport(0, 0, m_Specs.Resolution.x, m_Specs.Resolution.y);
-}
+void Framebuffer::Bind() {}
 
-void Framebuffer::Unbind()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+void Framebuffer::Unbind() {}
 
 void Framebuffer::SetResolution(ivec2 newResolution)
 {
@@ -260,7 +187,7 @@ ADD_MANAGED_METHOD(Framebuffer, CopyAttachmentTo, void, (void* handle, void* des
 { ((Framebuffer*)handle)->CopyAttachmentTo((RenderTexture*)destination, attachmentIndex); }
 
 ADD_MANAGED_METHOD(Framebuffer, BlitTo, void, (void* handle, void* destination, unsigned int flags), Yonai.Graphics)
-{ ((Framebuffer*)handle)->BlitTo((Framebuffer*)destination, flags); }
+{ ((Framebuffer*)handle)->BlitTo((Framebuffer*)destination); }
 
 ADD_MANAGED_METHOD(Framebuffer, GetAttachments, MonoArray*, (void* handle, int* outDepthAttachmentIndex), Yonai.Graphics)
 {

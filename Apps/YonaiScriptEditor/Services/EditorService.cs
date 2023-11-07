@@ -1,6 +1,8 @@
 using Yonai;
+using System;
 using Yonai.IO;
 using Yonai.Systems;
+using Yonai.Graphics;
 using YonaiEditor.Systems;
 using YonaiEditor.BuildProcess;
 
@@ -59,6 +61,13 @@ namespace YonaiEditor
 
 			if (!Scripting.IsAssemblyReloading())
 			{
+				GraphicsAPI graphicsAPI = GraphicsAPI.Vulkan;
+				if (Application.HasArg("GraphicsAPI"))
+					Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI);
+
+				Log.Debug($"Setting graphics API to '{Enum.GetName(typeof(GraphicsAPI), graphicsAPI)}'");
+				Graphics._SetAPI((int)graphicsAPI);
+
 				EditorWindow.InitContext();
 				EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
 				EditorWindow.Create();
@@ -109,7 +118,7 @@ namespace YonaiEditor
 			// Settings save/load location
 			ImGUI.SetIniFilename(VFS.ExpandPath(ImGUIFile));
 
-			Add<ImGUISystem>()?.Enable(true);
+			// Add<ImGUISystem>()?.Enable(true);
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);

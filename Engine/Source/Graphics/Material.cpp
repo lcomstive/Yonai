@@ -13,13 +13,10 @@ using namespace Yonai::Graphics;
 void BindTexture(unsigned int index, string shaderName, ResourceID textureID, Shader* shader)
 {
 	shader->Set(shaderName, (int)index);
-	glActiveTexture(GL_TEXTURE0 + index);
 	
 	Texture* texture = Resource::Get<Texture>(textureID);
 	if (texture)
 		texture->Bind(index);
-	else
-		glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Shader* Material::PrepareShader()

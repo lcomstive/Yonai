@@ -47,7 +47,7 @@ namespace Yonai::Graphics
 		YonaiAPI void SetResolution(glm::ivec2 newResolution);
 		
 		YonaiAPI void CopyAttachmentTo(RenderTexture* destination, unsigned int colourAttachment = 0);
-		YonaiAPI void BlitTo(Framebuffer* other = nullptr, GLbitfield bufferFlags = GL_COLOR_BUFFER_BIT, GLenum filter = GL_NEAREST);
+		YonaiAPI void BlitTo(Framebuffer* other = nullptr);
 
 		YonaiAPI unsigned int GetSamples();
 		YonaiAPI glm::ivec2 GetResolution();

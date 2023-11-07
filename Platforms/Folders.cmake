@@ -17,7 +17,6 @@ endif()
 
 ## Dependencies ##
 set(DEPENDENCY_PROJECTS
-	glad
 	assimp
 	spdlog
 )

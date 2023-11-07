@@ -2,14 +2,16 @@
 #include <ImGuizmo.h>
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
+#include <Yonai/Graphics/Graphics.hpp>
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
-#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
+#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_Vulkan.hpp>
 #include <GLFW/glfw3.h>
 
 using namespace glm;
 using namespace Yonai;
 using namespace Yonai::Systems;
+using namespace Yonai::Graphics;
 using namespace YonaiEditor::Systems;
 
 ImGUISystem::ImGUISystem()
@@ -31,13 +33,47 @@ ImGUISystem::ImGUISystem()
 	ImGui::StyleColorsDark();
 }
 
+static void CheckVKResult(VkResult err)
+{
+	if (err == 0) return;
+	spdlog::error("[ImGUI] Vulkan error: {}", err);
+}
+
 static bool imguiInitialised = false;
 void ImGUISystem::OnEnabled()
 {
 	if(!imguiInitialised)
 	{
-		ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeHandle(), true);
-		ImGui_ImplOpenGL3_Init("#version 410 core");
+		switch (Yonai::Graphics::Graphics::API())
+		{
+		case GraphicsAPI::None: break;
+		case GraphicsAPI::Vulkan:
+			ImGui_ImplGlfw_InitForVulkan(Window::GetNativeHandle(), true);
+
+			/*
+			ImGui_ImplVulkan_InitInfo init_info = {};
+			init_info.Instance = g_Instance;
+			init_info.PhysicalDevice = g_PhysicalDevice;
+			init_info.Device = g_Device;
+			init_info.QueueFamily = g_QueueFamily;
+			init_info.Queue = g_Queue;
+			init_info.PipelineCache = g_PipelineCache;
+			init_info.DescriptorPool = g_DescriptorPool;
+			init_info.Subpass = 0;
+			init_info.MinImageCount = g_MinImageCount;
+			init_info.ImageCount = wd->ImageCount;
+			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+			init_info.Allocator = g_Allocator;
+
+// #ifndef NDEBUG
+			init_info.CheckVkResultFn = CheckVKResult;
+// #endif
+
+			ImGui_ImplVulkan_Init();
+			*/
+			break;
+		}
+
 		StartFrame();
 
 		imguiInitialised = true;
@@ -65,7 +101,7 @@ void ImGUISystem::OnDisabled()
 
 	if(imguiInitialised)
 	{
-		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
@@ -82,7 +118,7 @@ void ImGUISystem::Draw()
 
 void ImGUISystem::StartFrame()
 {
-	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
@@ -94,8 +130,8 @@ void ImGUISystem::EndFrame()
 	ImGui::Render();
 
 	ivec2 resolution = Window::GetFramebufferResolution();
-	glViewport(0, 0, resolution.x, resolution.y);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	// glViewport(0, 0, resolution.x, resolution.y);
+	// ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), );
 
 #pragma region Viewport support
 	if (m_IO->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

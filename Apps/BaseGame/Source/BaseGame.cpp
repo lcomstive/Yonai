@@ -20,6 +20,8 @@ BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
 
 void BaseGame::Setup()
 {
+	Window::Show(false);
+
 	SystemManager::Global()->Add<SceneSystem>();
 	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 

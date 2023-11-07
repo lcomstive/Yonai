@@ -1,11 +1,11 @@
 using System;
-using System.Linq;
 using Yonai.IO;
-using Newtonsoft.Json;
+using System.Linq;
 using Yonai.Systems;
+using Yonai.Graphics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
-using System.Reflection;
 
 namespace Yonai
 {
@@ -34,11 +34,19 @@ namespace Yonai
 
 			Resource.LoadDatabase("build://Resources.json");
 
+			GraphicsAPI graphicsAPI = GraphicsAPI.Vulkan;
+			if (!Application.HasArg("GraphicsAPI") || !Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI))
+				if (JSON.ContainsKey("GraphicsAPI"))
+					Enum.TryParse(JSON["GraphicsAPI"].Value<string>(), out graphicsAPI);
+			Graphics.Graphics._SetAPI((int)graphicsAPI);
+
 			if (JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
 				LoadGlobalSystems();
 
 			if (JSON.ContainsKey("Scenes") && JSON["Scenes"].GetType() == typeof(JArray))
 				LoadInitialScene();
+
+			Window._Show();
 		}
 
 		private static void LoadAssemblies()

@@ -71,3 +71,6 @@ ADD_MANAGED_METHOD(Window, GetVSync, bool)
 
 ADD_MANAGED_METHOD(Window, SetVSync, void, (bool value))
 { Window::SetVSync(value); }
+
+ADD_MANAGED_METHOD(Window, Show, void, (bool value))
+{ Window::Show(value); }

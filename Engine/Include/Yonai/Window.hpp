@@ -16,7 +16,6 @@
 #include <Yonai/API.hpp>
 
 #if defined(YONAI_PLATFORM_DESKTOP)
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define WINDOW_HANDLE_TYPE GLFWwindow*
 #else

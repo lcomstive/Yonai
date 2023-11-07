@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <Yonai/Window.hpp>
@@ -23,8 +22,10 @@ ADD_MANAGED_METHOD(EditorWindow, Create, void, (), YonaiEditor)
 	Window::Create();
 
 #ifdef YONAI_PLATFORM_DESKTOP
+	/*
 	glfwMakeContextCurrent(Window::GetNativeHandle());
 	gladLoadGL(glfwGetProcAddress);
+	*/
 #endif
 }
 

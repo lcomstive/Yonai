@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <glm/glm.hpp>
-#include <glad/glad.h>
 #include <Yonai/ResourceID.hpp>
 
 namespace Yonai::Graphics
@@ -11,14 +10,14 @@ namespace Yonai::Graphics
 	public:
 		enum class DrawMode : unsigned char
 		{
-			Points			= GL_POINTS,
-			Lines			= GL_LINES,
-			LineStrip		= GL_LINE_STRIP,
-			Triangles		= GL_TRIANGLES,
-			TriangleStrip	= GL_TRIANGLE_STRIP,
-			TriangleFan		= GL_TRIANGLE_FAN,
-			Quads			= GL_QUADS,
-			QuadStrip		= GL_QUAD_STRIP
+			Points,
+			Lines,
+			LineStrip,
+			Triangles,
+			TriangleStrip,
+			TriangleFan,
+			Quads,
+			QuadStrip
 		};
 
 		struct Vertex

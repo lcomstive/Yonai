@@ -21,10 +21,6 @@ using namespace Yonai::Graphics::Pipelines;
 
 ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 {
-	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	FramebufferSpec framebufferSpecs = { Window::GetResolution() };
 	framebufferSpecs.Attachments =
 	{
@@ -41,7 +37,6 @@ ForwardRenderPipeline::ForwardRenderPipeline() : RenderPipeline()
 ForwardRenderPipeline::~ForwardRenderPipeline()
 {
 	// Restore 
-	glDisable(GL_CULL_FACE);
 	delete m_Framebuffer;
 }
 
@@ -77,21 +72,12 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 {
 	m_Framebuffer->Bind();
 
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-
 	vector<World*>& scenes = m_SceneSystem->GetActiveScenes();
 
 	ivec2 currentResolution = camera->RenderTarget ? camera->RenderTarget->GetResolution() : GetResolution();
 
 	if (currentResolution.x <= 0 || currentResolution.y <= 0)
 		return; // Nothing to draw
-
-	glViewport(0, 0, currentResolution.x, currentResolution.y);
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
 
 	for(World* scene : scenes)
 	{
@@ -117,8 +103,6 @@ void ForwardRenderPipeline::ForwardPass(Camera* camera)
 			Shader* shader = material->PrepareShader();
 			DrawMesh(mesh, shader, transform, camera, currentResolution);
 		}
-
-		glDisable(GL_CULL_FACE);
 
 		// Draw sprites
 		vector<SpriteRenderer*> sprites = scene->GetComponents<SpriteRenderer>();

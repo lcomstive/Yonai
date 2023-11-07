@@ -1,5 +1,4 @@
 #pragma once
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <Yonai/API.hpp>
 
@@ -25,9 +24,6 @@ namespace Yonai::Graphics
 	};
 
 	YonaiAPI bool IsDepthFormat(TextureFormat format);
-	YonaiAPI GLenum GetTextureTarget(TextureFormat format, bool multisampled = false);
-	YonaiAPI GLenum TextureFormatToGLFormat(TextureFormat format);
-	YonaiAPI GLenum TextureFormatToInternalGLFormat(TextureFormat format);
 
 	class RenderTexture
 	{

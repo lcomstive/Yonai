@@ -52,8 +52,6 @@ DeferredRenderPipeline::DeferredRenderPipeline() : RenderPipeline(), m_CurrentCa
 
 	// Get Quad mesh //
 	m_QuadMesh = Resource::Get<Mesh>(Mesh::Quad());
-
-	glEnable(GL_CULL_FACE);
 }
 
 DeferredRenderPipeline::~DeferredRenderPipeline()
@@ -63,8 +61,6 @@ DeferredRenderPipeline::~DeferredRenderPipeline()
 	delete m_LightingFB;
 
 	delete m_LightingShader;
-	
-	glDisable(GL_CULL_FACE);
 }
 
 Framebuffer* DeferredRenderPipeline::GetOutput() { return m_ForwardFB; }
@@ -108,12 +104,6 @@ void DeferredRenderPipeline::DrawMesh(Transform* transform, Mesh* mesh, Shader* 
 
 void DeferredRenderPipeline::MeshPass()
 {
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glCullFace(GL_BACK);
-
 	m_MeshFB->Bind();
 
 	for (MeshRenderer* renderer : m_CurrentMeshes)
@@ -142,8 +132,6 @@ void DeferredRenderPipeline::MeshPass()
 
 void DeferredRenderPipeline::LightingPass()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	m_LightingFB->Bind();
 	m_LightingShader->Bind();
 
@@ -180,16 +168,14 @@ void DeferredRenderPipeline::LightingPass()
 }
 
 void DeferredRenderPipeline::ForwardPass()
-{
-	glCullFace(GL_NONE);
-	
+{	
 	m_ForwardFB->Bind();
 
 	// Blit the colour info from the lighting pass
-	m_LightingFB->BlitTo(m_ForwardFB, GL_COLOR_BUFFER_BIT);
+	m_LightingFB->BlitTo(m_ForwardFB /*, GL_COLOR_BUFFER_BIT */);
 
 	// Blit the depth info from the mesh pass
-	m_MeshFB->BlitTo(m_ForwardFB, GL_DEPTH_BUFFER_BIT);
+	m_MeshFB->BlitTo(m_ForwardFB /*, GL_DEPTH_BUFFER_BIT */);
 
 	// Draw transparent objects
 	for (MeshRenderer* renderer : m_CurrentMeshes)

@@ -12,6 +12,7 @@
 #include <Yonai/IO/Files.hpp>
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
+#include <Yonai/Graphics/Graphics.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
@@ -27,7 +28,6 @@ MonoMethod* Window::s_ManagedMethodScaled = nullptr;
 MonoMethod* Window::s_ManagedMethodResized = nullptr;
 
 void GLFWErrorCallback(int error, const char* message);
-void GLFWDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* msg, const void* userParam);
 
 bool Window::InitContext()
 {
@@ -44,12 +44,16 @@ bool Window::InitContext()
 	ScriptEngine::AddReloadCallback(GetThunks);
 	GetThunks();
 
+	Graphics::Graphics::Init();
+
 	s_ContextInitialised = true;
 	return true;
 }
 
 void Window::DestroyContext()
 {
+	Graphics::Graphics::Destroy();
+
 	if (s_ContextInitialised)
 		glfwTerminate();
 	s_ContextInitialised = false;
@@ -79,22 +83,7 @@ Window::Window() :
 		InitContext();
 
 	// Window creation options //
-	// Set preferred OpenGL version 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-#if !defined(YONAI_PLATFORM_APPLE)
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-#else
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#endif
-
-#if !defined(NDEBUG)
-	// When in debug configuration, enable OpenGL's debugging
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
-
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwSetErrorCallback(GLFWErrorCallback);
 
 	m_Handle = glfwCreateWindow(
@@ -119,26 +108,6 @@ Window::Window() :
 	glfwSetCursorPosCallback(m_Handle,		 GLFWCursorPositionCallback);
 	glfwSetWindowContentScaleCallback(m_Handle, GLFWWindowScaleCallback);
 	glfwSetFramebufferSizeCallback(m_Handle, GLFWFramebufferResizeCallback);
-
-	// Finalise OpenGL creation
-	glfwMakeContextCurrent(m_Handle);
-
-	int glVersion = gladLoadGL(glfwGetProcAddress);
-	if (glVersion == 0)
-	{
-		spdlog::critical("Failed to initialise OpenGL context");
-		return;
-	}
-#if !defined(NDEBUG) && !defined(__APPLE__)
-	// If debug configuration, enable OpenGL debug output
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(GLFWDebugOutput, nullptr);
-#endif
-
-	// Output device information in debug mode
-	spdlog::debug("OpenGL v{}.{}", GLAD_VERSION_MAJOR(glVersion), GLAD_VERSION_MINOR(glVersion));
-	spdlog::debug("\tDevice: {} (driver {})", (const char*)glGetString(GL_RENDERER), (const char*)glGetString(GL_VERSION));
 
 	// Set VSync enabled by default
 	SetVSync(true);
@@ -169,9 +138,6 @@ Window::Window() :
 
 	// Set initial video mode
 	m_VideoMode = GetCurrentVideoMode();
-
-	// Bind default framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Window* Window::Create() { return s_Instance ? s_Instance : (s_Instance = new Window()); }
@@ -333,8 +299,6 @@ void Window::SetFullscreen(FullscreenMode mode)
 	videomode = glfwGetVideoMode(monitor);
 	if (!fullscreen)
 		CenterOnDisplay();
-
-	glViewport(0, 0, s_Instance->m_Resolution.x, s_Instance->m_Resolution.y);
 }
 
 bool Window::GetVSync() { return s_Instance ? s_Instance->m_VSync : false; }
@@ -346,7 +310,7 @@ void Window::SetVSync(bool enable)
 	spdlog::trace("Setting VSync to {}", enable ? "on" : "off");
 
 	s_Instance->m_VSync = enable;
-	glfwSwapInterval(s_Instance->m_VSync ? 1 : 0);
+	// glfwSwapInterval(s_Instance->m_VSync ? 1 : 0);
 }
 
 GLFWwindow* Window::GetNativeHandle() { return s_Instance ? s_Instance->m_Handle : nullptr; }
@@ -425,7 +389,6 @@ void Window::SetVideoMode(const VideoMode mode)
 
 	s_Instance->m_VideoMode = mode;
 	s_Instance->m_Resolution = mode.Resolution;
-	glViewport(0, 0, mode.Resolution.x, mode.Resolution.y);
 }
 
 void Window::AddResizedCallback(WindowResizeCallback callback) { s_WindowResizeCallbacks.push_back(callback); }
@@ -444,8 +407,6 @@ void Window::GLFWFramebufferResizeCallback(GLFWwindow* glfwWindow, int width, in
 	glm::ivec2 resolution = { width, height };
 	s_Instance->m_Resolution = resolution;
 	
-	glViewport(0, 0, width, height);
-
 	for (WindowResizeCallback callback : s_WindowResizeCallbacks)
 		callback(resolution);
 
@@ -524,32 +485,6 @@ void Window::GLFWJoystickCallback(int jid, int event)
 void GLFWErrorCallback(int error, const char* message)
 {
 	spdlog::error("[GLFW] {} [{}]", message, error);
-}
-
-void GLFWDebugOutput(
-	GLenum source,
-	GLenum type,
-	unsigned int id,
-	GLenum severity,
-	GLsizei length,
-	const char* msg,
-	const void* userParam)
-{
-	switch (type)
-	{
-	case GL_DEBUG_TYPE_ERROR:
-		spdlog::error(msg);
-		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-	case GL_DEBUG_TYPE_PERFORMANCE:
-		spdlog::warn(msg);
-		break;
-	case GL_DEBUG_TYPE_OTHER:
-		break;
-	default:
-		spdlog::info(msg);
-		break;
-	}
 }
 #pragma endregion
 

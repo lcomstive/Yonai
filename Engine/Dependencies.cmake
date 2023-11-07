@@ -18,13 +18,11 @@ if(UNIX AND NOT APPLE)
 	)
 endif()
 
-# OpenGL
-if(UNIX AND NOT APPLE)
-	# Prefer newer OpenGL libs over legacy ones
-	set(OpenGL_GL_PREFERENCE "GLVND")
-endif()
-
-find_package(OpenGL REQUIRED)
+# Vulkan
+find_package(Vulkan REQUIRED)
+message("Vulkan version v${Vulkan_VERSION}")
+list(APPEND YONAI_DEPENDENCY_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
+list(APPEND YONAI_DEPENDENCY_LIBS Vulkan::Vulkan)
 
 # GLFW
 if(YONAI_DESKTOP_PLATFORM)
@@ -65,18 +63,6 @@ set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp EXCLUDE_FROM_ALL)
 list(APPEND YONAI_DEPENDENCY_LIBS assimp)
-
-# Glad
-if(YONAI_DESKTOP_PLATFORM)
-    add_library(glad STATIC ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/src/gl.c)
-elseif(ANDROID)
-    add_library(glad STATIC ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/src/gles2.c)
-endif()
-
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include)
-
-list(APPEND YONAI_DEPENDENCY_LIBS glad)
-list(APPEND YONAI_DEPENDENCY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include")
 
 # ImGui and ImGuizmo
 if(YONAI_BUILD_EDITOR)

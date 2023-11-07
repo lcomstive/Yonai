@@ -96,6 +96,8 @@ namespace Yonai
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetVSync();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVSync(bool value);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)] internal static extern void _Show(bool show = true);
 		#endregion
 	}
 }

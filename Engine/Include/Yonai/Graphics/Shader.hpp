@@ -3,7 +3,6 @@
 #include <string>
 #include <filesystem>
 #include <glm/glm.hpp>
-#include <glad/glad.h>
 #include <Yonai/Application.hpp>
 #include <Yonai/IO/FileWatcher.hpp>
 
@@ -28,7 +27,7 @@ namespace Yonai::Graphics
 	{		
 		int Location;
 		std::string Name;
-		GLenum Type;
+		// GLenum Type;
 	};
 
 	class Shader
@@ -42,7 +41,7 @@ namespace Yonai::Graphics
 		void CreateShaders();
 		void CacheUniformLocations();
 		void ShaderSourceChangedCallback(std::string path, IO::FileWatchStatus changeType);
-		GLuint CreateShader(const std::string & source, const GLenum type, const std::string& debugName);
+		unsigned int CreateShader(const std::string & source, const int type, const std::string& debugName);
 
 	public:
 		YonaiAPI Shader();

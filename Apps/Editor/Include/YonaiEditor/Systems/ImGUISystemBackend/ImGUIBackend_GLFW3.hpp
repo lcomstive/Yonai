@@ -24,7 +24,6 @@
 #ifndef IMGUI_DISABLE
 
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#include <glad/glad.h>
 
 struct GLFWwindow;
 struct GLFWmonitor;
