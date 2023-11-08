@@ -3,7 +3,7 @@
 #include <Yonai/Scripting/InternalCalls.hpp>
 
 // Backends //
-#include <Yonai/Graphics/Backends/VulkanBackend.hpp>
+#include <Yonai/Graphics/Backends/Vulkan/VulkanBackend.hpp>
 
 #if defined(YONAI_PLATFORM_WINDOWS)
 // TODO: DirectX backend

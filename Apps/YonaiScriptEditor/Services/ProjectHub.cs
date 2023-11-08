@@ -142,6 +142,8 @@ namespace YonaiEditor.Systems
 			// Add<EditorUIService>();
 			Add<AudioSystem>();
 
+			Add<RenderSystem>().API = Yonai.Graphics.GraphicsAPI.Vulkan;
+
 			BehaviourSystem behaviourSystem = Add<BehaviourSystem>();
 			if(behaviourSystem)
 				behaviourSystem.Enable(false); // Disabled during edit mode

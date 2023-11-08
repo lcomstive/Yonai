@@ -22,7 +22,6 @@
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 
-
 #include <map>
 #include <set>
 #include <vector>
@@ -32,7 +31,7 @@
 #include <Yonai/Window.hpp>
 #include <glfw/glfw3native.h>
 #include <vulkan/vk_enum_string_helper.h>
-#include <Yonai/Graphics/Backends/VulkanBackend.hpp>
+#include <Yonai/Graphics/Backends/Vulkan/VulkanBackend.hpp>
 
 #include <Yonai/IO/Files.hpp>
 #include <Yonai/Scripting/Class.hpp>
@@ -45,20 +44,28 @@ using namespace Yonai::Scripting;
 using namespace Yonai::Graphics::Backends;
 
 const int MaxFramesInFlight = 2;
-const bool VulkanBackend::EnableValidationLayers =
+const bool EnableValidationLayers =
 #ifndef NDEBUG
 true;
 #else
 false;
 #endif
-const vector<const char*> VulkanBackend::ValidationLayers =
+const vector<const char*> ValidationLayers =
 {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-const vector<const char*> VulkanBackend::DeviceExtensions =
+const vector<const char*> DeviceExtensions =
 {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
+struct QueueFamilyIndices
+{
+	std::optional<unsigned int> GraphicsFamily;
+	std::optional<unsigned int> PresentFamily;
+
+	bool IsComplete() { return GraphicsFamily.has_value() && PresentFamily.has_value(); }
 };
 
 #pragma region Forward Declarations
@@ -67,6 +74,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData);
+
+vector<const char*> GetRequiredExtensions();
+VkDebugUtilsMessengerCreateInfoEXT CreateDebugInfo();
+bool CheckValidationLayerSupport(const vector<const char*>& validationLayers);
+
+QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice, VkSurfaceKHR);
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 void DestroyDebugUtilsMessengerEXT(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
@@ -80,18 +93,20 @@ void LogCriticalError(const char* msg, VkResult result)
 
 void VulkanBackend::Init()
 {
+	return;
+
 	spdlog::debug("Initialising Vulkan backend");
 
-	CreateInstance();
-	GetAvailableExtensions();
-	SetupDebugMessenger();
+	// CreateInstance();
+	// GetAvailableExtensions();
+	// SetupDebugMessenger();
 
-	CreateSurface();
+	// CreateSurface();
 
-	FindPhysicalDevices();
-	if (AvailablePhysicalDevices.empty())
-		return;
-	SelectDevice(AvailablePhysicalDevices[0]);
+	// FindPhysicalDevices();
+	// if (AvailablePhysicalDevices.empty())
+	// 	return;
+	// SelectDevice(AvailablePhysicalDevices[0]);
 
 	CreateSwapchain();
 	CreateGraphicsPipeline();
@@ -102,13 +117,15 @@ void VulkanBackend::Init()
 
 void VulkanBackend::Destroy()
 {
+	return;
+
 	spdlog::debug("Destroying Vulkan backend");
 
 	vkDeviceWaitIdle(Device);
 	Cleanup();
 }
 
-void VulkanBackend::OnResized() { RecreateSwapchain(); }
+void VulkanBackend::OnResized() {} // { RecreateSwapchain(); }
 
 void VulkanBackend::Cleanup()
 {
@@ -274,7 +291,7 @@ void VulkanBackend::GetAvailableExtensions()
 		spdlog::trace(" - {}", extension.extensionName);
 }
 
-bool VulkanBackend::CheckValidationLayerSupport(const vector<const char*>& validationLayers)
+bool CheckValidationLayerSupport(const vector<const char*>& validationLayers)
 {
 	unsigned int layerCount = 0;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -303,7 +320,7 @@ bool VulkanBackend::CheckValidationLayerSupport(const vector<const char*>& valid
 	return true;
 }
 
-vector<const char*> VulkanBackend::GetRequiredExtensions()
+vector<const char*> GetRequiredExtensions()
 {
 	unsigned int glfwExtensionCount = 0;
 	const char** glfwExtensions;
@@ -338,7 +355,7 @@ void VulkanBackend::CreateSurface()
 	// vkCreateAndroidSurfaceKHR
 #endif
 #endif
-	}
+}
 
 void VulkanBackend::CreateSyncObjects()
 {
@@ -364,6 +381,39 @@ void VulkanBackend::CreateSyncObjects()
 		}
 	}
 }
+
+#pragma region Vertex Buffers
+VkVertexInputBindingDescription VulkanBackend::GetBindingDescription()
+{
+	VkVertexInputBindingDescription description = {};
+	description.binding = 0;
+	description.stride = sizeof(Mesh::Vertex);
+	description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	return description;
+}
+
+array<VkVertexInputAttributeDescription, 3> VulkanBackend::GetAttributeDescriptions()
+{
+	array<VkVertexInputAttributeDescription, 3> attributes;
+
+	attributes[0].binding = 0;
+	attributes[0].location = 0;
+	attributes[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+	attributes[0].offset = offsetof(Mesh::Vertex, Position);
+
+	attributes[1].binding = 0;
+	attributes[1].location = 1;
+	attributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+	attributes[1].offset = offsetof(Mesh::Vertex, Normal);
+
+	attributes[2].binding = 0;
+	attributes[2].location = 2;
+	attributes[2].format = VK_FORMAT_R32G32_SFLOAT;
+	attributes[2].offset = offsetof(Mesh::Vertex, TexCoords);
+
+	return attributes;
+}
+#pragma endregion
 
 #pragma region Devices
 bool VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice device)
@@ -396,7 +446,7 @@ int VulkanBackend::RateDeviceSuitability(VkPhysicalDevice device)
 
 	score += deviceProperties.limits.maxImageDimension2D;
 
-	QueueFamilyIndices indices = FindQueueFamilies(device);
+	QueueFamilyIndices indices = FindQueueFamilies(device, Surface);
 
 	bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
@@ -454,7 +504,7 @@ void VulkanBackend::SelectDevice(VkPhysicalDevice device)
 		vkDestroyDevice(Device, nullptr);
 
 	PhysicalDevice = device;
-	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice);
+	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice, Surface);
 
 	vector<VkDeviceQueueCreateInfo> queueCreateInfos = {};
 	set<unsigned int> uniqueQueueFamilies = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
@@ -601,7 +651,7 @@ void VulkanBackend::CreateSwapchain()
 	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = Offscreen rendering, then blit to framebuffer
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice);
+	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice, Surface);
 	unsigned int queueFamilyIndices[] =
 	{
 		indices.GraphicsFamily.value(),
@@ -735,7 +785,7 @@ void VulkanBackend::CreateFramebuffers()
 #pragma endregion
 
 #pragma region Queue Families
-VulkanBackend::QueueFamilyIndices VulkanBackend::FindQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
 	QueueFamilyIndices indices;
 
@@ -752,7 +802,7 @@ VulkanBackend::QueueFamilyIndices VulkanBackend::FindQueueFamilies(VkPhysicalDev
 			indices.GraphicsFamily = i;
 
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, Surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 
 		if (presentSupport)
 			indices.PresentFamily = i;
@@ -794,6 +844,13 @@ void VulkanBackend::CreateGraphicsPipeline()
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.vertexBindingDescriptionCount = 0;
 	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+	auto bindingDescription = GetBindingDescription();
+	auto attributeDescriptions = GetAttributeDescriptions();
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.vertexAttributeDescriptionCount = (unsigned int)attributeDescriptions.size();
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -978,7 +1035,7 @@ ADD_MANAGED_METHOD(Graphics, UploadFragmentShader, void, (MonoArray* data), Yona
 #pragma region Commands
 void VulkanBackend::CreateCommandPool()
 {
-	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice);
+	QueueFamilyIndices indices = FindQueueFamilies(PhysicalDevice, Surface);
 
 	VkCommandPoolCreateInfo poolInfo = {};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -1056,7 +1113,7 @@ void VulkanBackend::RecordCommandBuffer(VkCommandBuffer commandBuffer, unsigned 
 #pragma endregion
 
 #pragma region Debug Info
-VkDebugUtilsMessengerCreateInfoEXT VulkanBackend::CreateDebugInfo()
+VkDebugUtilsMessengerCreateInfoEXT CreateDebugInfo()
 {
 	VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -1123,3 +1180,266 @@ void DestroyDebugUtilsMessengerEXT(
 		func(instance, debugMessenger, pAllocator);
 }
 #pragma endregion
+
+ADD_MANAGED_METHOD(VulkanInstance, Create, void*, (
+	MonoString* monoAppName,
+	int appMajor,
+	int appMinor,
+	int appPatch
+	), Yonai.Graphics.Backends.Vulkan)
+{
+	char* appName = mono_string_to_utf8(monoAppName);
+
+	if (EnableValidationLayers && !CheckValidationLayerSupport(ValidationLayers))
+	{
+		spdlog::critical("Validation layers requested, but not all are available");
+		exit(-1);
+		return nullptr;
+	}
+
+	VkApplicationInfo appInfo = {};
+	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	appInfo.pApplicationName = appName;
+	appInfo.applicationVersion = VK_MAKE_VERSION(appMajor, appMinor, appPatch);
+	appInfo.pEngineName = "Yonai";
+	appInfo.engineVersion = VK_MAKE_VERSION(YONAI_VERSION_MAJOR, YONAI_VERSION_MINOR, YONAI_VERSION_PATCH);
+	appInfo.apiVersion = VK_API_VERSION_1_2;
+
+	VkInstanceCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	createInfo.pApplicationInfo = &appInfo;
+
+	vector<const char*> requiredExtensions = GetRequiredExtensions();
+
+#if defined(YONAI_PLATFORM_APPLE)
+	// MoltenVK 1.3+ requires VK_KHR_PORTABILITY_subset extension
+	createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
+	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+	createInfo.enabledExtensionCount = (unsigned int)requiredExtensions.size();
+
+	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
+	if (EnableValidationLayers)
+	{
+		createInfo.ppEnabledLayerNames = ValidationLayers.data();
+		createInfo.enabledLayerCount = (unsigned int)ValidationLayers.size();
+
+		debugCreateInfo = CreateDebugInfo();
+		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+		createInfo.pNext = nullptr;
+	}
+
+	mono_free(appName);
+
+	VkInstance instance;
+	VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create instance", result);
+		return nullptr;
+	}
+
+	return instance;
+}
+
+ADD_MANAGED_METHOD(VulkanInstance, Destroy, void, (void* instance), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyInstance((VkInstance)instance, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanGraphicsBackend, GetAvailableExtensions, MonoArray*, (), Yonai.Graphics.Backends.Vulkan)
+{
+	unsigned int extensionCount = 0;
+	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+	vector<VkExtensionProperties> extensions(extensionCount);
+	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_string_class(), extensionCount);
+	for(unsigned int i = 0; i < extensionCount; i++)
+	{
+		MonoString* monoName = mono_string_new(mono_domain_get(), extensions[i].extensionName);
+		mono_array_set(output, MonoString*, i, monoName);
+	}
+	return output;
+}
+
+ADD_MANAGED_METHOD(VulkanInstance, CreateDebugMessenger, void*, (void* instance), Yonai.Graphics.Backends.Vulkan)
+{
+	if (!EnableValidationLayers) return nullptr;
+
+	VkDebugUtilsMessengerCreateInfoEXT createInfo = CreateDebugInfo();
+	VkDebugUtilsMessengerEXT messenger;
+	VkResult result = CreateDebugUtilsMessengerEXT((VkInstance)instance, &createInfo, nullptr, &messenger);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create debug messenger", result);
+		return nullptr;
+	}
+	return messenger;
+}
+
+ADD_MANAGED_METHOD(VulkanInstance, DestroyDebugMessenger, void, (void* instance, void* messenger), Yonai.Graphics.Backends.Vulkan)
+{
+	if (EnableValidationLayers && messenger)
+		DestroyDebugUtilsMessengerEXT((VkInstance)instance, (VkDebugUtilsMessengerEXT)messenger, nullptr);
+}
+
+ADD_MANAGED_METHOD(VulkanInstance, CreateSurface, void*, (void* instance), Yonai.Graphics.Backends.Vulkan)
+{
+	VkSurfaceKHR surface;
+#if defined(YONAI_PLATFORM_DESKTOP)
+	VkResult result = glfwCreateWindowSurface((VkInstance)instance, Window::GetNativeHandle(), nullptr, &surface);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create surface", result);
+		return nullptr;
+	}
+#else
+#if defined(YONAI_PLATFORM_iOS)
+	// vkCreateIOSSurfaceMVK
+#elif defined(YONAI_PLATFORM_ANDROID)
+	// vkCreateAndroidSurfaceKHR
+#endif
+#endif
+
+	return surface;
+}
+
+ADD_MANAGED_METHOD(VulkanInstance, DestroySurface, void, (void* instance, void* surface), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroySurfaceKHR((VkInstance)instance, (VkSurfaceKHR)surface, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanInstance, GetPhysicalDevices, MonoArray*, (void* instanceRaw), Yonai.Graphics.Backends.Vulkan)
+{
+	VkInstance instance = (VkInstance)instanceRaw;
+
+	unsigned int deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+	if (deviceCount == 0)
+	{
+		spdlog::critical("No Vulkan-compatible graphics devices were found");
+		return nullptr;
+	}
+
+	vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_intptr_class(), deviceCount);
+
+	for (unsigned int i = 0; i < deviceCount; i++)
+		mono_array_set(output, VkPhysicalDevice, i, devices[i]);
+
+	return output;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, GetQueueFamilyProperties, MonoArray*, (void* physicalDevice), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPhysicalDevice device = (VkPhysicalDevice)physicalDevice;
+	unsigned int queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_int32_class(), queueFamilyCount);
+	for (unsigned int i = 0; i < queueFamilyCount; i++)
+		mono_array_set(output, int, i, (int)queueFamilies[i].queueFlags);
+
+	return output;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, CreateDevice, void*, (void* physicalDevice, unsigned int graphicsFamily, unsigned int presentFamily), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkDeviceQueueCreateInfo> queueCreateInfos = {};
+	set<unsigned int> uniqueQueueFamilies = { graphicsFamily, presentFamily };
+
+	const float QueuePriority = 1.0f;
+
+	for (unsigned int queueFamily : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueCreateInfo = {};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &QueuePriority;
+
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
+	// Request features
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+
+	// Create logical device
+	VkDeviceCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
+	createInfo.queueCreateInfoCount = (unsigned int)queueCreateInfos.size();
+	createInfo.pEnabledFeatures = &deviceFeatures;
+
+	createInfo.enabledExtensionCount = (unsigned int)DeviceExtensions.size();
+	createInfo.ppEnabledExtensionNames = DeviceExtensions.data();
+
+	if (EnableValidationLayers)
+	{
+		createInfo.ppEnabledLayerNames = ValidationLayers.data();
+		createInfo.enabledLayerCount = (unsigned int)ValidationLayers.size();
+	}
+	else
+		createInfo.enabledLayerCount = 0;
+
+	VkDevice device;
+	VkResult result = vkCreateDevice((VkPhysicalDevice)physicalDevice, &createInfo, nullptr, &device);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create logical device", result);
+		return nullptr;
+	}
+
+	return device;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, GetDeviceQueue, void*, (void* device, unsigned int queueFamilyIndex, unsigned int queueIndex), Yonai.Graphics.Backends.Vulkan)
+{
+	VkQueue queue;
+	vkGetDeviceQueue((VkDevice)device, queueFamilyIndex, queueIndex, &queue);
+	return queue;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceSurfaceSupport, bool, (void* device, unsigned int queueFamilyIndex, void* surface), Yonai.Graphics.Backends.Vulkan)
+{
+	VkBool32 presentSupport;
+	vkGetPhysicalDeviceSurfaceSupportKHR(
+		(VkPhysicalDevice)device,
+		queueFamilyIndex,
+		(VkSurfaceKHR)surface,
+		&presentSupport
+	);
+	return presentSupport;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void* device, unsigned int* outID, unsigned int* outDriverVersion, int* outDeviceType), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties((VkPhysicalDevice)device, &properties);
+
+	*outID = properties.deviceID;
+	*outDriverVersion = properties.driverVersion;
+	*outDeviceType = (int)properties.deviceType;
+	return mono_string_new(mono_domain_get(), properties.deviceName);
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void* device, unsigned int* outID, unsigned int* outDriverVersion, int* outDeviceType), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties((VkPhysicalDevice)device, &properties);
+
+	VkPhysicalDeviceFeatures features;
+
+	*outID = properties.deviceID;
+	*outDriverVersion = properties.driverVersion;
+	*outDeviceType = (int)properties.deviceType;
+	return mono_string_new(mono_domain_get(), properties.deviceName);
+}

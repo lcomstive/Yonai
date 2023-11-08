@@ -1,8 +1,10 @@
 #pragma once
+#include <array>
 #include <vector>
 #include <optional>
 #include <Yonai/API.hpp>
 #include <vulkan/vulkan.h>
+#include <Yonai/Graphics/Mesh.hpp>
 #include <Yonai/Graphics/Backends/GraphicsBackend.hpp>
 
 namespace Yonai::Graphics::Backends
@@ -52,18 +54,6 @@ namespace Yonai::Graphics::Backends
 
 		VkDebugUtilsMessengerEXT m_DebugMessenger;
 
-		static const bool EnableValidationLayers;
-		static const std::vector<const char*> DeviceExtensions;
-		static const std::vector<const char*> ValidationLayers;
-
-		struct QueueFamilyIndices
-		{
-			std::optional<unsigned int> GraphicsFamily;
-			std::optional<unsigned int> PresentFamily;
-
-			bool IsComplete() { return GraphicsFamily.has_value() && PresentFamily.has_value(); }
-		};
-
 		struct SwapchainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR Capabilities = {};
@@ -78,13 +68,14 @@ namespace Yonai::Graphics::Backends
 		void FindPhysicalDevices();
 		void SetupDebugMessenger();
 		void GetAvailableExtensions();
-		std::vector<const char*> GetRequiredExtensions();
 		int RateDeviceSuitability(VkPhysicalDevice device);
-		VkDebugUtilsMessengerCreateInfoEXT CreateDebugInfo();
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
-		bool CheckValidationLayerSupport(const std::vector<const char*>& layers);
 		void CreateRenderPass();
+
+#pragma region Vertex Buffers
+		static VkVertexInputBindingDescription GetBindingDescription();
+		static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions();
+#pragma endregion
 
 #pragma region Commands
 		void CreateCommandPool();

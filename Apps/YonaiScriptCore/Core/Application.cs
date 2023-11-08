@@ -21,6 +21,14 @@ namespace Yonai
 		public string Branch;
 		public string Revision;
 
+		public Version(int major, int minor = 0, int patch = 0)
+		{
+			Major = major;
+			Minor = minor;
+			Patch = patch;
+			Branch = Revision = string.Empty;
+		}
+
 		public override string ToString() => $"{Major}.{Minor}.{Patch}";
 		public string ToLongString() => $"{Major}.{Minor}.{Patch}-{Revision} [{Branch}]";
 	}
