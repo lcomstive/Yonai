@@ -36,7 +36,7 @@ ImGUISystem::ImGUISystem()
 static void CheckVKResult(VkResult err)
 {
 	if (err == 0) return;
-	spdlog::error("[ImGUI] Vulkan error: {}", err);
+	spdlog::error("[ImGUI] Vulkan error: {}", (int)err);
 }
 
 static bool imguiInitialised = false;

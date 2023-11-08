@@ -2,14 +2,15 @@
 #include <glm/glm.hpp>
 #include <Yonai/Time.hpp>
 #include <Yonai/World.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <Yonai/Window.hpp>
 #include <Yonai/Resource.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <Yonai/Graphics/Texture.hpp>
 #include <Yonai/Graphics/Material.hpp>
 #include <Yonai/Graphics/Pipelines/Forward.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
 #include <Yonai/Systems/Global/RenderSystem.hpp>
-#include <Yonai/Window.hpp>
+#include <Yonai/Graphics/Graphics.hpp>
 
 // Components //
 #include <Yonai/Components/Camera.hpp>
@@ -49,6 +50,8 @@ void RenderSystem::Draw()
 		for (auto camera : cameras)
 			Draw(camera);
 	}
+
+	Graphics::Graphics::Draw();
 }
 
 void RenderSystem::Draw(Camera* camera)

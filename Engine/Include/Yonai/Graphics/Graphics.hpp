@@ -17,6 +17,7 @@ namespace Yonai::Graphics
 		static std::unique_ptr<Backends::GraphicsBackend> s_Backend;
 
 		static void Init();
+		static void Draw();
 		static void Destroy();
 
 		/// <summary>

@@ -31,12 +31,24 @@ void Graphics::Init()
 		s_Backend = make_unique<VulkanBackend>();
 		break;
 	}
+
+	if (s_Backend)
+		s_Backend->Init();
+}
+
+void Graphics::Draw()
+{
+	if (s_Backend)
+		s_Backend->Draw();
 }
 
 void Graphics::Destroy()
 {
 	if (s_Backend)
+	{
+		s_Backend->Destroy();
 		s_Backend.reset();
+	}
 	s_Backend = nullptr;
 }
 

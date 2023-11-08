@@ -55,7 +55,7 @@ void EditorApp::Setup()
 		// Disable drawing to default framebuffer.
 		// Instead store pointer to render system and call manually
 		m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
-		m_RenderSystem->Enable(false);
+		// m_RenderSystem->Enable(false);
 
 		SystemManager::Global()->Add<SceneSystem>();
 	}
