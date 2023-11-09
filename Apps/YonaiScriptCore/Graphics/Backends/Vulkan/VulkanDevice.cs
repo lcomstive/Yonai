@@ -13,7 +13,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			public bool IsComplete => GraphicsFamily != null && PresentFamily != 0;
 		}
 
-		private VulkanInstance m_Owner;
+		private VulkanInstance m_Instance;
 		internal IntPtr Device = IntPtr.Zero;
 		internal IntPtr PhysicalDevice = IntPtr.Zero;
 		internal IntPtr GraphicsQueue = IntPtr.Zero;
@@ -22,11 +22,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public uint ID { get; private set; }
 		public string Name { get; private set; }
 		public uint DriverVersion { get; private set; }
-		public PhysicalDeviceType Type { get; private set; }
+		public VkPhysicalDeviceType Type { get; private set; }
 
 		internal VulkanDevice(VulkanInstance owner, IntPtr physicalDeviceHandle)
 		{
-			m_Owner = owner;
+			m_Instance = owner;
 			PhysicalDevice = physicalDeviceHandle;
 
 			QueueFamilyIndices indices = FindQueueFamilies();
@@ -42,9 +42,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 				);
 			ID = id;
 			DriverVersion = driverVersion;
-			Type = (PhysicalDeviceType)deviceType;
+			Type = (VkPhysicalDeviceType)deviceType;
 
-			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(PhysicalDeviceType), Type)}]");
+			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(VkPhysicalDeviceType), Type)}]");
 		}
 
 		public void Dispose() => _DestroyDevice(Device);
@@ -57,8 +57,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			for(uint i = 0; i < queueFamilies.Length; i++)
 			{
-				QueueFlags flags = (QueueFlags)queueFamilies[i];
-				if (flags.HasFlag(QueueFlags.Graphics))
+				VkQueueFlags flags = (VkQueueFlags)queueFamilies[i];
+				if (flags.HasFlag(VkQueueFlags.Graphics))
 					indices.GraphicsFamily = i;
 
 				bool presentSupport = GetSurfaceSupport(i);
@@ -72,8 +72,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 			return indices;
 		}
 
-		public bool GetSurfaceSupport(uint queueFamilyIndex) => _GetPhysicalDeviceSurfaceSupport(PhysicalDevice, queueFamilyIndex, m_Owner.m_Surface);
+		public bool GetSurfaceSupport(uint queueFamilyIndex) => _GetPhysicalDeviceSurfaceSupport(PhysicalDevice, queueFamilyIndex, m_Instance.m_Surface);
 
+		public VulkanSwapchain CreateSwapchain() => new VulkanSwapchain(this, m_Instance);
+		
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _CreateDevice(IntPtr physicalDevice, uint graphicsFamilyIndice, uint presentFamilyIndice);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyDevice(IntPtr logicalDevice);
 

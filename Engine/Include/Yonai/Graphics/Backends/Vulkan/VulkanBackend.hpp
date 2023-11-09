@@ -54,13 +54,6 @@ namespace Yonai::Graphics::Backends
 
 		VkDebugUtilsMessengerEXT m_DebugMessenger;
 
-		struct SwapchainSupportDetails
-		{
-			VkSurfaceCapabilitiesKHR Capabilities = {};
-			std::vector<VkSurfaceFormatKHR> Formats = {};
-			std::vector<VkPresentModeKHR> PresentModes = {};
-		};
-
 		void Cleanup();
 		void CreateSurface();
 		void CreateInstance();
@@ -89,11 +82,6 @@ namespace Yonai::Graphics::Backends
 		void CreateImageViews();
 		void RecreateSwapchain();
 		void CreateFramebuffers();
-
-		SwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice device);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-		VkPresentModeKHR ChooseSwapchainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
-		VkSurfaceFormatKHR ChooseSwapchainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 #pragma endregion
 
 #pragma region Graphics Pipeline

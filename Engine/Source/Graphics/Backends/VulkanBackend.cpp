@@ -68,6 +68,13 @@ struct QueueFamilyIndices
 	bool IsComplete() { return GraphicsFamily.has_value() && PresentFamily.has_value(); }
 };
 
+struct SwapchainSupportDetails
+{
+	VkSurfaceCapabilitiesKHR Capabilities = {};
+	std::vector<VkSurfaceFormatKHR> Formats = {};
+	std::vector<VkPresentModeKHR> PresentModes = {};
+};
+
 #pragma region Forward Declarations
 static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -79,8 +86,16 @@ vector<const char*> GetRequiredExtensions();
 VkDebugUtilsMessengerCreateInfoEXT CreateDebugInfo();
 bool CheckValidationLayerSupport(const vector<const char*>& validationLayers);
 
+// Queue family
 QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice, VkSurfaceKHR);
 
+// Swapchain
+VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+VkPresentModeKHR ChooseSwapchainPresentMode(const vector<VkPresentModeKHR>& presentModes);
+VkSurfaceFormatKHR ChooseSwapchainSurfaceFormat(const vector<VkSurfaceFormatKHR>& formats);
+SwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
+
+// Debug
 VkResult CreateDebugUtilsMessengerEXT(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 void DestroyDebugUtilsMessengerEXT(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 #pragma endregion
@@ -453,7 +468,7 @@ int VulkanBackend::RateDeviceSuitability(VkPhysicalDevice device)
 	bool swapChainAdequate = false;
 	if (extensionsSupported)
 	{
-		SwapchainSupportDetails swapChainSupport = QuerySwapchainSupport(device);
+		SwapchainSupportDetails swapChainSupport = QuerySwapchainSupport(device, Surface);
 		swapChainAdequate = !swapChainSupport.Formats.empty() && !swapChainSupport.PresentModes.empty();
 	}
 
@@ -556,37 +571,37 @@ void VulkanBackend::SelectDevice(VkPhysicalDevice device)
 #pragma endregion
 
 #pragma region Swapchain
-VulkanBackend::SwapchainSupportDetails VulkanBackend::QuerySwapchainSupport(VkPhysicalDevice device)
+SwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
 	SwapchainSupportDetails details;
 
 	// Capabilities
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, Surface, &details.Capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.Capabilities);
 
 	// Formats
 	unsigned int formatCount = 0;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(device, Surface, &formatCount, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
 
 	if (formatCount != 0)
 	{
 		details.Formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, Surface, &formatCount, details.Formats.data());
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.Formats.data());
 	}
 
 	// Present modes
 	unsigned int presentModeCount = 0;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(device, Surface, &presentModeCount, nullptr);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
 
 	if (presentModeCount != 0)
 	{
 		details.PresentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, Surface, &presentModeCount, details.PresentModes.data());
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.PresentModes.data());
 	}
 
 	return details;
 }
 
-VkSurfaceFormatKHR VulkanBackend::ChooseSwapchainSurfaceFormat(const vector<VkSurfaceFormatKHR>& formats)
+VkSurfaceFormatKHR ChooseSwapchainSurfaceFormat(const vector<VkSurfaceFormatKHR>& formats)
 {
 	for (const auto& format : formats)
 		if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
@@ -596,7 +611,7 @@ VkSurfaceFormatKHR VulkanBackend::ChooseSwapchainSurfaceFormat(const vector<VkSu
 	return formats[0];
 }
 
-VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 {
 	// If extent is a valid value, return that
 	if (capabilities.currentExtent.width != numeric_limits<unsigned int>().max())
@@ -616,7 +631,7 @@ VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capab
 	return extent;
 }
 
-VkPresentModeKHR VulkanBackend::ChooseSwapchainPresentMode(const vector<VkPresentModeKHR>& presentModes)
+VkPresentModeKHR ChooseSwapchainPresentMode(const vector<VkPresentModeKHR>& presentModes)
 {
 	for (const auto& presentMode : presentModes)
 		if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -628,7 +643,7 @@ VkPresentModeKHR VulkanBackend::ChooseSwapchainPresentMode(const vector<VkPresen
 
 void VulkanBackend::CreateSwapchain()
 {
-	SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(PhysicalDevice);
+	SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(PhysicalDevice, Surface);
 
 	VkSurfaceFormatKHR surfaceFormat = ChooseSwapchainSurfaceFormat(swapchainSupport.Formats);
 	VkPresentModeKHR presentMode = ChooseSwapchainPresentMode(swapchainSupport.PresentModes);
@@ -1431,15 +1446,185 @@ ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void
 	return mono_string_new(mono_domain_get(), properties.deviceName);
 }
 
-ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void* device, unsigned int* outID, unsigned int* outDriverVersion, int* outDeviceType), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
+	void* inPhysicalDevice,
+	void* inDevice,
+	void* inSurface,
+	void* oldSwapchain,
+	int* outImageFormat,
+	unsigned int* outExtentsWidth,
+	unsigned int* outExtentsHeight
+), Yonai.Graphics.Backends.Vulkan)
 {
-	VkPhysicalDeviceProperties properties;
-	vkGetPhysicalDeviceProperties((VkPhysicalDevice)device, &properties);
+	VkDevice device = (VkDevice)inDevice;
+	VkSurfaceKHR surface = (VkSurfaceKHR)inSurface;
+	VkPhysicalDevice physicalDevice = (VkPhysicalDevice)inPhysicalDevice;
 
-	VkPhysicalDeviceFeatures features;
+	SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(physicalDevice, surface);
 
-	*outID = properties.deviceID;
-	*outDriverVersion = properties.driverVersion;
-	*outDeviceType = (int)properties.deviceType;
-	return mono_string_new(mono_domain_get(), properties.deviceName);
+	VkSurfaceFormatKHR surfaceFormat = ChooseSwapchainSurfaceFormat(swapchainSupport.Formats);
+	VkPresentModeKHR presentMode = ChooseSwapchainPresentMode(swapchainSupport.PresentModes);
+	VkExtent2D extent = ChooseSwapExtent(swapchainSupport.Capabilities);
+
+	unsigned int imageCount = swapchainSupport.Capabilities.minImageCount + 1;
+	if (swapchainSupport.Capabilities.maxImageCount > 0)
+		imageCount = std::min(imageCount, swapchainSupport.Capabilities.maxImageCount);
+
+	VkSwapchainCreateInfoKHR createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = surface;
+	createInfo.minImageCount = imageCount;
+	createInfo.imageFormat = surfaceFormat.format;
+	createInfo.imageColorSpace = surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;
+
+	// VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = Direct to framebuffer
+	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = Offscreen rendering, then blit to framebuffer
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	QueueFamilyIndices indices = FindQueueFamilies(physicalDevice, surface);
+	unsigned int queueFamilyIndices[] =
+	{
+		indices.GraphicsFamily.value(),
+		indices.PresentFamily.value()
+	};
+
+	if (indices.GraphicsFamily != indices.PresentFamily)
+	{
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	}
+	else
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	createInfo.preTransform = swapchainSupport.Capabilities.currentTransform;
+
+	// Ensure window is opaque
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+	createInfo.presentMode = presentMode;
+	createInfo.clipped = VK_TRUE; // Discard pixels obscured by other windows
+
+	createInfo.oldSwapchain = oldSwapchain ? (VkSwapchainKHR)oldSwapchain : VK_NULL_HANDLE;
+
+	VkSwapchainKHR swapchain;
+	VkResult result = vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create swapchain", result);
+		return nullptr;
+	}
+
+	*outImageFormat = surfaceFormat.format;
+	*outExtentsWidth = extent.width;
+	*outExtentsHeight = extent.height;
+
+	// CreateRenderPass();
+	// CreateFramebuffers();
+	
+	return swapchain;
+}
+
+ADD_MANAGED_METHOD(VulkanSwapchain, Destroy, void, (void* device, void* swapchain), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroySwapchainKHR((VkDevice)device, (VkSwapchainKHR)swapchain, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanSwapchain, GetImages, MonoArray*, (void* inDevice, void* inSwapchain), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDevice device = (VkDevice)inDevice;
+	VkSwapchainKHR swapchain = (VkSwapchainKHR)inSwapchain;
+
+	unsigned int imageCount = 0;
+	vector<VkImage> swapchainImages;
+	vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr);
+	swapchainImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(device, swapchain, &imageCount, swapchainImages.data());
+
+	MonoArray* output = mono_array_new(mono_domain_get(), mono_get_intptr_class(), imageCount);
+	for (unsigned int i = 0; i < imageCount; i++)
+		mono_array_set(output, void*, i, swapchainImages[i]);
+
+	return output;
+}
+
+ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDevice, int imageFormat), Yonai.Graphics.Backends.Vulkan)
+{
+	VkImageViewCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	createInfo.image = (VkImage)image;
+	createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	createInfo.format = (VkFormat)imageFormat;
+
+	createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+	createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	createInfo.subresourceRange.baseMipLevel = 0;
+	createInfo.subresourceRange.levelCount = 1;
+	createInfo.subresourceRange.baseArrayLayer = 0;
+	createInfo.subresourceRange.layerCount = 1;
+
+	VkImageView imageView;
+	VkResult result = vkCreateImageView((VkDevice)inDevice, &createInfo, nullptr, &imageView);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create image view", result);
+		return nullptr;
+	}
+
+	return imageView;
+}
+
+ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*, (void* device, int attachmentCount, void* attachments), Yonai.Graphics.Backends.Vulkan)
+{
+	/*
+	VkAttachmentDescription colourAttachment = {};
+	colourAttachment.format = (VkFormat)imageFormat;
+	colourAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colourAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colourAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colourAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colourAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colourAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	*/
+
+	VkAttachmentReference colourAttachmentRef = {};
+	colourAttachmentRef.attachment = 0;
+	colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colourAttachmentRef;
+
+	VkRenderPassCreateInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = (unsigned int)attachmentCount;
+	renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+
+	VkSubpassDependency dependency = {};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+
+	VkRenderPass renderPass;
+	VkResult result = vkCreateRenderPass((VkDevice)device, &renderPassInfo, nullptr, &renderPass);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create render pass", result);
+		return nullptr;
+	}
+	return renderPass;
 }
