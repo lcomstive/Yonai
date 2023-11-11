@@ -37,21 +37,36 @@ namespace Yonai.Graphics.Backends.Vulkan
 					StencilStoreOp = VkAttachmentStoreOp.DontCare,
 					InitialLayout = VkImageLayout.UNDEFINED,
 					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
-				},
-				new VkAttachmentDescription()
-				{
-					Format = swapchain.ImageFormat,
-					Samples = VkSampleCount.BITS_16,
-					LoadOp = VkAttachmentLoadOp.None_EXT,
-					StoreOp = VkAttachmentStoreOp.None_KHR,
-					StencilLoadOp = VkAttachmentLoadOp.Load,
-					StencilStoreOp = VkAttachmentStoreOp.Store,
-					InitialLayout = VkImageLayout.DEPTH_ATTACHMENT_OPTIMAL,
-					FinalLayout = VkImageLayout.FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR
 				}
 			};
-			VulkanRenderPass renderPass = new VulkanRenderPass(device, attachments);
-			Log.Debug("Created render pass");
+			VkSubpassDescription[] subpasses = new VkSubpassDescription[]
+			{
+				new VkSubpassDescription()
+				{
+					PipelineBindPoint = VkPipelineBindPoint.GRAPHICS,
+					ColourAttachments = new VkAttachmentReference[]
+					{
+						new VkAttachmentReference()
+						{
+							Attachment = 0,
+							Layout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
+						}
+					}
+				}
+			};
+			VkSubpassDependency[] dependencies = new VkSubpassDependency[]
+			{
+				new VkSubpassDependency()
+				{
+					SrcSubpass = VkSubpassDependency.SubpassExternal,
+					DstSubpass = 0,
+					SrcStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
+					SrcAccessMask = VkAccessFlags.NONE,
+					DstStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
+					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
+				}
+			};
+			VulkanRenderPass renderPass = new VulkanRenderPass(device, attachments, subpasses, dependencies);
 		}
 
 		public void Dispose()

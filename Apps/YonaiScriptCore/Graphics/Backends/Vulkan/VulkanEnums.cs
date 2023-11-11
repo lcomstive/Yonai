@@ -409,6 +409,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public enum VkSubpassDescriptionFlags : int
 	{
+		None = 0,
 		PER_VIEW_ATTRIBUTES_BIT_NVX = 0x00000001,
 		PER_VIEW_POSITION_X_ONLY_BIT_NVX = 0x00000002,
 		FRAGMENT_REGION_BIT_QCOM = 0x00000004,

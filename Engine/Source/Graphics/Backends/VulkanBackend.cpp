@@ -1578,46 +1578,19 @@ ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDe
 	return imageView;
 }
 
-ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*, (void* device, int attachmentCount, void* attachments), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
+	(void* device, int attachmentCount, void* attachments,
+		int subpassCount, void* subpasses, int dependencyCount, void* dependencies),
+	Yonai.Graphics.Backends.Vulkan)
 {
-	/*
-	VkAttachmentDescription colourAttachment = {};
-	colourAttachment.format = (VkFormat)imageFormat;
-	colourAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colourAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colourAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colourAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colourAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colourAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	*/
-
-	VkAttachmentReference colourAttachmentRef = {};
-	colourAttachmentRef.attachment = 0;
-	colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colourAttachmentRef;
-
 	VkRenderPassCreateInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	renderPassInfo.attachmentCount = (unsigned int)attachmentCount;
 	renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments;
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-
-	VkSubpassDependency dependency = {};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
+	renderPassInfo.subpassCount = (unsigned int)subpassCount;
+	renderPassInfo.pSubpasses = (VkSubpassDescription*)subpasses;
+	renderPassInfo.dependencyCount = dependencyCount;
+	renderPassInfo.pDependencies = (VkSubpassDependency*)dependencies;
 
 	VkRenderPass renderPass;
 	VkResult result = vkCreateRenderPass((VkDevice)device, &renderPassInfo, nullptr, &renderPass);
@@ -1628,3 +1601,6 @@ ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*, (void* device, int attachmen
 	}
 	return renderPass;
 }
+
+ADD_MANAGED_METHOD(VulkanRenderPass, Destroy, void, (void* device, void* renderPass), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyRenderPass((VkDevice)device, (VkRenderPass)renderPass, nullptr); }

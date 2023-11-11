@@ -4,85 +4,71 @@ using System.Runtime.InteropServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct VkAttachmentDescription
-	{
-		private int _flags;
-		public VkFormat Format;
-		public VkSampleCount Samples;
-		public VkAttachmentLoadOp LoadOp;
-		public VkAttachmentStoreOp StoreOp;
-		public VkAttachmentLoadOp  StencilLoadOp;
-		public VkAttachmentStoreOp StencilStoreOp;
-		public VkImageLayout InitialLayout;
-		public VkImageLayout FinalLayout;
-	}
-
-	[StructLayout(LayoutKind.Sequential)]
-	public struct VkAttachmentReference
-	{
-		public uint Attachment;
-		public VkImageLayout Layout;
-	}
-
-	[StructLayout(LayoutKind.Sequential)]
-	public struct VkSubpassDescription
-	{
-		public VkSubpassDescriptionFlags Flags;
-		public VkPipelineBindPoint PipelineBindPoint;
-		public uint InputAttachmentCount;
-		[MarshalAs(UnmanagedType.LPArray)]
-		public VkAttachmentReference[] InputAttachments;
-		public uint ColourAttachmentCount;
-		public VkAttachmentReference[] ColourAttachments;
-		public VkAttachmentReference[] ResolveAttachments;
-		public VkAttachmentReference DepthStencilAttachment;
-		public uint PreserveAttachmentCount;
-		public uint[] PreserveAttachments;
-	}
-
-	public struct VkSubpassDependency
-	{
-		public uint SrcSubpass;
-		public uint DstSubpass;
-		public VkPipelineStageFlags SrcStageMask;
-		public VkPipelineStageFlags DstStageMask;
-		public VkAccessFlags SrcAccessMask;
-		public VkAccessFlags DstAccessMask;
-		public VkDependencyFlags DependencyFlags;
-
-		public const uint SubpassExternal = ~0u;
-	}
-
-	public class VulkanRenderPass
+	public class VulkanRenderPass : IDisposable
 	{
 		internal IntPtr Handle;
+		internal VulkanDevice Device;
 
-		internal VulkanRenderPass(VulkanDevice device, VkAttachmentDescription[] attachments)
+		internal VulkanRenderPass(
+			VulkanDevice device,
+			VkAttachmentDescription[] attachments,
+			VkSubpassDescription[] subpasses,
+			VkSubpassDependency[] dependencies
+			)
 		{
-			IntPtr cbase, ccur;
+			Device = device;
 
-			int attachmentSize = Marshal.SizeOf(typeof(VkAttachmentDescription));
-			cbase = Marshal.AllocHGlobal(attachmentSize * attachments.Length);
-			ccur = cbase;
+			VkSubpassDescriptionNative[] nativeSubpasses = new VkSubpassDescriptionNative[subpasses.Length];
+			for (int i = 0; i < subpasses.Length; i++)
+				nativeSubpasses[i] = new VkSubpassDescriptionNative(subpasses[i]);
 
-			for (int i = 0; i < attachments.Length; i++, ccur += attachmentSize)
-				Marshal.StructureToPtr(attachments[i], ccur, false);
+			IntPtr ptrAttachments = CreateNativeHandle(attachments);
+			IntPtr ptrSubpasses = CreateNativeHandle(nativeSubpasses);
+			IntPtr ptrDependencies = CreateNativeHandle(dependencies);
 
 			Handle = _Create(
-				device.Device,
+				Device.Device,
 				attachments.Length,
-				cbase
+				ptrAttachments,
+				subpasses.Length,
+				ptrSubpasses,
+				dependencies.Length,
+				ptrDependencies
 			);
 
-			Marshal.FreeHGlobal(cbase);
+			Marshal.FreeHGlobal(ptrSubpasses);
+			Marshal.FreeHGlobal(ptrAttachments);
+			Marshal.FreeHGlobal(ptrDependencies);
+		}
+
+		public void Dispose() => _Destroy(Device.Device, Handle);
+
+		private IntPtr CreateNativeHandle<T>(T[] values) where T : struct
+		{
+			IntPtr ptr, currentPtr;
+
+			int structSize = Marshal.SizeOf(typeof(T));
+			ptr = Marshal.AllocHGlobal(structSize * values.Length);
+			currentPtr = ptr;
+
+			for(int i = 0; i < values.Length; i++, currentPtr += structSize)
+				Marshal.StructureToPtr(values[i], currentPtr, false);
+
+			return ptr;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr _Create(
 			IntPtr device,
 			int attachmentCount,
-			IntPtr attachments
+			IntPtr attachments,
+			int subpassCount,
+			IntPtr subpasses,
+			int dependenciesCount,
+			IntPtr dependencies
 		);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _Destroy(IntPtr device, IntPtr renderPass);
 	}
 }
