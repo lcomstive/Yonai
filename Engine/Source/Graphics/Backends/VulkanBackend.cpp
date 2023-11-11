@@ -123,7 +123,7 @@ void VulkanBackend::Init()
 	// 	return;
 	// SelectDevice(AvailablePhysicalDevices[0]);
 
-	CreateSwapchain();
+	// CreateSwapchain();
 	CreateGraphicsPipeline();
 	CreateCommandPool();
 	CreateCommandBuffer();
@@ -1521,9 +1521,6 @@ ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
 	*outExtentsWidth = extent.width;
 	*outExtentsHeight = extent.height;
 
-	// CreateRenderPass();
-	// CreateFramebuffers();
-	
 	return swapchain;
 }
 
@@ -1604,3 +1601,35 @@ ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
 
 ADD_MANAGED_METHOD(VulkanRenderPass, Destroy, void, (void* device, void* renderPass), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyRenderPass((VkDevice)device, (VkRenderPass)renderPass, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanFramebuffer, Create, void*,
+	(void* device, void* renderPass, MonoArray* monoAttachments,
+		unsigned int width, unsigned int height),
+	Yonai.Graphics.Backends.Vulkan)
+{
+	unsigned int attachmentCount = (unsigned int)mono_array_length(monoAttachments);
+	vector<VkImageView> attachments(attachmentCount);
+	for (size_t i = 0; i < attachmentCount; i++)
+		attachments[i] = mono_array_get(monoAttachments, VkImageView, i);
+
+	VkFramebufferCreateInfo framebufferInfo = {};
+	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	framebufferInfo.renderPass = (VkRenderPass)renderPass;
+	framebufferInfo.attachmentCount = (unsigned int)attachments.size();
+	framebufferInfo.pAttachments = attachments.data();
+	framebufferInfo.width  = width;
+	framebufferInfo.height = height;
+	framebufferInfo.layers = 1;
+
+	VkFramebuffer output;
+	VkResult result = vkCreateFramebuffer((VkDevice)device, &framebufferInfo, nullptr, &output);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create framebuffer", result);
+		return nullptr;
+	}
+	return output;
+}
+
+ADD_MANAGED_METHOD(VulkanFramebuffer, Destroy, void, (void* device, void* framebuffer), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyFramebuffer((VkDevice)device, (VkFramebuffer)framebuffer, nullptr); }

@@ -1,4 +1,5 @@
 using System;
+using Yonai._Internal;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -22,9 +23,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			for (int i = 0; i < subpasses.Length; i++)
 				nativeSubpasses[i] = new VkSubpassDescriptionNative(subpasses[i]);
 
-			IntPtr ptrAttachments = CreateNativeHandle(attachments);
-			IntPtr ptrSubpasses = CreateNativeHandle(nativeSubpasses);
-			IntPtr ptrDependencies = CreateNativeHandle(dependencies);
+			IntPtr ptrAttachments  = InteropUtils.CreateNativeHandle(attachments);
+			IntPtr ptrSubpasses    = InteropUtils.CreateNativeHandle(nativeSubpasses);
+			IntPtr ptrDependencies = InteropUtils.CreateNativeHandle(dependencies);
 
 			Handle = _Create(
 				Device.Device,
@@ -42,20 +43,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 
 		public void Dispose() => _Destroy(Device.Device, Handle);
-
-		private IntPtr CreateNativeHandle<T>(T[] values) where T : struct
-		{
-			IntPtr ptr, currentPtr;
-
-			int structSize = Marshal.SizeOf(typeof(T));
-			ptr = Marshal.AllocHGlobal(structSize * values.Length);
-			currentPtr = ptr;
-
-			for(int i = 0; i < values.Length; i++, currentPtr += structSize)
-				Marshal.StructureToPtr(values[i], currentPtr, false);
-
-			return ptr;
-		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr _Create(

@@ -67,6 +67,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 				}
 			};
 			VulkanRenderPass renderPass = new VulkanRenderPass(device, attachments, subpasses, dependencies);
+
+			swapchain.GenerateFramebuffers(renderPass);
 		}
 
 		public void Dispose()
