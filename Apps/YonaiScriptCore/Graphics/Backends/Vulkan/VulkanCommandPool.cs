@@ -8,8 +8,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		internal IntPtr Handle;
 		internal VulkanDevice Device;
 
-		public VulkanCommandPool(VulkanDevice device, VkCommandPoolCreateFlag flag = VkCommandPoolCreateFlag.ResetCommandBuffer) =>
-			Handle = _Create(Device.Device, Device.GraphicsQueueIndex, (int)flag);
+		public VulkanCommandPool(VulkanDevice device, VkCommandPoolCreateFlag flag = VkCommandPoolCreateFlag.ResetCommandBuffer)
+		{
+			Device = device;
+			Handle = _Create(Device.Device, Device.GraphicsQueue.Index, (int) flag);
+		}
 
 		public void Dispose() => _Destroy(Device.Device, Handle);
 
@@ -22,9 +25,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanCommandBuffer[] CreateCommandBuffers(int count, VkCommandBufferLevel level)
 		{
 			_CreateCommandBuffers(Device.Device, Handle, (uint)count, (int)level, out IntPtr[] handles);
+			if(handles == null || handles.Length < count)
+			{
+				Log.Warning("Failed to create command buffers");
+				return new VulkanCommandBuffer[0];
+			}
 			VulkanCommandBuffer[] buffers = new VulkanCommandBuffer[count];
 			for(int i = 0; i < count; i++)
-				buffers[i] = new VulkanCommandBuffer(Handle);
+				buffers[i] = new VulkanCommandBuffer(handles[i]);
 			return buffers;
 		}
 

@@ -24,5 +24,11 @@ namespace Yonai
 			Width = (uint)width;
 			Height = (uint)height;
 		}
+
+		public Extents(IVector2 size)
+		{
+			Width  = (uint)size.x;
+			Height = (uint)size.y;
+		}
 	}
 }

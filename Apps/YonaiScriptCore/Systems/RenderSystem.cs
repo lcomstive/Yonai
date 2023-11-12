@@ -37,6 +37,8 @@ namespace Yonai.Systems
 
 		}
 
+		public void DoTheDraw() => m_Backend?.Draw();
+
 		private void SetBackend(GraphicsAPI backend)
 		{
 			if (m_API == backend) return;
@@ -55,7 +57,8 @@ namespace Yonai.Systems
 				case GraphicsAPI.Vulkan: m_Backend = new VulkanGraphicsBackend(); break;
 			}
 
-			m_Backend?.Create();
+			try { m_Backend?.Create(); }
+			catch(Exception e) { Log.Exception(e); }
 		}
 	}
 }

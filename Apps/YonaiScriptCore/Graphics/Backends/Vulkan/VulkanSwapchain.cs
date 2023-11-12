@@ -10,7 +10,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IVector2 Resolution { get; private set; }
 		public VulkanFramebuffer[] Framebuffers { get; private set; }
 
-		private IntPtr m_Handle;
+		internal IntPtr Handle;
 		private VulkanDevice m_Device;
 		private VulkanInstance m_Instance;
 		private VulkanRenderPass m_RenderPass;
@@ -19,7 +19,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Device = device;
 			m_Instance = instance;
-			m_Handle = _Create(
+			Handle = _Create(
 				device.PhysicalDevice, 
 				device.Device,
 				m_Instance.m_Surface,
@@ -33,7 +33,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Resolution = new IVector2((int)extentsWidth, (int)extentsHeight);
 
 			// Create image views
-			IntPtr[] imageHandles = _GetImages(device.Device, m_Handle);
+			IntPtr[] imageHandles = _GetImages(device.Device, Handle);
 			Images = new VulkanImage[imageHandles.Length];
 			for(int i = 0; i < imageHandles.Length; i++)
 				Images[i] = new VulkanImage(imageHandles[i], imageFormat, m_Device);
@@ -54,13 +54,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 				);
 		}
 
-		public void Dispose() => _Destroy(m_Device.Device, m_Handle);
+		public void Dispose() => _Destroy(m_Device.Device, Handle);
 
 		public (VkResult, uint) AcquireNextImage(VulkanSemaphore semaphore, VulkanFence fence = null, uint timeout = uint.MaxValue)
 		{
 			VkResult result = (VkResult)_AcquireNextImage(
 				m_Device.Device,
-				m_Handle,
+				Handle,
 				timeout,
 				semaphore?.Handle ?? IntPtr.Zero,
 				fence?.Handle ?? IntPtr.Zero,

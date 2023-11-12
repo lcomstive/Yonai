@@ -141,7 +141,6 @@ namespace YonaiEditor.Systems
 			// Add global systems
 			// Add<EditorUIService>();
 			Add<AudioSystem>();
-
 			Add<RenderSystem>().API = Yonai.Graphics.GraphicsAPI.Vulkan;
 
 			BehaviourSystem behaviourSystem = Add<BehaviourSystem>();

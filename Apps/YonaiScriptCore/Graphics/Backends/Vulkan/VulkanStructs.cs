@@ -8,6 +8,26 @@ namespace Yonai.Graphics.Backends.Vulkan
 	public struct VkViewport
 	{
 		public float x, y, Width, Height, MinDepth, MaxDepth;
+
+		public VkViewport(float x = 0, float y = 0, float width = 0, float height = 0, float minDepth = 0, float maxDepth = 1)
+		{
+			this.x = x;
+			this.y = y;
+			Width = width;
+			Height = height;
+			MinDepth = minDepth;
+			MaxDepth = maxDepth;
+		}
+
+		public VkViewport(Vector2 offset, Vector2 size, Vector2 depthRange)
+		{
+			x = offset.x;
+			y = offset.y;
+			Width = size.x;
+			Height = size.y;
+			MinDepth = depthRange.x;
+			MaxDepth = depthRange.y;
+		}
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -15,6 +35,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		public IVector2 Offset;
 		public Extents Extent;
+
+		public VkRect2D(IVector2 offset, Extents extent)
+		{
+			Offset = offset;
+			Extent = extent;
+		}
 	}
 
 	#region Attachments
@@ -164,11 +190,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_sType = _flags = 0;
 			_pNext = IntPtr.Zero;
 
-			BindingsCount = (uint)state.Bindings.Length;
-			Bindings = InteropUtils.CreateNativeHandle(state.Bindings);
+			BindingsCount = (uint)(state.Bindings?.Length ?? 0);
+			Bindings = InteropUtils.CreateNativeHandle(state.Bindings ?? new VkVertexInputBindingDescription[0]);
 
-			AttributesCount = (uint)state.Attributes.Length;
-			Attributes = InteropUtils.CreateNativeHandle(state.Attributes);
+			AttributesCount = (uint)(state.Attributes?.Length ?? 0);
+			Attributes = InteropUtils.CreateNativeHandle(state.Attributes ?? new VkVertexInputAttributeDescription[0]);
 		}
 
 		public void Dispose()

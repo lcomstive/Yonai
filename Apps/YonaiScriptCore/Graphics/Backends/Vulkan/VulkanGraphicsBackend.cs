@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -10,10 +11,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		#region Temp
 		public const int MaxFramesInFlight = 2;
-		public VulkanDevice SelectedDevice { get; private set; } = null;
 		public VulkanSwapchain Swapchain { get; private set; } = null;
-		public VulkanGraphicsPipeline Pipeline { get; private set; } = null;
+		public VulkanDevice SelectedDevice { get; private set; } = null;
+		public VulkanRenderPass RenderPass { get; private set; } = null;
 		public VulkanCommandPool CommandPool { get; private set; } = null;
+		public VulkanGraphicsPipeline Pipeline { get; private set; } = null;
 		public VulkanCommandBuffer[] CommandBuffers { get; private set; } = null;
 		public VulkanFence[] InFlightFences { get; private set; } = new VulkanFence[0];
 		public VulkanSemaphore[] ImageAvailableSemaphores { get; private set; } = new VulkanSemaphore[0];
@@ -55,7 +57,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			{
 				new VkSubpassDescription()
 				{
-					PipelineBindPoint = VkPipelineBindPoint.GRAPHICS,
+					PipelineBindPoint = VkPipelineBindPoint.Graphics,
 					ColourAttachments = new VkAttachmentReference[]
 					{
 						new VkAttachmentReference()
@@ -78,24 +80,94 @@ namespace Yonai.Graphics.Backends.Vulkan
 					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
 				}
 			};
-			VulkanRenderPass renderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
+			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
 
-			Swapchain.GenerateFramebuffers(renderPass);
+			Swapchain.GenerateFramebuffers(RenderPass);
 
-			Pipeline = new VulkanGraphicsPipeline(renderPass, 0, Swapchain.Resolution);
+			var pipelineInfo = CreatePipelineInfo();
+			Pipeline = new VulkanGraphicsPipeline(pipelineInfo);
 			CommandPool = new VulkanCommandPool(SelectedDevice);
 			CommandBuffers = CommandPool.CreateCommandBuffers(MaxFramesInFlight, VkCommandBufferLevel.Primary);
 
 			InFlightFences = new VulkanFence[MaxFramesInFlight];
 			ImageAvailableSemaphores = new VulkanSemaphore[MaxFramesInFlight];
 			RenderFinishedSemaphores = new VulkanSemaphore[MaxFramesInFlight];
-			for(int i = 0; i < MaxFramesInFlight; i++)
+			for (int i = 0; i < MaxFramesInFlight; i++)
 			{
 				InFlightFences[i] = new VulkanFence(SelectedDevice, VkFenceCreateFlags.Signaled);
 				ImageAvailableSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 				RenderFinishedSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 			}
 			#endregion
+
+			Log.Debug("Finished creating C# Vulkan backend");
+		}
+
+		private static uint CurrentFrame = 0;
+		public void Draw()
+		{
+			InFlightFences[CurrentFrame].Wait();
+
+			(VkResult result, uint imageIndex) = Swapchain.AcquireNextImage(ImageAvailableSemaphores[CurrentFrame], null);
+
+			if (result == VkResult.VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				return;
+			}
+			else if (result != VkResult.VK_SUCCESS && result != VkResult.VK_SUBOPTIMAL_KHR)
+			{
+				return;
+			}
+
+			InFlightFences[CurrentFrame].Reset();
+			CommandBuffers[CurrentFrame].Reset();
+			RecordCommandBuffer(CommandBuffers[CurrentFrame], imageIndex);
+
+			VulkanSemaphore[] waitSemaphores = new VulkanSemaphore[] { ImageAvailableSemaphores[CurrentFrame] };
+			VulkanSemaphore[] signalSemaphores = new VulkanSemaphore[] { RenderFinishedSemaphores[CurrentFrame] };
+			VkPipelineStageFlags[] waitStages = new VkPipelineStageFlags[] { VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT };
+			VulkanCommandBuffer[] commandBuffers = new VulkanCommandBuffer[] { CommandBuffers[CurrentFrame] };
+
+			result = SelectedDevice.GraphicsQueue.Submit(
+				waitSemaphores, waitStages, commandBuffers, signalSemaphores, InFlightFences[CurrentFrame]);
+			if (result != VkResult.VK_SUCCESS)
+			{
+				Application.Exit();
+				return;
+			}
+
+			result = SelectedDevice.PresentQueue.Present(
+				new VulkanSwapchain[] { Swapchain }, signalSemaphores, new uint[] { imageIndex });
+
+			if(result == VkResult.VK_ERROR_OUT_OF_DATE_KHR || result == VkResult.VK_SUBOPTIMAL_KHR)
+			{
+				// RecreateSwapchain();
+			}
+			else if(result != VkResult.VK_SUCCESS)
+			{
+				Application.Exit();
+				return;
+			}
+
+			CurrentFrame = (CurrentFrame + 1) % MaxFramesInFlight;
+		}
+
+		private void RecordCommandBuffer(VulkanCommandBuffer cmd, uint imageIndex)
+		{
+			VkResult result = cmd.Begin();
+			if (result != VkResult.VK_SUCCESS)
+				return;
+
+			cmd.BeginRenderPass(RenderPass, Swapchain.Framebuffers[imageIndex], IVector2.Zero, Swapchain.Resolution, Colour.Black);
+
+			cmd.BindPipeline(Pipeline, VkPipelineBindPoint.Graphics);
+			cmd.SetViewport(new VkViewport(offset: Vector2.Zero, size: Swapchain.Resolution, depthRange: new Vector2(0, 1)));
+			cmd.SetScissor(new VkRect2D(offset: IVector2.Zero, new Extents(Swapchain.Resolution)));
+
+			cmd.Draw(vertexCount: 3, instanceCount: 1);
+
+			cmd.EndRenderPass();
+			cmd.End();
 		}
 
 		public void Destroy()
@@ -103,7 +175,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Log.Trace("Destroying vulkan graphics backend");
 
 			#region Temp
-			for(int i = 0; i < MaxFramesInFlight; i++)
+			for (int i = 0; i < MaxFramesInFlight; i++)
 			{
 				InFlightFences[i].Dispose();
 				ImageAvailableSemaphores[i].Dispose();
@@ -121,6 +193,133 @@ namespace Yonai.Graphics.Backends.Vulkan
 			#endregion
 
 			Instance?.Dispose();
+		}
+
+		private VkGraphicsPipelineCreateInfo CreatePipelineInfo()
+		{
+			VulkanShaderModule[] shaders = new VulkanShaderModule[]
+			{
+				new VulkanShaderModule(SelectedDevice, "app://Assets/Shaders/vert.spv"),
+				new VulkanShaderModule(SelectedDevice, "app://Assets/Shaders/frag.spv")
+			};
+
+			VkPipelineShaderStage[] shaderStages = new VkPipelineShaderStage[]
+			{
+				new VkPipelineShaderStage
+				{
+					Stage = VkShaderStage.Vertex,
+					Shader = shaders[0].Handle,
+					EntryPoint = "main"
+				},
+				new VkPipelineShaderStage
+				{
+					Stage = VkShaderStage.Fragment,
+					Shader = shaders[1].Handle,
+					EntryPoint = "main"
+				}
+			};
+
+			uint v2Size = (uint)Marshal.SizeOf(typeof(Vector2));
+			uint v3Size = (uint)Marshal.SizeOf(typeof(Vector3));
+			VkPipelineVertexInputState vertexInput = new VkPipelineVertexInputState();
+			/*
+			{
+				Bindings = new VkVertexInputBindingDescription[]
+				{
+					new VkVertexInputBindingDescription
+					{
+						Binding = 0,
+						Stride = v3Size * 2 + v2Size,
+						InputRate = VkVertexInputRate.Vertex
+					}
+				},
+				Attributes = new VkVertexInputAttributeDescription[]
+				{
+					new VkVertexInputAttributeDescription
+					{
+						Binding = 0,
+						Location = 0,
+						Format = VkFormat.R32G32B32_SFLOAT,
+						Offset = 0
+					},
+					new VkVertexInputAttributeDescription
+					{
+						Binding = 0,
+						Location = 1,
+						Format = VkFormat.R32G32B32_SFLOAT,
+						Offset = v3Size
+					},
+					new VkVertexInputAttributeDescription
+					{
+						Binding = 0,
+						Location = 2,
+						Format = VkFormat.R32G32_SFLOAT,
+						Offset = v3Size * 2
+					}
+				}
+			};
+			*/
+
+			VkPipelineInputAssemblyState inputAssembly = new VkPipelineInputAssemblyState()
+			{
+				Topology = VkPrimitiveTopology.TRIANGLE_LIST,
+				PrimitiveRestartEnable = false
+			};
+
+			VkRect2D scissor = new VkRect2D(IVector2.Zero, new Extents(Swapchain.Resolution));
+			VkViewport viewport = new VkViewport(offset: Vector2.Zero, size: Swapchain.Resolution, new Vector2(0, 1));
+
+			VkDynamicState[] dynamicStates = new VkDynamicState[]
+			{
+				VkDynamicState.VIEWPORT,
+				VkDynamicState.SCISSOR
+			};
+
+			VkPipelineRasterizationState rasterizer = new VkPipelineRasterizationState
+			{
+				DepthClampEnable = false,
+				RasterizerDiscardEnable = false,
+				PolygonMode = VkPolygonMode.Fill,
+				LineWidth = 1,
+				CullMode = VkCullMode.BACK_BIT,
+				FrontFace = VkFrontFace.Clockwise,
+				DepthBiasEnable = false
+			};
+
+			VkPipelineMultisampleState multisampling = new VkPipelineMultisampleState
+			{
+				SampleShadingEnable = false,
+				RasterizationSamples = VkSampleCount.BITS_1
+			};
+
+			VkPipelineColorBlendState colourBlending = new VkPipelineColorBlendState
+			{
+				LogicOpEnable = false,
+				BlendConstants = new Vector4(1, 2, 3, 4),
+				Attachments = new VkPipelineColorBlendAttachment[]
+				{
+					new VkPipelineColorBlendAttachment
+					{
+						ColorWriteMask = VkColorComponentFlagBits.R | VkColorComponentFlagBits.G | VkColorComponentFlagBits.B | VkColorComponentFlagBits.A,
+						BlendEnable = false,
+					}
+				}
+			};
+
+			return new VkGraphicsPipelineCreateInfo
+			{
+				Stages = shaderStages,
+				InputState = vertexInput,
+				InputAssembly = inputAssembly,
+				Viewports = new VkViewport[] { viewport },
+				Scissors = new VkRect2D[] { scissor },
+				Rasterization = rasterizer,
+				Multisample = multisampling,
+				ColorBlendState = colourBlending,
+				DynamicStates = dynamicStates,
+				RenderPass = RenderPass,
+				Subpass = 0
+			};
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

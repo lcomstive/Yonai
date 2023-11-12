@@ -173,6 +173,8 @@ void VulkanBackend::Cleanup()
 
 void VulkanBackend::Draw()
 {
+	return;
+
 	static unsigned int currentFrame = 0;
 
 	vkWaitForFences(Device, 1, &InFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -1797,7 +1799,7 @@ ADD_MANAGED_METHOD(VulkanCommandPool, Destroy, void, (void* device, void* handle
 { vkDestroyCommandPool((VkDevice)device, (VkCommandPool)handle, nullptr); }
 
 ADD_MANAGED_METHOD(VulkanCommandPool, CreateCommandBuffers, void,
-	(void* device, void* commandPool, unsigned int count, int bufferLevel, MonoArray* outHandles),
+	(void* device, void* commandPool, unsigned int count, int bufferLevel, MonoArray** outHandles),
 	Yonai.Graphics.Backends.Vulkan)
 {
 	VkCommandBufferAllocateInfo allocInfo = {};
@@ -1816,15 +1818,64 @@ ADD_MANAGED_METHOD(VulkanCommandPool, CreateCommandBuffers, void,
 		return;
 	}
 
-	outHandles = mono_array_new(mono_domain_get(), mono_get_intptr_class(), count);
+	*outHandles = mono_array_new(mono_domain_get(), mono_get_intptr_class(), count);
 	for (unsigned int i = 0; i < count; i++)
-		mono_array_set(outHandles, VkCommandBuffer, i, buffers[i]);
+		mono_array_set(*outHandles, VkCommandBuffer, i, buffers[i]);
 }
 
-ADD_MANAGED_METHOD(VulkanCommandBuffer, Reset, int, (void* handle, int flag), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanCommandBuffer, Begin, int, (void* handle), Yonai.Graphics.Backends.Vulkan)
 {
-	return (int)vkResetCommandBuffer((VkCommandBuffer)handle, (VkCommandBufferResetFlags)flag);
+	VkCommandBufferBeginInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	return (int)vkBeginCommandBuffer((VkCommandBuffer)handle, &info);
 }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, End, int, (void* handle), Yonai.Graphics.Backends.Vulkan)
+{ return (int)vkEndCommandBuffer((VkCommandBuffer)handle); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, Reset, int, (void* handle, int flag), Yonai.Graphics.Backends.Vulkan)
+{ return (int)vkResetCommandBuffer((VkCommandBuffer)handle, (VkCommandBufferResetFlags)flag); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BindPipeline, void, (void* handle, int bindPoint, void* pipeline), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdBindPipeline((VkCommandBuffer)handle, (VkPipelineBindPoint)bindPoint, (VkPipeline)pipeline); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, SetViewport, void, (void* handle, void* viewport, int index), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdSetViewport((VkCommandBuffer)handle, index, 1, (VkViewport*)viewport); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, SetScissor, void, (void* handle, void* scissor, int index), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdSetScissor((VkCommandBuffer)handle, index, 1, (VkRect2D*)scissor); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, Draw, void,
+	(void* handle, unsigned int vertexCount, unsigned int instanceCount, unsigned int firstVertex, unsigned int firstInstance),
+	Yonai.Graphics.Backends.Vulkan)
+{ vkCmdDraw((VkCommandBuffer)handle, vertexCount, instanceCount, firstVertex, firstInstance); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRenderPass, void, (
+	void* handle, void* renderPass, void* framebuffer,
+	glm::ivec2* offset, glm::ivec2* extent, glm::vec4* clearValue
+), Yonai.Graphics.Backends.Vulkan)
+{
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = (VkRenderPass)renderPass;
+	renderPassInfo.framebuffer = (VkFramebuffer)framebuffer;
+	renderPassInfo.renderArea.offset = { offset->x, offset->y };
+	renderPassInfo.renderArea.extent = { (unsigned int)extent->x, (unsigned int)extent->y };
+
+	VkClearValue clearColour = {{{
+			clearValue->r,
+			clearValue->g,
+			clearValue->b,
+			clearValue->a
+	}}};
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColour;
+
+	vkCmdBeginRenderPass((VkCommandBuffer)handle, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, EndRenderPass, void, (void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdEndRenderPass((VkCommandBuffer)handle); }
 
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
 {
@@ -1882,3 +1933,80 @@ ADD_MANAGED_METHOD(VulkanSemaphore, Create, void*, (void* device), Yonai.Graphic
 
 ADD_MANAGED_METHOD(VulkanSemaphore, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroySemaphore((VkDevice)device, (VkSemaphore)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanQueue, Submit, int, (void* queue, void* fence, MonoArray* monoWaitSemaphores, MonoArray* monoStageMask, MonoArray* monoCommandBuffers, MonoArray* monoSignalSemaphores), Yonai.Graphics.Backends.Vulkan)
+{
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	// Wait semaphores //
+	vector<VkSemaphore> waitSemaphores;
+	waitSemaphores.resize(mono_array_length(monoWaitSemaphores));
+	for (size_t i = 0; i < waitSemaphores.size(); i++)
+		waitSemaphores[i] = mono_array_get(monoWaitSemaphores, VkSemaphore, i);
+
+	info.pWaitSemaphores = waitSemaphores.data();
+	info.waitSemaphoreCount = (unsigned int)waitSemaphores.size();
+
+	// Command buffers //
+	vector<VkCommandBuffer> buffers;
+	buffers.resize(mono_array_length(monoCommandBuffers));
+	for (size_t i = 0; i < buffers.size(); i++)
+		buffers[i] = mono_array_get(monoCommandBuffers, VkCommandBuffer, i);
+
+	info.pCommandBuffers = buffers.data();
+	info.commandBufferCount = (unsigned int)buffers.size();
+
+	// Signal semaphores //
+	vector<VkSemaphore> signalSemaphores;
+	signalSemaphores.resize(mono_array_length(monoSignalSemaphores));
+	for (size_t i = 0; i < signalSemaphores.size(); i++)
+		signalSemaphores[i] = mono_array_get(monoSignalSemaphores, VkSemaphore, i);
+
+	info.pSignalSemaphores = signalSemaphores.data();
+	info.signalSemaphoreCount = (unsigned int)signalSemaphores.size();
+
+	// Stage flags //
+	vector<VkPipelineStageFlags> stageFlags;
+	stageFlags.resize(mono_array_length(monoStageMask));
+	for (size_t i = 0; i < stageFlags.size(); i++)
+		stageFlags[i] = mono_array_get(monoStageMask, VkPipelineStageFlags, i);
+
+	info.pWaitDstStageMask = stageFlags.data();
+	
+	return (int)vkQueueSubmit((VkQueue)queue, 1, &info, (VkFence)fence);
+}
+
+ADD_MANAGED_METHOD(VulkanQueue, Present, int, (void* queue, MonoArray* monoSemaphores, MonoArray* monoSwapchains, MonoArray* monoImageIndices), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPresentInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	// Wait semaphores //
+	vector<VkSemaphore> waitSemaphores;
+	waitSemaphores.resize(mono_array_length(monoSemaphores));
+	for (size_t i = 0; i < waitSemaphores.size(); i++)
+		waitSemaphores[i] = mono_array_get(monoSemaphores, VkSemaphore, i);
+
+	info.pWaitSemaphores = waitSemaphores.data();
+	info.waitSemaphoreCount = (unsigned int)waitSemaphores.size();
+	
+	// Swapchains //
+	vector<VkSwapchainKHR> swapchains;
+	swapchains.resize(mono_array_length(monoSwapchains));
+	for (size_t i = 0; i < swapchains.size(); i++)
+		swapchains[i] = mono_array_get(monoSwapchains, VkSwapchainKHR, i);
+
+	info.pSwapchains = swapchains.data();
+	info.swapchainCount = (unsigned int)swapchains.size();
+
+	// Image indices //
+	vector<unsigned int> imageIndices;
+	imageIndices.resize(mono_array_length(monoImageIndices));
+	for (size_t i = 0; i < imageIndices.size(); i++)
+		imageIndices[i] = mono_array_get(monoImageIndices, unsigned int, i);
+
+	info.pImageIndices = imageIndices.data();
+
+	return vkQueuePresentKHR((VkQueue)queue, &info);
+}

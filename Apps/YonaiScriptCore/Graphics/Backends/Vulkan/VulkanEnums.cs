@@ -400,11 +400,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public enum VkPipelineBindPoint
 	{
-		GRAPHICS = 0,
-		COMPUTE = 1,
-		RAY_TRACING_KHR = 1000165000,
-		SUBPASS_SHADING_HUAWEI = 1000369003,
-		RAY_TRACING_NV = RAY_TRACING_KHR
+		Graphics = 0,
+		Compute = 1,
+		RayTracingKHR = 1000165000,
+		SubpassShading_HUAWEI = 1000369003,
+		RayTracing_NV = RayTracingKHR
 	}
 
 	public enum VkSubpassDescriptionFlags : int

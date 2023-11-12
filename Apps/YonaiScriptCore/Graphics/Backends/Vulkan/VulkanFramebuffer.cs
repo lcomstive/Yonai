@@ -19,7 +19,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			for (int i = 0; i < attachments.Length; i++)
 				nativeAttachments[i] = attachments[i].ImageView;
 
-			_Create(Device.Device,
+			Handle = _Create(Device.Device,
 				renderPass.Handle,
 				nativeAttachments,
 				(uint)size.x,

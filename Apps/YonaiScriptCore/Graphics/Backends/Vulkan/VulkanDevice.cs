@@ -16,10 +16,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private VulkanInstance m_Instance;
 		internal IntPtr Device = IntPtr.Zero;
 		internal IntPtr PhysicalDevice = IntPtr.Zero;
-		internal IntPtr GraphicsQueue = IntPtr.Zero;
-		internal IntPtr PresentQueue = IntPtr.Zero;
-		internal uint GraphicsQueueIndex = 0;
-		internal uint PresentQueueIndex = 0;
+		internal VulkanQueue GraphicsQueue = null;
+		internal VulkanQueue PresentQueue = null;
 
 		public uint ID { get; private set; }
 		public string Name { get; private set; }
@@ -32,11 +30,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			PhysicalDevice = physicalDeviceHandle;
 
 			QueueFamilyIndices indices = FindQueueFamilies();
-			GraphicsQueueIndex = indices.GraphicsFamily.Value;
-			PresentQueueIndex = indices.PresentFamily.Value;
-			Device = _CreateDevice(PhysicalDevice, GraphicsQueueIndex, indices.PresentFamily.Value);
-			GraphicsQueue = _GetDeviceQueue(Device, GraphicsQueueIndex, 0);
-			PresentQueue = _GetDeviceQueue(Device, PresentQueueIndex, 0);
+			Device = _CreateDevice(PhysicalDevice, indices.GraphicsFamily.Value, indices.PresentFamily.Value);
+			GraphicsQueue = new VulkanQueue(_GetDeviceQueue(Device, indices.GraphicsFamily.Value, 0), indices.GraphicsFamily.Value);
+			PresentQueue = new VulkanQueue(_GetDeviceQueue(Device, indices.PresentFamily.Value, 0), indices.PresentFamily.Value);
 
 			Name = _GetPhysicalDeviceProperties(
 				PhysicalDevice,

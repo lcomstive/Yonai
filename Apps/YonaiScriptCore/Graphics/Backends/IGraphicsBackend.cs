@@ -4,5 +4,6 @@ namespace Yonai.Graphics.Backends
 	{
 		void Create();
 		void Destroy();
+		void Draw();
 	}
 }
