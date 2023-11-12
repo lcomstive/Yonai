@@ -1,9 +1,11 @@
 ﻿using System;
 using Yonai.IO;
 using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices;
 
 namespace Yonai
 {
+	[StructLayout(LayoutKind.Sequential)]
 	[System.Diagnostics.DebuggerDisplay("({x}, {y})")]
 	public struct IVector2 : ISerializable
 	{

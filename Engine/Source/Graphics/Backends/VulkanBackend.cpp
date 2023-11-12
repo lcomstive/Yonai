@@ -112,18 +112,18 @@ void VulkanBackend::Init()
 
 	spdlog::debug("Initialising Vulkan backend");
 
-	// CreateInstance();
-	// GetAvailableExtensions();
-	// SetupDebugMessenger();
+	CreateInstance();
+	GetAvailableExtensions();
+	SetupDebugMessenger();
 
-	// CreateSurface();
+	CreateSurface();
 
-	// FindPhysicalDevices();
-	// if (AvailablePhysicalDevices.empty())
-	// 	return;
-	// SelectDevice(AvailablePhysicalDevices[0]);
+	FindPhysicalDevices();
+	if (AvailablePhysicalDevices.empty())
+		return;
+	SelectDevice(AvailablePhysicalDevices[0]);
 
-	// CreateSwapchain();
+	CreateSwapchain();
 	CreateGraphicsPipeline();
 	CreateCommandPool();
 	CreateCommandBuffer();
@@ -857,9 +857,6 @@ void VulkanBackend::CreateGraphicsPipeline()
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-
 	auto bindingDescription = GetBindingDescription();
 	auto attributeDescriptions = GetAttributeDescriptions();
 	vertexInputInfo.vertexBindingDescriptionCount = 1;
@@ -1545,6 +1542,11 @@ ADD_MANAGED_METHOD(VulkanSwapchain, GetImages, MonoArray*, (void* inDevice, void
 	return output;
 }
 
+ADD_MANAGED_METHOD(VulkanSwapchain, AcquireNextImage, int, (void* device, void* swapchain, unsigned int timeout, void* semaphore, void* fence, unsigned int* outIndex), Yonai.Graphics.Backends.Vulkan)
+{
+	return (int)vkAcquireNextImageKHR((VkDevice)device, (VkSwapchainKHR)swapchain, timeout, (VkSemaphore)semaphore, (VkFence)fence, outIndex);
+}
+
 ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDevice, int imageFormat), Yonai.Graphics.Backends.Vulkan)
 {
 	VkImageViewCreateInfo createInfo = {};
@@ -1633,3 +1635,250 @@ ADD_MANAGED_METHOD(VulkanFramebuffer, Create, void*,
 
 ADD_MANAGED_METHOD(VulkanFramebuffer, Destroy, void, (void* device, void* framebuffer), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyFramebuffer((VkDevice)device, (VkFramebuffer)framebuffer, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanShaderModule, Create, void*, (void* device, MonoArray* data), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<unsigned char> code;
+	code.resize(mono_array_length(data));
+	for (size_t i = 0; i < code.size(); i++)
+		code[i] = mono_array_get(data, char, i);
+
+	VkShaderModuleCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	createInfo.pCode = (const unsigned int*)code.data();
+
+	VkShaderModule shader;
+	VkResult result = vkCreateShaderModule((VkDevice)device, &createInfo, nullptr, &shader);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create shader", result);
+		return nullptr;
+	}
+
+	return shader;
+}
+
+ADD_MANAGED_METHOD(VulkanShaderModule, Destroy, void, (void* device, void* shaderModule), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyShaderModule((VkDevice)device, (VkShaderModule)shaderModule, nullptr); }
+
+struct VkPipelineColorBlendStateCreateInfoManaged
+{
+	float blendConstantR;
+	float blendConstantG;
+	float blendConstantB;
+	float blendConstantA;
+	
+	bool logicOpEnable;
+	VkLogicOp logicOp;
+	uint32_t attachmentCount;
+	const VkPipelineColorBlendAttachmentState* pAttachments;
+};
+
+struct VkGraphicsPipelineCreateInfoManaged
+{
+	unsigned int StageCount;
+	VkPipelineShaderStageCreateInfo* Stages;
+	VkPipelineVertexInputStateCreateInfo InputState;
+	VkPipelineInputAssemblyStateCreateInfo InputAssembly;
+	
+	unsigned int ViewportsCount;
+	VkViewport* Viewports;
+
+	unsigned int ScissorsCount;
+	VkRect2D* Scissors;
+
+	VkPipelineRasterizationStateCreateInfo Rasterization;
+	VkPipelineMultisampleStateCreateInfo Multisample;
+	VkPipelineDepthStencilStateCreateInfo* DepthStencil;
+	VkPipelineColorBlendStateCreateInfoManaged ColorBlendState;
+
+	unsigned int DynamicStatesCount;
+	VkDynamicState* DynamicStates;
+
+	VkRenderPass RenderPass;
+	unsigned int Subpass;
+};
+
+ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void* inPipelineInfo), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDevice device = (VkDevice)inDevice;
+	VkGraphicsPipelineCreateInfoManaged* managed = (VkGraphicsPipelineCreateInfoManaged*)inPipelineInfo;
+
+	managed->InputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	managed->InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	managed->Rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	managed->Multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+
+	for (unsigned int i = 0; i < managed->StageCount; i++)
+		managed->Stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+
+	if (managed->DepthStencil)
+		managed->DepthStencil->sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+
+	VkPipelineColorBlendStateCreateInfo blendState = {};
+	blendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	blendState.attachmentCount = managed->ColorBlendState.attachmentCount;
+	blendState.pAttachments = managed->ColorBlendState.pAttachments;
+	blendState.logicOp = managed->ColorBlendState.logicOp;
+	blendState.logicOpEnable = managed->ColorBlendState.logicOpEnable;
+
+	blendState.blendConstants[0] = managed->ColorBlendState.blendConstantR;
+	blendState.blendConstants[1] = managed->ColorBlendState.blendConstantG;
+	blendState.blendConstants[2] = managed->ColorBlendState.blendConstantB;
+	blendState.blendConstants[3] = managed->ColorBlendState.blendConstantA;
+
+	VkPipelineDynamicStateCreateInfo dynamicStates = {};
+	dynamicStates.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStates.pDynamicStates = managed->DynamicStates;
+	dynamicStates.dynamicStateCount = managed->DynamicStatesCount;
+
+	VkPipelineViewportStateCreateInfo viewports = {};
+	viewports.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewports.pViewports = managed->Viewports;
+	viewports.viewportCount = managed->ViewportsCount;
+	viewports.pScissors = managed->Scissors;
+	viewports.scissorCount = managed->ScissorsCount;
+
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+	VkPipelineLayout pipelineLayout;
+	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create pipeline layout", result);
+		return nullptr;
+	}
+
+	VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = managed->StageCount;
+	pipelineInfo.pStages = managed->Stages;
+	pipelineInfo.pVertexInputState = &managed->InputState;
+	pipelineInfo.pInputAssemblyState = &managed->InputAssembly;
+	pipelineInfo.pViewportState = &viewports;
+	pipelineInfo.pRasterizationState = &managed->Rasterization;
+	pipelineInfo.pMultisampleState = &managed->Multisample;
+	pipelineInfo.pColorBlendState = &blendState;
+	pipelineInfo.pDynamicState = &dynamicStates;
+	pipelineInfo.layout = pipelineLayout;
+	pipelineInfo.renderPass = managed->RenderPass;
+	pipelineInfo.subpass = managed->Subpass;
+
+	VkPipeline pipeline;
+	result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create graphics pipeline", result);
+		return nullptr;
+	}
+	return pipeline;
+}
+
+ADD_MANAGED_METHOD(VulkanCommandPool, Create, void*, (void* device, unsigned int graphicsQueueIndex, int flag), Yonai.Graphics.Backends.Vulkan)
+{
+	VkCommandPoolCreateInfo poolInfo = {};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = (VkCommandPoolCreateFlagBits)flag;
+	poolInfo.queueFamilyIndex = graphicsQueueIndex;
+
+	VkCommandPool commandPool;
+	VkResult result = vkCreateCommandPool((VkDevice)device, &poolInfo, nullptr, &commandPool);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create command pool", result);
+		return nullptr;
+	}
+	return commandPool;
+}
+
+ADD_MANAGED_METHOD(VulkanCommandPool, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyCommandPool((VkDevice)device, (VkCommandPool)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanCommandPool, CreateCommandBuffers, void,
+	(void* device, void* commandPool, unsigned int count, int bufferLevel, MonoArray* outHandles),
+	Yonai.Graphics.Backends.Vulkan)
+{
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = (VkCommandPool)commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = count;
+
+	vector<VkCommandBuffer> buffers;
+	buffers.resize(count);
+	VkResult result = vkAllocateCommandBuffers((VkDevice)device, &allocInfo, buffers.data());
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create command buffer", result);
+		outHandles = nullptr;
+		return;
+	}
+
+	outHandles = mono_array_new(mono_domain_get(), mono_get_intptr_class(), count);
+	for (unsigned int i = 0; i < count; i++)
+		mono_array_set(outHandles, VkCommandBuffer, i, buffers[i]);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, Reset, int, (void* handle, int flag), Yonai.Graphics.Backends.Vulkan)
+{
+	return (int)vkResetCommandBuffer((VkCommandBuffer)handle, (VkCommandBufferResetFlags)flag);
+}
+
+ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
+{
+	VkFenceCreateInfo fenceInfo = {};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = (VkFenceCreateFlagBits)flags;
+
+	VkFence fence;
+	VkResult result = vkCreateFence((VkDevice)device, &fenceInfo, nullptr, &fence);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create fence", result);
+		return nullptr;
+	}
+	return fence;
+}
+
+ADD_MANAGED_METHOD(VulkanFence, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyFence((VkDevice)device, (VkFence)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanFence, Wait, int, (void* device, MonoArray* handles, bool waitAll, unsigned int timeout), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkFence> fences;
+	fences.resize(mono_array_length(handles));
+	for (size_t i = 0; i < fences.size(); i++)
+		fences[i] = mono_array_get(handles, VkFence, i);
+
+	return vkWaitForFences((VkDevice)device, (unsigned int)fences.size(), fences.data(), waitAll, timeout);
+}
+
+ADD_MANAGED_METHOD(VulkanFence, Reset, int, (void* device, MonoArray* handles), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkFence> fences;
+	fences.resize(mono_array_length(handles));
+	for (size_t i = 0; i < fences.size(); i++)
+		fences[i] = mono_array_get(handles, VkFence, i);
+
+	return vkResetFences((VkDevice)device, (unsigned int)fences.size(), fences.data());
+}
+
+ADD_MANAGED_METHOD(VulkanSemaphore, Create, void*, (void* device), Yonai.Graphics.Backends.Vulkan)
+{
+	VkSemaphoreCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkSemaphore semaphore;
+	VkResult result = vkCreateSemaphore((VkDevice)device, &info, nullptr, &semaphore);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create semaphore", result);
+		return nullptr;
+	}
+	return semaphore;
+}
+
+ADD_MANAGED_METHOD(VulkanSemaphore, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroySemaphore((VkDevice)device, (VkSemaphore)handle, nullptr); }

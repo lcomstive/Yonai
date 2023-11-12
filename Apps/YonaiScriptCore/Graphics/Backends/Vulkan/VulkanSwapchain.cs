@@ -56,6 +56,19 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void Dispose() => _Destroy(m_Device.Device, m_Handle);
 
+		public (VkResult, uint) AcquireNextImage(VulkanSemaphore semaphore, VulkanFence fence = null, uint timeout = uint.MaxValue)
+		{
+			VkResult result = (VkResult)_AcquireNextImage(
+				m_Device.Device,
+				m_Handle,
+				timeout,
+				semaphore?.Handle ?? IntPtr.Zero,
+				fence?.Handle ?? IntPtr.Zero,
+				out uint imageIndex
+			);
+			return (result, imageIndex);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr _Create(
 			IntPtr physicalDevice,
@@ -70,5 +83,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Destroy(IntPtr device, IntPtr swapchain);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr[] _GetImages(IntPtr device, IntPtr swapchain);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int _AcquireNextImage(IntPtr device, IntPtr swapchain, uint timeout, IntPtr semaphore, IntPtr fence, out uint imageIndex);
 	}
 }

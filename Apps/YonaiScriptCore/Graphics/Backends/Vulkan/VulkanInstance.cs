@@ -20,59 +20,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 			m_Surface = _CreateSurface(m_Handle);
 
 			GetPhysicalDevices();
-
-			Log.Debug("\n\nChoosing first device");
-			VulkanDevice device = Devices[0];
-			VulkanSwapchain swapchain = device.CreateSwapchain();
-
-			VkAttachmentDescription[] attachments = new VkAttachmentDescription[]
-			{
-				new VkAttachmentDescription()
-				{
-					Format = swapchain.ImageFormat,
-					Samples = VkSampleCount.BITS_1,
-					LoadOp = VkAttachmentLoadOp.Clear,
-					StoreOp = VkAttachmentStoreOp.Store,
-					StencilLoadOp = VkAttachmentLoadOp.DontCare,
-					StencilStoreOp = VkAttachmentStoreOp.DontCare,
-					InitialLayout = VkImageLayout.UNDEFINED,
-					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
-				}
-			};
-			VkSubpassDescription[] subpasses = new VkSubpassDescription[]
-			{
-				new VkSubpassDescription()
-				{
-					PipelineBindPoint = VkPipelineBindPoint.GRAPHICS,
-					ColourAttachments = new VkAttachmentReference[]
-					{
-						new VkAttachmentReference()
-						{
-							Attachment = 0,
-							Layout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
-						}
-					}
-				}
-			};
-			VkSubpassDependency[] dependencies = new VkSubpassDependency[]
-			{
-				new VkSubpassDependency()
-				{
-					SrcSubpass = VkSubpassDependency.SubpassExternal,
-					DstSubpass = 0,
-					SrcStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
-					SrcAccessMask = VkAccessFlags.NONE,
-					DstStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
-					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
-				}
-			};
-			VulkanRenderPass renderPass = new VulkanRenderPass(device, attachments, subpasses, dependencies);
-
-			swapchain.GenerateFramebuffers(renderPass);
 		}
 
 		public void Dispose()
 		{
+			foreach (VulkanDevice device in Devices)
+				device.Dispose();
+			Devices = new VulkanDevice[0];
+
 			_DestroySurface(m_Handle, m_Surface);
 			_DestroyDebugMessenger(m_Handle, m_DebugMessenger);
 			_Destroy(m_Handle);
