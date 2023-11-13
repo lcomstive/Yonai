@@ -61,5 +61,10 @@ namespace Yonai.Systems
 			try { m_Backend?.Create(); }
 			catch(Exception e) { Log.Exception(e); }
 		}
+
+		/// <summary>
+		/// Called from C++ to get current API
+		/// </summary>
+		private static int GetGraphicsAPI() => (int)Get<RenderSystem>().m_API;
 	}
 }

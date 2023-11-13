@@ -1020,29 +1020,6 @@ VkShaderModule VulkanBackend::CreateShaderModule(const vector<unsigned char>& co
 
 	return shader;
 }
-
-#include <Yonai/Graphics/Graphics.hpp>
-ADD_MANAGED_METHOD(Graphics, UploadVertexShader, void, (MonoArray* data), Yonai.Graphics)
-{
-	vector<unsigned char> code;
-	code.resize(mono_array_length(data));
-	for (size_t i = 0; i < code.size(); i++)
-		code[i] = mono_array_get(data, char, i);
-
-	VulkanBackend* backend = (VulkanBackend*)Graphics::Graphics::s_Backend.get();
-	backend->VertexShader = backend->CreateShaderModule(code);
-}
-
-ADD_MANAGED_METHOD(Graphics, UploadFragmentShader, void, (MonoArray* data), Yonai.Graphics)
-{
-	vector<unsigned char> code;
-	code.resize(mono_array_length(data));
-	for (size_t i = 0; i < code.size(); i++)
-		code[i] = mono_array_get(data, char, i);
-
-	VulkanBackend* backend = (VulkanBackend*)Graphics::Graphics::s_Backend.get();
-	backend->FragmentShader = backend->CreateShaderModule(code);
-}
 #pragma endregion
 
 #pragma region Commands

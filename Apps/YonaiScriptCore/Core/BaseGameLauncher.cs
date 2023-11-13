@@ -38,7 +38,7 @@ namespace Yonai
 			if (!Application.HasArg("GraphicsAPI") || !Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI))
 				if (JSON.ContainsKey("GraphicsAPI"))
 					Enum.TryParse(JSON["GraphicsAPI"].Value<string>(), out graphicsAPI);
-			Graphics.Graphics._SetAPI((int)graphicsAPI);
+			YonaiSystem.Add<RenderSystem>().API = graphicsAPI;
 
 			if (JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
 				LoadGlobalSystems();

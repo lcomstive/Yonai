@@ -5,16 +5,17 @@ using namespace Yonai::Scripting;
 
 Method::Method(MonoMethod* handle) { Handle = handle; }
 
-void Method::Invoke(MonoObject* instance, void** params)
+MonoObject* Method::Invoke(MonoObject* instance, void** params)
 {
 	if (!Handle)
 	{
 		spdlog::warn("Tried to invoke method but no valid one was passed");
-		return;
+		return nullptr;
 	}
 	MonoObject* exception = nullptr;
-	mono_runtime_invoke(Handle, instance, params, &exception);
+	MonoObject* output = mono_runtime_invoke(Handle, instance, params, &exception);
 
 	if (exception)
 		mono_print_unhandled_exception(exception);
+	return exception ? nullptr : output;
 }

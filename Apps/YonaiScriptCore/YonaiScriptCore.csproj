@@ -117,7 +117,6 @@
     <Compile Include="Graphics\Pipelines\NativeRenderPipeline.cs" />
 
     <Compile Include="Graphics\Framebuffer.cs" />
-    <Compile Include="Graphics\Graphics.cs" />
     <Compile Include="Graphics\GraphicsAPI.cs" />
     <Compile Include="Graphics\Material.cs" />
     <Compile Include="Graphics\Mesh.cs" />

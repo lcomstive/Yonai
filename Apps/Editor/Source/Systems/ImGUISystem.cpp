@@ -2,7 +2,8 @@
 #include <ImGuizmo.h>
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
-#include <Yonai/Graphics/Graphics.hpp>
+#include <Yonai/Scripting/Class.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
 #include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_Vulkan.hpp>
@@ -11,8 +12,15 @@
 using namespace glm;
 using namespace Yonai;
 using namespace Yonai::Systems;
-using namespace Yonai::Graphics;
 using namespace YonaiEditor::Systems;
+
+enum class GraphicsAPI : int
+{
+	None = 0,
+	Vulkan
+};
+// Gets currently used API from C#
+GraphicsAPI GetGraphicsAPI();
 
 ImGUISystem::ImGUISystem()
 {
@@ -42,9 +50,11 @@ static void CheckVKResult(VkResult err)
 static bool imguiInitialised = false;
 void ImGUISystem::OnEnabled()
 {
+	GraphicsAPI api = GetGraphicsAPI();
+
 	if(!imguiInitialised)
 	{
-		switch (Yonai::Graphics::Graphics::API())
+		switch (api)
 		{
 		case GraphicsAPI::None: break;
 		case GraphicsAPI::Vulkan:
@@ -146,3 +156,12 @@ void ImGUISystem::EndFrame()
 
 ImGuiIO* ImGUISystem::GetIO() { return m_IO; }
 ImGuiContext* ImGUISystem::GetContext() { return m_Context; }
+
+GraphicsAPI GetGraphicsAPI()
+{
+	Yonai::Scripting::Class klass(Yonai::Scripting::ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai.Systems", "RenderSystem"), nullptr);
+	Yonai::Scripting::Method method = klass.GetMethod("GetGraphicsAPI", 0);
+	MonoObject* output = method.Invoke();
+	int graphicsAPI = *(int*)mono_object_unbox (output);
+	return (GraphicsAPI)graphicsAPI;
+}

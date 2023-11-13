@@ -12,7 +12,6 @@
 #include <Yonai/IO/Files.hpp>
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
-#include <Yonai/Graphics/Graphics.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 
 using namespace std;
@@ -44,16 +43,12 @@ bool Window::InitContext()
 	ScriptEngine::AddReloadCallback(GetThunks);
 	GetThunks();
 
-	Graphics::Graphics::Init();
-
 	s_ContextInitialised = true;
 	return true;
 }
 
 void Window::DestroyContext()
 {
-	Graphics::Graphics::Destroy();
-
 	if (s_ContextInitialised)
 		glfwTerminate();
 	s_ContextInitialised = false;

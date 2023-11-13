@@ -11,18 +11,18 @@ namespace Yonai::Scripting
 
 		YonaiAPI Method(MonoMethod* handle);
 
-		YonaiAPI void Invoke(MonoObject* instance = nullptr, void** params = nullptr);
+		YonaiAPI MonoObject* Invoke(MonoObject* instance = nullptr, void** params = nullptr);
 
 		template<typename T>
-		void Invoke(T* param) { Invoke(nullptr, (void**)&param); }
+		MonoObject* Invoke(T* param) { return Invoke(nullptr, (void**)&param); }
 
 		template<typename T>
-		void Invoke(T param) { Invoke<T>(&param); }
+		MonoObject* Invoke(T param) { return Invoke<T>(&param); }
 
 		template<typename T>
-		void Invoke(MonoObject* instance, T* param) { Invoke(instance, (void**)&param); }
+		MonoObject* Invoke(MonoObject* instance, T* param) { return Invoke(instance, (void**)&param); }
 
 		template<typename T>
-		void Invoke(MonoObject* instance, T param) { Invoke<T>(instance, &param); }
+		MonoObject* Invoke(MonoObject* instance, T param) { return Invoke<T>(instance, &param); }
 	};
 }
