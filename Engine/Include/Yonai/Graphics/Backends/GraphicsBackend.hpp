@@ -5,9 +5,9 @@ namespace Yonai::Graphics::Backends
 {
 	struct GraphicsBackend
 	{
-		YonaiAPI virtual void Init() abstract;
-		YonaiAPI virtual void Draw() abstract;
-		YonaiAPI virtual void Destroy() abstract;
+		YonaiAPI virtual void Init() = 0;
+		YonaiAPI virtual void Draw() = 0;
+		YonaiAPI virtual void Destroy() = 0;
 
 		YonaiAPI virtual void OnResized() {}
 

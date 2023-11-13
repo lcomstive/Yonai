@@ -5,7 +5,7 @@
 
 namespace Yonai::Graphics
 {
-	enum class GraphicsAPI : int
+	enum class GraphicsAPI
 	{
 		None = 0,
 		Vulkan,
@@ -14,7 +14,7 @@ namespace Yonai::Graphics
 
 	struct Graphics
 	{
-		static std::unique_ptr<Backends::GraphicsBackend> s_Backend;
+		static std::unique_ptr<Yonai::Graphics::Backends::GraphicsBackend> s_Backend;
 
 		static void Init();
 		static void Draw();
