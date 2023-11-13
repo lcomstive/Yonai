@@ -50,7 +50,7 @@ void EditorApp::Setup()
 
 	if (!HasArg("build"))
 	{
-		m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
+		// m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
 		SystemManager::Global()->Add<SceneSystem>();
 	}
 		
@@ -80,7 +80,7 @@ void EditorApp::LaunchEditorService()
 	MonoType* editorService = assembly->GetTypeFromClassName("YonaiEditor", "EditorService");
 
 	// Let managed code add & remove native ImGUISystem
-	assembly->BindManagedSystem<Systems::ImGUISystem>("YonaiEditor.Systems", "ImGUISystem");
+	// assembly->BindManagedSystem<Systems::ImGUISystem>("YonaiEditor.Systems", "ImGUISystem");
 
 	SystemManager::Global()->Add(editorService);
 }

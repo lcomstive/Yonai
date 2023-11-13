@@ -66,11 +66,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 	# Copy .NET .dlls for this platform to the root of the Assets/Mono/
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${YONAI_RESOURCES_DIR}/Assets/Mono/$<IF:$<PLATFORM_ID:Windows>,Windows,Unix>
+		${YONAI_RESOURCES_DIR}/Assets/Mono/$<IF:$<PLATFORM_ID:Windows>,Windows,$<IF:$<PLATFORM_ID:Darwin>,MacOS,Unix>>
 		${YONAI_RESOURCES_DIR}/Assets/Mono
 
 	# Remove platform .NET .dll folders
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${YONAI_RESOURCES_DIR}/Assets/Mono/Windows
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${YONAI_RESOURCES_DIR}/Assets/Mono/MacOS
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${YONAI_RESOURCES_DIR}/Assets/Mono/Unix
 )
 
@@ -120,6 +121,16 @@ if(APPLE)
 		COMMAND echo Copying ${MONO_LIBRARY_NATIVE} to output
 		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${YONAI_RESOURCES_DIR}/libmono-native.dylib
 		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_POSIXHELPER} ${YONAI_RESOURCES_DIR}
+	)
+elseif(UNIX)
+	find_file(MONO_LIBRARY_NATIVE NAMES
+		libmono-native.so
+		PATHS "${MONO_LIBRARY_DIRS}" REQUIRED)
+
+
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND echo Copying '${MONO_LIBRARY_NATIVE}' to output
+		COMMAND ${CMAKE_COMMAND} -E copy ${MONO_LIBRARY_NATIVE} ${YONAI_RESOURCES_DIR}/libmono-native.so
 	)
 endif()
 

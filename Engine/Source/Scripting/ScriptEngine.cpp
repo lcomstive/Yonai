@@ -258,7 +258,7 @@ Assembly* ScriptEngine::LoadAssembly(vector<unsigned char>& data, const char* fr
 
 vector<const char*> CoreAssemblyDependencies =
 {
-	// "app://Newtonsoft.Json.dll"
+	// "app://Assets/Mono/Newtonsoft.Json.dll"
 };
 
 void ScriptEngine::LoadCoreAssembly()

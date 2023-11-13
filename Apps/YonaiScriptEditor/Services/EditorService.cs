@@ -77,10 +77,12 @@ namespace YonaiEditor
 
 			// InitImGUI();
 
+			/*
 			if (!string.IsNullOrEmpty(projectPath))
 				ProjectHubService.SelectProject(projectPath);
 			else
 				Add<ProjectHubService>();
+			*/
 		}
 
 		protected override void Disabled()
