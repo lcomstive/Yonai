@@ -26,10 +26,10 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
-#include <glfw/glfw3native.h>
+#include <GLFW/glfw3native.h>
 #include <vulkan/vk_enum_string_helper.h>
 #include <Yonai/Graphics/Backends/Vulkan/VulkanBackend.hpp>
 
@@ -359,7 +359,7 @@ vector<const char*> GetRequiredExtensions()
 void VulkanBackend::CreateSurface()
 {
 #if defined(YONAI_PLATFORM_DESKTOP)
-	VkResult result = glfwCreateWindowSurface(Instance, Window::GetNativeHandle(), nullptr, &Surface);
+	VkResult result = glfwCreateWindowSurface(Instance, Yonai::Window::GetNativeHandle(), nullptr, &Surface);
 	if (result != VK_SUCCESS)
 	{
 		LogCriticalError("Failed to create surface", result);
@@ -623,7 +623,7 @@ VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	int width, height;
 
 #if defined(YONAI_PLATFORM_DESKTOP)
-	glfwGetFramebufferSize(Window::GetNativeHandle(), &width, &height);
+	glfwGetFramebufferSize(Yonai::Window::GetNativeHandle(), &width, &height);
 #endif
 
 	VkExtent2D extent = { (unsigned int)width, (unsigned int)height };
@@ -718,10 +718,10 @@ void VulkanBackend::RecreateSwapchain()
 #if defined(YONAI_PLATFORM_DESKTOP)
 	// Handle minification
 	int width = 0, height = 0;
-	glfwGetFramebufferSize(Window::GetNativeHandle(), &width, &height);
+	glfwGetFramebufferSize(Yonai::Window::GetNativeHandle(), &width, &height);
 	while (width == 0 || height == 0)
 	{
-		glfwGetFramebufferSize(Window::GetNativeHandle(), &width, &height);
+		glfwGetFramebufferSize(Yonai::Window::GetNativeHandle(), &width, &height);
 		glfwWaitEvents();
 	}
 #endif
@@ -1306,7 +1306,7 @@ ADD_MANAGED_METHOD(VulkanInstance, CreateSurface, void*, (void* instance), Yonai
 {
 	VkSurfaceKHR surface;
 #if defined(YONAI_PLATFORM_DESKTOP)
-	VkResult result = glfwCreateWindowSurface((VkInstance)instance, Window::GetNativeHandle(), nullptr, &surface);
+	VkResult result = glfwCreateWindowSurface((VkInstance)instance, Yonai::Window::GetNativeHandle(), nullptr, &surface);
 	if (result != VK_SUCCESS)
 	{
 		LogCriticalError("Failed to create surface", result);

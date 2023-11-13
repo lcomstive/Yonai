@@ -10,15 +10,17 @@ CONFIG=Release
 TESTING=false
 PACKAGE=false
 GENERATOR="Unix Makefiles"
+BUILD_FLAGS=""
 
 # Parse input args
-while getopts c:g:tp flag
+while getopts c:g:b:tp flag
 do
 	case "${flag}" in
 		c) 	CONFIG=${OPTARG};;
 		g)	GENERATOR=${OPTARG};;
 		t)	TESTING=true;;
 		p)	PACKAGE=true;;
+		b)  BUILD_FLAGS="${BUILD_FLAGS} ${OPTARG}";;
 		*) ;;
 	esac
 done
@@ -31,7 +33,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 ROOT=${SCRIPT_DIR}/../..
 
 # Configure CMake
-cmake -B ${ROOT}/build/ -G ${GENERATOR} -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT}
+cmake -B ${ROOT}/build/ -G ${GENERATOR} -DCMAKE_BUILD_TYPE=${CONFIG} ${ROOT} ${BUILD_FLAGS}
 
 # Build YonaiScriptCore C# project
 msbuild ${ROOT}/Apps/YonaiScriptCore/YonaiScriptCore.csproj -verbosity:minimal -property:Configuration=${CONFIG}

@@ -76,6 +76,7 @@
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\IImportSettings.cs" />
     <Compile Include="Core\Input.cs" />
+    <Compile Include="Core\InteropUtils.cs" />
     <Compile Include="Core\Keys.cs" />
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Mouse.cs" />
@@ -85,10 +86,39 @@
     <Compile Include="Core\UUID.cs" />
     <Compile Include="Core\World.cs" />
 
+	<!-- Vulkan -->
+    <Compile Include="Graphics\Backends\Vulkan\VulkanBuffer.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanCommandBuffer.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanCommandPool.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanDevice.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanEnums.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanFramebuffer.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanGraphicsBackend.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanGraphicsPipeline.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanImage.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanInstance.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanQueue.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanRenderPass.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanShader.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanStructs.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanSwapchain.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanSyncObjects.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanTexture.cs" />
+
     <!-- Graphics -->
+    <Compile Include="Graphics\Backends\IBuffer.cs" />
+    <Compile Include="Graphics\Backends\ICommandBuffer.cs" />
+    <Compile Include="Graphics\Backends\IDevice.cs" />
+    <Compile Include="Graphics\Backends\IGraphicsBackend.cs" />
+    <Compile Include="Graphics\Backends\ITexture.cs" />
+
+    <Compile Include="Graphics\Pipelines\ForwardRenderPipeline.cs" />
+    <Compile Include="Graphics\Pipelines\IRenderPipeline.cs" />
     <Compile Include="Graphics\Pipelines\NativeRenderPipeline.cs" />
+
     <Compile Include="Graphics\Framebuffer.cs" />
-    <Compile Include="Graphics\IRenderPipeline.cs" />
+    <Compile Include="Graphics\Graphics.cs" />
+    <Compile Include="Graphics\GraphicsAPI.cs" />
     <Compile Include="Graphics\Material.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\Model.cs" />
@@ -109,6 +139,7 @@
     
     <!-- Math -->
     <Compile Include="Math\Colour.cs" />
+    <Compile Include="Math\Extents.cs" />
     <Compile Include="Math\IVector2.cs" />
     <Compile Include="Math\IVector3.cs" />
     <Compile Include="Math\IVector4.cs" />
