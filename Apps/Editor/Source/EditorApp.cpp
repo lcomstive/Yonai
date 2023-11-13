@@ -51,12 +51,6 @@ void EditorApp::Setup()
 	if (!HasArg("build"))
 	{
 		m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
-
-		// Disable drawing to default framebuffer.
-		// Instead store pointer to render system and call manually
-		// m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
-		// m_RenderSystem->Enable(false);
-
 		SystemManager::Global()->Add<SceneSystem>();
 	}
 		
@@ -69,9 +63,6 @@ void EditorApp::Cleanup()
 
 	SystemManager::Global()->Remove<SceneSystem>();
 	SystemManager::Global()->Remove<AudioSystem>();
-	SystemManager::Global()->Remove<RenderSystem>();
-
-	m_RenderSystem = nullptr;
 }
 
 void EditorApp::OnUpdate()

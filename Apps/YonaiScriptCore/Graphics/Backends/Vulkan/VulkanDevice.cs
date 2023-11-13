@@ -74,10 +74,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public bool GetSurfaceSupport(uint queueFamilyIndex) => _GetPhysicalDeviceSurfaceSupport(PhysicalDevice, queueFamilyIndex, m_Instance.m_Surface);
 
+		public void WaitIdle() => _WaitIdle(Device);
+
 		public VulkanSwapchain CreateSwapchain() => new VulkanSwapchain(this, m_Instance);
 		
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _CreateDevice(IntPtr physicalDevice, uint graphicsFamilyIndice, uint presentFamilyIndice);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyDevice(IntPtr logicalDevice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _WaitIdle(IntPtr logicalDevice);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int[] _GetQueueFamilyProperties(IntPtr physicalDevice);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetDeviceQueue(IntPtr logicalDevice, uint queueFamilyIndex, uint queueIndex);

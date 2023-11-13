@@ -72,6 +72,8 @@ namespace Yonai
 		/// </summary>
 		public static void CenterOnDisplay() => _CenterOnDisplay();
 
+		public static void PollEvents() => _PollEvents();
+
 		public delegate void OnResized(IVector2 resolution);
 		public delegate void OnContentScaleChanged(Vector2 resolution);
 
@@ -82,6 +84,7 @@ namespace Yonai
 		private static void _OnResized() => Resized?.Invoke(Resolution);
 		private static void _OnContentScaleChanged() => ContentScaleChanged?.Invoke(ContentScaling);
 
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _PollEvents();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetContentScaling(out Vector2 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(out IVector2 value);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetResolution(ref IVector2 value);

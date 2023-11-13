@@ -1445,6 +1445,9 @@ ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void
 	return mono_string_new(mono_domain_get(), properties.deviceName);
 }
 
+ADD_MANAGED_METHOD(VulkanDevice, WaitIdle, void, (void* device), Yonai.Graphics.Backends.Vulkan)
+{ vkDeviceWaitIdle((VkDevice)device); }
+
 ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
 	void* inPhysicalDevice,
 	void* inDevice,
@@ -1578,6 +1581,9 @@ ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDe
 
 	return imageView;
 }
+
+ADD_MANAGED_METHOD(VulkanImage, DestroyImageView, void, (void* imageView, void* device), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyImageView((VkDevice)device, (VkImageView)imageView, nullptr); }
 
 ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
 	(void* device, int attachmentCount, void* attachments,

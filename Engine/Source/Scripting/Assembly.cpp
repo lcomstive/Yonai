@@ -15,7 +15,6 @@
 // Systems to map, unmanaged -> managed
 #include <Yonai/Systems/Global/AudioSystem.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
-#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 using namespace std;
 using namespace Yonai;
@@ -237,7 +236,6 @@ void Assembly::LoadScriptCoreTypes()
 
 	BindManagedSystem<Systems::SceneSystem>("Yonai", "SceneManager");
 	BindManagedSystem<Systems::AudioSystem>("Yonai.Systems", "AudioSystem");
-	BindManagedSystem<Systems::RenderSystem>("Yonai.Systems", "RenderSystem");
 
 #pragma region Component Methods
 	MonoClass* component = mono_class_from_name(Image, "Yonai", "Component");

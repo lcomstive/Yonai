@@ -1,7 +1,7 @@
 #include <BaseGame.hpp>
 #include <Yonai/Window.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
-#include <Yonai/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
 
 #include <Yonai/Scripting/Class.hpp>
 
@@ -23,13 +23,11 @@ void BaseGame::Setup()
 	Window::Show(false);
 
 	SystemManager::Global()->Add<SceneSystem>();
-	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 
 	glm::vec2 resolution = Window::GetResolution();
 	glm::vec2 scaling = Window::GetContentScaling();
 	resolution.x *= scaling.x;
 	resolution.y *= scaling.y;
-	m_RenderSystem->GetPipeline()->SetResolution(resolution);
 
 	// Launch BaseGameLauncher
 	Scripting::Class appClass(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "BaseGameLauncher"), nullptr);
@@ -48,20 +46,4 @@ void BaseGame::InitialiseScripting()
 #endif
 */
 	);
-}
-
-#include <vector>
-#include <Yonai/Components/Camera.hpp>
-#include <Yonai/Systems/Global/SceneSystem.hpp>
-using namespace Yonai::Systems;
-using namespace Yonai::Components;
-void BaseGame::OnPostDraw()
-{
-	// Blit output to default framebuffer
-	m_RenderSystem->GetPipeline()->GetOutput()->BlitTo();
-}
-
-void BaseGame::OnPreDraw()
-{
-	m_RenderSystem->GetPipeline()->SetResolution(Window::GetResolution());
 }

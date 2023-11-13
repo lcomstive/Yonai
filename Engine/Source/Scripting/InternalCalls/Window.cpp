@@ -50,6 +50,9 @@ ADD_MANAGED_METHOD(Screen, GetVideoMode, void, (glm::ivec2* outResolution, float
 ADD_MANAGED_METHOD(Screen, SetVideoMode, void, (glm::ivec2* resolution, float refreshRate))
 { Window::SetVideoMode(VideoMode { *resolution, refreshRate }); }
 
+ADD_MANAGED_METHOD(Window, PollEvents)
+{ Window::PollEvents(); }
+
 ADD_MANAGED_METHOD(Window, CenterOnDisplay)
 { Window::CenterOnDisplay(); }
 

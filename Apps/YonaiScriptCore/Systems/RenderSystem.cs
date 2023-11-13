@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Threading;
 using Yonai.Graphics;
 using Yonai.Graphics.Backends;
 using Yonai.Graphics.Backends.Vulkan;
@@ -30,14 +31,14 @@ namespace Yonai.Systems
 					Draw(camera);
 			}
 			*/
+
+			m_Backend.Draw();
 		}
 
 		private void Draw(Camera camera)
 		{
 
 		}
-
-		public void DoTheDraw() => m_Backend?.Draw();
 
 		private void SetBackend(GraphicsAPI backend)
 		{
@@ -53,7 +54,7 @@ namespace Yonai.Systems
 			switch (m_API)
 			{
 				default:
-				case GraphicsAPI.None: break;
+				case GraphicsAPI.None: return;
 				case GraphicsAPI.Vulkan: m_Backend = new VulkanGraphicsBackend(); break;
 			}
 

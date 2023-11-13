@@ -19,9 +19,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Device = device;
 			m_Instance = instance;
+
+			GenerateSwapchain();
+		}
+
+		private void GenerateSwapchain()
+		{
 			Handle = _Create(
-				device.PhysicalDevice, 
-				device.Device,
+				m_Device.PhysicalDevice,
+				m_Device.Device,
 				m_Instance.m_Surface,
 				IntPtr.Zero,
 				out int imageFormat,
@@ -33,9 +39,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Resolution = new IVector2((int)extentsWidth, (int)extentsHeight);
 
 			// Create image views
-			IntPtr[] imageHandles = _GetImages(device.Device, Handle);
+			IntPtr[] imageHandles = _GetImages(m_Device.Device, Handle);
 			Images = new VulkanImage[imageHandles.Length];
-			for(int i = 0; i < imageHandles.Length; i++)
+			for (int i = 0; i < imageHandles.Length; i++)
 				Images[i] = new VulkanImage(imageHandles[i], imageFormat, m_Device);
 		}
 
@@ -54,7 +60,26 @@ namespace Yonai.Graphics.Backends.Vulkan
 				);
 		}
 
-		public void Dispose() => _Destroy(m_Device.Device, Handle);
+		public void Dispose()
+		{
+			foreach(VulkanFramebuffer fb in Framebuffers)
+				fb.Dispose();
+
+			foreach (VulkanImage image in Images)
+				image.Dispose();
+
+			_Destroy(m_Device.Device, Handle);
+		}
+
+		public void Recreate()
+		{
+			m_Device.WaitIdle();
+
+			Dispose();
+
+			GenerateSwapchain();
+			GenerateFramebuffers(m_RenderPass);
+		}
 
 		public (VkResult, uint) AcquireNextImage(VulkanSemaphore semaphore, VulkanFence fence = null, uint timeout = uint.MaxValue)
 		{

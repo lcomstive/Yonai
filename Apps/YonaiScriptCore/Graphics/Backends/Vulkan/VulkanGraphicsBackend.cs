@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -20,6 +21,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanFence[] InFlightFences { get; private set; } = new VulkanFence[0];
 		public VulkanSemaphore[] ImageAvailableSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanSemaphore[] RenderFinishedSemaphores { get; private set; } = new VulkanSemaphore[0];
+
+		private bool m_FramebufferResized = false;
 		#endregion
 
 		public void Create()
@@ -98,10 +101,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 				ImageAvailableSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 				RenderFinishedSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 			}
+
+			Window.Resized += OnWindowResized;
 			#endregion
 
 			Log.Debug("Finished creating C# Vulkan backend");
 		}
+
+		private void OnWindowResized(IVector2 resolution) => m_FramebufferResized = true;
 
 		private static uint CurrentFrame = 0;
 		public void Draw()
@@ -112,10 +119,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			if (result == VkResult.VK_ERROR_OUT_OF_DATE_KHR)
 			{
+				RecreateSwapchain();
 				return;
 			}
 			else if (result != VkResult.VK_SUCCESS && result != VkResult.VK_SUBOPTIMAL_KHR)
 			{
+				Log.Error("Failed to acquire swapchain image");
+				Application.Exit();
 				return;
 			}
 
@@ -139,17 +149,30 @@ namespace Yonai.Graphics.Backends.Vulkan
 			result = SelectedDevice.PresentQueue.Present(
 				new VulkanSwapchain[] { Swapchain }, signalSemaphores, new uint[] { imageIndex });
 
-			if(result == VkResult.VK_ERROR_OUT_OF_DATE_KHR || result == VkResult.VK_SUBOPTIMAL_KHR)
+			if (result == VkResult.VK_ERROR_OUT_OF_DATE_KHR ||
+				result == VkResult.VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+				RecreateSwapchain();
+			else if (result != VkResult.VK_SUCCESS)
 			{
-				// RecreateSwapchain();
-			}
-			else if(result != VkResult.VK_SUCCESS)
-			{
+				Log.Error("Failed to present swapchain image");
 				Application.Exit();
 				return;
 			}
 
 			CurrentFrame = (CurrentFrame + 1) % MaxFramesInFlight;
+		}
+
+		private void RecreateSwapchain()
+		{
+			IVector2 res = Window.Resolution;
+			while (res.x == 0 || res.y == 0)
+			{
+				Window.PollEvents();
+				res = Window.Resolution;
+			}
+
+			m_FramebufferResized = false;
+			Swapchain.Recreate();
 		}
 
 		private void RecordCommandBuffer(VulkanCommandBuffer cmd, uint imageIndex)

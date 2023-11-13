@@ -59,6 +59,8 @@ namespace YonaiEditor
 			string projectPath = VFS.HasMount("project://") ? (VFS.ExpandPath("project://")?.FullPath as string) : Application.GetArg("projectpath", null);
 			Log.Debug($"Project path: {projectPath}");
 
+			Add<RenderSystem>();
+
 			if (!Scripting.IsAssemblyReloading())
 			{
 				GraphicsAPI graphicsAPI = GraphicsAPI.Vulkan;
@@ -70,8 +72,7 @@ namespace YonaiEditor
 				EditorWindow.Create();
 				EditorWindow.Show();
 
-				Log.Debug($"Setting graphics API to '{Enum.GetName(typeof(GraphicsAPI), graphicsAPI)}'");
-				Graphics._SetAPI((int)graphicsAPI);
+				Get<RenderSystem>().API = graphicsAPI;
 			}
 
 			// InitImGUI();
@@ -137,9 +138,6 @@ namespace YonaiEditor
 				ImGUI.SetFontGlobalScale(scaling.x);
 		}
 
-		#region Temp
-		private static RenderSystem m_RenderSystem = null;
-		#endregion
 		protected override void Update()
 		{
 			if (State == EditorState.Step)
@@ -154,12 +152,6 @@ namespace YonaiEditor
 				EditorWindow.Destroy();
 				Application.Exit();
 			}
-
-			#region Temp
-			if (m_RenderSystem == null)
-				m_RenderSystem = Get<RenderSystem>();
-			m_RenderSystem?.DoTheDraw();
-			#endregion
 		}
 
 		private void UpdateState(EditorState state)
