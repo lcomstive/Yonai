@@ -46,7 +46,7 @@ jobs:
       run: choco install mono
 
     # Vulkan SDK
-    -name: Prepare Vulkan SDK
+    - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
         vulkan-query-version: 1.2.170.0
