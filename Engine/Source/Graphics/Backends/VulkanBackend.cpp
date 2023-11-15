@@ -1842,6 +1842,11 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, Draw, void,
 	Yonai.Graphics.Backends.Vulkan)
 { vkCmdDraw((VkCommandBuffer)handle, vertexCount, instanceCount, firstVertex, firstInstance); }
 
+ADD_MANAGED_METHOD(VulkanCommandBuffer, DrawIndexed, void,
+	(void* handle, unsigned int indexCount, unsigned int instanceCount, unsigned int firstIndex, int vertexOffset, unsigned int firstInstance),
+	Yonai.Graphics.Backends.Vulkan)
+{ vkCmdDrawIndexed((VkCommandBuffer)handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance); }
+
 ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRenderPass, void, (
 	void* handle, void* renderPass, void* framebuffer,
 	glm::ivec2* offset, glm::ivec2* extent, glm::vec4* clearValue
@@ -1884,6 +1889,9 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BindVertexBuffers, void, (void* handle, 
 
 	vkCmdBindVertexBuffers((VkCommandBuffer)handle, 0, buffers.size(), buffers.data(), offsets.data());
 }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BindIndexBuffer, void, (void* handle, void* buffer, int offset, int indexType), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdBindIndexBuffer((VkCommandBuffer)handle, (VkBuffer)buffer, offset, (VkIndexType)indexType); }
 
 ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBuffer, void, (void* handle, void* src, void* dst, int srcOffset, int dstOffset, int size), Yonai.Graphics.Backends.Vulkan)
 {

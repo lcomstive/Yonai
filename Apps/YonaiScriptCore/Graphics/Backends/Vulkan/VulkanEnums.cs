@@ -913,4 +913,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 		RenderPassContinue = 0x00000002,
 		SimultaneousUse = 0x00000004
 	}
+
+	public enum VkIndexType : int
+	{
+		UINT16 = 0,
+		UINT32 = 1,
+		NONE_KHR = 1000165000,
+		UINT8_EXT = 1000265000,
+		NONE_NV = NONE_KHR,
+		MAX_ENUM = 0x7FFFFFFF
+	}
 }

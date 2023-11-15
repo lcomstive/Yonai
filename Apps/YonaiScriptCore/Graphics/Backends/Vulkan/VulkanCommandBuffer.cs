@@ -25,6 +25,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void Draw(uint vertexCount, uint instanceCount = 1, uint firstVertex = 0, uint firstInstance = 0) =>
 			_Draw(Handle, vertexCount, instanceCount, firstVertex, firstInstance);
 
+		public void DrawIndexed(uint indexCount, uint instanceCount = 1, uint firstIndex = 0, int vertexOffset = 0, uint firstInstance = 0) =>
+			_DrawIndexed(Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+
 		public void BindPipeline(VulkanGraphicsPipeline pipeline, VkPipelineBindPoint bindPoint) =>
 			_BindPipeline(Handle, (int)bindPoint, pipeline.Handle);
 
@@ -50,6 +53,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_BindVertexBuffers(Handle, handles, offsets);
 		}
 
+		public void BindIndexBuffer(VulkanBuffer buffer, int offset = 0, VkIndexType indexType = VkIndexType.UINT32) =>
+			_BindIndexBuffer(Handle, buffer.BufferHandle, offset, (int)indexType);
+
 		public void CopyBuffer(VulkanBuffer src, VulkanBuffer dst, int srcOffset, int dstOffset, int size) =>
 			_CopyBuffer(Handle, src.BufferHandle, dst.BufferHandle, srcOffset, dstOffset, size);
 
@@ -66,6 +72,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _BindPipeline(IntPtr handle, int bindPoint, IntPtr pipeline);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DrawIndexed(IntPtr handle, uint indexCount, uint instanceCount, uint firstIndex, int vertexOffset, uint firstInstance);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetViewport(IntPtr handle, ref VkViewport viewport, int index);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetScissor(IntPtr handle, ref VkRect2D scissor, int index);
@@ -84,6 +91,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _BindVertexBuffers(IntPtr handle, IntPtr[] buffers, int[] offsets);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _BindIndexBuffer(IntPtr handle, IntPtr buffer, int offset, int indexType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _CopyBuffer(IntPtr handle, IntPtr src, IntPtr dst, int srcOffset, int dstOffset, int size);

@@ -23,8 +23,37 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanSemaphore[] ImageAvailableSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanSemaphore[] RenderFinishedSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanBuffer VertexBuffer { get; private set; }
+		public VulkanBuffer IndexBuffer { get; private set; }
 
 		private bool m_FramebufferResized = false;
+
+		private static readonly Vertex[] Vertices =
+		{
+				new Vertex
+				{
+					Position = new Vector3(-0.5f, -0.5f, 0),
+					TexCoords = new Vector2(1, 0)
+				},
+				new Vertex
+				{
+					Position = new Vector3(0.5f, -0.5f, 0),
+					TexCoords = new Vector2(0, 1)
+				},
+				new Vertex
+				{
+					Position = new Vector3(0.5f, 0.5f, 0),
+					TexCoords = new Vector2(0.0f, 0.0f)
+				},
+				new Vertex
+				{
+					Position = new Vector3(-0.5f, 0.5f, 0),
+					TexCoords = new Vector2(1.0f, 1.0f)
+				},
+		};
+		private static readonly uint[] Indices =
+		{
+			0, 1, 2, 2, 3, 0
+		};
 		#endregion
 
 		public void Create()
@@ -105,6 +134,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 
 			CreateVertexBuffer();
+			CreateIndexBuffer();
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -182,8 +212,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private void RecordCommandBuffer(VulkanCommandBuffer cmd, uint imageIndex)
 		{
 			VkResult result = cmd.Begin();
-			if (result != VkResult.VK_SUCCESS)
+			if(result != VkResult.VK_SUCCESS)
+			{
+				Log.Error("Failed to record command buffer");
 				return;
+			}
 
 			cmd.BeginRenderPass(RenderPass, Swapchain.Framebuffers[imageIndex], IVector2.Zero, Swapchain.Resolution, Colour.Black);
 
@@ -192,42 +225,25 @@ namespace Yonai.Graphics.Backends.Vulkan
 			cmd.SetScissor(new VkRect2D(offset: IVector2.Zero, new Extents(Swapchain.Resolution)));
 
 			cmd.BindVertexBuffer(VertexBuffer);
+			cmd.BindIndexBuffer(IndexBuffer);
 
-			cmd.Draw(vertexCount: 3, instanceCount: 1);
+			cmd.DrawIndexed((uint)Indices.Length);
 
 			cmd.EndRenderPass();
 			cmd.End();
 		}
 
-		private static readonly Vertex[] vertices = new Vertex[]
-		{
-				new Vertex
-				{
-					Position = new Vector3(0, -0.5f, 0),
-					TexCoords = new Vector2(1, 0)
-				},
-				new Vertex
-				{
-					Position = new Vector3(0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0, 1)
-				},
-				new Vertex
-				{
-					Position = new Vector3(-0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0.0f, 0.0f)
-				},
-		};
 		private void CreateVertexBuffer()
 		{
 			int vertexSize = sizeof(float) * 8;
-			int bufferSize = vertexSize * vertices.Length;
+			int bufferSize = vertexSize * Vertices.Length;
 			VulkanBuffer stagingBuffer = new VulkanBuffer(
 				SelectedDevice,
 				bufferSize,
 				VkBufferUsage.TransferSource,
 				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
 			);
-			stagingBuffer.Upload(vertices.ToByteArray());
+			stagingBuffer.Upload(Vertices.ToByteArray());
 
 			VertexBuffer = new VulkanBuffer(
 				SelectedDevice,
@@ -237,6 +253,31 @@ namespace Yonai.Graphics.Backends.Vulkan
 			);
 
 			stagingBuffer.CopyTo(CommandPool, VertexBuffer, bufferSize);
+			stagingBuffer.Dispose();
+		}
+
+		private void CreateIndexBuffer()
+		{
+			int bufferSize = sizeof(uint) * Indices.Length;
+			byte[] indicesData = new byte[bufferSize];
+			Buffer.BlockCopy(Indices, 0, indicesData, 0, bufferSize);
+
+			VulkanBuffer stagingBuffer = new VulkanBuffer(
+				SelectedDevice,
+				bufferSize,
+				VkBufferUsage.TransferSource,
+				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+			);
+			stagingBuffer.Upload(indicesData);
+
+			IndexBuffer = new VulkanBuffer(
+				SelectedDevice,
+				bufferSize,
+				VkBufferUsage.TransferDestination | VkBufferUsage.Index,
+				VkMemoryProperty.DeviceLocal
+			);
+
+			stagingBuffer.CopyTo(CommandPool, IndexBuffer, bufferSize);
 			stagingBuffer.Dispose();
 		}
 
@@ -254,6 +295,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			InFlightFences = new VulkanFence[0];
 			ImageAvailableSemaphores = new VulkanSemaphore[0];
 			RenderFinishedSemaphores = new VulkanSemaphore[0];
+
+			IndexBuffer.Dispose();
+			VertexBuffer.Dispose();
 
 			CommandPool.Dispose();
 			Pipeline.Dispose();

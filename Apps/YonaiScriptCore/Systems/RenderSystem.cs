@@ -32,7 +32,8 @@ namespace Yonai.Systems
 			}
 			*/
 
-			m_Backend.Draw();
+			try { m_Backend.Draw(); }
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		private void Draw(Camera camera)
