@@ -1277,6 +1277,7 @@ namespace YonaiEditor
 		/// <returns>True if <paramref name="key"/> was released this frame</returns>
 		public static bool IsKeyReleased(Key key) => _IsKeyReleased((int)key);
 
+		/*
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _IsKeyDown(int key);
 
@@ -1285,6 +1286,10 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _IsKeyReleased(int key);
+		*/
+		private static bool _IsKeyDown(int _) => false;
+		private static bool _IsKeyPressed(int _) => false;
+		private static bool _IsKeyReleased(int _) => false;
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PushID(string id);
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern void PopID();

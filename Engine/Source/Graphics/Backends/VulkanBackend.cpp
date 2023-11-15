@@ -56,7 +56,11 @@ const vector<const char*> ValidationLayers =
 
 const vector<const char*> DeviceExtensions =
 {
-	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+
+#if defined(YONAI_PLATFORM_APPLE)
+	"VK_KHR_portability_subset"
+#endif
 };
 
 struct QueueFamilyIndices
@@ -836,7 +840,7 @@ QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surfa
 #pragma region Graphics Pipeline
 void VulkanBackend::CreateGraphicsPipeline()
 {
-	Class* graphicsClass = new Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai.Graphics", "Graphics"), nullptr);
+	Yonai::Scripting::Class* graphicsClass = new Yonai::Scripting::Class(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai.Graphics", "Graphics"), nullptr);
 	graphicsClass->Invoke("_CreateVertexShader");
 	graphicsClass->Invoke("_CreateFragmentShader");
 
@@ -1139,6 +1143,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 
 	switch (messageSeverity)
 	{
+	default:
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:	spdlog::trace("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:		spdlog::info("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:	spdlog::warn("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
@@ -1204,6 +1209,7 @@ ADD_MANAGED_METHOD(VulkanInstance, Create, void*, (
 #if defined(YONAI_PLATFORM_APPLE)
 	// MoltenVK 1.3+ requires VK_KHR_PORTABILITY_subset extension
 	createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+	requiredExtensions.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
 #endif
 
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
