@@ -3,16 +3,23 @@ using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanCommandBuffer
+	public class VulkanCommandBuffer : IDisposable
 	{
 		internal IntPtr Handle;
+		private VulkanCommandPool m_Pool;
 
-		internal VulkanCommandBuffer(IntPtr handle) => Handle = handle;
+		internal VulkanCommandBuffer(IntPtr handle, VulkanCommandPool pool)
+		{
+			m_Pool = pool;
+			Handle = handle;
+		}
+
+		public void Dispose() => _Destroy(m_Pool.Device.Device, m_Pool.Handle, Handle);
 
 		public VkResult Reset(VkCommandBufferResetFlag flag = VkCommandBufferResetFlag.None) =>
 			(VkResult)_Reset(Handle, (int)flag);
 
-		public VkResult Begin() => (VkResult)_Begin(Handle);
+		public VkResult Begin(VkCommandBufferUsage usage = 0) => (VkResult)_Begin(Handle, (int)usage);
 		public VkResult End() => (VkResult)_End(Handle);
 
 		public void Draw(uint vertexCount, uint instanceCount = 1, uint firstVertex = 0, uint firstInstance = 0) =>
@@ -43,11 +50,17 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_BindVertexBuffers(Handle, handles, offsets);
 		}
 
+		public void CopyBuffer(VulkanBuffer src, VulkanBuffer dst, int srcOffset, int dstOffset, int size) =>
+			_CopyBuffer(Handle, src.BufferHandle, dst.BufferHandle, srcOffset, dstOffset, size);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _Begin(IntPtr handle);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int _Destroy(IntPtr device, IntPtr pool, IntPtr cmdBuffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _Begin(IntPtr handle, int usage);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _End(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _BindPipeline(IntPtr handle, int bindPoint, IntPtr pipeline);
@@ -71,6 +84,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _BindVertexBuffers(IntPtr handle, IntPtr[] buffers, int[] offsets);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _CopyBuffer(IntPtr handle, IntPtr src, IntPtr dst, int srcOffset, int dstOffset, int size);
 		#endregion
 	}
 }

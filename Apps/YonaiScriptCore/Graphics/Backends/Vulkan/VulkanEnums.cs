@@ -859,14 +859,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public enum VkBufferUsage : int
 	{
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT = 0x00000001,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT = 0x00000002,
-		VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT = 0x00000004,
-		VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT = 0x00000008,
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT = 0x00000010,
-		VK_BUFFER_USAGE_STORAGE_BUFFER_BIT = 0x00000020,
-		VK_BUFFER_USAGE_INDEX_BUFFER_BIT = 0x00000040,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT = 0x00000080,
+		TransferSource = 0x00000001,
+		TransferDestination = 0x00000002,
+		UniformTexel = 0x00000004,
+		StorageTexel = 0x00000008,
+		Uniform = 0x00000010,
+		Storage = 0x00000020,
+		Index = 0x00000040,
+		Vertex = 0x00000080,
 		VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT = 0x00000100,
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT = 0x00020000,
 		VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR = 0x00002000,
@@ -891,5 +891,26 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		Exclusive = 0,
 		Concurrent = 1
+	}
+
+	[Flags]
+	public enum VkMemoryProperty : int
+	{
+		DeviceLocal = 0x00000001,
+		HostVisible = 0x00000002,
+		HostCoherent = 0x00000004,
+		HostCached = 0x00000008,
+		LazilyAllocated = 0x00000010,
+		Protected = 0x00000020,
+		DeviceCoherent_AMD = 0x00000040,
+		DeviceUncached_AMD = 0x00000080,
+		RDMACapable_NV = 0x00000100
+	}
+
+	public enum VkCommandBufferUsage : int
+	{
+		OneTimeSubmit = 0x00000001,
+		RenderPassContinue = 0x00000002,
+		SimultaneousUse = 0x00000004
 	}
 }

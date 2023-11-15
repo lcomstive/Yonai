@@ -104,32 +104,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				RenderFinishedSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 			}
 
-			Vertex[] vertices = new Vertex[]
-			{
-				new Vertex
-				{
-					Position = new Vector3(0, -0.5f, 0),
-					TexCoords = new Vector2(1, 0)
-				},
-				new Vertex
-				{
-					Position = new Vector3(0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0, 1)
-				},
-				new Vertex
-				{
-					Position = new Vector3(-0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0.0f, 0.0f)
-				},
-			};
-
-			int vertexSize = sizeof(float) * 8;
-			VertexBuffer = new VulkanBuffer(
-				SelectedDevice,
-				vertexSize * vertices.Length,
-				VkBufferUsage.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-			);
-			VertexBuffer.Upload(vertices.ToByteArray());
+			CreateVertexBuffer();
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -222,6 +197,47 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			cmd.EndRenderPass();
 			cmd.End();
+		}
+
+		private static readonly Vertex[] vertices = new Vertex[]
+		{
+				new Vertex
+				{
+					Position = new Vector3(0, -0.5f, 0),
+					TexCoords = new Vector2(1, 0)
+				},
+				new Vertex
+				{
+					Position = new Vector3(0.5f, 0.5f, 0),
+					TexCoords = new Vector2(0, 1)
+				},
+				new Vertex
+				{
+					Position = new Vector3(-0.5f, 0.5f, 0),
+					TexCoords = new Vector2(0.0f, 0.0f)
+				},
+		};
+		private void CreateVertexBuffer()
+		{
+			int vertexSize = sizeof(float) * 8;
+			int bufferSize = vertexSize * vertices.Length;
+			VulkanBuffer stagingBuffer = new VulkanBuffer(
+				SelectedDevice,
+				bufferSize,
+				VkBufferUsage.TransferSource,
+				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+			);
+			stagingBuffer.Upload(vertices.ToByteArray());
+
+			VertexBuffer = new VulkanBuffer(
+				SelectedDevice,
+				bufferSize,
+				VkBufferUsage.TransferDestination | VkBufferUsage.Vertex,
+				VkMemoryProperty.DeviceLocal
+			);
+
+			stagingBuffer.CopyTo(CommandPool, VertexBuffer, bufferSize);
+			stagingBuffer.Dispose();
 		}
 
 		public void Destroy()

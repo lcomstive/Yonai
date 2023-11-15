@@ -19,7 +19,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level)
 		{
 			_CreateCommandBuffers(Device.Device, Handle, 1u, (int)level, out IntPtr[] handles);
-			return new VulkanCommandBuffer(handles[0]);
+			return new VulkanCommandBuffer(handles[0], this);
 		}
 
 		public VulkanCommandBuffer[] CreateCommandBuffers(int count, VkCommandBufferLevel level)
@@ -32,7 +32,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 			VulkanCommandBuffer[] buffers = new VulkanCommandBuffer[count];
 			for(int i = 0; i < count; i++)
-				buffers[i] = new VulkanCommandBuffer(handles[i]);
+				buffers[i] = new VulkanCommandBuffer(handles[i], this);
 			return buffers;
 		}
 

@@ -12,7 +12,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		internal IntPtr MemoryHandle;
 		private VulkanDevice m_Device;
 
-		public VulkanBuffer(VulkanDevice device, int bufferSize, VkBufferUsage usage, VkSharingMode sharingMode = VkSharingMode.Exclusive)
+		public VulkanBuffer(
+			VulkanDevice device,
+			int bufferSize,
+			VkBufferUsage usage,
+			VkMemoryProperty properties,
+			VkSharingMode sharingMode = VkSharingMode.Exclusive)
 		{
 			m_Device = device;
 			BufferSize = bufferSize;
@@ -22,6 +27,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				m_Device.PhysicalDevice,
 				bufferSize,
 				(int)usage,
+				(int)properties,
 				(int)sharingMode,
 				out BufferHandle,
 				out MemoryHandle
@@ -42,8 +48,24 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IntPtr MapMemory(int size, int offset = 0) => _MapMemory(m_Device.Device, MemoryHandle, offset, size);
 		public void UnmapMemory() => _UnmapMemory(m_Device.Device, MemoryHandle);
 
+		/// <param name="size">Size, in bytes, of data to copy</param>
+		public void CopyTo(VulkanCommandPool commandPool, VulkanBuffer other, int size)
+		{
+			VulkanCommandBuffer cmd = commandPool.CreateCommandBuffer(VkCommandBufferLevel.Primary);
+			cmd.Begin(VkCommandBufferUsage.OneTimeSubmit);
+
+			cmd.CopyBuffer(this, other, 0, 0, size);
+
+			cmd.End();
+
+			m_Device.GraphicsQueue.Submit(null, null, new VulkanCommandBuffer[] { cmd }, null, null);
+			m_Device.GraphicsQueue.WaitIdle();
+
+			cmd.Dispose();
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int _Create(IntPtr device, IntPtr physicalDevice, int bufferSize, int usage, int sharingMode, out IntPtr bufferHandle, out IntPtr memoryHandle);
+		private static extern int _Create(IntPtr device, IntPtr physicalDevice, int bufferSize, int usage, int properties, int sharingMode, out IntPtr bufferHandle, out IntPtr memoryHandle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Destroy(IntPtr device, IntPtr bufferHandle, IntPtr memoryHandle);
