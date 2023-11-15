@@ -32,6 +32,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void EndRenderPass() => _EndRenderPass(Handle);
 
+		public void BindVertexBuffer(VulkanBuffer buffer, int offset = 0) =>
+			_BindVertexBuffers(Handle, new IntPtr[] { buffer.BufferHandle }, new int[] { offset });
+
+		public void BindVertexBuffers(VulkanBuffer[] buffers, int[] offsets)
+		{
+			IntPtr[] handles = new IntPtr[buffers.Length];
+			for(int i = 0;i < handles.Length;i++)
+				handles[i] = buffers[i].BufferHandle;
+			_BindVertexBuffers(Handle, handles, offsets);
+		}
+
+		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
 
@@ -56,5 +68,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _EndRenderPass(IntPtr handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _BindVertexBuffers(IntPtr handle, IntPtr[] buffers, int[] offsets);
+		#endregion
 	}
 }

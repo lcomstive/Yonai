@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using static Yonai.Graphics.Mesh;
 
 namespace Yonai.Graphics
 {
@@ -18,6 +19,23 @@ namespace Yonai.Graphics
 			public Vector3 Position;
 			public Vector3 Normal;
 			public Vector2 TexCoords;
+
+			public float[] ToArray()
+			{
+				float[] output = new float[3 + 3 + 2];
+				output[0] = Position.x;
+				output[1] = Position.y;
+				output[2] = Position.z;
+
+				output[3] = Normal.x;
+				output[4] = Normal.y;
+				output[5] = Normal.z;
+
+				output[6] = TexCoords.x;
+				output[7] = TexCoords.y;
+
+				return output;
+			}
 		}
 
 		private MeshImportSettings m_Settings;
@@ -164,6 +182,18 @@ namespace Yonai.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetIndices(IntPtr handle, uint[] indices);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetIndices(IntPtr handle, out uint[] indices);
 		#endregion
+	}
+
+	public static class VertexExtension
+	{
+		public static byte[] ToByteArray(this Vertex[] vertices)
+		{
+			int vertexSize = (3 + 3 + 2) * sizeof(float);
+			byte[] output = new byte[vertexSize * vertices.Length];
+			for(int i = 0;i < vertices.Length;i++)
+				Buffer.BlockCopy(vertices[i].ToArray(), 0, output, i * vertexSize, vertexSize);
+			return output;
+		}
 	}
 }
 

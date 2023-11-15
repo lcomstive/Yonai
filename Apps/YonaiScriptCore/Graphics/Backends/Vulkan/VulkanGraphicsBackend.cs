@@ -1,5 +1,7 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static Yonai.Graphics.Mesh;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -20,6 +22,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanFence[] InFlightFences { get; private set; } = new VulkanFence[0];
 		public VulkanSemaphore[] ImageAvailableSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanSemaphore[] RenderFinishedSemaphores { get; private set; } = new VulkanSemaphore[0];
+		public VulkanBuffer VertexBuffer { get; private set; }
 
 		private bool m_FramebufferResized = false;
 		#endregion
@@ -100,6 +103,33 @@ namespace Yonai.Graphics.Backends.Vulkan
 				ImageAvailableSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 				RenderFinishedSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 			}
+
+			Vertex[] vertices = new Vertex[]
+			{
+				new Vertex
+				{
+					Position = new Vector3(0, -0.5f, 0),
+					TexCoords = new Vector2(1, 0)
+				},
+				new Vertex
+				{
+					Position = new Vector3(0.5f, 0.5f, 0),
+					TexCoords = new Vector2(0, 1)
+				},
+				new Vertex
+				{
+					Position = new Vector3(-0.5f, 0.5f, 0),
+					TexCoords = new Vector2(0.0f, 0.0f)
+				},
+			};
+
+			int vertexSize = sizeof(float) * 8;
+			VertexBuffer = new VulkanBuffer(
+				SelectedDevice,
+				vertexSize * vertices.Length,
+				VkBufferUsage.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+			);
+			VertexBuffer.Upload(vertices.ToByteArray());
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -186,6 +216,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			cmd.SetViewport(new VkViewport(offset: Vector2.Zero, size: Swapchain.Resolution, depthRange: new Vector2(0, 1)));
 			cmd.SetScissor(new VkRect2D(offset: IVector2.Zero, new Extents(Swapchain.Resolution)));
 
+			cmd.BindVertexBuffer(VertexBuffer);
+
 			cmd.Draw(vertexCount: 3, instanceCount: 1);
 
 			cmd.EndRenderPass();
@@ -241,10 +273,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 				}
 			};
 
-			uint v2Size = (uint)Marshal.SizeOf(typeof(Vector2));
-			uint v3Size = (uint)Marshal.SizeOf(typeof(Vector3));
-			VkPipelineVertexInputState vertexInput = new VkPipelineVertexInputState();
-			/*
+			uint v2Size = sizeof(float) * 2;
+			uint v3Size = sizeof(float) * 3;
+			VkPipelineVertexInputState vertexInput = new VkPipelineVertexInputState
 			{
 				Bindings = new VkVertexInputBindingDescription[]
 				{
@@ -280,7 +311,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 					}
 				}
 			};
-			*/
 
 			VkPipelineInputAssemblyState inputAssembly = new VkPipelineInputAssemblyState()
 			{
@@ -346,6 +376,5 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string[] _GetAvailableExtensions();
-
 	}
 }

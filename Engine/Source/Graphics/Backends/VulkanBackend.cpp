@@ -1865,6 +1865,22 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRenderPass, void, (
 ADD_MANAGED_METHOD(VulkanCommandBuffer, EndRenderPass, void, (void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkCmdEndRenderPass((VkCommandBuffer)handle); }
 
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BindVertexBuffers, void, (void* handle, MonoArray* inBuffers, MonoArray* inOffsets), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkBuffer> buffers;
+	vector<VkDeviceSize> offsets;
+
+	buffers.resize(mono_array_length(inBuffers));
+	for(unsigned int i = 0; i < buffers.size(); i++)
+		buffers[i] = mono_array_get(inBuffers, VkBuffer, i);
+
+	offsets.resize(mono_array_length(inOffsets));
+	for(unsigned int i = 0; i < offsets.size(); i++)
+		offsets[i] = (VkDeviceSize)mono_array_get(inOffsets, int, i);
+
+	vkCmdBindVertexBuffers((VkCommandBuffer)handle, 0, buffers.size(), buffers.data(), offsets.data());
+}
+
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
 {
 	VkFenceCreateInfo fenceInfo = {};
@@ -1998,3 +2014,84 @@ ADD_MANAGED_METHOD(VulkanQueue, Present, int, (void* queue, MonoArray* monoSemap
 
 	return vkQueuePresentKHR((VkQueue)queue, &info);
 }
+
+unsigned int FindMemoryType(VkPhysicalDevice device, unsigned int typeFilter, VkMemoryPropertyFlags propertyFlags)
+{
+	VkPhysicalDeviceMemoryProperties properties;
+	vkGetPhysicalDeviceMemoryProperties((VkPhysicalDevice)device, &properties);
+	
+	for(unsigned int i = 0; i < properties.memoryTypeCount; i++)
+		if(typeFilter & (1 << i) &&
+			(properties.memoryTypes[i].propertyFlags & propertyFlags) == propertyFlags)
+			return i;
+
+	return UINT_MAX;
+}
+
+ADD_MANAGED_METHOD(VulkanBuffer, Create, int, (void* device, void* physicalDevice, int bufferSize, int usage, int sharingMode, void** outputBuffer, void** outputMemory), Yonai.Graphics.Backends.Vulkan)
+{
+	VkBuffer buffer;
+	VkDeviceMemory memory;
+
+	VkBufferCreateInfo bufferInfo = {};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = bufferSize;
+	bufferInfo.usage = usage;
+	bufferInfo.sharingMode = (VkSharingMode)sharingMode;
+	
+	VkResult result = vkCreateBuffer((VkDevice)device, &bufferInfo, nullptr, &buffer);
+	
+	if(result != VK_SUCCESS)
+		return result;
+
+	VkMemoryRequirements memRequirements;
+	vkGetBufferMemoryRequirements((VkDevice)device, buffer, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size;
+	allocInfo.memoryTypeIndex = FindMemoryType((VkPhysicalDevice)physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	result = vkAllocateMemory((VkDevice)device, &allocInfo, nullptr, &memory);
+	if(result != VK_SUCCESS)
+		return result;
+
+	vkBindBufferMemory((VkDevice)device, buffer, memory, 0);
+
+	*outputBuffer = buffer;
+	*outputMemory = memory;
+
+	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanBuffer, Destroy, void, (void* device, void* buffer, void* memory), Yonai.Graphics.Backends.Vulkan)
+{
+	vkDestroyBuffer((VkDevice)device, (VkBuffer)buffer, nullptr);
+	vkFreeMemory((VkDevice)device, (VkDeviceMemory)memory, nullptr);
+}
+
+ADD_MANAGED_METHOD(VulkanBuffer, Upload, void, (void* inDevice, void* inBufferMemory, MonoArray* monoData), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDevice device = (VkDevice)inDevice;
+	VkDeviceMemory bufferMemory = (VkDeviceMemory)inBufferMemory;
+
+	vector<unsigned char> data;
+	data.resize(mono_array_length(monoData));
+	for(unsigned int i = 0; i < data.size(); i++)
+		data[i] = mono_array_get(monoData, unsigned char, i);
+
+	void* mapping;
+	vkMapMemory(device, bufferMemory, 0, data.size(), 0, &mapping);
+	memcpy(mapping, data.data(), data.size());
+	vkUnmapMemory(device, bufferMemory);
+}
+
+ADD_MANAGED_METHOD(VulkanBuffer, MapMemory, void*, (void* device, void* bufferMemory, int offset, int size), Yonai.Graphics.Backends.Vulkan)
+{
+	void* data;
+	vkMapMemory((VkDevice)device, (VkDeviceMemory)bufferMemory, offset, size, 0, &data);
+	return data;
+}
+
+ADD_MANAGED_METHOD(VulkanBuffer, UnmapMemory, void, (void* device, void* bufferMemory), Yonai.Graphics.Backends.Vulkan)
+{ vkUnmapMemory((VkDevice)device, (VkDeviceMemory)bufferMemory); }
