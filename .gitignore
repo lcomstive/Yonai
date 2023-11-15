@@ -41,3 +41,6 @@ vcpkg_installed
 # Don't upload the generated glue files
 Engine/Include/Yonai/Glue.hpp
 Apps/Editor/Include/YonaiEditor/Glue.hpp
+
+# Don't upload Yonai runtime data
+.data/
