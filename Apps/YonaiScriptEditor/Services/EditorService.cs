@@ -154,6 +154,8 @@ namespace YonaiEditor
 				EditorWindow.Destroy();
 				Application.Exit();
 			}
+
+			Window.Title = $"Yonai Editor [{Time.FPS} FPS, {Time.DeltaTime}ms]";
 		}
 
 		private void UpdateState(EditorState state)

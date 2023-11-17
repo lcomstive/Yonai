@@ -6,6 +6,8 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    env:
+      VULKAN_VERSION: 1.3.268.1
     strategy:
       fail-fast: false
       matrix:
@@ -31,7 +33,7 @@ jobs:
 
     # Get source
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
@@ -46,12 +48,26 @@ jobs:
       run: choco install mono
 
     # Vulkan SDK
-    - name: Prepare Vulkan SDK
+    - if: matrix.config.os != 'macOS-latest'
+      name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
-        vulkan-query-version: 1.3.204.0
+        vulkan-query-version: $VULKAN_VERSION
         vulkan-components: Vulkan-Headers, Vulkan-Loader
         vulkan-use-cache: true
+
+    - if: matrix.config.os == 'macOS-latest'
+      name: Prepare Vulkan SDK (macOS)
+      shell: bash
+      run: |
+        wget -o VulkanSDK.dmg https://sdk.lunarg.com/sdk/download/$VULKAN_VERSION/mac/vulkansdk-macos-$VULKAN_VERSION.dmg
+        hdiutil attach VulkanSDK.dmg
+        sudo /Volumes/vulkansdk-macos-$VULKAN_VERSION/InstallVulkan.app/Contents/MacOS/InstallVulkan --root $GITHUB_WORKSPACE/vulkansdk-macos-$VULKAN_VERSION --accept-licenses --default-answer --confirm-command install
+        hdiutil detach /Volumes/vulkansdk-macos-$VULKAN_VERSION
+        echo "VULKAN_SDK_PATH=$GITHUB_WORKSPACE/vulkansdk-macos-$VULKAN_VERSION" >> $GITHUB_ENV
+        echo "VULKAN_SDK=$VULKAN_SDK_PATH/macOS" >> $GITHUB_ENV
+        echo "DYLD_LIBRARY_PATH=$VULKAN_SDK/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "PATH=$VULKAN_SDK/bin:$PATH" >> $GITHUB_ENV
 
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
