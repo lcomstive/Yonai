@@ -9,8 +9,15 @@ layout(location = 2) in vec2 inTexCoords;
 
 layout(location = 0) out vec3 fragColour;
 
+layout(binding = 0) uniform MVP
+{
+    mat4 Model;
+    mat4 View;
+    mat4 Proj;
+} mvp;
+
 void main()
 {
-	gl_Position = vec4(inPosition, 1.0);
+	gl_Position = mvp.Proj * mvp.View * mvp.Model * vec4(inPosition, 1.0);
 	fragColour = vec3(inTexCoords, 0);
 }

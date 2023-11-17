@@ -1430,6 +1430,25 @@ ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void
 ADD_MANAGED_METHOD(VulkanDevice, WaitIdle, void, (void* device), Yonai.Graphics.Backends.Vulkan)
 { vkDeviceWaitIdle((VkDevice)device); }
 
+ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* inLayoutBindings, unsigned int layoutBindingCount, void** output), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDescriptorSetLayoutBinding* layoutBindings = (VkDescriptorSetLayoutBinding*)inLayoutBindings;
+
+	VkDescriptorSetLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	info.bindingCount = layoutBindingCount;
+	info.pBindings = layoutBindings;
+
+	VkDescriptorSetLayout layout;
+	VkResult result = vkCreateDescriptorSetLayout((VkDevice)device, &info, nullptr, &layout);
+	if(result == VK_SUCCESS)
+		*output = layout;
+	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyDescriptorSetLayout((VkDevice)device, (VkDescriptorSetLayout)handle, nullptr); }
+
 ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
 	void* inPhysicalDevice,
 	void* inDevice,
@@ -1688,6 +1707,9 @@ struct VkGraphicsPipelineCreateInfoManaged
 
 	VkRenderPass RenderPass;
 	unsigned int Subpass;
+
+	unsigned int DescriptorSetLayoutCount;
+	VkDescriptorSetLayout* DescriptorSetLayouts;
 };
 
 ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void* inPipelineInfo), Yonai.Graphics.Backends.Vulkan)
@@ -1732,6 +1754,8 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void*
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = managed->DescriptorSetLayoutCount;
+	pipelineLayoutInfo.pSetLayouts = managed->DescriptorSetLayouts;
 
 	VkPipelineLayout pipelineLayout;
 	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);

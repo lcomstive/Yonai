@@ -60,5 +60,18 @@ namespace Yonai
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector2 input);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Distance(ref Vector2 a, ref Vector2 b);
 		#endregion
+
+		public float this[int i]
+		{
+			get
+			{
+				switch(i)
+				{
+					default:
+					case 0: return x;
+					case 1: return y;
+				}
+			}
+		}
 	}
 }

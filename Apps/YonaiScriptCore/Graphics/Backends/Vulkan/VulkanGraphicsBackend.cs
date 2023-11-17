@@ -1,6 +1,7 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+
 using static Yonai.Graphics.Mesh;
 
 namespace Yonai.Graphics.Backends.Vulkan
@@ -24,6 +25,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanSemaphore[] RenderFinishedSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanBuffer VertexBuffer { get; private set; }
 		public VulkanBuffer IndexBuffer { get; private set; }
+
+		// Uniform Buffers
+		public IntPtr[] UniformBufferMemory { get; private set; } = new IntPtr[0];
+		public VulkanBuffer[] UniformBuffers { get; private set; } = new VulkanBuffer[0];
+		public VulkanDescriptorSetLayout DescriptorSet { get; private set; } = null;
+
+		private struct ShaderMVP
+		{
+			public Matrix4 Model;
+			public Matrix4 View;
+			public Matrix4 Projection;
+		}
 
 		private bool m_FramebufferResized = false;
 
@@ -114,9 +127,21 @@ namespace Yonai.Graphics.Backends.Vulkan
 					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
 				}
 			};
+			DescriptorSet = new VulkanDescriptorSetLayout(SelectedDevice, new VkDescriptorSetLayoutBinding[]
+			{
+				new VkDescriptorSetLayoutBinding
+				{
+					Binding = 0,
+					DescriptorType = VkDescriptorType.UNIFORM_BUFFER,
+					DescriptorCount = 1,
+					StageFlags = VkShaderStage.Vertex
+				}
+			});
 			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
 
 			Swapchain.GenerateFramebuffers(RenderPass);
+
+			CreateUniformBuffers();
 
 			var pipelineInfo = CreatePipelineInfo();
 			Pipeline = new VulkanGraphicsPipeline(pipelineInfo);
@@ -166,6 +191,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			InFlightFences[CurrentFrame].Reset();
 			CommandBuffers[CurrentFrame].Reset();
 			RecordCommandBuffer(CommandBuffers[CurrentFrame], imageIndex);
+
+			UpdateUniformBuffer(imageIndex);
 
 			VulkanSemaphore[] waitSemaphores = new VulkanSemaphore[] { ImageAvailableSemaphores[CurrentFrame] };
 			VulkanSemaphore[] signalSemaphores = new VulkanSemaphore[] { RenderFinishedSemaphores[CurrentFrame] };
@@ -281,11 +308,35 @@ namespace Yonai.Graphics.Backends.Vulkan
 			stagingBuffer.Dispose();
 		}
 
+		private void CreateUniformBuffers()
+		{
+			int bufferSize = Marshal.SizeOf(typeof(ShaderMVP));
+
+			UniformBuffers = new VulkanBuffer[MaxFramesInFlight];
+			UniformBufferMemory = new IntPtr[MaxFramesInFlight];
+			for(int i = 0; i < MaxFramesInFlight;i++)
+			{
+				UniformBuffers[i] = new VulkanBuffer(
+					SelectedDevice,
+					bufferSize,
+					VkBufferUsage.Uniform,
+					VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+				);
+				UniformBufferMemory[i] = UniformBuffers[i].MapMemory(bufferSize);
+			}
+		}
+
 		public void Destroy()
 		{
 			Log.Trace("Destroying vulkan graphics backend");
 
 			#region Temp
+			for(int i = 0; i < MaxFramesInFlight; i++)
+			{
+				UniformBuffers[i].UnmapMemory();
+				UniformBuffers[i].Dispose();
+			}
+
 			for (int i = 0; i < MaxFramesInFlight; i++)
 			{
 				InFlightFences[i].Dispose();
@@ -295,6 +346,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			InFlightFences = new VulkanFence[0];
 			ImageAvailableSemaphores = new VulkanSemaphore[0];
 			RenderFinishedSemaphores = new VulkanSemaphore[0];
+
+			DescriptorSet.Dispose();
 
 			IndexBuffer.Dispose();
 			VertexBuffer.Dispose();
@@ -307,6 +360,22 @@ namespace Yonai.Graphics.Backends.Vulkan
 			#endregion
 
 			Instance?.Dispose();
+		}
+
+		private void UpdateUniformBuffer(uint imageIndex)
+		{
+			ShaderMVP mvp;
+			mvp.Model = Matrix4.Identity;
+			mvp.View = Matrix4.LookAt(new Vector3(0, 0, -1), Vector3.Zero, Vector3.Up);
+			mvp.Projection = Matrix4.Perspective(45.0f, Swapchain.Resolution.x / (float)Swapchain.Resolution.y);
+
+			int matrixSize = sizeof(float) * 16;
+			byte[] data = new byte[matrixSize * 3];
+			Buffer.BlockCopy(mvp.Model.Components, 0, data, 0, matrixSize);
+			Buffer.BlockCopy(mvp.View.Components, 0, data, matrixSize, matrixSize);
+			Buffer.BlockCopy(mvp.Projection.Components, 0, data, matrixSize * 2, matrixSize);
+
+			Marshal.Copy(data, 0, UniformBufferMemory[imageIndex], data.Length);
 		}
 
 		private VkGraphicsPipelineCreateInfo CreatePipelineInfo()
@@ -421,6 +490,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			return new VkGraphicsPipelineCreateInfo
 			{
 				Stages = shaderStages,
+				DescriptorSetLayouts = new VulkanDescriptorSetLayout[] { DescriptorSet },
 				InputState = vertexInput,
 				InputAssembly = inputAssembly,
 				Viewports = new VkViewport[] { viewport },

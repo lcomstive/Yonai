@@ -77,7 +77,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void WaitIdle() => _WaitIdle(Device);
 
 		public VulkanSwapchain CreateSwapchain() => new VulkanSwapchain(this, m_Instance);
-		
+
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _CreateDevice(IntPtr physicalDevice, uint graphicsFamilyIndice, uint presentFamilyIndice);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyDevice(IntPtr logicalDevice);
 

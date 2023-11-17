@@ -64,5 +64,20 @@ namespace Yonai
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector4 input);
 		#endregion
+
+		public float this[int i]
+		{
+			get
+			{
+				switch(i)
+				{
+					default:
+					case 0: return x;
+					case 1: return y;
+					case 2: return z;
+					case 3: return w;
+				}
+			}
+		}
 	}
 }

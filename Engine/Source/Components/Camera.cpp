@@ -60,6 +60,12 @@ ADD_MANAGED_GET_SET(Camera, FieldOfView, float)
 ADD_MANAGED_GET_SET(Camera, Orthographic, bool)
 ADD_MANAGED_GET_SET(Camera, OrthographicSize, float)
 
+ADD_MANAGED_METHOD(Camera, ViewMatrix, void, (void* handle, glm::mat4* output))
+{ *output = ((Camera*)handle)->GetViewMatrix(); }
+
+ADD_MANAGED_METHOD(Camera, ProjectionMatrix, void, (void* handle, int width, int height, glm::mat4* output))
+{ *output = ((Camera*)handle)->GetProjectionMatrix(width, height); }
+
 ADD_MANAGED_METHOD(Camera, SetRenderTarget, void, (void* handle, void* renderTarget))
 {
 	((Camera*)handle)->RenderTarget = (RenderTexture*)renderTarget;

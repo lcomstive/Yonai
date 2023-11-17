@@ -441,6 +441,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public uint Subpass;
 		public VulkanRenderPass RenderPass;
+
+		public VulkanDescriptorSetLayout[] DescriptorSetLayouts;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -463,6 +465,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IntPtr DynamicStates;
 		public IntPtr RenderPass;
 		public uint Subpass;
+
+		public uint DescriptorSetLayoutCount;
+		public IntPtr DescriptorSetLayouts;
 
 		public VkGraphicsPipelineCreateInfoNative(VulkanRenderPass renderPass, uint subpass, VkGraphicsPipelineCreateInfo info)
 		{
@@ -490,6 +495,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 				DepthStencilState = InteropUtils.CreateNativeHandle(info.DepthStencilState.Value);
 			else
 				DepthStencilState = IntPtr.Zero;
+
+			DescriptorSetLayoutCount = (uint)info.DescriptorSetLayouts.Length;
+			IntPtr[] descriptorHandles = new IntPtr[DescriptorSetLayoutCount];
+			for(int i = 0;i < DescriptorSetLayoutCount;i++)
+				descriptorHandles[i] = info.DescriptorSetLayouts[i].Handle;
+			DescriptorSetLayouts = InteropUtils.CreateNativeHandle(descriptorHandles);
 		}
 
 		public void Dispose()
@@ -499,10 +510,20 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Marshal.FreeHGlobal(Viewports);
 			Marshal.FreeHGlobal(DynamicStates);
 			Marshal.FreeHGlobal(DepthStencilState);
+			Marshal.FreeHGlobal(DescriptorSetLayouts);
 
 			InputState.Dispose();
 			ColorBlendState.Dispose();
 		}
+	}
+
+	public struct VkDescriptorSetLayoutBinding
+	{
+		public uint Binding;
+		public VkDescriptorType DescriptorType;
+		public uint DescriptorCount;
+		public VkShaderStage StageFlags;
+		private IntPtr _pImmutableSamplers;
 	}
 	#endregion
 }

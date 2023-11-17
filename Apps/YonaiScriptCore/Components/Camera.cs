@@ -1,5 +1,5 @@
-﻿using Yonai.Graphics;
-using System;
+﻿using System;
+using Yonai.Graphics;
 using System.Runtime.CompilerServices;
 
 namespace Yonai
@@ -80,6 +80,15 @@ namespace Yonai
 			set => _SetRenderTarget(Handle, (m_RenderTarget = value)?.Handle ?? IntPtr.Zero);
 		}
 
+		public Matrix4 ViewMatrix
+		{
+			get
+			{
+				_ViewMatrix(Handle, out Matrix4 output);
+				return output;
+			}
+		}
+
 		public Camera()
 		{
 			World.StateChanged += OnWorldStateChanged;
@@ -105,6 +114,13 @@ namespace Yonai
 				Main = null;
 		}
 
+		public Matrix4 GetProjectionMatrix(IVector2 resolution) => GetProjectionMatrix(resolution.x, resolution.y);
+		public Matrix4 GetProjectionMatrix(int width, int height)
+		{
+			_ProjectionMatrix(Handle, width, height, out Matrix4 output);
+			return output;
+		}
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
@@ -123,6 +139,12 @@ namespace Yonai
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _ViewMatrix(IntPtr handle, out Matrix4 output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _ProjectionMatrix(IntPtr handle, int width, int height, out Matrix4 output);
 		#endregion
 	}
 }

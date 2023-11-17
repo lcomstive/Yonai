@@ -90,6 +90,7 @@
     <Compile Include="Graphics\Backends\Vulkan\VulkanBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandPool.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanDescriptorSetLayout.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanDevice.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanEnums.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanFramebuffer.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="Systems\RenderSystem.cs" />
     <Compile Include="Systems\SceneManager.cs" />
     <Compile Include="Systems\System.cs" />
+    <Compile Include="Math\Matrix4.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
