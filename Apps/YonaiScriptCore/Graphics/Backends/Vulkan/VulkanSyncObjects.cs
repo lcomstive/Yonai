@@ -19,7 +19,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public static VkResult Wait(VulkanFence[] fences, bool waitAll = true, uint timeout = uint.MaxValue)
 		{
-			if (fences.Length == 0) return VkResult.VK_INCOMPLETE;
+			if (fences.Length == 0) return VkResult.Incomplete;
 
 			IntPtr[] handles = new IntPtr[fences.Length];
 			for(int i = 0; i < handles.Length; i++)
@@ -30,7 +30,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		
 		public static VkResult Reset(VulkanFence[] fences)
 		{
-			if (fences.Length == 0) return VkResult.VK_INCOMPLETE;
+			if (fences.Length == 0) return VkResult.Incomplete;
 
 			IntPtr[] handles = new IntPtr[fences.Length];
 			for(int i = 0; i < handles.Length; i++)

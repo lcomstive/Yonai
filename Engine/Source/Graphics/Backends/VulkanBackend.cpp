@@ -1433,6 +1433,8 @@ ADD_MANAGED_METHOD(VulkanDevice, WaitIdle, void, (void* device), Yonai.Graphics.
 ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* inLayoutBindings, unsigned int layoutBindingCount, void** output), Yonai.Graphics.Backends.Vulkan)
 {
 	VkDescriptorSetLayoutBinding* layoutBindings = (VkDescriptorSetLayoutBinding*)inLayoutBindings;
+	for (unsigned int i = 0; i < layoutBindingCount; i++)
+		layoutBindings[i].pImmutableSamplers = nullptr;
 
 	VkDescriptorSetLayoutCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -1448,6 +1450,79 @@ ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* 
 
 ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyDescriptorSetLayout((VkDevice)device, (VkDescriptorSetLayout)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, int type, unsigned int descriptorCount, unsigned int maxDescriptorSets, void** output), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDescriptorPoolSize size = {};
+	size.type = (VkDescriptorType)type;
+	size.descriptorCount = descriptorCount;
+
+	VkDescriptorPoolCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	info.poolSizeCount = 1;
+	info.pPoolSizes = &size;
+	info.maxSets = maxDescriptorSets;
+
+	VkDescriptorPool pool;
+	VkResult result = vkCreateDescriptorPool((VkDevice)device, &info, nullptr, &pool);
+	if (result == VK_SUCCESS)
+		*output = pool;
+	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanDescriptorPool, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroyDescriptorPool((VkDevice)device, (VkDescriptorPool)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanDescriptorPool, AllocateDescriptorSets, int, (
+	void* inDevice,
+	void* handle,
+	int count,
+	void* descriptorSetLayout,
+	MonoArray* uniformBuffers,
+	unsigned int bufferSize,
+	int descriptorType,
+	MonoArray** output
+), Yonai.Graphics.Backends.Vulkan)
+{
+	VkDevice device = (VkDevice)inDevice;
+
+	vector<VkDescriptorSetLayout> layouts(count, (VkDescriptorSetLayout)descriptorSetLayout);
+	VkDescriptorSetAllocateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	info.descriptorPool = (VkDescriptorPool)handle;
+	info.descriptorSetCount = count;
+	info.pSetLayouts = layouts.data();
+
+	vector<VkDescriptorSet> descriptorSets;
+	descriptorSets.resize(count);
+	VkResult result = vkAllocateDescriptorSets(device, &info, descriptorSets.data());
+	if (result != VK_SUCCESS)
+		return result;
+
+	*output = mono_array_new(mono_domain_get(), mono_get_intptr_class(), count);
+	for (int i = 0; i < count; i++)
+	{
+		VkDescriptorBufferInfo bufferInfo = {};
+		bufferInfo.buffer = mono_array_get(uniformBuffers, VkBuffer, i);
+		bufferInfo.offset = 0;
+		bufferInfo.range = bufferSize;
+		
+		VkWriteDescriptorSet descriptorWrite = {};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSets[i];
+		descriptorWrite.dstBinding = 0;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = (VkDescriptorType)descriptorType;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pBufferInfo = &bufferInfo;
+
+		vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+
+		mono_array_set(*output, void*, i, descriptorSets[i]);
+	}
+
+	return result;
+}
 
 ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
 	void* inPhysicalDevice,
@@ -1712,7 +1787,7 @@ struct VkGraphicsPipelineCreateInfoManaged
 	VkDescriptorSetLayout* DescriptorSetLayouts;
 };
 
-ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void* inPipelineInfo), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void* inPipelineInfo, void** outPipelineLayout), Yonai.Graphics.Backends.Vulkan)
 {
 	VkDevice device = (VkDevice)inDevice;
 	VkGraphicsPipelineCreateInfoManaged* managed = (VkGraphicsPipelineCreateInfoManaged*)inPipelineInfo;
@@ -1787,7 +1862,14 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void*
 		LogCriticalError("Failed to create graphics pipeline", result);
 		return nullptr;
 	}
+	*outPipelineLayout = pipelineLayout;
 	return pipeline;
+}
+
+ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Destroy, void, (void* device, void* handle, void* layout), Yonai.Graphics.Backends.Vulkan)
+{
+	vkDestroyPipelineLayout((VkDevice)device, (VkPipelineLayout)layout, nullptr);
+	vkDestroyPipeline((VkDevice)device, (VkPipeline)handle, nullptr);
 }
 
 ADD_MANAGED_METHOD(VulkanCommandPool, Create, void*, (void* device, unsigned int graphicsQueueIndex, int flag), Yonai.Graphics.Backends.Vulkan)
@@ -1911,7 +1993,7 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BindVertexBuffers, void, (void* handle, 
 	for(unsigned int i = 0; i < offsets.size(); i++)
 		offsets[i] = (VkDeviceSize)mono_array_get(inOffsets, int, i);
 
-	vkCmdBindVertexBuffers((VkCommandBuffer)handle, 0, buffers.size(), buffers.data(), offsets.data());
+	vkCmdBindVertexBuffers((VkCommandBuffer)handle, 0, (unsigned int)buffers.size(), buffers.data(), offsets.data());
 }
 
 ADD_MANAGED_METHOD(VulkanCommandBuffer, BindIndexBuffer, void, (void* handle, void* buffer, int offset, int indexType), Yonai.Graphics.Backends.Vulkan)
@@ -1924,6 +2006,27 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBuffer, void, (void* handle, void* s
 	copyRegion.dstOffset = dstOffset;
 	copyRegion.size = size;
 	vkCmdCopyBuffer((VkCommandBuffer)handle, (VkBuffer)src, (VkBuffer)dst, 1, &copyRegion);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BindDescriptorSets, void, (
+	void* handle, int bindPoint, void* pipelineLayout, unsigned int firstSet, MonoArray* descriptorSets
+), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkDescriptorSet> sets;
+	sets.resize(mono_array_length(descriptorSets));
+	for (size_t i = 0; i < sets.size(); i++)
+		sets[i] = mono_array_get(descriptorSets, VkDescriptorSet, i);
+
+	vkCmdBindDescriptorSets(
+		(VkCommandBuffer)handle,
+		(VkPipelineBindPoint)bindPoint,
+		(VkPipelineLayout)pipelineLayout,
+		firstSet,
+		(unsigned int)sets.size(),
+		sets.data(),
+		0,
+		nullptr
+	);
 }
 
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)

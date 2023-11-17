@@ -29,7 +29,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		// Uniform Buffers
 		public IntPtr[] UniformBufferMemory { get; private set; } = new IntPtr[0];
 		public VulkanBuffer[] UniformBuffers { get; private set; } = new VulkanBuffer[0];
-		public VulkanDescriptorSetLayout DescriptorSet { get; private set; } = null;
+		public VulkanDescriptorPool DescriptorPool { get; private set; } = null;
+		public VulkanDescriptorSet[] DescriptorSets { get; private set; } = new VulkanDescriptorSet[0];
+		public VulkanDescriptorSetLayout DescriptorSetLayout { get; private set; } = null;
 
 		private struct ShaderMVP
 		{
@@ -37,6 +39,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			public Matrix4 View;
 			public Matrix4 Projection;
 		}
+		private const int MVPSize = sizeof(float) * 16 * 3;
 
 		private bool m_FramebufferResized = false;
 
@@ -127,21 +130,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
 				}
 			};
-			DescriptorSet = new VulkanDescriptorSetLayout(SelectedDevice, new VkDescriptorSetLayoutBinding[]
-			{
-				new VkDescriptorSetLayoutBinding
-				{
-					Binding = 0,
-					DescriptorType = VkDescriptorType.UNIFORM_BUFFER,
-					DescriptorCount = 1,
-					StageFlags = VkShaderStage.Vertex
-				}
-			});
+			
 			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
 
 			Swapchain.GenerateFramebuffers(RenderPass);
 
 			CreateUniformBuffers();
+			CreateDescriptorSets();
 
 			var pipelineInfo = CreatePipelineInfo();
 			Pipeline = new VulkanGraphicsPipeline(pipelineInfo);
@@ -176,23 +171,23 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			(VkResult result, uint imageIndex) = Swapchain.AcquireNextImage(ImageAvailableSemaphores[CurrentFrame], null);
 
-			if (result == VkResult.VK_ERROR_OUT_OF_DATE_KHR)
+			if (result == VkResult.ErrorOutOfDate)
 			{
 				RecreateSwapchain();
 				return;
 			}
-			else if (result != VkResult.VK_SUCCESS && result != VkResult.VK_SUBOPTIMAL_KHR)
+			else if (result != VkResult.Success && result != VkResult.Suboptimal)
 			{
 				Log.Error("Failed to acquire swapchain image");
 				Application.Exit();
 				return;
 			}
 
+			UpdateUniformBuffer(CurrentFrame);
+
 			InFlightFences[CurrentFrame].Reset();
 			CommandBuffers[CurrentFrame].Reset();
 			RecordCommandBuffer(CommandBuffers[CurrentFrame], imageIndex);
-
-			UpdateUniformBuffer(imageIndex);
 
 			VulkanSemaphore[] waitSemaphores = new VulkanSemaphore[] { ImageAvailableSemaphores[CurrentFrame] };
 			VulkanSemaphore[] signalSemaphores = new VulkanSemaphore[] { RenderFinishedSemaphores[CurrentFrame] };
@@ -201,7 +196,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			result = SelectedDevice.GraphicsQueue.Submit(
 				waitSemaphores, waitStages, commandBuffers, signalSemaphores, InFlightFences[CurrentFrame]);
-			if (result != VkResult.VK_SUCCESS)
+			if (result != VkResult.Success)
 			{
 				Application.Exit();
 				return;
@@ -210,10 +205,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 			result = SelectedDevice.PresentQueue.Present(
 				new VulkanSwapchain[] { Swapchain }, signalSemaphores, new uint[] { imageIndex });
 
-			if (result == VkResult.VK_ERROR_OUT_OF_DATE_KHR ||
-				result == VkResult.VK_SUBOPTIMAL_KHR || m_FramebufferResized)
+			if (result == VkResult.ErrorOutOfDate ||
+				result == VkResult.Suboptimal || m_FramebufferResized)
 				RecreateSwapchain();
-			else if (result != VkResult.VK_SUCCESS)
+			else if (result != VkResult.Success)
 			{
 				Log.Error("Failed to present swapchain image");
 				Application.Exit();
@@ -239,7 +234,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private void RecordCommandBuffer(VulkanCommandBuffer cmd, uint imageIndex)
 		{
 			VkResult result = cmd.Begin();
-			if(result != VkResult.VK_SUCCESS)
+			if(result != VkResult.Success)
 			{
 				Log.Error("Failed to record command buffer");
 				return;
@@ -254,6 +249,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			cmd.BindVertexBuffer(VertexBuffer);
 			cmd.BindIndexBuffer(IndexBuffer);
 
+			cmd.BindDescriptorSets(Pipeline, 0, new VulkanDescriptorSet[] { DescriptorSets[CurrentFrame] });
 			cmd.DrawIndexed((uint)Indices.Length);
 
 			cmd.EndRenderPass();
@@ -310,20 +306,34 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private void CreateUniformBuffers()
 		{
-			int bufferSize = Marshal.SizeOf(typeof(ShaderMVP));
-
 			UniformBuffers = new VulkanBuffer[MaxFramesInFlight];
 			UniformBufferMemory = new IntPtr[MaxFramesInFlight];
 			for(int i = 0; i < MaxFramesInFlight;i++)
 			{
 				UniformBuffers[i] = new VulkanBuffer(
 					SelectedDevice,
-					bufferSize,
+					MVPSize,
 					VkBufferUsage.Uniform,
 					VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
 				);
-				UniformBufferMemory[i] = UniformBuffers[i].MapMemory(bufferSize);
+				UniformBufferMemory[i] = UniformBuffers[i].MapMemory(MVPSize);
 			}
+		}
+		
+		private void CreateDescriptorSets()
+		{
+			DescriptorSetLayout = new VulkanDescriptorSetLayout(SelectedDevice, new VkDescriptorSetLayoutBinding[]
+			{
+				new VkDescriptorSetLayoutBinding
+				{
+					Binding = 0,
+					DescriptorType = VkDescriptorType.UNIFORM_BUFFER,
+					DescriptorCount = 1,
+					StageFlags = VkShaderStage.Vertex
+				}
+			});
+			DescriptorPool = new VulkanDescriptorPool(SelectedDevice, VkDescriptorType.UNIFORM_BUFFER, MaxFramesInFlight, MaxFramesInFlight);
+			DescriptorSets = DescriptorPool.AllocateDescriptorSets(MaxFramesInFlight, DescriptorSetLayout, UniformBuffers, MVPSize, VkDescriptorType.UNIFORM_BUFFER);
 		}
 
 		public void Destroy()
@@ -347,7 +357,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			ImageAvailableSemaphores = new VulkanSemaphore[0];
 			RenderFinishedSemaphores = new VulkanSemaphore[0];
 
-			DescriptorSet.Dispose();
+			DescriptorPool.Dispose();
+			DescriptorSetLayout.Dispose();
 
 			IndexBuffer.Dispose();
 			VertexBuffer.Dispose();
@@ -362,20 +373,21 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Instance?.Dispose();
 		}
 
-		private void UpdateUniformBuffer(uint imageIndex)
+		private void UpdateUniformBuffer(uint frameIndex)
 		{
 			ShaderMVP mvp;
-			mvp.Model = Matrix4.Identity;
-			mvp.View = Matrix4.LookAt(new Vector3(0, 0, -1), Vector3.Zero, Vector3.Up);
-			mvp.Projection = Matrix4.Perspective(45.0f, Swapchain.Resolution.x / (float)Swapchain.Resolution.y);
+			mvp.Model = Matrix4.Rotate(Time.TimeSinceLaunch, Vector3.Forward);
+			mvp.View = Matrix4.LookAt(new Vector3(2, 2, 2), Vector3.Zero, Vector3.Forward);
+			mvp.Projection = Matrix4.Perspective(45.0f, Swapchain.Resolution.x / (float)Swapchain.Resolution.y, 0.1f, 10.0f);
+			mvp.Projection[1, 1] *= -1.0f;
 
 			int matrixSize = sizeof(float) * 16;
-			byte[] data = new byte[matrixSize * 3];
-			Buffer.BlockCopy(mvp.Model.Components, 0, data, 0, matrixSize);
-			Buffer.BlockCopy(mvp.View.Components, 0, data, matrixSize, matrixSize);
-			Buffer.BlockCopy(mvp.Projection.Components, 0, data, matrixSize * 2, matrixSize);
+			byte[] data = new byte[MVPSize * 3];
+			Buffer.BlockCopy(mvp.Model.Values1D, 0, data, 0, matrixSize);
+			Buffer.BlockCopy(mvp.View.Values1D, 0, data, matrixSize, matrixSize);
+			Buffer.BlockCopy(mvp.Projection.Values1D, 0, data, matrixSize * 2, matrixSize);
 
-			Marshal.Copy(data, 0, UniformBufferMemory[imageIndex], data.Length);
+			Marshal.Copy(data, 0, UniformBufferMemory[frameIndex], data.Length);
 		}
 
 		private VkGraphicsPipelineCreateInfo CreatePipelineInfo()
@@ -463,7 +475,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 				PolygonMode = VkPolygonMode.Fill,
 				LineWidth = 1,
 				CullMode = VkCullMode.BACK_BIT,
-				FrontFace = VkFrontFace.Clockwise,
+				// FrontFace = VkFrontFace.Clockwise,
+				FrontFace = VkFrontFace.CounterClockwise,
 				DepthBiasEnable = false
 			};
 
@@ -490,7 +503,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			return new VkGraphicsPipelineCreateInfo
 			{
 				Stages = shaderStages,
-				DescriptorSetLayouts = new VulkanDescriptorSetLayout[] { DescriptorSet },
+				DescriptorSetLayouts = new VulkanDescriptorSetLayout[] { DescriptorSetLayout },
 				InputState = vertexInput,
 				InputAssembly = inputAssembly,
 				Viewports = new VkViewport[] { viewport },

@@ -59,6 +59,21 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void CopyBuffer(VulkanBuffer src, VulkanBuffer dst, int srcOffset, int dstOffset, int size) =>
 			_CopyBuffer(Handle, src.BufferHandle, dst.BufferHandle, srcOffset, dstOffset, size);
 
+		public void BindDescriptorSets(VulkanGraphicsPipeline pipeline, uint firstSet, VulkanDescriptorSet[] descriptorSets)
+		{
+			IntPtr[] nativeSets = new IntPtr[descriptorSets.Length];
+			for (int i = 0; i < nativeSets.Length; i++)
+				nativeSets[i] = descriptorSets[i].Handle;
+
+			_BindDescriptorSets(
+				Handle,
+				(int)VkPipelineBindPoint.Graphics,
+				pipeline.PipelineLayout,
+				firstSet,
+				nativeSets
+			);
+		}
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -97,6 +112,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _CopyBuffer(IntPtr handle, IntPtr src, IntPtr dst, int srcOffset, int dstOffset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _BindDescriptorSets(
+			IntPtr handle,
+			int bindPoint,
+			IntPtr pipelineLayout,
+			uint firstSet,
+			IntPtr[] descriptorSets
+		);
 		#endregion
 	}
 }

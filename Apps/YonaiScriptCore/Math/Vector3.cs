@@ -14,6 +14,8 @@ namespace Yonai
 		/// </summary>
 		public float Magnitude => _Magnitude(ref this);
 
+		public Vector3 Normalized => this / (float)Magnitude;
+
 		public static Vector3 Zero		=> new Vector3(0, 0, 0);
 		public static Vector3 One		=> new Vector3(1, 1, 1);
 
@@ -56,7 +58,13 @@ namespace Yonai
 
 		public Vector3(Vector3 other)
 		{
-			Log.Warning("COPY");
+			x = other.x;
+			y = other.y;
+			z = other.z;
+		}
+
+		public Vector3(Vector4 other)
+		{
 			x = other.x;
 			y = other.y;
 			z = other.z;
@@ -72,6 +80,16 @@ namespace Yonai
 
 		/// <returns>Distance between this vector and another</returns>
 		public float Distance(Vector3 other) => _Distance(ref this, ref other);
+
+		public void Normalize() => this /= (float)Magnitude;
+
+		public Vector3 Cross(Vector3 other) => new Vector3(
+			y * other.z - z * other.y,
+			z * other.x - x * other.z,
+			x * other.y - y * other.x
+		);
+
+		public static Vector3 Cross(Vector3 a, Vector3 b) => a.Cross(b);
 
 		/// <returns>Distance between two vectors</returns>
 		public static float Distance(Vector3 a, Vector3 b) => _Distance(ref a, ref b);
@@ -115,6 +133,8 @@ namespace Yonai
 
 		public static Vector3 operator *(Vector3 a, float b) => new Vector3(a.x * b, a.y * b, a.z * b);
 		public static Vector3 operator /(Vector3 a, float b) => new Vector3(a.x / b, a.y / b, a.z / b);
+		public static Vector3 operator *(float b, Vector3 a) => new Vector3(a.x * b, a.y * b, a.z * b);
+		public static Vector3 operator /(float b, Vector3 a) => new Vector3(a.x / b, a.y / b, a.z / b);
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector3 input);

@@ -22,6 +22,14 @@ namespace Yonai
 			this.w = w;
 		}
 
+		public Vector4(Vector3 v, float w = 0)
+		{
+			x = v.x;
+			y = v.y;
+			z = v.z;
+			this.w = w;
+		}
+
 		public Vector4(float scalar) => x = y = z = w = scalar;
 
 		public static Vector4 Lerp(Vector4 a, Vector4 b, float time) =>
@@ -60,6 +68,20 @@ namespace Yonai
 
 		public static Vector4 operator *(Vector4 a, float b) => new Vector4(a.x * b, a.y * b, a.z * b, a.w * b);
 		public static Vector4 operator /(Vector4 a, float b) => new Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
+
+		public static Vector4 operator *(Vector4 a, int b) => new Vector4(a.x * b, a.y * b, a.z * b, a.w * b);
+		public static Vector4 operator /(Vector4 a, int b) => new Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
+		public static Vector4 operator *(int b, Vector4 a) => new Vector4(a.x * b, a.y * b, a.z * b, a.w * b);
+		public static Vector4 operator /(int b, Vector4 a) => new Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
+
+		public static Vector4 operator +(Vector4 a, float b) => new Vector4(a.x + b, a.y + b, a.z + b, a.w + b);
+		public static Vector4 operator +(float b, Vector4 a) => new Vector4(a.x + b, a.y + b, a.z + b, a.w + b);
+		public static Vector4 operator +(Vector4 a, int b) => new Vector4(a.x + b, a.y + b, a.z + b, a.w + b);
+		public static Vector4 operator +(int b, Vector4 a) => new Vector4(a.x + b, a.y + b, a.z + b, a.w + b);
+		public static Vector4 operator -(Vector4 a, float b) => new Vector4(a.x - b, a.y - b, a.z - b, a.w - b);
+		public static Vector4 operator -(float b, Vector4 a) => new Vector4(a.x - b, a.y - b, a.z - b, a.w - b);
+		public static Vector4 operator -(Vector4 a, int b) => new Vector4(a.x - b, a.y - b, a.z - b, a.w - b);
+		public static Vector4 operator -(int b, Vector4 a) => new Vector4(a.x - b, a.y - b, a.z - b, a.w - b);
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _Magnitude(ref Vector4 input);

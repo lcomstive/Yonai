@@ -90,7 +90,7 @@
     <Compile Include="Graphics\Backends\Vulkan\VulkanBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandPool.cs" />
-    <Compile Include="Graphics\Backends\Vulkan\VulkanDescriptorSetLayout.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanDescriptorSets.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanDevice.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanEnums.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanFramebuffer.cs" />

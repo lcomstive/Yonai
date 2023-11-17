@@ -1,3 +1,5 @@
+add_definitions(-D_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
+
 function (SetWin32Properties)
 	get_target_property(targetType ${PROJECT_NAME} TYPE)
 	if(NOT WIN32 OR NOT (targetType STREQUAL "EXECUTABLE"))

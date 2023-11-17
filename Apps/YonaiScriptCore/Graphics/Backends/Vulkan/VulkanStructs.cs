@@ -496,11 +496,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			else
 				DepthStencilState = IntPtr.Zero;
 
-			DescriptorSetLayoutCount = (uint)info.DescriptorSetLayouts.Length;
+			DescriptorSetLayoutCount = (uint)(info.DescriptorSetLayouts?.Length ?? 0);
 			IntPtr[] descriptorHandles = new IntPtr[DescriptorSetLayoutCount];
 			for(int i = 0;i < DescriptorSetLayoutCount;i++)
 				descriptorHandles[i] = info.DescriptorSetLayouts[i].Handle;
-			DescriptorSetLayouts = InteropUtils.CreateNativeHandle(descriptorHandles);
+			DescriptorSetLayouts = DescriptorSetLayoutCount > 0 ?
+				InteropUtils.CreateNativeHandle(descriptorHandles) : IntPtr.Zero;
 		}
 
 		public void Dispose()

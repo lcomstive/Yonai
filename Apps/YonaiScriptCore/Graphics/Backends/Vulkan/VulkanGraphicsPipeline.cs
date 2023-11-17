@@ -7,6 +7,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 	public class VulkanGraphicsPipeline : IDisposable
 	{
 		internal IntPtr Handle;
+		internal IntPtr PipelineLayout;
 		internal VulkanRenderPass RenderPass;
 		private VulkanDevice Device => RenderPass.Device;
 
@@ -20,7 +21,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Upload(Subpass, info);
 		}
 
-		public void Dispose() => _Destroy(Handle);
+		public void Dispose() => _Destroy(Handle, PipelineLayout);
 
 		private void Upload(uint subpass, VkGraphicsPipelineCreateInfo pipelineInfo)
 		{
@@ -28,14 +29,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 			PipelineCreateInfo = pipelineInfo;
 
 			VkGraphicsPipelineCreateInfoNative native = new VkGraphicsPipelineCreateInfoNative(RenderPass, Subpass, PipelineCreateInfo);
-			Handle = _Create(Device.Device, ref native);
+			Handle = _Create(Device.Device, ref native, out PipelineLayout);
 			native.Dispose();
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr _Create(IntPtr device, ref VkGraphicsPipelineCreateInfoNative pipelineInfo);
+		private static extern IntPtr _Create(IntPtr device, ref VkGraphicsPipelineCreateInfoNative pipelineInfo, out IntPtr pipelineLayout);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _Destroy(IntPtr handle);
+		private static extern void _Destroy(IntPtr handle, IntPtr pipelineLayout);
 	}
 }
