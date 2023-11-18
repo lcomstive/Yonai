@@ -32,6 +32,18 @@ jobs:
     # Get source
     steps:
     - uses: actions/checkout@v4
+
+    # Cache submodules
+    - name: Cache submodules
+      id: cache-submodules
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/Engine/Vendor
+        key: ${{ runner.os }}-submodules
+      
+    - name: Get submodules
+      if: steps.cache-submodules.outputs.cache-hit != 'true'
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
@@ -46,12 +58,24 @@ jobs:
       run: choco install mono
 
     # Vulkan SDK
-    - name: Prepare Vulkan SDK
+    - if: runner.os != 'macOS'
+      name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
         vulkan-query-version: 1.3.224.1
-        vulkan-components: Vulkan-Headers, Vulkan-Loader, MoltenVK
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
         vulkan-use-cache: true
+
+    - if: runner.os == 'macOS'
+      name: Prepare Vulkan SDK
+      run: |
+        curl -L "https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg" -o /tmp/vulkan-sdk.dmg
+        hdiutil attach /tmp/vulkan-sdk.dmg -mountpoint /Volumes/vulkan-sdk
+        /Volumes/vulkan-sdk/InstallVulkan.app/Contents/MacOS/InstallVulkan \
+            --root ~/VulkanSDK/latest --accept-licenses --default-answer --confirm-command install
+        cd ~/VulkanSDK/latest
+        sudo python ./install_vulkan.py
+
 
     # Set CMake configuration based on branch
     - if: github.ref == 'refs/heads/main' && matrix.config.name != 'Windows'
