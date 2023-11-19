@@ -74,6 +74,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			);
 		}
 
+		public void PipelineBarrier(VkImageMemoryBarrier barrier, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage) =>
+			_PipelineBarrierImage(Handle, ref barrier, (int)sourceStage, (int)destinationStage);
+
+		public void CopyBufferToImage(VulkanBuffer buffer, VulkanImage image, VkBufferImageCopy region) =>
+			_CopyBufferToImage(Handle, ref region, buffer.BufferHandle, image.Image);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -121,6 +127,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			uint firstSet,
 			IntPtr[] descriptorSets
 		);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PipelineBarrierImage(IntPtr handle, ref VkImageMemoryBarrier barrier, int srcStage, int dstStage);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _CopyBufferToImage(IntPtr handle, ref VkBufferImageCopy region, IntPtr buffer, IntPtr image);
 		#endregion
 	}
 }

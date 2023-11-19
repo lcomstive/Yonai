@@ -1,7 +1,6 @@
+using System;
 using Yonai.IO;
 using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics
@@ -85,7 +84,12 @@ namespace Yonai.Graphics
 				HDR		  = json["HDR"].Value<bool>(),
 				Filtering = (TextureFiltering)json["Filtering"].Value<int>()
 			});
-			
+
+		public static (byte[], IVector2) Decode(VFSFile file, bool hdr = false)
+		{
+			bool success = _Decode(VFS.Read(file), hdr, out byte[] output, out IVector2 resolution);
+			return success ? (output, resolution) : (new byte[0], IVector2.Zero);
+		}
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
@@ -96,6 +100,8 @@ namespace Yonai.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetHDR(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFilter(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Decode(byte[] fileData, bool hdr, out byte[] output, out IVector2 resolution);
 		#endregion
 	}
 }

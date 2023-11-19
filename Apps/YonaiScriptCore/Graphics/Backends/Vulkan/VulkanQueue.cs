@@ -1,7 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Yonai._Internal;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -9,6 +7,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		internal IntPtr Handle;
 		internal uint Index;
+
+		public const uint Ignored = (~0u);
 
 		internal VulkanQueue(IntPtr handle, uint index)
 		{

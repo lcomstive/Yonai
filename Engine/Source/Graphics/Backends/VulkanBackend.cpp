@@ -2247,3 +2247,94 @@ ADD_MANAGED_METHOD(VulkanBuffer, MapMemory, void*, (void* device, void* bufferMe
 
 ADD_MANAGED_METHOD(VulkanBuffer, UnmapMemory, void, (void* device, void* bufferMemory), Yonai.Graphics.Backends.Vulkan)
 { vkUnmapMemory((VkDevice)device, (VkDeviceMemory)bufferMemory); }
+
+ADD_MANAGED_METHOD(VulkanImage, Create, int, (
+	void* device,
+	void* physicalDevice,
+	int type,
+	int format,
+	int usage,
+	int samples,
+	int tiling,
+	int width,
+	int height,
+	int depth,
+	int mipLevels,
+	int arrayLayers,
+	void** outImage,
+	void** outImageMemory
+), Yonai.Graphics.Backends.Vulkan)
+{
+	*outImage = nullptr;
+	*outImageMemory = nullptr;
+
+	VkImageCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	info.imageType = (VkImageType)type;
+	info.extent.width = (unsigned int)width;
+	info.extent.height = (unsigned int)height;
+	info.extent.depth = (unsigned int)depth;
+	info.mipLevels = (unsigned int)mipLevels;
+	info.arrayLayers = (unsigned int)arrayLayers;
+	info.format = (VkFormat)format;
+	info.tiling = (VkImageTiling)tiling;
+	info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	info.usage = (VkImageUsageFlagBits)usage;
+	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	info.samples = (VkSampleCountFlagBits)samples;
+
+	VkImage image;
+	VkResult result = vkCreateImage((VkDevice)device, &info, nullptr, &image);
+	if(result != VK_SUCCESS)
+		return result;
+	
+	VkMemoryRequirements memRequirements;
+	vkGetImageMemoryRequirements((VkDevice)device, image, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size;
+	allocInfo.memoryTypeIndex = FindMemoryType((VkPhysicalDevice)physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	VkDeviceMemory memory;
+	result = vkAllocateMemory((VkDevice)device, &allocInfo, nullptr, &memory);
+	if(result != VK_SUCCESS)
+		return result;
+
+	vkBindImageMemory((VkDevice)device, image, memory, 0);
+
+	*outImage = image;
+	*outImageMemory = memory;
+
+	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, PipelineBarrierImage, void, (void* handle, void* inBarrier, int srcStage, int dstStage), Yonai.Graphics.Backends.Vulkan)
+{
+	VkImageMemoryBarrier* barrier = (VkImageMemoryBarrier*)inBarrier;
+	barrier->sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+	vkCmdPipelineBarrier(
+		(VkCommandBuffer)handle,
+		(VkPipelineStageFlags)srcStage,
+		(VkPipelineStageFlags)dstStage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, barrier
+	);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBufferToImage, void, (void* handle, void* inRegion, void* buffer, void* image), Yonai.Graphics.Backends.Vulkan)
+{
+	VkBufferImageCopy* region = (VkBufferImageCopy*)inRegion;
+
+	vkCmdCopyBufferToImage(
+		(VkCommandBuffer)handle,
+		(VkBuffer)buffer,
+		(VkImage)image,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		region
+	);
+}

@@ -33,6 +33,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanDescriptorSet[] DescriptorSets { get; private set; } = new VulkanDescriptorSet[0];
 		public VulkanDescriptorSetLayout DescriptorSetLayout { get; private set; } = null;
 
+		// Texture
+		public VulkanImage TestTexture = null;
+		public const string TexturePath = "app://Assets/Textures/Grid.png";
+		public byte[] TextureData { get; private set; }
+		public IVector2 TextureResolution { get; private set; }
+
 		private struct ShaderMVP
 		{
 			public Matrix4 Model;
@@ -124,10 +130,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 				{
 					SrcSubpass = VkSubpassDependency.SubpassExternal,
 					DstSubpass = 0,
-					SrcStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
-					SrcAccessMask = VkAccessFlags.NONE,
-					DstStageMask = VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT,
-					DstAccessMask = VkAccessFlags.COLOR_ATTACHMENT_WRITE_BIT
+					SrcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+					SrcAccessMask = VkAccessFlags.None,
+					DstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+					DstAccessMask = VkAccessFlags.ColorAttachmentWrite
 				}
 			};
 			
@@ -155,6 +161,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			CreateVertexBuffer();
 			CreateIndexBuffer();
+			CreateTexture();
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -191,7 +198,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			VulkanSemaphore[] waitSemaphores = new VulkanSemaphore[] { ImageAvailableSemaphores[CurrentFrame] };
 			VulkanSemaphore[] signalSemaphores = new VulkanSemaphore[] { RenderFinishedSemaphores[CurrentFrame] };
-			VkPipelineStageFlags[] waitStages = new VkPipelineStageFlags[] { VkPipelineStageFlags.COLOR_ATTACHMENT_OUTPUT_BIT };
+			VkPipelineStageFlags[] waitStages = new VkPipelineStageFlags[] { VkPipelineStageFlags.ColorAttachmentOutput };
 			VulkanCommandBuffer[] commandBuffers = new VulkanCommandBuffer[] { CommandBuffers[CurrentFrame] };
 
 			result = SelectedDevice.GraphicsQueue.Submit(
@@ -336,11 +343,41 @@ namespace Yonai.Graphics.Backends.Vulkan
 			DescriptorSets = DescriptorPool.AllocateDescriptorSets(MaxFramesInFlight, DescriptorSetLayout, UniformBuffers, MVPSize, VkDescriptorType.UNIFORM_BUFFER);
 		}
 
+		private void CreateTexture()
+		{
+			(TextureData, TextureResolution) = Texture.Decode(TexturePath);
+			VulkanBuffer stagingBuffer = new VulkanBuffer(
+				SelectedDevice,
+				TextureData.Length,
+				VkBufferUsage.TransferSource,
+				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+			);
+			stagingBuffer.Upload(TextureData);
+
+			TestTexture = new VulkanImage(
+				SelectedDevice,
+				VkImageType.Type2D,
+				VkFormat.R8G8B8A8_SRGB,
+				VkImageUsage.TransferDst | VkImageUsage.Sampled,
+				VkImageTiling.Optimal,
+				TextureResolution,
+				VkSampleCount.BITS_1
+			);
+
+			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.UNDEFINED, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			CommandPool.CopyBufferToImage(stagingBuffer, TestTexture, TextureResolution);
+			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+
+			stagingBuffer.Dispose();
+		}
+
 		public void Destroy()
 		{
 			Log.Trace("Destroying vulkan graphics backend");
 
 			#region Temp
+			TestTexture.Dispose();
+
 			for(int i = 0; i < MaxFramesInFlight; i++)
 			{
 				UniformBuffers[i].UnmapMemory();

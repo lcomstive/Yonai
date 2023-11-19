@@ -111,4 +111,53 @@ ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), Yonai.Graphics)
 ADD_MANAGED_METHOD(Texture, IsValid, bool, (void* instance), Yonai.Graphics)
 { return ((Texture*)instance)->IsValid(); }
 
+ADD_MANAGED_METHOD(Texture, Decode, bool, (MonoArray* textureDataRaw, bool hdr, MonoArray** output, glm::ivec2* outResolution), Yonai.Graphics)
+{
+	if(!textureDataRaw)
+		return false;
+
+	vector<unsigned char> textureData;
+	textureData.resize(mono_array_length(textureDataRaw));
+	for (size_t i = 0; i < textureData.size(); i++)
+		textureData[i] = mono_array_get(textureDataRaw, unsigned char, i);
+
+	if (textureData.empty())
+	{
+		spdlog::warn("Cannot generate texture with empty path");
+		return false;
+	}
+
+	// Read image data
+	int width, height, channelCount;
+	void* data = nullptr;
+
+	// Flip loaded textures, so OpenGL loads them right way up
+	stbi_set_flip_vertically_on_load(true);
+	
+	if (!hdr)
+		data = stbi_load_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
+	else
+		data = stbi_loadf_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
+
+	// Check for validity
+	if (!data)
+	{
+		// Release resources, these are now stored inside OpenGL's texture buffer
+		stbi_image_free(data);
+
+		spdlog::warn("Failed to load texture - {}", stbi_failure_reason());
+		return false;
+	}
+
+	*outResolution = glm::ivec2(width, height);
+
+	int dataSize = width * height * channelCount;
+	*output = mono_array_new(mono_domain_get(), mono_get_byte_class(), dataSize);
+	for(int i = 0; i < dataSize; i++)
+		mono_array_set(*output, unsigned char, i, ((unsigned char*)data)[i]);
+
+	stbi_image_free(data);
+	return true;
+}
+
 #pragma endregion

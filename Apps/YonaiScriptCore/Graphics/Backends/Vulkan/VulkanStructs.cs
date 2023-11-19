@@ -524,7 +524,55 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VkDescriptorType DescriptorType;
 		public uint DescriptorCount;
 		public VkShaderStage StageFlags;
-		private IntPtr _pImmutableSamplers;
+		private readonly IntPtr _;
 	}
 	#endregion
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageSubresourceRange
+	{
+		public VkImageAspectFlags AspectMask;
+		public uint BaseMipLevel;
+		public uint LevelCount;
+		public uint BaseArrayLayer;
+		public uint LayerCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageMemoryBarrier
+	{
+		private int _sType;
+		private IntPtr _pNext;
+		public VkAccessFlags SrcAccessMask;
+		public VkAccessFlags DstAccessMask;
+		public VkImageLayout OldLayout;
+		public VkImageLayout NewLayout;
+		public uint SrcQueueFamilyIndex;
+		public uint DstQueueFamilyIndex;
+
+		private IntPtr m_Image;
+		public VulkanImage Image { set => m_Image = value?.Image ?? IntPtr.Zero; }
+
+		public VkImageSubresourceRange SubresourceRange;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageSubresourceLayers
+	{
+		public VkImageAspectFlags AspectMask;
+		public uint MipLevel;
+		public uint BaseArrayLayer;
+		public uint LayerCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkBufferImageCopy
+	{
+		public ulong BufferOffset;
+		public uint BufferRowLength;
+		public uint BufferImageHeight;
+		public VkImageSubresourceLayers ImageSubresource;
+		public IVector3 ImageOffset;
+		public Extents3D ImageExtent;
+	}
 }
