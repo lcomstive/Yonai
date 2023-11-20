@@ -575,4 +575,141 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IVector3 ImageOffset;
 		public Extents3D ImageExtent;
 	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkPhysicalDeviceLimits
+	{
+		public uint MaxImageDimension1D;
+		public uint MaxImageDimension2D;
+		public uint MaxImageDimension3D;
+		public uint MaxImageDimensionCube;
+		public uint MaxImageArrayLayers;
+		public uint MaxTexelBufferElements;
+		public uint MaxUniformBufferRange;
+		public uint MaxStorageBufferRange;
+		public uint MaxPushConstantsSize;
+		public uint MaxMemoryAllocationCount;
+		public uint MaxSamplerAllocationCount;
+		public ulong BufferImageGranularity;
+		public ulong SparseAddressSpaceSize;
+		public uint MaxBoundDescriptorSets;
+		public uint MaxPerStageDescriptorSamplers;
+		public uint MaxPerStageDescriptorUniformBuffers;
+		public uint MaxPerStageDescriptorStorageBuffers;
+		public uint MaxPerStageDescriptorSampledImages;
+		public uint MaxPerStageDescriptorStorageImages;
+		public uint MaxPerStageDescriptorInputAttachments;
+		public uint MaxPerStageResources;
+		public uint MaxDescriptorSetSamplers;
+		public uint MaxDescriptorSetUniformBuffers;
+		public uint MaxDescriptorSetUniformBuffersDynamic;
+		public uint MaxDescriptorSetStorageBuffers;
+		public uint MaxDescriptorSetStorageBuffersDynamic;
+		public uint MaxDescriptorSetSampledImages;
+		public uint MaxDescriptorSetStorageImages;
+		public uint MaxDescriptorSetInputAttachments;
+		public uint MaxVertexInputAttributes;
+		public uint MaxVertexInputBindings;
+		public uint MaxVertexInputAttributeOffset;
+		public uint MaxVertexInputBindingStride;
+		public uint MaxVertexOutputComponents;
+		public uint MaxTessellationGenerationLevel;
+		public uint MaxTessellationPatchSize;
+		public uint MaxTessellationControlPerVertexInputComponents;
+		public uint MaxTessellationControlPerVertexOutputComponents;
+		public uint MaxTessellationControlPerPatchOutputComponents;
+		public uint MaxTessellationControlTotalOutputComponents;
+		public uint MaxTessellationEvaluationInputComponents;
+		public uint MaxTessellationEvaluationOutputComponents;
+		public uint MaxGeometryShaderInvocations;
+		public uint MaxGeometryInputComponents;
+		public uint MaxGeometryOutputComponents;
+		public uint MaxGeometryOutputVertices;
+		public uint MaxGeometryTotalOutputComponents;
+		public uint MaxFragmentInputComponents;
+		public uint MaxFragmentOutputAttachments;
+		public uint MaxFragmentDualSrcAttachments;
+		public uint MaxFragmentCombinedOutputResources;
+		public uint MaxComputeSharedMemorySize;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 3, ArraySubType = UnmanagedType.SysUInt)]
+		public uint[] MaxComputeWorkGroupCount;
+		public uint MaxComputeWorkGroupInvocations;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 3, ArraySubType = UnmanagedType.SysUInt)]
+		public uint[] MaxComputeWorkGroupSize;
+		public uint SubPixelPrecisionBits;
+		public uint SubTexelPrecisionBits;
+		public uint MipmapPrecisionBits;
+		public uint MaxDrawIndexedIndexValue;
+		public uint MaxDrawIndirectCount;
+		public float MaxSamplerLodBias;
+		public float MaxSamplerAnisotropy;
+		public uint MaxViewports;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 2, ArraySubType = UnmanagedType.SysUInt)]
+		public uint[] MaxViewportDimensions;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 2, ArraySubType = UnmanagedType.R8)]
+		public float[] ViewportBoundsRange;
+		public uint ViewportSubPixelBits;
+		public UIntPtr MinMemoryMapAlignment;
+		public ulong MinTexelBufferOffsetAlignment;
+		public ulong MinUniformBufferOffsetAlignment;
+		public ulong MinStorageBufferOffsetAlignment;
+		public int MinTexelOffset;
+		public uint MaxTexelOffset;
+		public int MinTexelGatherOffset;
+		public uint MaxTexelGatherOffset;
+		public float MinInterpolationOffset;
+		public float MaxInterpolationOffset;
+		public uint SubPixelInterpolationOffsetBits;
+		public uint MaxFramebufferWidth;
+		public uint MaxFramebufferHeight;
+		public uint MaxFramebufferLayers;
+		public VkSampleCount FramebufferColorSampleCounts;
+		public VkSampleCount FramebufferDepthSampleCounts;
+		public VkSampleCount FramebufferStencilSampleCounts;
+		public VkSampleCount FramebufferNoAttachmentsSampleCounts;
+		public uint MaxColorAttachments;
+		public VkSampleCount SampledImageColorSampleCounts;
+		public VkSampleCount SampledImageIntegerSampleCounts;
+		public VkSampleCount SampledImageDepthSampleCounts;
+		public VkSampleCount SampledImageStencilSampleCounts;
+		public VkSampleCount StorageImageSampleCounts;
+		public uint MaxSampleMaskWords;
+
+		private uint m_TimestampComputeAndGraphics;
+		public bool TimestampComputeAndGraphics
+		{
+			get => m_TimestampComputeAndGraphics == 1u;
+			set => m_TimestampComputeAndGraphics = value ? 1u : 0u;
+		}
+
+		public float TimestampPeriod;
+		public uint MaxClipDistances;
+		public uint MaxCullDistances;
+		public uint MaxCombinedClipAndCullDistances;
+		public uint DiscreteQueuePriorities;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 2, ArraySubType = UnmanagedType.R8)]
+		public float[] PointSizeRange;
+		[MarshalAs(UnmanagedType.LPArray, SizeConst = 2, ArraySubType = UnmanagedType.R8)]
+		public float[] LineWidthRange;
+		public float PointSizeGranularity;
+		public float LineWidthGranularity;
+
+		private uint m_StandardSampleLocations;
+		public bool StandardSampleLocations
+		{
+			get => m_StandardSampleLocations == 1u;
+			set => m_StandardSampleLocations = value ? 1u : 0u;
+		}
+
+		private uint m_StrictLines;
+		public bool StrictLines
+		{
+			get => m_StandardSampleLocations == 1u;
+			set => m_StandardSampleLocations = value ? 1u : 0u;
+		}
+
+		public ulong OptimalBufferCopyOffsetAlignment;
+		public ulong OptimalBufferCopyRowPitchAlignment;
+		public ulong NonCoherentAtomSize;
+	}
 }

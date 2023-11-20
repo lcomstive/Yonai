@@ -16,6 +16,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/VersionInfo.cmake)
 # Detect if compiling for mobile or desktop platform
 include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/DetectPlatforms.cmake)
 
+# Check which graphics APIs are supported (e.g. Vulkan, DirectX)
+include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/DetectGraphics.cmake)
+
 # Enable testing if Yonai is not a dependency
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)

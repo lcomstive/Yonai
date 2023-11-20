@@ -23,6 +23,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public string Name { get; private set; }
 		public uint DriverVersion { get; private set; }
 		public VkPhysicalDeviceType Type { get; private set; }
+		public VkPhysicalDeviceLimits Limits { get; private set; }
 
 		internal VulkanDevice(VulkanInstance owner, IntPtr physicalDeviceHandle)
 		{
@@ -43,6 +44,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			ID = id;
 			DriverVersion = driverVersion;
 			Type = (VkPhysicalDeviceType)deviceType;
+
+			_GetPhysicalDeviceLimits(PhysicalDevice, out VkPhysicalDeviceLimits limits);
+			Limits = limits;
 
 			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(VkPhysicalDeviceType), Type)}]");
 		}
@@ -93,5 +97,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			out uint driverVersion,
 			out int deviceType
 		);
+
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetPhysicalDeviceLimits(IntPtr physicalDevice, out VkPhysicalDeviceLimits output);
+
 	}
 }

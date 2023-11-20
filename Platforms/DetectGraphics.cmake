@@ -1,0 +1,15 @@
+## Vulkan ##
+
+set(YONAI_VULKAN_SUPPORTED OFF)
+
+if(WIN32 AND NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore"))
+	set(YONAI_VULKAN_SUPPORTED ON)
+endif()
+
+if(ANDROID OR iOS OR UNIX OR APPLE)
+	set(YONAI_VULKAN_SUPPORTED ON)
+endif()
+
+if(YONAI_VULKAN_SUPPORTED)
+	option(YONAI_GRAPHICS_VULKAN "Enable the Vulkan graphics API" ON)
+endif()

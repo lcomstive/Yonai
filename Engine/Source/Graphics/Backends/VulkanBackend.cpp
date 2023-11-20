@@ -2338,3 +2338,10 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBufferToImage, void, (void* handle, 
 		region
 	);
 }
+
+ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceLimits, void, (void* physicalDevice, VkPhysicalDeviceLimits* output), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties((VkPhysicalDevice)physicalDevice, &properties);
+	*output = properties.limits;
+}

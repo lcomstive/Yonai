@@ -1,3 +1,4 @@
+set(YONAI_DEFINES)
 set(YONAI_DEPENDENCY_LIBS)
 set(YONAI_DEPENDENCY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 
@@ -19,10 +20,13 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # Vulkan
-find_package(Vulkan REQUIRED)
-message("Vulkan version v${Vulkan_VERSION}")
-list(APPEND YONAI_DEPENDENCY_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
-list(APPEND YONAI_DEPENDENCY_LIBS Vulkan::Vulkan)
+if(YONAI_GRAPHICS_VULKAN)
+	find_package(Vulkan REQUIRED)
+	message("Vulkan version v${Vulkan_VERSION}")
+	list(APPEND YONAI_DEPENDENCY_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
+	list(APPEND YONAI_DEPENDENCY_LIBS Vulkan::Vulkan)
+	list(APPEND YONAI_DEFINES YONAI_GRAPHICS_VULKAN)
+endif()
 
 # GLFW
 if(YONAI_DESKTOP_PLATFORM)
@@ -149,3 +153,7 @@ if(APPLE)
 		list(APPEND YONAI_DEPENDENCY_LIBS "-framework UIKit")
 	endif()
 endif()
+
+foreach(DEFINE IN LISTS YONAI_DEFINES)
+	add_definitions(-D${DEFINE})
+endforeach()

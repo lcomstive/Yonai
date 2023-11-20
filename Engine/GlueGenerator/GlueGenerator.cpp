@@ -25,6 +25,9 @@ string BaseContent = string("#pragma once\n")		+
 					"#include <string>\n"			+
 					"#include <glm/glm.hpp>\n"		+
 					"#include <mono/jit/jit.h>\n\n" +
+#if defined(YONAI_GRAPHICS_VULKAN)
+					"#include <vulkan/vulkan.h>\n\n"	+
+#endif
 					"using namespace std; \n\n"		+
 					"typedef pair<const char*, const void*> MethodType; \n\n";
 
