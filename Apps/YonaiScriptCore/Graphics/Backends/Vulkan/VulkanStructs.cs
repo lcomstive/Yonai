@@ -712,4 +712,122 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public ulong OptimalBufferCopyRowPitchAlignment;
 		public ulong NonCoherentAtomSize;
 	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkSamplerCreateInfo
+	{
+		private int _sType;
+		private IntPtr _pNext;
+		private int flags;
+
+		public VkFilter MagFilter;
+		public VkFilter MinFilter;
+		public VkSamplerMipmapMode MipmapMode;
+		public VkSamplerAddressMode AddressModeU;
+		public VkSamplerAddressMode AddressModeV;
+		public VkSamplerAddressMode AddressModeW;
+		public float MipLodBias;
+
+		private uint m_AnisotropyEnable;
+		public bool AnisotropyEnable
+		{
+			get => m_AnisotropyEnable == 1u;
+			set => m_AnisotropyEnable = value ? 1u : 0u;
+		}
+
+		public float MaxAnisotropy;
+
+		private uint m_CompareEnable;
+		public bool CompareEnable
+		{
+			get => m_CompareEnable == 1u;
+			set => m_CompareEnable = value ? 1u : 0u;
+		}
+
+		public VkCompareOp CompareOp;
+		public float MinLod;
+		public float MaxLod;
+		public VkBorderColor BorderColor;
+
+		private uint m_UnnormalizedCoordinates;
+		public bool UnnormalizedCoordinates
+		{
+			get => m_UnnormalizedCoordinates == 1u;
+			set => m_UnnormalizedCoordinates = value ? 1u : 0u;
+		}
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkDescriptorPoolSize
+	{
+		public VkDescriptorType Type;
+		public uint DescriptorCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkDescriptorBufferInfo
+	{
+		public IntPtr Buffer;
+		public ulong Offset;
+		public ulong Range;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkDescriptorImageInfo
+	{
+		public IntPtr Sampler;
+		public IntPtr ImageView;
+		public VkImageLayout ImageLayout;
+	}
+
+	public struct VkWriteDescriptorSet
+	{
+		public uint DestinationBinding;
+		public uint DestinationArrayElement;
+		public uint DescriptorCount;
+		public VkDescriptorType DescriptorType;
+		public VkDescriptorImageInfo[] ImageInfos;
+		public VkDescriptorBufferInfo[] BufferInfos;
+		public IntPtr[] TexelBufferViews;
+	}
+	
+	[StructLayout(LayoutKind.Sequential)]
+	internal struct VkWriteDescriptorSetNative : IDisposable
+	{
+		private int _sType;
+		private IntPtr _pNext;
+
+		internal IntPtr DestinationSet;
+
+		public uint DestinationBinding;
+		public uint DestinationArrayElement;
+		public uint DescriptorCount;
+		public VkDescriptorType DescriptorType;
+		public IntPtr ImageInfos;
+		public IntPtr BufferInfos;
+		public IntPtr TexelBufferViews;
+
+		public VkWriteDescriptorSetNative(IntPtr dstSet, VkWriteDescriptorSet set)
+		{
+			_sType = 35; // VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET
+			_pNext = IntPtr.Zero;
+
+			DestinationSet = dstSet;
+
+			DestinationBinding = set.DestinationBinding;
+			DestinationArrayElement = set.DestinationArrayElement;
+			DescriptorCount = set.DescriptorCount;
+			DescriptorType = set.DescriptorType;
+			ImageInfos = set.ImageInfos != null ? InteropUtils.CreateNativeHandle(set.ImageInfos) : IntPtr.Zero;
+			BufferInfos = set.BufferInfos != null ? InteropUtils.CreateNativeHandle(set.BufferInfos) : IntPtr.Zero;
+			TexelBufferViews = set.TexelBufferViews != null ? InteropUtils.CreateNativeHandle(set.TexelBufferViews) : IntPtr.Zero;
+		}
+
+		public void Dispose()
+		{
+			if (ImageInfos != IntPtr.Zero) Marshal.FreeHGlobal(ImageInfos);
+			if (BufferInfos != IntPtr.Zero) Marshal.FreeHGlobal(BufferInfos);
+			if (TexelBufferViews != IntPtr.Zero) Marshal.FreeHGlobal(TexelBufferViews);
+		}
+	}
 }

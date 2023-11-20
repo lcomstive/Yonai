@@ -7,6 +7,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		public VkFormat Format { get; private set; }
 		internal IntPtr Image;
+		internal IntPtr Sampler;
 		internal IntPtr ImageView;
 		internal IntPtr ImageMemory;
 		private VulkanDevice m_Device;
@@ -17,7 +18,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Format = (VkFormat)imageFormat;
 			m_Device = device;
 
-			ImageView = _CreateImageView(Image, m_Device.Device, imageFormat);
+			ImageView = _CreateImageView(m_Device.Device, Image, imageFormat);
 		}
 
 		public VulkanImage(
@@ -52,9 +53,35 @@ namespace Yonai.Graphics.Backends.Vulkan
 				out Image,
 				out ImageMemory
 			);
+
+			ImageView = _CreateImageView(m_Device.Device, Image, (int)Format);
+
+			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
+			{
+				MagFilter = VkFilter.Linear,
+				MinFilter = VkFilter.Linear,
+				AddressModeU = VkSamplerAddressMode.Repeat,
+				AddressModeV = VkSamplerAddressMode.Repeat,
+				AddressModeW = VkSamplerAddressMode.Repeat,
+				AnisotropyEnable = true,
+				MaxAnisotropy = m_Device.Limits.MaxSamplerAnisotropy,
+				BorderColor = VkBorderColor.IntOpaqueBlack,
+				UnnormalizedCoordinates = false,
+				CompareEnable = false,
+				CompareOp = VkCompareOp.ALWAYS,
+				MipmapMode = VkSamplerMipmapMode.Linear,
+				MipLodBias = 0.0f,
+				MinLod = 0.0f,
+				MaxLod = 0.0f
+			};
+			_CreateSampler(m_Device.Device, ref samplerInfo, out Sampler);
 		}
 
-		public void Dispose() => _DestroyImageView(ImageView, m_Device.Device);
+		public void Dispose()
+		{
+			_DestroyImageView(m_Device.Device, ImageView);
+			_DestroySampler(m_Device.Device, Sampler);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Create(
@@ -75,9 +102,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 		);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr _CreateImageView(IntPtr image, IntPtr device, int imageFormat);
+		private static extern IntPtr _CreateImageView(IntPtr device, IntPtr image, int imageFormat);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _DestroyImageView(IntPtr image, IntPtr device);
+		private static extern void _DestroyImageView(IntPtr device, IntPtr image);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _CreateSampler(IntPtr device, ref VkSamplerCreateInfo info, out IntPtr sampler);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _DestroySampler(IntPtr device, IntPtr sampler);
 	}
 }

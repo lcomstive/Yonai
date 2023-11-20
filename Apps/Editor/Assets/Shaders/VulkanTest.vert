@@ -7,7 +7,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexCoords;
 
-layout(location = 0) out vec3 fragColour;
+layout(location = 0) out vec2 outTexCoords;
 
 layout(binding = 0) uniform MVP
 {
@@ -19,5 +19,5 @@ layout(binding = 0) uniform MVP
 void main()
 {
 	gl_Position = mvp.Proj * mvp.View * mvp.Model * vec4(inPosition, 1.0);
-	fragColour = vec3(inTexCoords, 0);
+	outTexCoords = inTexCoords;
 }

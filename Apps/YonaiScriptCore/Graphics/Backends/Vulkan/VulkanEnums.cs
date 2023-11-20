@@ -1000,4 +1000,40 @@ namespace Yonai.Graphics.Backends.Vulkan
 		PLANE_2_BIT_KHR = Plane2,
 		NONE_KHR = None
 	}
+
+	public enum VkFilter : int
+	{
+		Nearest = 0,
+		Linear = 1,
+		Cubic_EXT = 1000015000,
+		Cubic_IMG = Cubic_EXT,
+	}
+
+	public enum VkBorderColor : int
+	{
+		FloatTransparentBlack = 0,
+		IntTransparentBlack = 1,
+		FloatOpaqueBlack = 2,
+		IntOpaqueBlack = 3,
+		FloatOpaqueWhite = 4,
+		IntOpaqueWhite = 5,
+		FloatCustom_EXT = 1000287003,
+		IntCustom_EXT = 1000287004
+	}
+
+	public enum VkSamplerMipmapMode : int
+	{
+		Nearest = 0,
+		Linear = 1
+	}
+
+	public enum VkSamplerAddressMode : int
+	{
+		Repeat = 0,
+		MirroredRepeat = 1,
+		ClampToEdge = 2,
+		ClampToBorder = 3,
+		MirrorClampToEdge = 4,
+		MirrorClampToEdge_KHR = MirrorClampToEdge
+	}
 }

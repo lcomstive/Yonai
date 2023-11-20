@@ -1367,6 +1367,7 @@ ADD_MANAGED_METHOD(VulkanDevice, CreateDevice, void*, (void* physicalDevice, uns
 
 	// Request features
 	VkPhysicalDeviceFeatures deviceFeatures = {};
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	// Create logical device
 	VkDeviceCreateInfo createInfo = {};
@@ -1451,16 +1452,17 @@ ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* 
 ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyDescriptorSetLayout((VkDevice)device, (VkDescriptorSetLayout)handle, nullptr); }
 
-ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, int type, unsigned int descriptorCount, unsigned int maxDescriptorSets, void** output), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, MonoArray* inPoolSizes, unsigned int descriptorCount, unsigned int maxDescriptorSets, void** output), Yonai.Graphics.Backends.Vulkan)
 {
-	VkDescriptorPoolSize size = {};
-	size.type = (VkDescriptorType)type;
-	size.descriptorCount = descriptorCount;
+	vector<VkDescriptorPoolSize> poolSizes;
+	poolSizes.resize(mono_array_length(inPoolSizes));
+	for (size_t i = 0; i < poolSizes.size(); i++)
+		poolSizes[i] = mono_array_get(inPoolSizes, VkDescriptorPoolSize, i);
 
 	VkDescriptorPoolCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	info.poolSizeCount = 1;
-	info.pPoolSizes = &size;
+	info.poolSizeCount = (unsigned int)poolSizes.size();
+	info.pPoolSizes = poolSizes.data();
 	info.maxSets = maxDescriptorSets;
 
 	VkDescriptorPool pool;
@@ -1478,9 +1480,6 @@ ADD_MANAGED_METHOD(VulkanDescriptorPool, AllocateDescriptorSets, int, (
 	void* handle,
 	int count,
 	void* descriptorSetLayout,
-	MonoArray* uniformBuffers,
-	unsigned int bufferSize,
-	int descriptorType,
 	MonoArray** output
 ), Yonai.Graphics.Backends.Vulkan)
 {
@@ -1501,27 +1500,22 @@ ADD_MANAGED_METHOD(VulkanDescriptorPool, AllocateDescriptorSets, int, (
 
 	*output = mono_array_new(mono_domain_get(), mono_get_intptr_class(), count);
 	for (int i = 0; i < count; i++)
-	{
-		VkDescriptorBufferInfo bufferInfo = {};
-		bufferInfo.buffer = mono_array_get(uniformBuffers, VkBuffer, i);
-		bufferInfo.offset = 0;
-		bufferInfo.range = bufferSize;
-		
-		VkWriteDescriptorSet descriptorWrite = {};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = descriptorSets[i];
-		descriptorWrite.dstBinding = 0;
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = (VkDescriptorType)descriptorType;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pBufferInfo = &bufferInfo;
-
-		vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-
 		mono_array_set(*output, void*, i, descriptorSets[i]);
-	}
 
 	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanDescriptorSet, UpdateDescriptorSet, void, (void* device, MonoArray* inSets), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkWriteDescriptorSet> sets;
+	sets.resize(mono_array_length(inSets));
+	for (size_t i = 0; i < sets.size(); i++)
+	{
+		sets[i] = mono_array_get(inSets, VkWriteDescriptorSet, i);
+		sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	}
+
+	vkUpdateDescriptorSets((VkDevice)device, (unsigned int)sets.size(), sets.data(), 0, nullptr);
 }
 
 ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
@@ -1628,7 +1622,7 @@ ADD_MANAGED_METHOD(VulkanSwapchain, AcquireNextImage, int, (void* device, void* 
 	return (int)vkAcquireNextImageKHR((VkDevice)device, (VkSwapchainKHR)swapchain, timeout, (VkSemaphore)semaphore, (VkFence)fence, outIndex);
 }
 
-ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDevice, int imageFormat), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* inDevice, void* image, int imageFormat), Yonai.Graphics.Backends.Vulkan)
 {
 	VkImageViewCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1658,7 +1652,7 @@ ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* image, void* inDe
 	return imageView;
 }
 
-ADD_MANAGED_METHOD(VulkanImage, DestroyImageView, void, (void* imageView, void* device), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanImage, DestroyImageView, void, (void* device, void* imageView), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyImageView((VkDevice)device, (VkImageView)imageView, nullptr); }
 
 ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
@@ -2345,3 +2339,16 @@ ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceLimits, void, (void* physicalD
 	vkGetPhysicalDeviceProperties((VkPhysicalDevice)physicalDevice, &properties);
 	*output = properties.limits;
 }
+
+ADD_MANAGED_METHOD(VulkanImage, CreateSampler, int, (void* device, VkSamplerCreateInfo* info, void** output), Yonai.Graphics.Backends.Vulkan)
+{
+	info->sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+	VkSampler sampler;
+	VkResult result = vkCreateSampler((VkDevice)device, info, nullptr, &sampler);
+	*output = sampler;
+	return result;
+}
+
+ADD_MANAGED_METHOD(VulkanImage, DestroySampler, void, (void* device, void* sampler), Yonai.Graphics.Backends.Vulkan)
+{ vkDestroySampler((VkDevice)device, (VkSampler)sampler, nullptr); }

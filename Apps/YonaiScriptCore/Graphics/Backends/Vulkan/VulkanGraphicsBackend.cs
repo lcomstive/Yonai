@@ -59,17 +59,17 @@ namespace Yonai.Graphics.Backends.Vulkan
 				new Vertex
 				{
 					Position = new Vector3(0.5f, -0.5f, 0),
-					TexCoords = new Vector2(0, 1)
+					TexCoords = new Vector2(0, 0)
 				},
 				new Vertex
 				{
 					Position = new Vector3(0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0.0f, 0.0f)
+					TexCoords = new Vector2(0, 1)
 				},
 				new Vertex
 				{
 					Position = new Vector3(-0.5f, 0.5f, 0),
-					TexCoords = new Vector2(1.0f, 1.0f)
+					TexCoords = new Vector2(1, 1)
 				},
 		};
 		private static readonly uint[] Indices =
@@ -138,16 +138,17 @@ namespace Yonai.Graphics.Backends.Vulkan
 			};
 			
 			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
+			CommandPool = new VulkanCommandPool(SelectedDevice);
+			CommandBuffers = CommandPool.CreateCommandBuffers(MaxFramesInFlight, VkCommandBufferLevel.Primary);
 
 			Swapchain.GenerateFramebuffers(RenderPass);
 
+			CreateTexture();
 			CreateUniformBuffers();
 			CreateDescriptorSets();
 
 			var pipelineInfo = CreatePipelineInfo();
 			Pipeline = new VulkanGraphicsPipeline(pipelineInfo);
-			CommandPool = new VulkanCommandPool(SelectedDevice);
-			CommandBuffers = CommandPool.CreateCommandBuffers(MaxFramesInFlight, VkCommandBufferLevel.Primary);
 
 			InFlightFences = new VulkanFence[MaxFramesInFlight];
 			ImageAvailableSemaphores = new VulkanSemaphore[MaxFramesInFlight];
@@ -161,7 +162,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			CreateVertexBuffer();
 			CreateIndexBuffer();
-			CreateTexture();
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -174,6 +174,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private static uint CurrentFrame = 0;
 		public void Draw()
 		{
+			if(InFlightFences.Length == 0)
+			{
+				Application.Exit();
+				return;
+			}
+
 			InFlightFences[CurrentFrame].Wait();
 
 			(VkResult result, uint imageIndex) = Swapchain.AcquireNextImage(ImageAvailableSemaphores[CurrentFrame], null);
@@ -337,10 +343,72 @@ namespace Yonai.Graphics.Backends.Vulkan
 					DescriptorType = VkDescriptorType.UNIFORM_BUFFER,
 					DescriptorCount = 1,
 					StageFlags = VkShaderStage.Vertex
+				},
+				new VkDescriptorSetLayoutBinding
+				{
+					Binding = 1,
+					DescriptorCount = 1,
+					DescriptorType = VkDescriptorType.COMBINED_IMAGE_SAMPLER,
+					StageFlags = VkShaderStage.Fragment
 				}
 			});
-			DescriptorPool = new VulkanDescriptorPool(SelectedDevice, VkDescriptorType.UNIFORM_BUFFER, MaxFramesInFlight, MaxFramesInFlight);
-			DescriptorSets = DescriptorPool.AllocateDescriptorSets(MaxFramesInFlight, DescriptorSetLayout, UniformBuffers, MVPSize, VkDescriptorType.UNIFORM_BUFFER);
+			VkDescriptorPoolSize[] poolSizes = new VkDescriptorPoolSize[]
+			{
+				new VkDescriptorPoolSize
+				{
+					Type = VkDescriptorType.UNIFORM_BUFFER,
+					DescriptorCount = MaxFramesInFlight
+				},
+				new VkDescriptorPoolSize
+				{
+					Type = VkDescriptorType.COMBINED_IMAGE_SAMPLER,
+					DescriptorCount = MaxFramesInFlight
+				}
+			};
+
+			DescriptorPool = new VulkanDescriptorPool(SelectedDevice, poolSizes, MaxFramesInFlight, MaxFramesInFlight);
+			DescriptorSets = DescriptorPool.AllocateDescriptorSets(MaxFramesInFlight, DescriptorSetLayout);
+
+			VkWriteDescriptorSet[] descriptorSets = new VkWriteDescriptorSet[]
+			{
+				new VkWriteDescriptorSet
+				{
+					DestinationBinding = 0,
+					DestinationArrayElement = 0,
+					DescriptorType = VkDescriptorType.UNIFORM_BUFFER,
+					DescriptorCount = 1,
+					BufferInfos = new VkDescriptorBufferInfo[]
+					{
+						new VkDescriptorBufferInfo
+						{
+							Buffer = IntPtr.Zero,
+							Offset = 0,
+							Range = MVPSize
+						}
+					}
+				},
+				new VkWriteDescriptorSet
+				{
+					DestinationBinding = 1,
+					DestinationArrayElement = 0,
+					DescriptorType = VkDescriptorType.COMBINED_IMAGE_SAMPLER,
+					DescriptorCount = 1,
+					ImageInfos = new VkDescriptorImageInfo[]
+					{
+						new VkDescriptorImageInfo
+						{
+							ImageLayout = VkImageLayout.SHADER_READ_ONLY_OPTIMAL,
+							ImageView = TestTexture.ImageView,
+							Sampler = TestTexture.Sampler
+						}
+					}
+				}
+			};
+			for (int i = 0; i < MaxFramesInFlight; i++)
+			{
+				descriptorSets[0].BufferInfos[0].Buffer = UniformBuffers[i]?.BufferHandle ?? IntPtr.Zero;
+				DescriptorSets[i].Update(descriptorSets);
+			}
 		}
 
 		private void CreateTexture()
