@@ -6,13 +6,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 	public class VulkanImage : IDisposable
 	{
 		public VkFormat Format { get; private set; }
+		public IVector2 Resolution { get; private set; }
+
 		internal IntPtr Image;
 		internal IntPtr Sampler;
 		internal IntPtr ImageView;
 		internal IntPtr ImageMemory;
 		private VulkanDevice m_Device;
 
-		internal VulkanImage(IntPtr handle, int imageFormat, VulkanDevice device)
+		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat, IVector2 resolution)
 		{
 			Image = handle;
 			Format = (VkFormat)imageFormat;
@@ -23,57 +25,24 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public VulkanImage(
 			VulkanDevice device,
-			VkImageType type,
-			VkFormat format,
-			VkImageUsage usage,
-			VkImageTiling tiling,
-			IVector2 resolution,
-			VkSampleCount samples,
-			int depth = 1,
-			int mipLevels = 1,
-			int arrayLayers = 1
-			)
+			VkImageCreateInfo imageInfo,
+			VkSamplerCreateInfo samplerInfo
+		)
 		{
 			m_Device = device;
-			Format = format;
+			Format = imageInfo.Format;
+			Resolution = imageInfo.Extent;
 
 			VkResult result = (VkResult)_Create(
 				m_Device.Device,
 				m_Device.PhysicalDevice,
-				(int)type,
-				(int)format,
-				(int)usage,
-				(int)samples,
-				(int)tiling,
-				resolution.x,
-				resolution.y,
-				depth,
-				mipLevels,
-				arrayLayers,
+				ref imageInfo,
 				out Image,
 				out ImageMemory
 			);
 
 			ImageView = _CreateImageView(m_Device.Device, Image, (int)Format);
 
-			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
-			{
-				MagFilter = VkFilter.Linear,
-				MinFilter = VkFilter.Linear,
-				AddressModeU = VkSamplerAddressMode.Repeat,
-				AddressModeV = VkSamplerAddressMode.Repeat,
-				AddressModeW = VkSamplerAddressMode.Repeat,
-				AnisotropyEnable = true,
-				MaxAnisotropy = m_Device.Limits.MaxSamplerAnisotropy,
-				BorderColor = VkBorderColor.IntOpaqueBlack,
-				UnnormalizedCoordinates = false,
-				CompareEnable = false,
-				CompareOp = VkCompareOp.ALWAYS,
-				MipmapMode = VkSamplerMipmapMode.Linear,
-				MipLodBias = 0.0f,
-				MinLod = 0.0f,
-				MaxLod = 0.0f
-			};
 			_CreateSampler(m_Device.Device, ref samplerInfo, out Sampler);
 		}
 
@@ -87,16 +56,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private static extern int _Create(
 			IntPtr device,
 			IntPtr physicalDevice,
-			int type,
-			int format,
-			int usage,
-			int samples,
-			int tiling,
-			int width,
-			int height,
-			int depth,
-			int mipLevels,
-			int arrayLevels,
+			ref VkImageCreateInfo imageCreateInfo,
 			out IntPtr handle,
 			out IntPtr memoryHandle
 		);

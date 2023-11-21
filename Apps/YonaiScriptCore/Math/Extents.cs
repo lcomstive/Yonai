@@ -71,5 +71,8 @@ namespace Yonai
 			Height = (uint)size.y;
 			Depth = (uint)depth;
 		}
+
+		public static implicit operator IVector2(Extents3D extents) => new IVector2((int)extents.Width, (int)extents.Height);
+		public static implicit operator IVector3(Extents3D extents) => new IVector3((int)extents.Width, (int)extents.Height, (int)extents.Depth);
 	}
 }

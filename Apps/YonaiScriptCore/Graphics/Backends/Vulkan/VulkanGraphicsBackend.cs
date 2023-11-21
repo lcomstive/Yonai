@@ -34,10 +34,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanDescriptorSetLayout DescriptorSetLayout { get; private set; } = null;
 
 		// Texture
-		public VulkanImage TestTexture = null;
+		public VulkanImage TestTexture { get; private set; } = null;
 		public const string TexturePath = "app://Assets/Textures/Grid.png";
 		public byte[] TextureData { get; private set; }
 		public IVector2 TextureResolution { get; private set; }
+
+		// Depth Texture
+		public VulkanImage DepthTexture { get; private set; } = null;
 
 		private struct ShaderMVP
 		{
@@ -51,30 +54,20 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private static readonly Vertex[] Vertices =
 		{
-				new Vertex
-				{
-					Position = new Vector3(-0.5f, -0.5f, 0),
-					TexCoords = new Vector2(1, 0)
-				},
-				new Vertex
-				{
-					Position = new Vector3(0.5f, -0.5f, 0),
-					TexCoords = new Vector2(0, 0)
-				},
-				new Vertex
-				{
-					Position = new Vector3(0.5f, 0.5f, 0),
-					TexCoords = new Vector2(0, 1)
-				},
-				new Vertex
-				{
-					Position = new Vector3(-0.5f, 0.5f, 0),
-					TexCoords = new Vector2(1, 1)
-				},
+				new Vertex(new Vector3(-0.5f, -0.5f, 0), Vector3.Zero, new Vector2(0, 0)),
+				new Vertex(new Vector3( 0.5f, -0.5f, 0), Vector3.Zero, new Vector2(1, 0)),
+				new Vertex(new Vector3( 0.5f,  0.5f, 0), Vector3.Zero, new Vector2(1, 1)),
+				new Vertex(new Vector3(-0.5f,  0.5f, 0), Vector3.Zero, new Vector2(0, 1)),
+
+				new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), Vector3.Zero, new Vector2(0, 0)),
+				new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), Vector3.Zero, new Vector2(1, 0)),
+				new Vertex(new Vector3( 0.5f,  0.5f, -0.5f), Vector3.Zero, new Vector2(1, 1)),
+				new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), Vector3.Zero, new Vector2(0, 1)),
 		};
 		private static readonly uint[] Indices =
 		{
-			0, 1, 2, 2, 3, 0
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4
 		};
 		#endregion
 
@@ -143,7 +136,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			Swapchain.GenerateFramebuffers(RenderPass);
 
-			CreateTexture();
+			CreateTextures();
 			CreateUniformBuffers();
 			CreateDescriptorSets();
 
@@ -411,8 +404,28 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 		}
 
-		private void CreateTexture()
+		private void CreateTextures()
 		{
+			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
+			{
+				MagFilter = VkFilter.Linear,
+				MinFilter = VkFilter.Linear,
+				AddressModeU = VkSamplerAddressMode.Repeat,
+				AddressModeV = VkSamplerAddressMode.Repeat,
+				AddressModeW = VkSamplerAddressMode.Repeat,
+				AnisotropyEnable = true,
+				MaxAnisotropy = SelectedDevice.Limits.MaxSamplerAnisotropy,
+				BorderColor = VkBorderColor.IntOpaqueBlack,
+				UnnormalizedCoordinates = false,
+				CompareEnable = false,
+				CompareOp = VkCompareOp.ALWAYS,
+				MipmapMode = VkSamplerMipmapMode.Linear,
+				MipLodBias = 0.0f,
+				MinLod = 0.0f,
+				MaxLod = 0.0f
+			};
+
+			// Colour texture
 			(TextureData, TextureResolution) = Texture.Decode(TexturePath);
 			VulkanBuffer stagingBuffer = new VulkanBuffer(
 				SelectedDevice,
@@ -422,21 +435,30 @@ namespace Yonai.Graphics.Backends.Vulkan
 			);
 			stagingBuffer.Upload(TextureData);
 
-			TestTexture = new VulkanImage(
-				SelectedDevice,
-				VkImageType.Type2D,
-				VkFormat.R8G8B8A8_SRGB,
-				VkImageUsage.TransferDst | VkImageUsage.Sampled,
-				VkImageTiling.Optimal,
-				TextureResolution,
-				VkSampleCount.BITS_1
-			);
+			VkImageCreateInfo imageInfo = new VkImageCreateInfo
+			{
+				ImageType = VkImageType.Type2D,
+				Format = VkFormat.R8G8B8A8_SRGB,
+				Usage = VkImageUsage.TransferDst | VkImageUsage.Sampled,
+				Tiling = VkImageTiling.Optimal,
+				Samples = VkSampleCount.BITS_1,
+				Extent = new Extents3D(TextureResolution),
+				MipLevels = 1,
+				ArrayLayers = 1
+			};
+			TestTexture = new VulkanImage(SelectedDevice, imageInfo, samplerInfo);
 
 			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.UNDEFINED, VkImageLayout.TRANSFER_DST_OPTIMAL);
 			CommandPool.CopyBufferToImage(stagingBuffer, TestTexture, TextureResolution);
 			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 
 			stagingBuffer.Dispose();
+
+			// Depth texture
+			imageInfo.Format = VkFormat.D32_SFLOAT_S8_UINT;
+			imageInfo.Usage = VkImageUsage.DepthStencilAttachment;
+			imageInfo.Extent = new Extents3D(Swapchain.Resolution);
+			DepthTexture = new VulkanImage(SelectedDevice, imageInfo, samplerInfo);
 		}
 
 		public void Destroy()

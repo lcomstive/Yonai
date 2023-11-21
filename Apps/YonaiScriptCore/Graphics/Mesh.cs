@@ -20,6 +20,13 @@ namespace Yonai.Graphics
 			public Vector3 Normal;
 			public Vector2 TexCoords;
 
+			public Vertex(Vector3 pos, Vector3 normal, Vector2 texCoords)
+			{
+				Position = pos;
+				Normal = normal;
+				TexCoords = texCoords;
+			}
+
 			public float[] ToArray()
 			{
 				float[] output = new float[3 + 3 + 2];

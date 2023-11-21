@@ -2245,16 +2245,7 @@ ADD_MANAGED_METHOD(VulkanBuffer, UnmapMemory, void, (void* device, void* bufferM
 ADD_MANAGED_METHOD(VulkanImage, Create, int, (
 	void* device,
 	void* physicalDevice,
-	int type,
-	int format,
-	int usage,
-	int samples,
-	int tiling,
-	int width,
-	int height,
-	int depth,
-	int mipLevels,
-	int arrayLayers,
+	VkImageCreateInfo* imageCreateInfo,
 	void** outImage,
 	void** outImageMemory
 ), Yonai.Graphics.Backends.Vulkan)
@@ -2262,23 +2253,10 @@ ADD_MANAGED_METHOD(VulkanImage, Create, int, (
 	*outImage = nullptr;
 	*outImageMemory = nullptr;
 
-	VkImageCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	info.imageType = (VkImageType)type;
-	info.extent.width = (unsigned int)width;
-	info.extent.height = (unsigned int)height;
-	info.extent.depth = (unsigned int)depth;
-	info.mipLevels = (unsigned int)mipLevels;
-	info.arrayLayers = (unsigned int)arrayLayers;
-	info.format = (VkFormat)format;
-	info.tiling = (VkImageTiling)tiling;
-	info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	info.usage = (VkImageUsageFlagBits)usage;
-	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	info.samples = (VkSampleCountFlagBits)samples;
+	imageCreateInfo->sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
 	VkImage image;
-	VkResult result = vkCreateImage((VkDevice)device, &info, nullptr, &image);
+	VkResult result = vkCreateImage((VkDevice)device, imageCreateInfo, nullptr, &image);
 	if(result != VK_SUCCESS)
 		return result;
 	

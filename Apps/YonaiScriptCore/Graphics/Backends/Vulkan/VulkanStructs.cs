@@ -830,4 +830,38 @@ namespace Yonai.Graphics.Backends.Vulkan
 			if (TexelBufferViews != IntPtr.Zero) Marshal.FreeHGlobal(TexelBufferViews);
 		}
 	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageCreateInfo
+	{
+		private int _sType;
+		private IntPtr pNext;
+
+		public VkImageCreateFlag Flags;
+		public VkImageType ImageType;
+		public VkFormat Format;
+		public Extents3D Extent;
+		public uint MipLevels;
+		public uint ArrayLayers;
+		public VkSampleCount Samples;
+		public VkImageTiling Tiling;
+		public VkImageUsage Usage;
+		public VkSharingMode SharingMode;
+
+		private uint m_QueueFamilyIndexCount;
+		[MarshalAs(UnmanagedType.LPArray)]
+		private uint[] m_QueueFamilyIndices;
+
+		public uint[] QueueFamilyIndices
+		{
+			get => m_QueueFamilyIndices;
+			set
+			{
+				m_QueueFamilyIndices = value;
+				m_QueueFamilyIndexCount = (uint)(value?.Length ?? 0);
+			}
+		}
+
+		public VkImageLayout InitialLayout;
+	}
 }
