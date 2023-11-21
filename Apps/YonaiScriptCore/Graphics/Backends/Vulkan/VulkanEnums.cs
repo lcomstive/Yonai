@@ -851,6 +851,16 @@ namespace Yonai.Graphics.Backends.Vulkan
 		ErrorValidationFailed = -1000011001
 	}
 
+	static class VkResultExtension
+	{
+		public static void CheckForSuccess(this VkResult result, string context = "")
+		{
+			if (result != VkResult.Success)
+				Log.Error($"Vulkan error '{Enum.GetName(typeof(VkResult), result)}" +
+					(string.IsNullOrEmpty(context) ? string.Empty : $" - {context}"));
+		}
+	}
+
 	public enum VkCommandBufferResetFlag : int
 	{
 		None = 0,

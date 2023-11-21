@@ -36,6 +36,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				nativeSignalSemaphores[i] = signalSemaphores[i].Handle;
 
 			VkResult result = (VkResult)_Submit(Handle, fence?.Handle ?? IntPtr.Zero, nativeWaitSemaphores, stageMask, nativeBuffers, nativeSignalSemaphores);
+			result.CheckForSuccess("Submitting queue");
 			return result;
 		}
 
@@ -50,7 +51,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				nativeSwapchains[i] = swapchains[i].Handle;
 
 			VkResult result = (VkResult)_Present(Handle, nativeWaitSemaphores, nativeSwapchains, imageIndices);
-
+			result.CheckForSuccess("Presenting queue");
 			return result;
 		}
 

@@ -14,8 +14,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			m_Device = device;
 			IntPtr bindingsPtr = InteropUtils.CreateNativeHandle(bindings);
 			VkResult result = (VkResult)_Create(m_Device.Device, bindingsPtr, (uint)bindings.Length, out Handle);
-			if(result != VkResult.Success)
-				Log.Error("Failed to create descriptor set layout");
+			result.CheckForSuccess("Descriptor set layout creation");
 		}
 
 		public void Dispose() => _Destroy(m_Device.Device, Handle);
@@ -36,8 +35,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Device = device;
 			VkResult result = (VkResult)_Create(device.Device, poolSizes, (uint)descriptorCount, (uint)maxDescriptorSets, out Handle);
-			if (result != VkResult.Success)
-				Log.Error("Failed to create descriptor pool");
+			result.CheckForSuccess("Descriptor pool creation");
 		}
 
 		public void Dispose() => _Destroy(m_Device.Device, Handle);
@@ -51,6 +49,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				layout.Handle,
 				out IntPtr[] output
 			);
+			result.CheckForSuccess("Allocating descriptor sets");
 			if (result != VkResult.Success)
 				return new VulkanDescriptorSet[0];
 

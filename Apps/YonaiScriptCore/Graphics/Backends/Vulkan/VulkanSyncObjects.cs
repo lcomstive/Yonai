@@ -25,7 +25,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			for(int i = 0; i < handles.Length; i++)
 				handles[i] = fences[i].Handle;
 
-			return (VkResult)_Wait(fences[0].Device.Device, handles, waitAll, timeout);
+			VkResult result = (VkResult)_Wait(fences[0].Device.Device, handles, waitAll, timeout);
+			result.CheckForSuccess("Fence wait");
+			return result;
 		}
 		
 		public static VkResult Reset(VulkanFence[] fences)
@@ -36,7 +38,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			for(int i = 0; i < handles.Length; i++)
 				handles[i] = fences[i].Handle;
 
-			return (VkResult)_Reset(fences[0].Device.Device, handles);
+			VkResult result = (VkResult)_Reset(fences[0].Device.Device, handles);
+			result.CheckForSuccess("Reset fence");
+			return result;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

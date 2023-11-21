@@ -40,7 +40,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			IntPtr[] imageHandles = _GetImages(m_Device.Device, Handle);
 			Images = new VulkanImage[imageHandles.Length];
 			for (int i = 0; i < imageHandles.Length; i++)
-				Images[i] = new VulkanImage(m_Device, imageHandles[i], imageFormat, Resolution);
+				Images[i] = new VulkanImage(m_Device, imageHandles[i], imageFormat);
 		}
 
 		public void Dispose()

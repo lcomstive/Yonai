@@ -14,7 +14,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		internal IntPtr ImageMemory;
 		private VulkanDevice m_Device;
 
-		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat, IVector2 resolution)
+		private int m_MipLevels;
+
+		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat)
 		{
 			Image = handle;
 			Format = (VkFormat)imageFormat;
@@ -57,6 +59,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				out Image,
 				out ImageMemory
 			);
+			result.CheckForSuccess("Image creation");
 
 			imageViewInfo.m_Image = Image;
 			ImageView = _CreateImageView(m_Device.Device, Image, ref imageViewInfo);

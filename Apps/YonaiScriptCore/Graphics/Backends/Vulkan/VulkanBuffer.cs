@@ -32,6 +32,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 				out BufferHandle,
 				out MemoryHandle
 			);
+			result.CheckForSuccess("Buffer creation");
+
 			if(result != VkResult.Success)
 			{
 				Log.Error("Failed to create buffer");

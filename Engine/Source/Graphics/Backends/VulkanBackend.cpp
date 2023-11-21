@@ -1145,7 +1145,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 	{
 	default:
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:	spdlog::trace("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
-	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:		spdlog::info("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:		spdlog::trace("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:	spdlog::warn("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:		spdlog::error("[Vulkan][{}] {}", messageTypeStr, pCallbackData->pMessage); break;
 	}
