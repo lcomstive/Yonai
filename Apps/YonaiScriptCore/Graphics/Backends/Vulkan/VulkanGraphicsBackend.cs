@@ -593,6 +593,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			#region Temp
 			TestTexture.Dispose();
+			DepthTexture.Dispose();
+
+			for (int i = 0; i < Framebuffers.Length; i++)
+				Framebuffers[i].Dispose();
 
 			for(int i = 0; i < MaxFramesInFlight; i++)
 			{
