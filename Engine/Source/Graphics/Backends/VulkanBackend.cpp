@@ -1622,27 +1622,12 @@ ADD_MANAGED_METHOD(VulkanSwapchain, AcquireNextImage, int, (void* device, void* 
 	return (int)vkAcquireNextImageKHR((VkDevice)device, (VkSwapchainKHR)swapchain, timeout, (VkSemaphore)semaphore, (VkFence)fence, outIndex);
 }
 
-ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* inDevice, void* image, int imageFormat), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* inDevice, void* image, VkImageViewCreateInfo* info), Yonai.Graphics.Backends.Vulkan)
 {
-	VkImageViewCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	createInfo.image = (VkImage)image;
-	createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	createInfo.format = (VkFormat)imageFormat;
-
-	createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-	createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-	createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-	createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-	createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	createInfo.subresourceRange.baseMipLevel = 0;
-	createInfo.subresourceRange.levelCount = 1;
-	createInfo.subresourceRange.baseArrayLayer = 0;
-	createInfo.subresourceRange.layerCount = 1;
+	info->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
 	VkImageView imageView;
-	VkResult result = vkCreateImageView((VkDevice)inDevice, &createInfo, nullptr, &imageView);
+	VkResult result = vkCreateImageView((VkDevice)inDevice, info, nullptr, &imageView);
 	if (result != VK_SUCCESS)
 	{
 		LogCriticalError("Failed to create image view", result);
@@ -1848,6 +1833,7 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void*
 	pipelineInfo.layout = pipelineLayout;
 	pipelineInfo.renderPass = managed->RenderPass;
 	pipelineInfo.subpass = managed->Subpass;
+	pipelineInfo.pDepthStencilState = managed->DepthStencil;
 
 	VkPipeline pipeline;
 	result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
@@ -1947,9 +1933,19 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, DrawIndexed, void,
 	Yonai.Graphics.Backends.Vulkan)
 { vkCmdDrawIndexed((VkCommandBuffer)handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance); }
 
+struct VkClearValueManaged
+{
+	float ColourR;
+	float ColourG;
+	float ColourB;
+	float ColourA;
+	VkClearDepthStencilValue DepthStencil;
+	bool UseColour;
+};
+
 ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRenderPass, void, (
 	void* handle, void* renderPass, void* framebuffer,
-	glm::ivec2* offset, glm::ivec2* extent, glm::vec4* clearValue
+	glm::ivec2* offset, glm::ivec2* extent, MonoArray* clearValues
 ), Yonai.Graphics.Backends.Vulkan)
 {
 	VkRenderPassBeginInfo renderPassInfo = {};
@@ -1959,14 +1955,24 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRenderPass, void, (
 	renderPassInfo.renderArea.offset = { offset->x, offset->y };
 	renderPassInfo.renderArea.extent = { (unsigned int)extent->x, (unsigned int)extent->y };
 
-	VkClearValue clearColour = {{{
-			clearValue->r,
-			clearValue->g,
-			clearValue->b,
-			clearValue->a
-	}}};
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColour;
+	vector<VkClearValue> clearColours;
+	clearColours.resize(mono_array_length(clearValues));
+	for (size_t i = 0; i < clearColours.size(); i++)
+	{
+		VkClearValueManaged managed = mono_array_get(clearValues, VkClearValueManaged, i);
+		if (managed.UseColour)
+		{
+			clearColours[i].color.float32[0] = managed.ColourR;
+			clearColours[i].color.float32[1] = managed.ColourG;
+			clearColours[i].color.float32[2] = managed.ColourB;
+			clearColours[i].color.float32[3] = managed.ColourA;
+		}
+		else
+			clearColours[i].depthStencil = managed.DepthStencil;
+	}
+
+	renderPassInfo.clearValueCount = (unsigned int)clearColours.size();
+	renderPassInfo.pClearValues = clearColours.data();
 
 	vkCmdBeginRenderPass((VkCommandBuffer)handle, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }

@@ -79,7 +79,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			VkPipelineStageFlags sourceStage = VkPipelineStageFlags.None;
 			VkPipelineStageFlags destinationStage = VkPipelineStageFlags.None;
-			if(oldLayout == VkImageLayout.UNDEFINED && newLayout == VkImageLayout.TRANSFER_DST_OPTIMAL)
+			if(oldLayout == VkImageLayout.Undefined && newLayout == VkImageLayout.TRANSFER_DST_OPTIMAL)
 			{
 				barrier.SrcAccessMask = 0;
 				barrier.DstAccessMask = VkAccessFlags.TransferWrite;

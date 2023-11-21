@@ -8,12 +8,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VkFormat ImageFormat { get; private set; }
 		public VulkanImage[] Images { get; private set; }
 		public IVector2 Resolution { get; private set; }
-		public VulkanFramebuffer[] Framebuffers { get; private set; }
 
 		internal IntPtr Handle;
 		private VulkanDevice m_Device;
 		private VulkanInstance m_Instance;
-		private VulkanRenderPass m_RenderPass;
 
 		internal VulkanSwapchain(VulkanDevice device, VulkanInstance instance)
 		{
@@ -45,26 +43,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 				Images[i] = new VulkanImage(m_Device, imageHandles[i], imageFormat, Resolution);
 		}
 
-		public void GenerateFramebuffers(VulkanRenderPass renderPass)
-		{
-			m_RenderPass = renderPass;
-
-			// Create framebuffers
-			Framebuffers = new VulkanFramebuffer[Images.Length];
-			for (int i = 0; i < Images.Length; i++)
-				Framebuffers[i] = new VulkanFramebuffer(
-					m_Device,
-					m_RenderPass,
-					Images[i],
-					Resolution
-				);
-		}
-
 		public void Dispose()
 		{
-			foreach(VulkanFramebuffer fb in Framebuffers)
-				fb.Dispose();
-
 			foreach (VulkanImage image in Images)
 				image.Dispose();
 
@@ -73,12 +53,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void Recreate()
 		{
-			m_Device.WaitIdle();
-
 			Dispose();
-
 			GenerateSwapchain();
-			GenerateFramebuffers(m_RenderPass);
 		}
 
 		public (VkResult, uint) AcquireNextImage(VulkanSemaphore semaphore, VulkanFence fence = null, uint timeout = uint.MaxValue)

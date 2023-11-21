@@ -25,6 +25,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanSemaphore[] RenderFinishedSemaphores { get; private set; } = new VulkanSemaphore[0];
 		public VulkanBuffer VertexBuffer { get; private set; }
 		public VulkanBuffer IndexBuffer { get; private set; }
+		public VulkanFramebuffer[] Framebuffers { get; private set; } = new VulkanFramebuffer[0];
 
 		// Uniform Buffers
 		public IntPtr[] UniformBufferMemory { get; private set; } = new IntPtr[0];
@@ -34,6 +35,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanDescriptorSetLayout DescriptorSetLayout { get; private set; } = null;
 
 		// Texture
+		private VkFormat DepthFormat = VkFormat.D32_SFLOAT_S8_UINT;
 		public VulkanImage TestTexture { get; private set; } = null;
 		public const string TexturePath = "app://Assets/Textures/Grid.png";
 		public byte[] TextureData { get; private set; }
@@ -86,59 +88,24 @@ namespace Yonai.Graphics.Backends.Vulkan
 			SelectedDevice = Instance.Devices[0];
 			Log.Debug("\n\nChoosing first device - " + SelectedDevice.Name);
 
-			Swapchain = SelectedDevice.CreateSwapchain();
-
-			VkAttachmentDescription[] attachments = new VkAttachmentDescription[]
-			{
-				new VkAttachmentDescription()
-				{
-					Format = Swapchain.ImageFormat,
-					Samples = VkSampleCount.BITS_1,
-					LoadOp = VkAttachmentLoadOp.Clear,
-					StoreOp = VkAttachmentStoreOp.Store,
-					StencilLoadOp = VkAttachmentLoadOp.DontCare,
-					StencilStoreOp = VkAttachmentStoreOp.DontCare,
-					InitialLayout = VkImageLayout.UNDEFINED,
-					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
-				}
-			};
-			VkSubpassDescription[] subpasses = new VkSubpassDescription[]
-			{
-				new VkSubpassDescription()
-				{
-					PipelineBindPoint = VkPipelineBindPoint.Graphics,
-					ColourAttachments = new VkAttachmentReference[]
-					{
-						new VkAttachmentReference()
-						{
-							Attachment = 0,
-							Layout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
-						}
-					}
-				}
-			};
-			VkSubpassDependency[] dependencies = new VkSubpassDependency[]
-			{
-				new VkSubpassDependency()
-				{
-					SrcSubpass = VkSubpassDependency.SubpassExternal,
-					DstSubpass = 0,
-					SrcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
-					SrcAccessMask = VkAccessFlags.None,
-					DstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
-					DstAccessMask = VkAccessFlags.ColorAttachmentWrite
-				}
-			};
-			
-			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
+			Swapchain = SelectedDevice.CreateSwapchain();			
 			CommandPool = new VulkanCommandPool(SelectedDevice);
 			CommandBuffers = CommandPool.CreateCommandBuffers(MaxFramesInFlight, VkCommandBufferLevel.Primary);
 
-			Swapchain.GenerateFramebuffers(RenderPass);
-
-			CreateTextures();
+			CreateRenderPass();
+			CreateTestTexture();
+			CreateDepthTexture();
 			CreateUniformBuffers();
 			CreateDescriptorSets();
+
+			Framebuffers = new VulkanFramebuffer[Swapchain.Images.Length];
+			for (int i = 0; i < Swapchain.Images.Length; i++)
+				Framebuffers[i] = new VulkanFramebuffer(
+					SelectedDevice,
+					RenderPass,
+					new VulkanImage[] { Swapchain.Images[i], DepthTexture },
+					Swapchain.Resolution
+				);
 
 			var pipelineInfo = CreatePipelineInfo();
 			Pipeline = new VulkanGraphicsPipeline(pipelineInfo);
@@ -224,6 +191,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			CurrentFrame = (CurrentFrame + 1) % MaxFramesInFlight;
 		}
 
+		/// <summary>
+		/// Handles window resizing, or swapchain becoming out of date
+		/// </summary>
 		private void RecreateSwapchain()
 		{
 			IVector2 res = Window.Resolution;
@@ -233,8 +203,27 @@ namespace Yonai.Graphics.Backends.Vulkan
 				res = Window.Resolution;
 			}
 
+			SelectedDevice.WaitIdle();
+
+			// Clean up
+			for (int i = 0; i < Framebuffers.Length; i++)
+				Framebuffers[i].Dispose();
+
+			DepthTexture.Dispose();
+
+			// Recreate
 			m_FramebufferResized = false;
 			Swapchain.Recreate();
+
+			CreateDepthTexture();
+
+			for (int i = 0; i < Swapchain.Images.Length; i++)
+				Framebuffers[i] = new VulkanFramebuffer(
+					SelectedDevice,
+					RenderPass,
+					new VulkanImage[] { Swapchain.Images[i], DepthTexture },
+					Swapchain.Resolution
+				);
 		}
 
 		private void RecordCommandBuffer(VulkanCommandBuffer cmd, uint imageIndex)
@@ -246,7 +235,23 @@ namespace Yonai.Graphics.Backends.Vulkan
 				return;
 			}
 
-			cmd.BeginRenderPass(RenderPass, Swapchain.Framebuffers[imageIndex], IVector2.Zero, Swapchain.Resolution, Colour.Black);
+			VkClearValue[] clearValues = new VkClearValue[]
+			{
+				new VkClearValue(Colour.Black),
+				new VkClearValue(new VkClearDepthStencilValue
+				{
+					Depth = 1,
+					Stencil = 0
+				})
+			};
+
+			cmd.BeginRenderPass(
+				RenderPass,
+				Framebuffers[imageIndex],
+				offset: IVector2.Zero,
+				Swapchain.Resolution,
+				clearValues
+			);
 
 			cmd.BindPipeline(Pipeline, VkPipelineBindPoint.Graphics);
 			cmd.SetViewport(new VkViewport(offset: Vector2.Zero, size: Swapchain.Resolution, depthRange: new Vector2(0, 1)));
@@ -404,7 +409,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 		}
 
-		private void CreateTextures()
+		private void CreateTestTexture()
 		{
 			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
 			{
@@ -446,19 +451,140 @@ namespace Yonai.Graphics.Backends.Vulkan
 				MipLevels = 1,
 				ArrayLayers = 1
 			};
-			TestTexture = new VulkanImage(SelectedDevice, imageInfo, samplerInfo);
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				ViewType = VkImageViewType._2D,
+				Format = imageInfo.Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
+			TestTexture = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
 
-			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.UNDEFINED, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
 			CommandPool.CopyBufferToImage(stagingBuffer, TestTexture, TextureResolution);
 			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 
 			stagingBuffer.Dispose();
+		}
 
-			// Depth texture
-			imageInfo.Format = VkFormat.D32_SFLOAT_S8_UINT;
-			imageInfo.Usage = VkImageUsage.DepthStencilAttachment;
-			imageInfo.Extent = new Extents3D(Swapchain.Resolution);
-			DepthTexture = new VulkanImage(SelectedDevice, imageInfo, samplerInfo);
+		private void CreateDepthTexture()
+		{
+			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
+			{
+				MagFilter = VkFilter.Linear,
+				MinFilter = VkFilter.Linear,
+				AddressModeU = VkSamplerAddressMode.Repeat,
+				AddressModeV = VkSamplerAddressMode.Repeat,
+				AddressModeW = VkSamplerAddressMode.Repeat,
+				AnisotropyEnable = true,
+				MaxAnisotropy = SelectedDevice.Limits.MaxSamplerAnisotropy,
+				BorderColor = VkBorderColor.IntOpaqueBlack,
+				UnnormalizedCoordinates = false,
+				CompareEnable = false,
+				CompareOp = VkCompareOp.ALWAYS,
+				MipmapMode = VkSamplerMipmapMode.Linear,
+				MipLodBias = 0.0f,
+				MinLod = 0.0f,
+				MaxLod = 0.0f
+			};
+
+			VkImageCreateInfo imageInfo = new VkImageCreateInfo
+			{
+				ImageType = VkImageType.Type2D,
+				Format = DepthFormat,
+				Usage = VkImageUsage.DepthStencilAttachment,
+				Tiling = VkImageTiling.Optimal,
+				Samples = VkSampleCount.BITS_1,
+				Extent = new Extents3D(Swapchain.Resolution),
+				MipLevels = 1,
+				ArrayLayers = 1
+			};
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				ViewType = VkImageViewType._2D,
+				Format = imageInfo.Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Depth,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
+
+			DepthTexture = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
+		}
+
+		private void CreateRenderPass()
+		{
+			VkAttachmentDescription[] attachments = new VkAttachmentDescription[]
+			{
+				new VkAttachmentDescription
+				{
+					Format = Swapchain.ImageFormat,
+					Samples = VkSampleCount.BITS_1,
+					LoadOp = VkAttachmentLoadOp.Clear,
+					StoreOp = VkAttachmentStoreOp.Store,
+					StencilLoadOp = VkAttachmentLoadOp.DontCare,
+					StencilStoreOp = VkAttachmentStoreOp.DontCare,
+					InitialLayout = VkImageLayout.Undefined,
+					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
+				},
+				new VkAttachmentDescription
+				{
+					Format = DepthFormat,
+					Samples = VkSampleCount.BITS_1,
+					LoadOp = VkAttachmentLoadOp.Clear,
+					StoreOp = VkAttachmentStoreOp.DontCare,
+					StencilLoadOp = VkAttachmentLoadOp.DontCare,
+					StencilStoreOp = VkAttachmentStoreOp.DontCare,
+					InitialLayout = VkImageLayout.Undefined,
+					FinalLayout = VkImageLayout.DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				}
+			};
+			VkSubpassDescription[] subpasses = new VkSubpassDescription[]
+			{
+				new VkSubpassDescription()
+				{
+					PipelineBindPoint = VkPipelineBindPoint.Graphics,
+					ColourAttachments = new VkAttachmentReference[]
+					{
+						new VkAttachmentReference()
+						{
+							Attachment = 0,
+							Layout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
+						}
+					},
+					DepthStencilAttachment = new VkAttachmentReference
+					{
+						Attachment = 1,
+						Layout = VkImageLayout.DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+					}
+				}
+			};
+			VkSubpassDependency[] dependencies = new VkSubpassDependency[]
+			{
+				new VkSubpassDependency()
+				{
+					SrcSubpass = VkSubpassDependency.SubpassExternal,
+					DstSubpass = 0,
+					SrcStageMask = VkPipelineStageFlags.ColorAttachmentOutput | VkPipelineStageFlags.EarlyFragmentTests,
+					SrcAccessMask = VkAccessFlags.None,
+					DstStageMask = VkPipelineStageFlags.ColorAttachmentOutput | VkPipelineStageFlags.EarlyFragmentTests,
+					DstAccessMask = VkAccessFlags.ColorAttachmentWrite | VkAccessFlags.DepthStencilAttachmentWrite
+				}
+			};
+
+			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
 		}
 
 		public void Destroy()
@@ -610,6 +736,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			VkPipelineMultisampleState multisampling = new VkPipelineMultisampleState
 			{
 				SampleShadingEnable = false,
+				AlphaToOneEnable = false,
 				RasterizationSamples = VkSampleCount.BITS_1
 			};
 
@@ -627,6 +754,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 				}
 			};
 
+			VkPipelineDepthStencilState depthStencil = new VkPipelineDepthStencilState
+			{
+				DepthTestEnable = true,
+				DepthWriteEnable = true,
+				DepthCompareOp = VkCompareOp.LESS,
+				DepthBoundsTestEnable = false,
+				MinDepthBounds = 0,
+				MaxDepthBounds = 1,
+
+				StencilTestEnable = false
+			};
+
 			return new VkGraphicsPipelineCreateInfo
 			{
 				Stages = shaderStages,
@@ -639,6 +778,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				Multisample = multisampling,
 				ColorBlendState = colourBlending,
 				DynamicStates = dynamicStates,
+				DepthStencilState = depthStencil,
 				RenderPass = RenderPass,
 				Subpass = 0
 			};

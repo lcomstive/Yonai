@@ -38,7 +38,16 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_SetScissor(Handle, ref scissor, index);
 
 		public void BeginRenderPass(VulkanRenderPass renderPass, VulkanFramebuffer framebuffer, IVector2 offset, IVector2 extent, Colour clearValue) =>
-			_BeginRenderPass(Handle, renderPass.Handle, framebuffer.Handle, ref offset, ref extent, ref clearValue);
+			BeginRenderPass(renderPass, framebuffer, offset, extent, new VkClearValue[] { new VkClearValue(clearValue) });
+
+		public void BeginRenderPass(VulkanRenderPass renderPass, VulkanFramebuffer framebuffer, IVector2 offset, IVector2 extent, VkClearValue[] clearValues)
+		{
+			VkClearValueNative[] nativeClears = new VkClearValueNative[clearValues.Length];
+			for (int i = 0; i < clearValues.Length; i++)
+				nativeClears[i] = new VkClearValueNative(clearValues[i]);
+
+			_BeginRenderPass(Handle, renderPass.Handle, framebuffer.Handle, ref offset, ref extent, nativeClears);
+		}
 
 		public void EndRenderPass() => _EndRenderPass(Handle);
 
@@ -105,7 +114,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			IntPtr framebuffer,
 			ref IVector2 offset,
 			ref IVector2 extent,
-			ref Colour clearValue
+			VkClearValueNative[] clearValues
 		);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _EndRenderPass(IntPtr handle);

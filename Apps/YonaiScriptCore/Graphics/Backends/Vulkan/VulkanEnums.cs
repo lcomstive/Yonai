@@ -362,7 +362,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public enum VkImageLayout : int
 	{
-		UNDEFINED = 0,
+		Undefined = 0,
 		GENERAL = 1,
 		COLOR_ATTACHMENT_OPTIMAL = 2,
 		DEPTH_STENCIL_ATTACHMENT_OPTIMAL = 3,
@@ -1064,5 +1064,27 @@ namespace Yonai.Graphics.Backends.Vulkan
 		EXTENDED_USAGE_BIT_KHR = EXTENDED_USAGE_BIT,
 		DISJOINT_BIT_KHR = DISJOINT_BIT,
 		ALIAS_BIT_KHR = ALIAS_BIT
+	}
+
+	public enum VkImageViewType : int
+	{
+		_1D = 0,
+		_2D = 1,
+		_3D = 2,
+		Cube = 3,
+		_1D_ARRAY = 4,
+		_2D_ARRAY = 5,
+		CubeArray = 6
+	}
+
+	public enum VkComponentSwizzle : int
+	{
+		Identity = 0,
+		Zero = 1,
+		One = 2,
+		R = 3,
+		G = 4,
+		B = 5,
+		A = 6
 	}
 }

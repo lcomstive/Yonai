@@ -20,12 +20,29 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Format = (VkFormat)imageFormat;
 			m_Device = device;
 
-			ImageView = _CreateImageView(m_Device.Device, Image, imageFormat);
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				m_Image = Image,
+				ViewType = VkImageViewType._2D,
+				Format = Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
+
+			ImageView = _CreateImageView(m_Device.Device, Image, ref imageViewInfo);
 		}
 
 		public VulkanImage(
 			VulkanDevice device,
 			VkImageCreateInfo imageInfo,
+			VkImageViewCreateInfo imageViewInfo,
 			VkSamplerCreateInfo samplerInfo
 		)
 		{
@@ -41,7 +58,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 				out ImageMemory
 			);
 
-			ImageView = _CreateImageView(m_Device.Device, Image, (int)Format);
+			imageViewInfo.m_Image = Image;
+			ImageView = _CreateImageView(m_Device.Device, Image, ref imageViewInfo);
 
 			_CreateSampler(m_Device.Device, ref samplerInfo, out Sampler);
 		}
@@ -62,7 +80,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr _CreateImageView(IntPtr device, IntPtr image, int imageFormat);
+		private static extern IntPtr _CreateImageView(IntPtr device, IntPtr image, ref VkImageViewCreateInfo info);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _DestroyImageView(IntPtr device, IntPtr image);

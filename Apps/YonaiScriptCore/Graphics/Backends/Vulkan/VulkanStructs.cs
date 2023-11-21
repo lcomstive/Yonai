@@ -864,4 +864,112 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public VkImageLayout InitialLayout;
 	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkComponentMapping
+	{
+		public VkComponentSwizzle r;
+		public VkComponentSwizzle g;
+		public VkComponentSwizzle b;
+		public VkComponentSwizzle a;
+
+		public static VkComponentMapping Identity => new VkComponentMapping
+		{
+			r = VkComponentSwizzle.Identity,
+			g = VkComponentSwizzle.Identity,
+			b = VkComponentSwizzle.Identity,
+			a = VkComponentSwizzle.Identity
+		};
+		
+		public static VkComponentMapping Zero => new VkComponentMapping
+		{
+			r = VkComponentSwizzle.Zero,
+			g = VkComponentSwizzle.Zero,
+			b = VkComponentSwizzle.Zero,
+			a = VkComponentSwizzle.Zero
+		};
+		
+		public static VkComponentMapping One => new VkComponentMapping
+		{
+			r = VkComponentSwizzle.One,
+			g = VkComponentSwizzle.One,
+			b = VkComponentSwizzle.One,
+			a = VkComponentSwizzle.One
+		};
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageViewCreateInfo
+	{
+		private int _sType;
+		private IntPtr _pNext;
+		private int _flags;
+
+		internal IntPtr m_Image;
+		public VulkanImage Image { set => m_Image = value?.Image ?? IntPtr.Zero; }
+
+		public VkImageViewType ViewType;
+		public VkFormat Format;
+		public VkComponentMapping Components;
+		public VkImageSubresourceRange SubresourceRange;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkClearDepthStencilValue
+	{
+		public float Depth;
+		public uint Stencil;
+	}
+
+	public struct VkClearValue
+	{
+		public Colour? Colour;
+		public VkClearDepthStencilValue? DepthStencil;
+
+		public VkClearValue(Colour colour)
+		{
+			Colour = colour;
+			DepthStencil = null;
+		}
+
+		public VkClearValue(VkClearDepthStencilValue depthStencil)
+		{
+			Colour = null;
+			DepthStencil = depthStencil;
+		}
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	internal struct VkClearValueNative
+	{
+		public float ColorR;
+		public float ColorG;
+		public float ColorB;
+		public float ColorA;
+
+		public VkClearDepthStencilValue DepthStencil;
+
+		public bool UseColour;
+
+		public VkClearValueNative(VkClearValue value)
+		{
+			if (!value.Colour.HasValue && !value.DepthStencil.HasValue)
+				throw new ArgumentException("VkClearValue needs either color or depth value");
+
+			// Defaults
+			ColorR = ColorG = ColorB = ColorA = 0.0f;
+			DepthStencil = new VkClearDepthStencilValue();
+			UseColour = value.Colour.HasValue;
+
+			if (value.Colour.HasValue)
+			{
+				ColorR = value.Colour.Value.r;
+				ColorG = value.Colour.Value.g;
+				ColorB = value.Colour.Value.b;
+				ColorA = value.Colour.Value.a;
+			}
+			else
+				DepthStencil = value.DepthStencil.Value;
+		}
+	}
 }
