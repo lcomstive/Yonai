@@ -24,6 +24,13 @@ namespace Yonai.Graphics
 		}
 	}
 
+	public struct DecodedTexture
+	{
+		public byte[] Data;
+		public int Channels;
+		public IVector2 Resolution;
+	}
+
 	[SerializeFileOptions(SaveSeparateFile = true)]
 	public class Texture : NativeResourceBase, ISerializable
 	{
@@ -85,10 +92,17 @@ namespace Yonai.Graphics
 				Filtering = (TextureFiltering)json["Filtering"].Value<int>()
 			});
 
-		public static (byte[], IVector2) Decode(VFSFile file, bool hdr = false)
+		public static DecodedTexture Decode(VFSFile file, bool hdr = false, int expectedChannels = 0)
 		{
-			bool success = _Decode(VFS.Read(file), hdr, out byte[] output, out IVector2 resolution);
-			return success ? (output, resolution) : (new byte[0], IVector2.Zero);
+			bool success = _Decode(VFS.Read(file), hdr, expectedChannels, out byte[] output, out IVector2 resolution, out int channelCount);
+			if (!success)
+				return new DecodedTexture();
+			return new DecodedTexture
+			{
+				Data = output,
+				Resolution = resolution,
+				Channels = channelCount
+			};
 		}
 
 		#region Internal Calls
@@ -101,7 +115,7 @@ namespace Yonai.Graphics
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFilter(IntPtr handle);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Decode(byte[] fileData, bool hdr, out byte[] output, out IVector2 resolution);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Decode(byte[] fileData, bool hdr, int expectedChannels, out byte[] output, out IVector2 resolution, out int channelCount);
 		#endregion
 	}
 }

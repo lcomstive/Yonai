@@ -111,7 +111,7 @@ ADD_MANAGED_METHOD(Texture, GetFilter, int, (void* instance), Yonai.Graphics)
 ADD_MANAGED_METHOD(Texture, IsValid, bool, (void* instance), Yonai.Graphics)
 { return ((Texture*)instance)->IsValid(); }
 
-ADD_MANAGED_METHOD(Texture, Decode, bool, (MonoArray* textureDataRaw, bool hdr, MonoArray** output, glm::ivec2* outResolution), Yonai.Graphics)
+ADD_MANAGED_METHOD(Texture, Decode, bool, (MonoArray* textureDataRaw, bool hdr, int expectedChannels, MonoArray** output, glm::ivec2* outResolution, int* outChannels), Yonai.Graphics)
 {
 	if(!textureDataRaw)
 		return false;
@@ -130,14 +130,14 @@ ADD_MANAGED_METHOD(Texture, Decode, bool, (MonoArray* textureDataRaw, bool hdr, 
 	// Read image data
 	int width, height, channelCount;
 	void* data = nullptr;
-
-	// Flip loaded textures, so OpenGL loads them right way up
-	stbi_set_flip_vertically_on_load(true);
 	
 	if (!hdr)
-		data = stbi_load_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
+		data = stbi_load_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, expectedChannels);
 	else
-		data = stbi_loadf_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, 0);
+		data = stbi_loadf_from_memory(textureData.data(), (int)textureData.size(), &width, &height, &channelCount, expectedChannels);
+
+	if (expectedChannels > 0)
+		channelCount = expectedChannels;
 
 	// Check for validity
 	if (!data)
@@ -155,6 +155,8 @@ ADD_MANAGED_METHOD(Texture, Decode, bool, (MonoArray* textureDataRaw, bool hdr, 
 	*output = mono_array_new(mono_domain_get(), mono_get_byte_class(), dataSize);
 	for(int i = 0; i < dataSize; i++)
 		mono_array_set(*output, unsigned char, i, ((unsigned char*)data)[i]);
+
+	*outChannels = channelCount;
 
 	stbi_image_free(data);
 	return true;

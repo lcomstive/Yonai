@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 using static Yonai.Graphics.Mesh;
+using Yonai.IO;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -36,10 +37,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		// Texture
 		private VkFormat DepthFormat = VkFormat.D32_SFLOAT_S8_UINT;
-		public VulkanImage TestTexture { get; private set; } = null;
-		public const string TexturePath = "app://Assets/Textures/Grid.png";
-		public byte[] TextureData { get; private set; }
-		public IVector2 TextureResolution { get; private set; }
 
 		// Depth Texture
 		public VulkanImage DepthTexture { get; private set; } = null;
@@ -54,23 +51,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private bool m_FramebufferResized = false;
 
-		private static readonly Vertex[] Vertices =
-		{
-				new Vertex(new Vector3(-0.5f, -0.5f, 0), Vector3.Zero, new Vector2(0, 0)),
-				new Vertex(new Vector3( 0.5f, -0.5f, 0), Vector3.Zero, new Vector2(1, 0)),
-				new Vertex(new Vector3( 0.5f,  0.5f, 0), Vector3.Zero, new Vector2(1, 1)),
-				new Vertex(new Vector3(-0.5f,  0.5f, 0), Vector3.Zero, new Vector2(0, 1)),
-
-				new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), Vector3.Zero, new Vector2(0, 0)),
-				new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), Vector3.Zero, new Vector2(1, 0)),
-				new Vertex(new Vector3( 0.5f,  0.5f, -0.5f), Vector3.Zero, new Vector2(1, 1)),
-				new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), Vector3.Zero, new Vector2(0, 1)),
-		};
-		private static readonly uint[] Indices =
-		{
-			0, 1, 2, 2, 3, 0,
-			4, 5, 6, 6, 7, 4
-		};
+		public Model TestModel { get; private set; }
+		public VulkanImage TestModelTexture { get; private set; }
 		#endregion
 
 		public void Create()
@@ -93,7 +75,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			CommandBuffers = CommandPool.CreateCommandBuffers(MaxFramesInFlight, VkCommandBufferLevel.Primary);
 
 			CreateRenderPass();
-			CreateTestTexture();
+			CreateTestModel();
 			CreateDepthTexture();
 			CreateUniformBuffers();
 			CreateDescriptorSets();
@@ -119,9 +101,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 				ImageAvailableSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 				RenderFinishedSemaphores[i] = new VulkanSemaphore(SelectedDevice);
 			}
-
-			CreateVertexBuffer();
-			CreateIndexBuffer();
 
 			Window.Resized += OnWindowResized;
 			#endregion
@@ -261,23 +240,24 @@ namespace Yonai.Graphics.Backends.Vulkan
 			cmd.BindIndexBuffer(IndexBuffer);
 
 			cmd.BindDescriptorSets(Pipeline, 0, new VulkanDescriptorSet[] { DescriptorSets[CurrentFrame] });
-			cmd.DrawIndexed((uint)Indices.Length);
+			cmd.DrawIndexed((uint)TestModel.Meshes[0].Mesh.Indices.Length);
 
 			cmd.EndRenderPass();
 			cmd.End();
 		}
 
-		private void CreateVertexBuffer()
+		private void CreateMeshBuffers(Mesh mesh)
 		{
+			// Vertex buffer //
 			int vertexSize = sizeof(float) * 8;
-			int bufferSize = vertexSize * Vertices.Length;
+			int bufferSize = vertexSize * mesh.Vertices.Length;
 			VulkanBuffer stagingBuffer = new VulkanBuffer(
 				SelectedDevice,
 				bufferSize,
 				VkBufferUsage.TransferSource,
 				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
 			);
-			stagingBuffer.Upload(Vertices.ToByteArray());
+			stagingBuffer.Upload(mesh.Vertices.ToByteArray());
 
 			VertexBuffer = new VulkanBuffer(
 				SelectedDevice,
@@ -288,15 +268,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			stagingBuffer.CopyTo(CommandPool, VertexBuffer, bufferSize);
 			stagingBuffer.Dispose();
-		}
 
-		private void CreateIndexBuffer()
-		{
-			int bufferSize = sizeof(uint) * Indices.Length;
+			// Index Buffer //
+			bufferSize = sizeof(uint) * mesh.Indices.Length;
 			byte[] indicesData = new byte[bufferSize];
-			Buffer.BlockCopy(Indices, 0, indicesData, 0, bufferSize);
+			Buffer.BlockCopy(mesh.Indices, 0, indicesData, 0, bufferSize);
 
-			VulkanBuffer stagingBuffer = new VulkanBuffer(
+			stagingBuffer = new VulkanBuffer(
 				SelectedDevice,
 				bufferSize,
 				VkBufferUsage.TransferSource,
@@ -396,8 +374,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 						new VkDescriptorImageInfo
 						{
 							ImageLayout = VkImageLayout.SHADER_READ_ONLY_OPTIMAL,
-							ImageView = TestTexture.ImageView,
-							Sampler = TestTexture.Sampler
+							ImageView = TestModelTexture.ImageView,
+							Sampler = TestModelTexture.Sampler
 						}
 					}
 				}
@@ -409,8 +387,54 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 		}
 
-		private void CreateTestTexture()
+		private void CreateTestModel()
 		{
+			TestModel = Resource.Load<Model>("app://TestModel/viking_room.obj");
+			TestModelTexture = CreateTexture("app://TestModel/viking_room.png");
+
+			if ((TestModel?.Meshes?.Length ?? 0) > 0)
+				CreateMeshBuffers(TestModel.Meshes[0].Mesh);
+			else
+				Log.Error("Cannot create mesh buffers, invalid mesh");
+		}
+
+		private VulkanImage CreateTexture(VFSFile filepath)
+		{
+			// Colour texture
+			DecodedTexture decoded = Texture.Decode(filepath, false, 4);
+			VulkanBuffer stagingBuffer = new VulkanBuffer(
+				SelectedDevice,
+				decoded.Data.Length,
+				VkBufferUsage.TransferSource,
+				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+			);
+			stagingBuffer.Upload(decoded.Data);
+
+			VkImageCreateInfo imageInfo = new VkImageCreateInfo
+			{
+				ImageType = VkImageType.Type2D,
+				Format = VkFormat.R8G8B8A8_SRGB,
+				Usage = VkImageUsage.TransferDst | VkImageUsage.Sampled,
+				Tiling = VkImageTiling.Optimal,
+				Samples = VkSampleCount.BITS_1,
+				Extent = new Extents3D(decoded.Resolution),
+				MipLevels = 1,
+				ArrayLayers = 1
+			};
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				ViewType = VkImageViewType._2D,
+				Format = imageInfo.Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
 			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
 			{
 				MagFilter = VkFilter.Linear,
@@ -429,49 +453,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 				MinLod = 0.0f,
 				MaxLod = 0.0f
 			};
+			VulkanImage image = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
 
-			// Colour texture
-			(TextureData, TextureResolution) = Texture.Decode(TexturePath);
-			VulkanBuffer stagingBuffer = new VulkanBuffer(
-				SelectedDevice,
-				TextureData.Length,
-				VkBufferUsage.TransferSource,
-				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
-			);
-			stagingBuffer.Upload(TextureData);
-
-			VkImageCreateInfo imageInfo = new VkImageCreateInfo
-			{
-				ImageType = VkImageType.Type2D,
-				Format = VkFormat.R8G8B8A8_SRGB,
-				Usage = VkImageUsage.TransferDst | VkImageUsage.Sampled,
-				Tiling = VkImageTiling.Optimal,
-				Samples = VkSampleCount.BITS_1,
-				Extent = new Extents3D(TextureResolution),
-				MipLevels = 1,
-				ArrayLayers = 1
-			};
-			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
-			{
-				ViewType = VkImageViewType._2D,
-				Format = imageInfo.Format,
-				Components = VkComponentMapping.Identity,
-				SubresourceRange = new VkImageSubresourceRange
-				{
-					AspectMask = VkImageAspectFlags.Color,
-					BaseMipLevel = 0,
-					LevelCount = 1,
-					BaseArrayLayer = 0,
-					LayerCount = 1,
-				}
-			};
-			TestTexture = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
-
-			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
-			CommandPool.CopyBufferToImage(stagingBuffer, TestTexture, TextureResolution);
-			CommandPool.TransitionImageLayout(TestTexture, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+			CommandPool.TransitionImageLayout(image, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			CommandPool.CopyBufferToImage(stagingBuffer, image, decoded.Resolution);
+			CommandPool.TransitionImageLayout(image, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 
 			stagingBuffer.Dispose();
+
+			return image;
 		}
 
 		private void CreateDepthTexture()
@@ -592,7 +582,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Log.Trace("Destroying vulkan graphics backend");
 
 			#region Temp
-			TestTexture.Dispose();
+			TestModelTexture.Dispose();
 			DepthTexture.Dispose();
 
 			for (int i = 0; i < Framebuffers.Length; i++)
