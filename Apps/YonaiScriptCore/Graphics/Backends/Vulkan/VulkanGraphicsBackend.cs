@@ -620,10 +620,25 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Instance?.Dispose();
 		}
 
+		private static float Rotation = 0.0f;
+		private static bool FollowMouse = false;
+		private static float RotateSpeed = DefaultRotateSpeed;
+		private const float DefaultRotateSpeed = 1.0f;
+		private static float MousePositionDampen = 0.1f;
 		private void UpdateUniformBuffer(uint frameIndex)
 		{
+			if (FollowMouse)
+			{
+				RotateSpeed = Mouse.Position.x - (Window.Resolution.x / 2.0f);
+				RotateSpeed *= MousePositionDampen;
+			}
+			if (Input.IsKeyPressed(Key.Space))
+				FollowMouse = !FollowMouse;
+
+            Rotation += Time.DeltaTime * RotateSpeed;
+
 			ShaderMVP mvp;
-			mvp.Model = Matrix4.Rotate(Time.TimeSinceLaunch, Vector3.Forward);
+			mvp.Model = Matrix4.Rotate(Rotation, Vector3.Forward);
 			mvp.View = Matrix4.LookAt(new Vector3(2, 2, 2), Vector3.Zero, Vector3.Forward);
 			mvp.Projection = Matrix4.Perspective(45.0f, Swapchain.Resolution.x / (float)Swapchain.Resolution.y, 0.1f, 10.0f);
 			mvp.Projection[1, 1] *= -1.0f;
