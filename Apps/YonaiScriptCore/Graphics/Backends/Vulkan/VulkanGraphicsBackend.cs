@@ -41,6 +41,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 		// Depth Texture
 		public VulkanImage DepthTexture { get; private set; } = null;
 
+		// Offscreen buffer
+		public VkSampleCount MSAASamples { get; private set; } = VkSampleCount._1;
+		public VulkanImage RenderTarget { get; private set; } = null;
+
 		private struct ShaderMVP
 		{
 			public Matrix4 Model;
@@ -68,6 +72,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			#region Temp
 			SelectedDevice = Instance.Devices[0];
+			MSAASamples = SelectedDevice.Limits.GetMaxSamples();
 			Log.Debug("\n\nChoosing first device - " + SelectedDevice.Name);
 
 			Swapchain = SelectedDevice.CreateSwapchain();			
@@ -76,6 +81,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			CreateRenderPass();
 			CreateTestModel();
+			CreateRenderTarget();
 			CreateDepthTexture();
 			CreateUniformBuffers();
 			CreateDescriptorSets();
@@ -85,7 +91,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				Framebuffers[i] = new VulkanFramebuffer(
 					SelectedDevice,
 					RenderPass,
-					new VulkanImage[] { Swapchain.Images[i], DepthTexture },
+					new VulkanImage[] { RenderTarget, DepthTexture, Swapchain.Images[i] },
 					Swapchain.Resolution
 				);
 
@@ -189,18 +195,20 @@ namespace Yonai.Graphics.Backends.Vulkan
 				Framebuffers[i].Dispose();
 
 			DepthTexture.Dispose();
+			RenderTarget.Dispose();
 
 			// Recreate
 			m_FramebufferResized = false;
 			Swapchain.Recreate();
 
+			CreateRenderTarget();
 			CreateDepthTexture();
 
 			for (int i = 0; i < Swapchain.Images.Length; i++)
 				Framebuffers[i] = new VulkanFramebuffer(
 					SelectedDevice,
 					RenderPass,
-					new VulkanImage[] { Swapchain.Images[i], DepthTexture },
+					new VulkanImage[] { RenderTarget, DepthTexture, Swapchain.Images[i] },
 					Swapchain.Resolution
 				);
 		}
@@ -416,7 +424,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				Format = VkFormat.R8G8B8A8_SRGB,
 				Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Sampled,
 				Tiling = VkImageTiling.Optimal,
-				Samples = VkSampleCount.BITS_1,
+				Samples = VkSampleCount._1,
 				Extent = new Extents3D(decoded.Resolution),
 				MipLevels = VulkanImage.CalculateMipLevels(decoded.Resolution),
 				ArrayLayers = 1
@@ -468,6 +476,31 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private void CreateDepthTexture()
 		{
+			VkImageCreateInfo imageInfo = new VkImageCreateInfo
+			{
+				ImageType = VkImageType.Type2D,
+				Format = DepthFormat,
+				Usage = VkImageUsage.DepthStencilAttachment,
+				Tiling = VkImageTiling.Optimal,
+				Samples = MSAASamples,
+				Extent = new Extents3D(Swapchain.Resolution),
+				MipLevels = 1,
+				ArrayLayers = 1
+			};
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				ViewType = VkImageViewType._2D,
+				Format = imageInfo.Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Depth,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
 			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
 			{
 				MagFilter = VkFilter.Linear,
@@ -487,32 +520,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 				MaxLod = 0.0f
 			};
 
-			VkImageCreateInfo imageInfo = new VkImageCreateInfo
-			{
-				ImageType = VkImageType.Type2D,
-				Format = DepthFormat,
-				Usage = VkImageUsage.DepthStencilAttachment,
-				Tiling = VkImageTiling.Optimal,
-				Samples = VkSampleCount.BITS_1,
-				Extent = new Extents3D(Swapchain.Resolution),
-				MipLevels = 1,
-				ArrayLayers = 1
-			};
-			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
-			{
-				ViewType = VkImageViewType._2D,
-				Format = imageInfo.Format,
-				Components = VkComponentMapping.Identity,
-				SubresourceRange = new VkImageSubresourceRange
-				{
-					AspectMask = VkImageAspectFlags.Depth,
-					BaseMipLevel = 0,
-					LevelCount = 1,
-					BaseArrayLayer = 0,
-					LayerCount = 1,
-				}
-			};
-
 			DepthTexture = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
 		}
 
@@ -523,24 +530,35 @@ namespace Yonai.Graphics.Backends.Vulkan
 				new VkAttachmentDescription
 				{
 					Format = Swapchain.ImageFormat,
-					Samples = VkSampleCount.BITS_1,
+					Samples = MSAASamples,
 					LoadOp = VkAttachmentLoadOp.Clear,
 					StoreOp = VkAttachmentStoreOp.Store,
 					StencilLoadOp = VkAttachmentLoadOp.DontCare,
 					StencilStoreOp = VkAttachmentStoreOp.DontCare,
 					InitialLayout = VkImageLayout.Undefined,
-					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
+					FinalLayout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
 				},
 				new VkAttachmentDescription
 				{
 					Format = DepthFormat,
-					Samples = VkSampleCount.BITS_1,
+					Samples = MSAASamples,
 					LoadOp = VkAttachmentLoadOp.Clear,
 					StoreOp = VkAttachmentStoreOp.DontCare,
 					StencilLoadOp = VkAttachmentLoadOp.DontCare,
 					StencilStoreOp = VkAttachmentStoreOp.DontCare,
 					InitialLayout = VkImageLayout.Undefined,
 					FinalLayout = VkImageLayout.DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				},
+				new VkAttachmentDescription
+				{
+					Format = Swapchain.ImageFormat,
+					Samples = VkSampleCount._1,
+					LoadOp = VkAttachmentLoadOp.DontCare,
+					StoreOp = VkAttachmentStoreOp.Store,
+					StencilLoadOp = VkAttachmentLoadOp.DontCare,
+					StencilStoreOp = VkAttachmentStoreOp.DontCare,
+					InitialLayout = VkImageLayout.Undefined,
+					FinalLayout = VkImageLayout.PRESENT_SRC_KHR
 				}
 			};
 			VkSubpassDescription[] subpasses = new VkSubpassDescription[]
@@ -560,6 +578,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 					{
 						Attachment = 1,
 						Layout = VkImageLayout.DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+					},
+					ResolveAttachments = new VkAttachmentReference[]
+					{
+						new VkAttachmentReference()
+						{
+							Attachment = 2,
+							Layout = VkImageLayout.COLOR_ATTACHMENT_OPTIMAL
+						}
 					}
 				}
 			};
@@ -579,6 +605,55 @@ namespace Yonai.Graphics.Backends.Vulkan
 			RenderPass = new VulkanRenderPass(SelectedDevice, attachments, subpasses, dependencies);
 		}
 
+		private void CreateRenderTarget()
+		{
+			VkImageCreateInfo imageInfo = new VkImageCreateInfo
+			{
+				ImageType = VkImageType.Type2D,
+				Format = Swapchain.ImageFormat,
+				Usage = VkImageUsage.TransientAttachment | VkImageUsage.ColorAttachment,
+				Tiling = VkImageTiling.Optimal,
+				Samples = MSAASamples,
+				Extent = new Extents3D(Swapchain.Resolution),
+				MipLevels = 1,
+				ArrayLayers = 1
+			};
+			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
+			{
+				ViewType = VkImageViewType._2D,
+				Format = imageInfo.Format,
+				Components = VkComponentMapping.Identity,
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					BaseMipLevel = 0,
+					LevelCount = 1,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
+			VkSamplerCreateInfo samplerInfo = new VkSamplerCreateInfo
+			{
+				MagFilter = VkFilter.Linear,
+				MinFilter = VkFilter.Linear,
+				AddressModeU = VkSamplerAddressMode.Repeat,
+				AddressModeV = VkSamplerAddressMode.Repeat,
+				AddressModeW = VkSamplerAddressMode.Repeat,
+				AnisotropyEnable = true,
+				MaxAnisotropy = SelectedDevice.Limits.MaxSamplerAnisotropy,
+				BorderColor = VkBorderColor.IntOpaqueBlack,
+				UnnormalizedCoordinates = false,
+				CompareEnable = false,
+				CompareOp = VkCompareOp.ALWAYS,
+				MipmapMode = VkSamplerMipmapMode.Linear,
+				MipLodBias = 0.0f,
+				MinLod = 0.0f,
+				MaxLod = 0.0f
+			};
+
+			RenderTarget = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
+		}
+
 		public void Destroy()
 		{
 			Log.Trace("Destroying vulkan graphics backend");
@@ -586,6 +661,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			#region Temp
 			TestModelTexture.Dispose();
 			DepthTexture.Dispose();
+			RenderTarget.Dispose();
 
 			for (int i = 0; i < Framebuffers.Length; i++)
 				Framebuffers[i].Dispose();
@@ -748,7 +824,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			{
 				SampleShadingEnable = false,
 				AlphaToOneEnable = false,
-				RasterizationSamples = VkSampleCount.BITS_1
+				RasterizationSamples = MSAASamples
 			};
 
 			VkPipelineColorBlendState colourBlending = new VkPipelineColorBlendState

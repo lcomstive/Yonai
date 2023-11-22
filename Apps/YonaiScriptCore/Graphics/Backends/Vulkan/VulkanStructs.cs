@@ -711,6 +711,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public ulong OptimalBufferCopyOffsetAlignment;
 		public ulong OptimalBufferCopyRowPitchAlignment;
 		public ulong NonCoherentAtomSize;
+
+		public VkSampleCount GetMaxSamples()
+		{
+			VkSampleCount samples = FramebufferColorSampleCounts & FramebufferDepthSampleCounts;
+			if (samples.HasFlag(VkSampleCount._64)) return VkSampleCount._64;
+			if (samples.HasFlag(VkSampleCount._32)) return VkSampleCount._32;
+			if (samples.HasFlag(VkSampleCount._16)) return VkSampleCount._16;
+			if (samples.HasFlag(VkSampleCount._8)) return VkSampleCount._8;
+			if (samples.HasFlag(VkSampleCount._4)) return VkSampleCount._4;
+			if (samples.HasFlag(VkSampleCount._2)) return VkSampleCount._2;
+			return VkSampleCount._1;
+		}
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

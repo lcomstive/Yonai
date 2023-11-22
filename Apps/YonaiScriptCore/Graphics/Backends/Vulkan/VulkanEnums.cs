@@ -333,13 +333,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public enum VkSampleCount : int
 	{
-		BITS_1 = 0x00000001,
-		BITS_2 = 0x00000002,
-		BITS_4 = 0x00000004,
-		BITS_8 = 0x00000008,
-		BITS_16 = 0x00000010,
-		BITS_32 = 0x00000020,
-		BITS_64 = 0x00000040
+		_1 = 0x00000001,
+		_2 = 0x00000002,
+		_4 = 0x00000004,
+		_8 = 0x00000008,
+		_16 = 0x00000010,
+		_32 = 0x00000020,
+		_64 = 0x00000040
 	}
 
 	public enum VkAttachmentLoadOp
