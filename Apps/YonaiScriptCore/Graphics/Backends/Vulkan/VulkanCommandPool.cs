@@ -71,7 +71,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				{
 					AspectMask = VkImageAspectFlags.Color,
 					BaseMipLevel = 0,
-					LevelCount = 1,
+					LevelCount = image.MipLevels,
 					BaseArrayLayer = 0,
 					LayerCount = 1,
 				}

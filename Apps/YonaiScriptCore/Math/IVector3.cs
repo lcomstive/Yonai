@@ -1,9 +1,11 @@
 ﻿using System;
 using Yonai.IO;
 using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices;
 
 namespace Yonai
 {
+	[StructLayout(LayoutKind.Sequential)]
 	[System.Diagnostics.DebuggerDisplay("({x}, {y}, {z})")]
 	public struct IVector3 : ISerializable
 	{
@@ -16,6 +18,13 @@ namespace Yonai
 		{
 			this.x = x;
 			this.y = y;
+			this.z = z;
+		}
+
+		public IVector3(IVector2 xy, int z)
+		{
+			x = xy.x;
+			y = xy.y;
 			this.z = z;
 		}
 

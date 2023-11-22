@@ -2029,6 +2029,33 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BindDescriptorSets, void, (
 	);
 }
 
+struct VkImageBlitManaged
+{
+
+};
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BlitImage, void, (
+	VkCommandBuffer handle,
+	VkImage srcImage, VkImageLayout srcLayout,
+	VkImage dstImage, VkImageLayout dstLayout,
+	MonoArray* inRegions, VkFilter filter),
+	Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkImageBlit> regions;
+	regions.resize(mono_array_length(inRegions));
+	for (size_t i = 0; i < regions.size(); i++)
+		regions[i] = mono_array_get(inRegions, VkImageBlit, i);
+
+	vkCmdBlitImage(
+		handle,
+		srcImage, srcLayout,
+		dstImage, dstLayout,
+		(unsigned int)regions.size(),
+		regions.data(),
+		filter
+	);
+}
+
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
 {
 	VkFenceCreateInfo fenceInfo = {};

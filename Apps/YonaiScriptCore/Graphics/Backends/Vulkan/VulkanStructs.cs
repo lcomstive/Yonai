@@ -972,4 +972,35 @@ namespace Yonai.Graphics.Backends.Vulkan
 				DepthStencil = value.DepthStencil.Value;
 		}
 	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VkImageBlit
+	{
+		public VkImageSubresourceLayers SrcSubresource;
+
+		private IVector3 m_SrcOffset0;
+		private IVector3 m_SrcOffset1;
+		public IVector3[] SrcOffsets
+		{
+			set
+			{
+				m_SrcOffset0 = value?.Length > 0 ? value[0] : IVector3.Zero;
+				m_SrcOffset1 = value?.Length > 1 ? value[1] : IVector3.Zero;
+			}
+		}
+
+		public VkImageSubresourceLayers DstSubresource;
+
+		private IVector3 m_DstOffset0;
+		private IVector3 m_DstOffset1;
+		public IVector3[] DstOffsets
+		{
+			set
+			{
+				m_DstOffset0 = value?.Length > 0 ? value[0] : IVector3.Zero;
+				m_DstOffset1 = value?.Length > 1 ? value[1] : IVector3.Zero;
+			}
+		}
+
+	}
 }

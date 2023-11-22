@@ -89,6 +89,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void CopyBufferToImage(VulkanBuffer buffer, VulkanImage image, VkBufferImageCopy region) =>
 			_CopyBufferToImage(Handle, ref region, buffer.BufferHandle, image.Image);
 
+		public void BlitImage(
+			VulkanImage srcImage, VkImageLayout srcLayout,
+			VulkanImage dstImage, VkImageLayout dstLayout,
+			VkImageBlit[] regions, VkFilter filter) =>
+			_BlitImage(Handle, srcImage.Image, (int)srcLayout, dstImage.Image, (int)dstLayout, regions, filter);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -142,6 +148,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _CopyBufferToImage(IntPtr handle, ref VkBufferImageCopy region, IntPtr buffer, IntPtr image);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _BlitImage(
+			IntPtr handle,
+			IntPtr srcImage, int srcLayout,
+			IntPtr dstImage, int dstLayout,
+			VkImageBlit[] regions, VkFilter filter
+		);
 		#endregion
 	}
 }

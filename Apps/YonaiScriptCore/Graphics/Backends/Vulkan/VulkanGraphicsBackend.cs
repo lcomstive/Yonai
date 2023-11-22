@@ -414,11 +414,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 			{
 				ImageType = VkImageType.Type2D,
 				Format = VkFormat.R8G8B8A8_SRGB,
-				Usage = VkImageUsage.TransferDst | VkImageUsage.Sampled,
+				Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Sampled,
 				Tiling = VkImageTiling.Optimal,
 				Samples = VkSampleCount.BITS_1,
 				Extent = new Extents3D(decoded.Resolution),
-				MipLevels = 1,
+				MipLevels = VulkanImage.CalculateMipLevels(decoded.Resolution),
 				ArrayLayers = 1
 			};
 			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
@@ -430,7 +430,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				{
 					AspectMask = VkImageAspectFlags.Color,
 					BaseMipLevel = 0,
-					LevelCount = 1,
+					LevelCount = imageInfo.MipLevels,
 					BaseArrayLayer = 0,
 					LayerCount = 1,
 				}
@@ -450,14 +450,16 @@ namespace Yonai.Graphics.Backends.Vulkan
 				CompareOp = VkCompareOp.ALWAYS,
 				MipmapMode = VkSamplerMipmapMode.Linear,
 				MipLodBias = 0.0f,
-				MinLod = 0.0f,
-				MaxLod = 0.0f
+				MinLod = 0,
+				MaxLod = imageInfo.MipLevels
 			};
 			VulkanImage image = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
 
 			CommandPool.TransitionImageLayout(image, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
 			CommandPool.CopyBufferToImage(stagingBuffer, image, decoded.Resolution);
-			CommandPool.TransitionImageLayout(image, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+			// CommandPool.TransitionImageLayout(image, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+
+			image.GenerateMipmaps(CommandPool);
 
 			stagingBuffer.Dispose();
 
