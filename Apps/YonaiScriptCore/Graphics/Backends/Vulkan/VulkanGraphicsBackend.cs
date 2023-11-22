@@ -9,6 +9,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 {
 	public class VulkanGraphicsBackend : IGraphicsBackend
 	{
+		public IGraphicsDevice Device => SelectedDevice;
+
 		public VulkanInstance Instance { get; private set; }
 
 		public string[] AvailableExtensions { get; private set; }
@@ -248,7 +250,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			cmd.BindIndexBuffer(IndexBuffer);
 
 			cmd.BindDescriptorSets(Pipeline, 0, new VulkanDescriptorSet[] { DescriptorSets[CurrentFrame] });
-			cmd.DrawIndexed((uint)TestModel.Meshes[0].Mesh.Indices.Length);
+			cmd.DrawIndexed((uint)TestModel.Meshes[0].Indices.Length);
 
 			cmd.EndRenderPass();
 			cmd.End();
@@ -401,7 +403,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			TestModelTexture = CreateTexture("app://TestModel/viking_room.png");
 
 			if ((TestModel?.Meshes?.Length ?? 0) > 0)
-				CreateMeshBuffers(TestModel.Meshes[0].Mesh);
+				CreateMeshBuffers(TestModel.Meshes[0]);
 			else
 				Log.Error("Cannot create mesh buffers, invalid mesh");
 		}

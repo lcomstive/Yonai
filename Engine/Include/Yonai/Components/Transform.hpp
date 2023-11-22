@@ -4,7 +4,6 @@
 #include <Yonai/World.hpp>
 #include <Yonai/Entity.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <Yonai/Graphics/Shader.hpp>
 #include <Yonai/Components/Component.hpp>
 
 namespace Yonai::Components

@@ -1,8 +1,7 @@
 ﻿using System;
 using Yonai.IO;
-using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
-using System.Net.Configuration;
+using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics
 {
@@ -13,55 +12,45 @@ namespace Yonai.Graphics
 		public ModelImportSettings(bool importMaterials = true) => ImportMaterials = importMaterials;
 	}
 
+	internal struct MeshImportData
+	{
+		public Mesh.Vertex[] Vertices;
+		public uint[] Indices;
+	}
+
 	[SerializeFileOptions(SaveSeparateFile = true)]
-	public class Model : NativeResourceBase, ISerializable
+	public class Model : ResourceBase, ISerializable
 	{
 		public bool SerializeAsCache => true;
 		
 		public bool ImportMaterials { get; private set; }
 
-		public struct MeshData
-		{
-			public Mesh Mesh;
-			public Material Material;
-
-			public MeshData(UUID meshID, UUID materialID)
-			{
-				Mesh = Resource.Get<Mesh>(meshID);
-				Material = Resource.Get<Material>(materialID);
-			}
-		}
-
 		/// <summary>
 		/// Meshes that make up this model
 		/// </summary>
-		public MeshData[] Meshes { get; private set; }
-
-		protected override void OnLoad()
-		{
-			ulong resourceID = ResourceID;
-			_Load(ResourcePath, out resourceID, out IntPtr handle);
-
-			ResourceID = resourceID;
-			Handle = handle;
-		}
-
-		protected override void OnNativeLoad() => OnLoad();
+		public Mesh[] Meshes { get; private set; }
 
 		protected override void OnImported()
 		{
 			// Load model
 			TryGetImportSettings(out ModelImportSettings settings);
 			byte[] modelData = VFS.Read(ResourcePath);
-			_Import(Handle, ResourcePath, modelData, ImportMaterials = settings.ImportMaterials);
+			bool success = _Import(modelData, ImportMaterials = settings.ImportMaterials, out MeshImportData[] meshData);
 
-			// Get meshes
-			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
+			if(!success)
+			{
+				Log.Error("Failed to import model");
+				Application.Exit();
+				return;
+			}
 
-			Meshes = new MeshData[meshIDs.Length];
-			for (int i = 0; i < meshIDs.Length; i++)
-				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
-
+			Meshes = new Mesh[meshData.Length];
+			for (int i = 0; i < meshData.Length; i++)
+				Meshes[i] = Resource.Load<Mesh>($"{ResourcePath}/Mesh_{i}", new MeshImportSettings()
+				{
+					Vertices = meshData[i].Vertices,
+					Indices = meshData[i].Indices
+				});
 		}
 
 		public JObject OnSerialize() => new JObject(
@@ -71,10 +60,8 @@ namespace Yonai.Graphics
 		public void OnDeserialize(JObject json) => Import(new ModelImportSettings(json["ImportMaterials"].Value<bool>()));
 
 		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, string filepath, byte[] modelData, bool importMaterials);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetMeshes(IntPtr handle, out ulong[] meshIDs, out ulong[] materialIDs);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _Import(byte[] modelData, bool importMaterials, out MeshImportData[] meshData);
 		#endregion
 	}
 }

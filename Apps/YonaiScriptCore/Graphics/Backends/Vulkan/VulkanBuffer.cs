@@ -1,10 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanBuffer : IDisposable
+	public class VulkanBuffer : IDisposable, IBuffer
 	{
 		public int BufferSize { get; private set; }
 

@@ -9,16 +9,12 @@
 #include <Yonai/Resource.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <Yonai/Graphics/Texture.hpp>
-#include <Yonai/Components/Camera.hpp>
-#include <Yonai/Graphics/RenderTexture.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 
 using namespace std;
 using namespace glm;
 using namespace Yonai;
-using namespace Yonai::Graphics;
 using namespace YonaiEditor::Systems;
 
 // Helper Functions //
@@ -301,6 +297,8 @@ ADD_MANAGED_METHOD(ImGUI, _Image, void, (uint64_t textureID, glm::vec2* size, gl
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
 
+	// TODO: Implement ImGUI images
+	/*
 	Texture* texture = Resource::Get<Texture>(textureID);
 	ImGui::Image(
 		(ImTextureID)(texture ? texture->GetID() : 0),
@@ -310,6 +308,7 @@ ADD_MANAGED_METHOD(ImGUI, _Image, void, (uint64_t textureID, glm::vec2* size, gl
 		imTint,
 		imBorder
 	);
+	*/
 }
 
 ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), YonaiEditor)
@@ -318,6 +317,8 @@ ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* s
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
 
+	// TODO: Implement ImGUI render texture
+	/*
 	RenderTexture* texture = (RenderTexture*)handle;
 	ImGui::Image(
 		(ImTextureID)(texture ? texture->GetID() : 0),
@@ -327,6 +328,7 @@ ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* s
 		imTint,
 		imBorder
 	);
+	*/
 }
 
 ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
@@ -335,6 +337,8 @@ ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* si
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBackground(bgCol->x, bgCol->g, bgCol->b, bgCol->a);
 
+	// TODO: Implement ImGUI images
+	/*
 	Texture* texture = Resource::Get<Texture>(textureID);
 	string id = "ImageButton_" + to_string(textureID);
 	return ImGui::ImageButton(
@@ -346,6 +350,8 @@ ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* si
 		imBackground,
 		imTint
 	);
+	*/
+	return false;
 }
 
 char* GetInput(MonoString* valueRaw, int maxCharacters)
@@ -1086,14 +1092,16 @@ ADD_MANAGED_METHOD(ImGUI, _AddBezierQuadratic, void, (glm::vec2* p1, glm::vec2* 
 
 ADD_MANAGED_METHOD(ImGUI, _AddImage, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour), YonaiEditor)
 {
-	Texture* texture = Resource::Get<Texture>(textureID);
-	GetDrawList()->AddImage((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour));
+	// TODO: Implement ImGUI images
+	// Texture* texture = Resource::Get<Texture>(textureID);
+	// GetDrawList()->AddImage((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour));
 }
 
 ADD_MANAGED_METHOD(ImGUI, _AddImageRounded, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour, float rounding, int flags), YonaiEditor)
 {
-	Texture* texture = Resource::Get<Texture>(textureID);
-	GetDrawList()->AddImageRounded((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour), rounding, flags);
+	// TODO: Implement ImGUI images
+	// Texture* texture = Resource::Get<Texture>(textureID);
+	// GetDrawList()->AddImageRounded((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour), rounding, flags);
 }
 
 ADD_MANAGED_METHOD(ImGUI, _PushClipRect, void, (glm::vec2* p1, glm::vec2* p2, bool intersectWithCurrentClipRect), YonaiEditor)
@@ -1124,24 +1132,30 @@ ADD_MANAGED_METHOD(ImGUI, Gizmo_Enable, void, (bool enable), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, Gizmo_IsOver, bool, (), YonaiEditor)  { return ImGuizmo::IsOver(); }
 ADD_MANAGED_METHOD(ImGUI, Gizmo_IsUsing, bool, (), YonaiEditor) { return ImGuizmo::IsUsing(); }
 
-ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (void* cameraHandle, void* transformHandle, glm::vec2* drawRegion, unsigned int operation, bool local, float snapping), YonaiEditor)
+#include <Yonai/Components/Transform.hpp>
+ADD_MANAGED_METHOD(ImGUI, _Gizmo_Manipulate, void, (
+	void* transformHandle,
+	glm::vec2* drawRegion,
+	unsigned int operation,
+	bool local,
+	float snapping,
+	bool orthographic,
+	glm::mat4* viewMatrix,
+	glm::mat4* projectionMatrix
+), YonaiEditor)
 {
-	Components::Camera* camera = (Components::Camera*)cameraHandle;
 	Components::Transform* transform = (Components::Transform*)transformHandle;
 	Components::Transform* parent = transform->GetParent();
 
-	ImGuizmo::SetOrthographic(camera->Orthographic);
-
-	mat4 viewMatrix = camera->GetViewMatrix();
-	mat4 projectionMatrix = camera->GetProjectionMatrix(drawRegion->x, drawRegion->y);
+	ImGuizmo::SetOrthographic(orthographic);
 
 	mat4 modelMatrix = transform->GetModelMatrix();
 
 	float snapValues[3] = { snapping, snapping, snapping };
 
 	ImGuizmo::Manipulate(
-		value_ptr(viewMatrix),
-		value_ptr(projectionMatrix),
+		value_ptr(*viewMatrix),
+		value_ptr(*projectionMatrix),
 		(ImGuizmo::OPERATION)operation,
 		local ? ImGuizmo::LOCAL : ImGuizmo::WORLD,
 		value_ptr(modelMatrix),

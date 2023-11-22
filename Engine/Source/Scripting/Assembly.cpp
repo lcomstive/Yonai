@@ -5,12 +5,9 @@
 #include <Yonai/Scripting/UnmanagedThunks.hpp>
 
 // Components to map, unmanaged -> managed
-#include <Yonai/Components/Camera.hpp>
 #include <Yonai/Components/Transform.hpp>
 #include <Yonai/Components/AudioSource.hpp>
-#include <Yonai/Components/MeshRenderer.hpp>
 #include <Yonai/Components/AudioListener.hpp>
-#include <Yonai/Components/SpriteRenderer.hpp>
 
 // Systems to map, unmanaged -> managed
 #include <Yonai/Systems/Global/AudioSystem.hpp>
@@ -227,12 +224,9 @@ void Assembly::CacheTypes(bool isCore)
 
 void Assembly::LoadScriptCoreTypes()
 {
-	BindManagedComponent<Components::Camera>("Yonai", "Camera");
 	BindManagedComponent<Components::Transform>("Yonai", "Transform");
 	BindManagedComponent<Components::AudioSource>("Yonai", "AudioSource");
-	BindManagedComponent<Components::MeshRenderer>("Yonai", "MeshRenderer");
 	BindManagedComponent<Components::AudioListener>("Yonai", "AudioListener");
-	BindManagedComponent<Components::SpriteRenderer>("Yonai", "SpriteRenderer");
 
 	BindManagedSystem<Systems::SceneSystem>("Yonai", "SceneManager");
 	BindManagedSystem<Systems::AudioSystem>("Yonai.Systems", "AudioSystem");

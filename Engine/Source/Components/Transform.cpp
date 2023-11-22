@@ -7,7 +7,6 @@
 using namespace glm;
 using namespace std;
 using namespace Yonai;
-using namespace Yonai::Graphics;
 using namespace Yonai::Components;
 
 vec3 Transform::GetPosition() { return Position; }

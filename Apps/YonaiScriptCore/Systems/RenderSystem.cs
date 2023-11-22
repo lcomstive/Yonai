@@ -1,6 +1,4 @@
-using Newtonsoft.Json.Linq;
 using System;
-using System.Threading;
 using Yonai.Graphics;
 using Yonai.Graphics.Backends;
 using Yonai.Graphics.Backends.Vulkan;
@@ -9,14 +7,9 @@ namespace Yonai.Systems
 {
 	public class RenderSystem : YonaiSystem
 	{
-		private IGraphicsBackend m_Backend { get; set; } = null;
+		public static IGraphicsBackend Backend { get; private set; } = null;
 
-		private GraphicsAPI m_API = GraphicsAPI.None;
-		public GraphicsAPI API
-		{
-			get => m_API;
-			set => SetBackend(value);
-		}
+		public static GraphicsAPI API { get; private set; }
 
 		public override bool IsGlobal => true;
 
@@ -32,7 +25,7 @@ namespace Yonai.Systems
 			}
 			*/
 
-			try { m_Backend.Draw(); }
+			try { Backend.Draw(); }
 			catch(Exception e) { Log.Exception(e); }
 		}
 
@@ -41,31 +34,27 @@ namespace Yonai.Systems
 
 		}
 
-		private void SetBackend(GraphicsAPI backend)
+		public static void ChangeBackend(GraphicsAPI backend)
 		{
-			if (m_API == backend) return;
+			if (API == backend) return;
+			API = backend;
 
 			Log.Trace("Graphics API set to " + Enum.GetName(typeof(GraphicsAPI), backend));
 
-			m_Backend?.Destroy();
-			m_Backend = null;
+			Backend?.Destroy();
+			Backend = null;
 
-			m_API = backend;
+			API = backend;
 
-			switch (m_API)
+			switch (API)
 			{
 				default:
 				case GraphicsAPI.None: return;
-				case GraphicsAPI.Vulkan: m_Backend = new VulkanGraphicsBackend(); break;
+				case GraphicsAPI.Vulkan: Backend = new VulkanGraphicsBackend(); break;
 			}
 
-			try { m_Backend?.Create(); }
+			try { Backend?.Create(); }
 			catch(Exception e) { Log.Exception(e); }
 		}
-
-		/// <summary>
-		/// Called from C++ to get current API
-		/// </summary>
-		private static int GetGraphicsAPI() => (int)Get<RenderSystem>().m_API;
 	}
 }

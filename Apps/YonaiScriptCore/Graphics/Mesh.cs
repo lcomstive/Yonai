@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using static Yonai.Graphics.Mesh;
+using Yonai.Systems;
 
 namespace Yonai.Graphics
 {
 	public struct MeshImportSettings : IImportSettings
 	{
 		public uint[] Indices;
-		public DrawMode DrawMode;
 		public Mesh.Vertex[] Vertices;
 	}
 
 	[Serialize(false)]
-	public class Mesh : NativeResourceBase
+	public class Mesh : ResourceBase
 	{
 		public struct Vertex
 		{
@@ -55,11 +53,10 @@ namespace Yonai.Graphics
 			get => m_Settings.Vertices;
 			set
 			{
-				if(m_Settings.Vertices == value)
+				if (m_Settings.Vertices == value)
 					return; // No change
 
 				m_Settings.Vertices = value;
-				UpdateVertices();
 			}
 		}
 
@@ -71,48 +68,21 @@ namespace Yonai.Graphics
 			get => m_Settings.Indices;
 			set
 			{
-				if(m_Settings.Indices == value)
+				if (m_Settings.Indices == value)
 					return; // No change
-
 				m_Settings.Indices = value;
-				_SetIndices(Handle, m_Settings.Indices);
 			}
 		}
 
-		public DrawMode DrawMode => m_Settings.DrawMode;
+		public IBuffer VertexBuffer { get; private set; }
+		public IBuffer IndexBuffer { get; private set; }
 
-		// Loaded from existing unmanaged resource
-		protected override void OnNativeLoad()
+		protected override void OnLoad() => GenerateBuffers();
+
+		protected override void OnUnload()
 		{
-			ulong resourceID = ResourceID;
-			_Load(ResourcePath, out resourceID, out IntPtr handle);
-			ResourceID = resourceID;
-			Handle = handle;
-
-			// Get existing vertices
-			_GetVertices(Handle, out Vector3[] positions, out Vector3[] normals, out Vector2[] texCoords);
-			m_Settings.Vertices = new Vertex[positions.Length];
-			for(int i = 0; i < positions.Length; i++)
-			{
-				m_Settings.Vertices[i] = new Vertex()
-				{
-					Position = positions[i],
-					Normal = normals[i],
-					TexCoords = texCoords[i]
-				};
-			}
-
-			// Get existing indices
-			_GetIndices(Handle, out m_Settings.Indices);
-		}
-
-		// Loaded new from managed code
-		protected override void OnLoad()
-		{
-			ulong resourceID = ResourceID;
-			_Load(ResourcePath, out resourceID, out IntPtr handle);
-			ResourceID = resourceID;
-			Handle = handle;
+			VertexBuffer?.Dispose();
+			IndexBuffer?.Dispose();
 		}
 
 		protected override void OnImported()
@@ -120,32 +90,54 @@ namespace Yonai.Graphics
 			if (!TryGetImportSettings(out m_Settings))
 				// Set to default values if invalid import settings
 				m_Settings = new MeshImportSettings();
-
-			// Update vertices, indices and drawmode in unmanaged code
-			_Import(Handle, Vertices, Indices, (byte)DrawMode);
 		}
 
-		/// <summary>
-		/// Uploads the vertex buffer to unmanaged memory
-		/// </summary>
-		public void UpdateVertices()
+		private void GenerateBuffers()
 		{
-			Vector3[] positions = new Vector3[m_Settings.Vertices.Length];
-			Vector3[] normals = new Vector3[m_Settings.Vertices.Length];
-			Vector2[] texCoords = new Vector2[m_Settings.Vertices.Length];
-			for(int i = 0;i < m_Settings.Vertices.Length;i++)
-			{
-				positions[i] = m_Settings.Vertices[i].Position;
-				normals[i]   = m_Settings.Vertices[i].Normal;
-				texCoords[i] = m_Settings.Vertices[i].TexCoords;
-			}
-			_SetVertices(Handle, positions, normals, texCoords);
-		}
+			VertexBuffer?.Dispose();
+			IndexBuffer?.Dispose();
 
-		/// <summary>
-		/// Uploads the index buffer to unmanaged memory
-		/// </summary>
-		public void UpdateIndices() => _SetIndices(Handle, m_Settings.Indices);
+			VertexBuffer = null;
+			IndexBuffer = null;
+
+			if (Vertices == null)
+				return;
+
+			IGraphicsDevice device = RenderSystem.Backend.Device;
+
+			#region Vertex Buffer
+			int bufferSize = sizeof(float) * 8 * Vertices.Length;
+
+			// Upload data from CPU to GPU memory
+			IBuffer stagingBuffer = device.CreateBuffer(bufferSize, BufferUsage.CPUWrite);
+			stagingBuffer.Upload(Vertices.ToByteArray());
+
+			// Copy staging buffer data into vertex buffer, which is GPU-only (so cannot upload directly from CPU)
+			VertexBuffer = device.CreateBuffer(bufferSize, BufferUsage.NoCPU, BufferType.Vertex);
+			device.CopyBuffer(stagingBuffer, VertexBuffer);
+
+			stagingBuffer.Dispose();
+			#endregion
+
+			#region Index Buffer
+			if (Indices != null)
+			{
+				// Upload data from CPU to GPU memory
+				bufferSize = sizeof(uint) * Indices.Length;
+				byte[] indicesData = new byte[bufferSize];
+				Buffer.BlockCopy(Indices, 0, indicesData, 0, bufferSize);
+
+				stagingBuffer = device.CreateBuffer(bufferSize, BufferUsage.CPUWrite);
+				stagingBuffer.Upload(indicesData);
+
+				// Copy staging buffer data into index buffer, which is GPU-only (so cannot upload directly from CPU)
+				IndexBuffer = device.CreateBuffer(bufferSize, BufferUsage.NoCPU, BufferType.Index);
+				device.CopyBuffer(stagingBuffer, IndexBuffer);
+
+				stagingBuffer.Dispose();
+			}
+			#endregion
+		}
 
 		public static UUID QuadID => Quad.ResourceID;
 		public static UUID CubeID => Cube.ResourceID;
@@ -166,34 +158,22 @@ namespace Yonai.Graphics
 			Log.Debug($"Loading mesh from {name}");
 			return Resource.Load<Mesh>($"Meshes/{name}", new MeshImportSettings()
 			{
-				DrawMode = DrawMode.Triangles,
-				Vertices = model.Meshes[0].Mesh.Vertices,
-				Indices = model.Meshes[0].Mesh.Indices
+				Vertices = model.Meshes[0].Vertices,
+				Indices = model.Meshes[0].Indices
 			});
 		}
 
 		internal static void LoadPrimitives()
 		{
-			Quad	= LoadPrimitive("Quad");
-			Cube	= LoadPrimitive("Cube");
-			Sphere	= LoadPrimitive("Sphere");
+			Quad = LoadPrimitive("Quad");
+			Cube = LoadPrimitive("Cube");
+			Sphere = LoadPrimitive("Sphere");
 		}
-
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Import(IntPtr handle, Vertex[] vertices, uint[] indices, byte drawMode);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetVertices(IntPtr handle, Vector3[] positions, Vector3[] normals, Vector2[] texCoords);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetVertices(IntPtr handle, out Vector3[] positions, out Vector3[] normals, out Vector2[] texCoords);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetIndices(IntPtr handle, uint[] indices);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetIndices(IntPtr handle, out uint[] indices);
-		#endregion
 	}
 
 	public static class VertexExtension
 	{
-		public static byte[] ToByteArray(this Vertex[] vertices)
+		public static byte[] ToByteArray(this Mesh.Vertex[] vertices)
 		{
 			int vertexSize = (3 + 3 + 2) * sizeof(float);
 			byte[] output = new byte[vertexSize * vertices.Length];

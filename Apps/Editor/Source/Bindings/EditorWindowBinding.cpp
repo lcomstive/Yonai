@@ -2,11 +2,9 @@
 
 #include <Yonai/Window.hpp>
 #include <Yonai/Resource.hpp>
-#include <Yonai/Graphics/Texture.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 
 using namespace Yonai;
-using namespace Yonai::Graphics;
 
 ADD_MANAGED_METHOD(EditorWindow, InitContext, void, (), YonaiEditor)
 { Window::InitContext(); }
@@ -18,16 +16,7 @@ ADD_MANAGED_METHOD(EditorWindow, ContextIsInitialised, bool, (), YonaiEditor)
 { return Window::ContextIsInitialised(); }
 
 ADD_MANAGED_METHOD(EditorWindow, Create, void, (), YonaiEditor)
-{
-	Window::Create();
-
-#ifdef YONAI_PLATFORM_DESKTOP
-	/*
-	glfwMakeContextCurrent(Window::GetNativeHandle());
-	gladLoadGL(glfwGetProcAddress);
-	*/
-#endif
-}
+{ Window::Create(); }
 
 ADD_MANAGED_METHOD(EditorWindow, Show, void, (bool show), YonaiEditor)
 { Window::Show(show); }

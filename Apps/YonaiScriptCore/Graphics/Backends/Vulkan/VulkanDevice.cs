@@ -1,9 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
+using Yonai.Systems;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanDevice : IDisposable
+	public class VulkanDevice : IGraphicsDevice
 	{
 		private struct QueueFamilyIndices
 		{
@@ -18,6 +19,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		internal IntPtr PhysicalDevice = IntPtr.Zero;
 		internal VulkanQueue GraphicsQueue = null;
 		internal VulkanQueue PresentQueue = null;
+		private VulkanGraphicsBackend m_Backend;
 
 		public uint ID { get; private set; }
 		public string Name { get; private set; }
@@ -29,6 +31,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Instance = owner;
 			PhysicalDevice = physicalDeviceHandle;
+			m_Backend = (VulkanGraphicsBackend)RenderSystem.Backend;
 
 			QueueFamilyIndices indices = FindQueueFamilies();
 			Device = _CreateDevice(PhysicalDevice, indices.GraphicsFamily.Value, indices.PresentFamily.Value);
@@ -50,6 +53,34 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(VkPhysicalDeviceType), Type)}]");
 		}
+
+		#region Testing Interface
+		public IBuffer CreateBuffer(int bufferSize, BufferUsage usage, BufferType type)
+		{
+			VkMemoryProperty vkMemory = 0;
+			switch(usage)
+			{
+				default:
+				case BufferUsage.NoCPU: vkMemory |= VkMemoryProperty.DeviceLocal; break;
+				case BufferUsage.CPURead:
+				case BufferUsage.CPUWrite: vkMemory |= VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent; break;
+			}
+
+			VkBufferUsage vkUsage = VkBufferUsage.TransferSource | VkBufferUsage.TransferDestination;
+			if (type.HasFlag(BufferType.Vertex)) vkUsage |= VkBufferUsage.Vertex;
+			if (type.HasFlag(BufferType.Index)) vkUsage |= VkBufferUsage.Index;
+			if (type.HasFlag(BufferType.Uniform)) vkUsage |= VkBufferUsage.Uniform;
+			if (type.HasFlag(BufferType.Indirect)) vkUsage |= VkBufferUsage.Indirect;
+
+			return new VulkanBuffer(this, bufferSize, vkUsage, vkMemory);
+		}
+
+		public void CopyBuffer(IBuffer srcBuffer, IBuffer dstBuffer)
+		{
+			VulkanBuffer source = (VulkanBuffer)srcBuffer;
+			source.CopyTo(m_Backend.CommandPool, (VulkanBuffer)dstBuffer, source.BufferSize);
+		}
+		#endregion
 
 		public void Dispose() => _DestroyDevice(Device);
 

@@ -5,16 +5,12 @@
 #include <Yonai/Resource.hpp>
 #include <YonaiEditor/Glue.hpp>
 #include <YonaiEditor/EditorApp.hpp>
-#include <Yonai/Graphics/Shader.hpp>
-#include <Yonai/Graphics/Texture.hpp>
-#include <Yonai/Components/FPSCamera.hpp>
 #include <Yonai/Platform/FixDLLBoundaries.hpp>
 
 // Systems //
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
 #include <Yonai/Systems/Global/AudioSystem.hpp>
-#include <Yonai/Systems/CameraControlSystem.hpp>
 
 // Scripting //
 #include <Yonai/Scripting/Class.hpp>
@@ -28,7 +24,6 @@ using namespace Yonai;
 using namespace Yonai::IO;
 using namespace YonaiEditor::Systems;
 using namespace Yonai::Systems;
-using namespace Yonai::Graphics;
 using namespace Yonai::Scripting;
 using namespace Yonai::Components;
 

@@ -7,8 +7,6 @@
 #include <Yonai/World.hpp>
 #include <Yonai/Application.hpp>
 #include <YonaiEditor/ProjectInfo.hpp>
-#include <Yonai/Components/Camera.hpp>
-#include <Yonai/Graphics/RenderTexture.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 

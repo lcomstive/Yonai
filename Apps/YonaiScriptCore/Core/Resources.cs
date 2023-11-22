@@ -168,7 +168,7 @@ namespace Yonai
 		}
 
 		/// <returns>Instance of resource with matching ID, or null if ID is invalid</returns>
-		public static T Get<T>(UUID resourceID) where T : ResourceBase, new()
+		public static T Get<T>(UUID resourceID, bool createIfNotExist = true) where T : ResourceBase, new()
 		{
 			// Check for valid ID
 			if(resourceID == UUID.Invalid || !Exists(resourceID))
@@ -186,6 +186,9 @@ namespace Yonai
 					return null;
 				}
 			}
+
+			if (!createIfNotExist)
+				return null;
 
 			// Create new instance
 			T instance = new T();

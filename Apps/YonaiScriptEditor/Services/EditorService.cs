@@ -72,7 +72,7 @@ namespace YonaiEditor
 				EditorWindow.Create();
 				EditorWindow.Show();
 
-				Get<RenderSystem>().API = graphicsAPI;
+				RenderSystem.ChangeBackend(graphicsAPI);
 			}
 
 			// InitImGUI();
