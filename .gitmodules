@@ -32,3 +32,6 @@
 [submodule "Engine/Vendor/ImGuizmo"]
 	path = Engine/Vendor/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "Engine/Vendor/VulkanMemoryAllocator"]
+	path = Engine/Vendor/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

@@ -767,6 +767,25 @@ namespace Yonai.Graphics.Backends.Vulkan
 			get => m_UnnormalizedCoordinates == 1u;
 			set => m_UnnormalizedCoordinates = value ? 1u : 0u;
 		}
+
+		public static VkSamplerCreateInfo Default => new VkSamplerCreateInfo
+		{
+			MagFilter = VkFilter.Linear,
+			MinFilter = VkFilter.Linear,
+			AddressModeU = VkSamplerAddressMode.Repeat,
+			AddressModeV = VkSamplerAddressMode.Repeat,
+			AddressModeW = VkSamplerAddressMode.Repeat,
+			AnisotropyEnable = false,
+			MaxAnisotropy = 1,
+			BorderColor = VkBorderColor.IntOpaqueBlack,
+			UnnormalizedCoordinates = false,
+			CompareEnable = false,
+			CompareOp = VkCompareOp.ALWAYS,
+			MipmapMode = VkSamplerMipmapMode.Linear,
+			MipLodBias = 0.0f,
+			MinLod = 0,
+			MaxLod = 1
+		};
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -875,6 +894,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 
 		public VkImageLayout InitialLayout;
+
+		public static VkImageCreateInfo Default => new VkImageCreateInfo
+		{
+			ImageType = VkImageType.Type2D,
+			Format = VkFormat.R32G32B32A32_SFLOAT,
+			Extent = new Extents3D(),
+			MipLevels = 1,
+			ArrayLayers = 1,
+			Samples = VkSampleCount._1,
+			Tiling = VkImageTiling.Optimal,
+			Usage = 0
+		};
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -885,20 +916,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VkComponentSwizzle b;
 		public VkComponentSwizzle a;
 
-		public static VkComponentMapping Identity => new VkComponentMapping
+		public static VkComponentMapping Zero => new VkComponentMapping
 		{
 			r = VkComponentSwizzle.Identity,
 			g = VkComponentSwizzle.Identity,
 			b = VkComponentSwizzle.Identity,
 			a = VkComponentSwizzle.Identity
-		};
-		
-		public static VkComponentMapping Zero => new VkComponentMapping
-		{
-			r = VkComponentSwizzle.Zero,
-			g = VkComponentSwizzle.Zero,
-			b = VkComponentSwizzle.Zero,
-			a = VkComponentSwizzle.Zero
 		};
 		
 		public static VkComponentMapping One => new VkComponentMapping
@@ -924,6 +947,21 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VkFormat Format;
 		public VkComponentMapping Components;
 		public VkImageSubresourceRange SubresourceRange;
+
+		public static VkImageViewCreateInfo Default => new VkImageViewCreateInfo
+		{
+			ViewType = VkImageViewType._2D,
+			Format = VkFormat.R32G32B32A32_SFLOAT,
+			Components = VkComponentMapping.Zero,
+			SubresourceRange = new VkImageSubresourceRange
+			{
+				AspectMask = VkImageAspectFlags.Color,
+				BaseMipLevel = 0,
+				LevelCount = 1,
+				BaseArrayLayer = 0,
+				LayerCount = 1
+			}
+		};
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

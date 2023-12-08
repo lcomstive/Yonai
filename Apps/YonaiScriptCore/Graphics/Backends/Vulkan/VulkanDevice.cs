@@ -14,11 +14,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 			public bool IsComplete => GraphicsFamily != null && PresentFamily != 0;
 		}
 
-		private VulkanInstance m_Instance;
 		internal IntPtr Device = IntPtr.Zero;
 		internal IntPtr PhysicalDevice = IntPtr.Zero;
 		internal VulkanQueue GraphicsQueue = null;
 		internal VulkanQueue PresentQueue = null;
+		internal IntPtr Allocator = IntPtr.Zero;
+
+		private VulkanInstance m_Instance;
 		private VulkanGraphicsBackend m_Backend;
 
 		public uint ID { get; private set; }
@@ -51,6 +53,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_GetPhysicalDeviceLimits(PhysicalDevice, out VkPhysicalDeviceLimits limits);
 			Limits = limits;
 
+			Allocator = _CreateAllocator(PhysicalDevice, Device, m_Instance.m_Handle);
+
 			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(VkPhysicalDeviceType), Type)}]");
 		}
 
@@ -82,7 +86,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 		#endregion
 
-		public void Dispose() => _DestroyDevice(Device);
+		public void Dispose()
+		{
+			_DestroyAllocator(Allocator);
+			_DestroyDevice(Device);
+		}
 
 		private QueueFamilyIndices FindQueueFamilies()
 		{
@@ -131,5 +139,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetPhysicalDeviceLimits(IntPtr physicalDevice, out VkPhysicalDeviceLimits output);
 
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _CreateAllocator(IntPtr physicalDevice, IntPtr logicalDevice, IntPtr instance);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DestroyAllocator(IntPtr allocator);
 	}
 }

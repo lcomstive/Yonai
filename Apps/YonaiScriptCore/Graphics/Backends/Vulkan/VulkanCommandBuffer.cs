@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -89,6 +90,56 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void CopyBufferToImage(VulkanBuffer buffer, VulkanImage image, VkBufferImageCopy region) =>
 			_CopyBufferToImage(Handle, ref region, buffer.BufferHandle, image.Image);
 
+		public void TransitionImageLayout(VulkanImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+		{
+			VkImageMemoryBarrier barrier = new VkImageMemoryBarrier
+			{
+				OldLayout = oldLayout,
+				NewLayout = newLayout,
+
+				SrcQueueFamilyIndex = VulkanQueue.Ignored,
+				DstQueueFamilyIndex = VulkanQueue.Ignored,
+
+				Image = image,
+
+				SubresourceRange = new VkImageSubresourceRange
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					BaseMipLevel = 0,
+					LevelCount = image.MipLevels,
+					BaseArrayLayer = 0,
+					LayerCount = 1,
+				}
+			};
+
+			VkPipelineStageFlags sourceStage = VkPipelineStageFlags.None;
+			VkPipelineStageFlags destinationStage = VkPipelineStageFlags.None;
+			if (oldLayout == VkImageLayout.Undefined && newLayout == VkImageLayout.TRANSFER_DST_OPTIMAL)
+			{
+				barrier.SrcAccessMask = 0;
+				barrier.DstAccessMask = VkAccessFlags.TransferWrite;
+
+				sourceStage = VkPipelineStageFlags.TopOfPipe;
+				destinationStage = VkPipelineStageFlags.Transfer;
+			}
+			else if (oldLayout == VkImageLayout.TRANSFER_DST_OPTIMAL && newLayout == VkImageLayout.SHADER_READ_ONLY_OPTIMAL)
+			{
+				barrier.SrcAccessMask = VkAccessFlags.TransferWrite;
+				barrier.DstAccessMask = VkAccessFlags.ShaderRead;
+
+				sourceStage = VkPipelineStageFlags.Transfer;
+				destinationStage = VkPipelineStageFlags.FragmentShader;
+			}
+
+			PipelineBarrier(barrier, sourceStage, destinationStage);
+		}
+
+		public void ClearColorImage(VulkanImage image, VkImageLayout imageLayout, Colour colour, VkImageSubresourceRange range) =>
+			ClearColorImage(image, imageLayout, colour, new VkImageSubresourceRange[] { range });
+
+		public void ClearColorImage(VulkanImage image, VkImageLayout imageLayout, Colour colour, VkImageSubresourceRange[] ranges) =>
+			_ClearColorImage(Handle, image.Image, (int)imageLayout, ref colour, ranges);
+
 		public void BlitImage(
 			VulkanImage srcImage, VkImageLayout srcLayout,
 			VulkanImage dstImage, VkImageLayout dstLayout,
@@ -156,6 +207,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			IntPtr dstImage, int dstLayout,
 			VkImageBlit[] regions, VkFilter filter
 		);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _ClearColorImage(IntPtr handle, IntPtr image, int imageLayout, ref Colour colour, VkImageSubresourceRange[] ranges);
 		#endregion
 	}
 }

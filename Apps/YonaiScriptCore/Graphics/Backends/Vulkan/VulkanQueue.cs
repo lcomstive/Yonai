@@ -40,7 +40,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			return result;
 		}
 
-		public VkResult Present(VulkanSwapchain[] swapchains, VulkanSemaphore[] waitSemaphores, uint[] imageIndices)
+		public VkResult Present(VulkanSwapchain[] swapchains, VulkanSemaphore[] waitSemaphores, uint[] imageIndex)
 		{
 			IntPtr[] nativeWaitSemaphores = new IntPtr[waitSemaphores.Length];
 			for (int i = 0; i < waitSemaphores.Length; i++)
@@ -50,9 +50,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 			for (int i = 0; i < swapchains.Length; i++)
 				nativeSwapchains[i] = swapchains[i].Handle;
 
-			VkResult result = (VkResult)_Present(Handle, nativeWaitSemaphores, nativeSwapchains, imageIndices);
-			result.CheckForSuccess("Presenting queue");
-			return result;
+			return (VkResult)_Present(Handle, nativeWaitSemaphores, nativeSwapchains, imageIndex);
+		}
+
+		public VkResult Present(VulkanSwapchain swapchain, VulkanSemaphore[] waitSemaphores, uint imageIndex)
+		{
+			IntPtr[] nativeWaitSemaphores = new IntPtr[waitSemaphores.Length];
+			for (int i = 0; i < waitSemaphores.Length; i++)
+				nativeWaitSemaphores[i] = waitSemaphores[i].Handle;
+
+			IntPtr[] nativeSwapchains = new IntPtr[] { swapchain.Handle };
+
+			return (VkResult)_Present(Handle, nativeWaitSemaphores, nativeSwapchains, new uint[] { imageIndex });
 		}
 
 		public void WaitIdle() => _WaitIdle(Handle);

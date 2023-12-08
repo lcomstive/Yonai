@@ -26,7 +26,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				m_Image = Image,
 				ViewType = VkImageViewType._2D,
 				Format = Format,
-				Components = VkComponentMapping.Identity,
+				Components = VkComponentMapping.Zero,
 				SubresourceRange = new VkImageSubresourceRange
 				{
 					AspectMask = VkImageAspectFlags.Color,
@@ -54,7 +54,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			VkResult result = (VkResult)_Create(
 				m_Device.Device,
-				m_Device.PhysicalDevice,
+				m_Device.Allocator,
 				ref imageInfo,
 				out Image,
 				out ImageMemory
@@ -70,8 +70,23 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void Dispose()
 		{
-			_DestroyImageView(m_Device.Device, ImageView);
-			_DestroySampler(m_Device.Device, Sampler);
+			DestroyImageView();
+			DestroySampler();
+			_Destroy(m_Device.Allocator, Image, ImageMemory);
+		}
+
+		internal void DestroySampler()
+		{
+			if(Sampler != null && Sampler != IntPtr.Zero)
+				_DestroySampler(m_Device.Device, Sampler);
+			Sampler = IntPtr.Zero;
+		}
+
+		internal void DestroyImageView()
+		{
+			if(ImageView != null && ImageView != IntPtr.Zero)
+				_DestroyImageView(m_Device.Device, ImageView);
+			ImageView = IntPtr.Zero;
 		}
 
 		public void GenerateMipmaps(VulkanCommandPool commandPool)
@@ -160,11 +175,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Create(
 			IntPtr device,
-			IntPtr physicalDevice,
+			IntPtr allocator,
 			ref VkImageCreateInfo imageCreateInfo,
 			out IntPtr handle,
-			out IntPtr memoryHandle
+			out IntPtr allocation
 		);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _Destroy(IntPtr allocator, IntPtr image, IntPtr memoryAllocation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr _CreateImageView(IntPtr device, IntPtr image, ref VkImageViewCreateInfo info);

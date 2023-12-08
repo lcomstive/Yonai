@@ -1,5 +1,6 @@
 #include <Yonai/API.hpp>
 
+#define VMA_IMPLEMENTATION
 #define GLFW_INCLUDE_VULKAN
 
 #if defined(YONAI_PLATFORM_WINDOWS)
@@ -28,6 +29,7 @@
 #include <optional>
 #include <algorithm>
 #include <GLFW/glfw3.h>
+#include <vk_mem_alloc.h> // VMA
 #include <spdlog/spdlog.h>
 #include <Yonai/Window.hpp>
 #include <GLFW/glfw3native.h>
@@ -497,12 +499,22 @@ ADD_MANAGED_METHOD(VulkanDevice, CreateDevice, void*, (void* physicalDevice, uns
 	VkPhysicalDeviceFeatures deviceFeatures = {};
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+	VkPhysicalDeviceSynchronization2Features sync2Features = {};
+	sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+	sync2Features.synchronization2 = VK_TRUE;
+
+	VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures = {};
+	dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+	dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+	sync2Features.pNext = &dynamicRenderingFeatures;
+
 	// Create logical device
 	VkDeviceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.queueCreateInfoCount = (unsigned int)queueCreateInfos.size();
 	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.pNext = &sync2Features;
 
 	createInfo.enabledExtensionCount = (unsigned int)DeviceExtensions.size();
 	createInfo.ppEnabledExtensionNames = DeviceExtensions.data();
@@ -558,6 +570,28 @@ ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceProperties, MonoString*, (void
 
 ADD_MANAGED_METHOD(VulkanDevice, WaitIdle, void, (void* device), Yonai.Graphics.Backends.Vulkan)
 { vkDeviceWaitIdle((VkDevice)device); }
+
+ADD_MANAGED_METHOD(VulkanDevice, CreateAllocator, void*, (VkPhysicalDevice physical, VkDevice logical, VkInstance instance), Yonai.Graphics.Backends.Vulkan)
+{
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = physical;
+	allocatorInfo.device = logical;
+	allocatorInfo.instance = instance;
+
+	VmaAllocator allocator;
+	vmaCreateAllocator(&allocatorInfo, &allocator);
+	return allocator;
+}
+
+ADD_MANAGED_METHOD(VulkanDevice, DestroyAllocator, void, (void* allocator), Yonai.Graphics.Backends.Vulkan)
+{ vmaDestroyAllocator((VmaAllocator)allocator); }
+
+ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceLimits, void, (void* physicalDevice, VkPhysicalDeviceLimits* output), Yonai.Graphics.Backends.Vulkan)
+{
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties((VkPhysicalDevice)physicalDevice, &properties);
+	*output = properties.limits;
+}
 
 ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* inLayoutBindings, unsigned int layoutBindingCount, void** output), Yonai.Graphics.Backends.Vulkan)
 {
@@ -681,7 +715,7 @@ ADD_MANAGED_METHOD(VulkanSwapchain, Create, void*, (
 
 	// VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = Direct to framebuffer
 	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = Offscreen rendering, then blit to framebuffer
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	QueueFamilyIndices indices = FindQueueFamilies(physicalDevice, surface);
 	unsigned int queueFamilyIndices[] =
@@ -748,48 +782,6 @@ ADD_MANAGED_METHOD(VulkanSwapchain, GetImages, MonoArray*, (void* inDevice, void
 ADD_MANAGED_METHOD(VulkanSwapchain, AcquireNextImage, int, (void* device, void* swapchain, unsigned int timeout, void* semaphore, void* fence, unsigned int* outIndex), Yonai.Graphics.Backends.Vulkan)
 {
 	return (int)vkAcquireNextImageKHR((VkDevice)device, (VkSwapchainKHR)swapchain, timeout, (VkSemaphore)semaphore, (VkFence)fence, outIndex);
-}
-
-ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* inDevice, void* image, VkImageViewCreateInfo* info), Yonai.Graphics.Backends.Vulkan)
-{
-	info->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
-	VkImageView imageView;
-	VkResult result = vkCreateImageView((VkDevice)inDevice, info, nullptr, &imageView);
-	if (result != VK_SUCCESS)
-	{
-		LogCriticalError("Failed to create image view", result);
-		return nullptr;
-	}
-
-	return imageView;
-}
-
-ADD_MANAGED_METHOD(VulkanImage, DestroyImageView, void, (void* device, void* imageView), Yonai.Graphics.Backends.Vulkan)
-{ vkDestroyImageView((VkDevice)device, (VkImageView)imageView, nullptr); }
-
-ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
-	(void* device, int attachmentCount, void* attachments,
-		int subpassCount, void* subpasses, int dependencyCount, void* dependencies),
-	Yonai.Graphics.Backends.Vulkan)
-{
-	VkRenderPassCreateInfo renderPassInfo = {};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = (unsigned int)attachmentCount;
-	renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments;
-	renderPassInfo.subpassCount = (unsigned int)subpassCount;
-	renderPassInfo.pSubpasses = (VkSubpassDescription*)subpasses;
-	renderPassInfo.dependencyCount = dependencyCount;
-	renderPassInfo.pDependencies = (VkSubpassDependency*)dependencies;
-
-	VkRenderPass renderPass;
-	VkResult result = vkCreateRenderPass((VkDevice)device, &renderPassInfo, nullptr, &renderPass);
-	if (result != VK_SUCCESS)
-	{
-		LogCriticalError("Failed to create render pass", result);
-		return nullptr;
-	}
-	return renderPass;
 }
 
 ADD_MANAGED_METHOD(VulkanRenderPass, Destroy, void, (void* device, void* renderPass), Yonai.Graphics.Backends.Vulkan)
@@ -1157,11 +1149,6 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BindDescriptorSets, void, (
 	);
 }
 
-struct VkImageBlitManaged
-{
-
-};
-
 ADD_MANAGED_METHOD(VulkanCommandBuffer, BlitImage, void, (
 	VkCommandBuffer handle,
 	VkImage srcImage, VkImageLayout srcLayout,
@@ -1182,6 +1169,47 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, BlitImage, void, (
 		regions.data(),
 		filter
 	);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, PipelineBarrierImage, void, (void* handle, void* inBarrier, int srcStage, int dstStage), Yonai.Graphics.Backends.Vulkan)
+{
+	VkImageMemoryBarrier* barrier = (VkImageMemoryBarrier*)inBarrier;
+	barrier->sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+	vkCmdPipelineBarrier(
+		(VkCommandBuffer)handle,
+		(VkPipelineStageFlags)srcStage,
+		(VkPipelineStageFlags)dstStage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, barrier
+	);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBufferToImage, void, (void* handle, void* inRegion, void* buffer, void* image), Yonai.Graphics.Backends.Vulkan)
+{
+	VkBufferImageCopy* region = (VkBufferImageCopy*)inRegion;
+
+	vkCmdCopyBufferToImage(
+		(VkCommandBuffer)handle,
+		(VkBuffer)buffer,
+		(VkImage)image,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		region
+	);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, ClearColorImage, void, (VkCommandBuffer handle, VkImage image, VkImageLayout layout, glm::vec4* inColour, MonoArray* inRanges), Yonai.Graphics.Backends.Vulkan)
+{
+	vector<VkImageSubresourceRange> ranges;
+	ranges.resize(mono_array_length(inRanges));
+	for (size_t i = 0; i < ranges.size(); i++)
+		ranges[i] = mono_array_get(inRanges, VkImageSubresourceRange, i);
+
+	VkClearColorValue clearValue = { { inColour->r, inColour->g, inColour->b, inColour->a } };
+	vkCmdClearColorImage(handle, image, layout, &clearValue, (unsigned int)ranges.size(), ranges.data());
 }
 
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
@@ -1404,79 +1432,75 @@ ADD_MANAGED_METHOD(VulkanBuffer, UnmapMemory, void, (void* device, void* bufferM
 { vkUnmapMemory((VkDevice)device, (VkDeviceMemory)bufferMemory); }
 
 ADD_MANAGED_METHOD(VulkanImage, Create, int, (
-	void* device,
-	void* physicalDevice,
+	VkDevice device,
+	void* allocator,
 	VkImageCreateInfo* imageCreateInfo,
-	void** outImage,
-	void** outImageMemory
+	VkImage* outImage,
+	void** outAllocation
 ), Yonai.Graphics.Backends.Vulkan)
 {
 	*outImage = nullptr;
-	*outImageMemory = nullptr;
+	*outAllocation = nullptr;
 
 	imageCreateInfo->sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
-	VkImage image;
-	VkResult result = vkCreateImage((VkDevice)device, imageCreateInfo, nullptr, &image);
-	if(result != VK_SUCCESS)
-		return result;
-	
-	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements((VkDevice)device, image, &memRequirements);
+	VmaAllocationCreateInfo allocInfo = {};
+	allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+	allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-	VkMemoryAllocateInfo allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType((VkPhysicalDevice)physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	VmaAllocation allocation;
+	VkResult result = vmaCreateImage((VmaAllocator)allocator, imageCreateInfo, &allocInfo, outImage, &allocation, nullptr);
 
-	VkDeviceMemory memory;
-	result = vkAllocateMemory((VkDevice)device, &allocInfo, nullptr, &memory);
-	if(result != VK_SUCCESS)
-		return result;
-
-	vkBindImageMemory((VkDevice)device, image, memory, 0);
-
-	*outImage = image;
-	*outImageMemory = memory;
+	*outAllocation = allocation;
 
 	return result;
 }
+// _Destroy(IntPtr allocator, IntPtr image, IntPtr memoryAllocation);
+ADD_MANAGED_METHOD(VulkanImage, Destroy, void, (void* allocator, VkImage image, void* memoryAllocation), Yonai.Graphics.Backends.Vulkan)
+{ vmaDestroyImage((VmaAllocator)allocator, image, (VmaAllocation)memoryAllocation); }
 
-ADD_MANAGED_METHOD(VulkanCommandBuffer, PipelineBarrierImage, void, (void* handle, void* inBarrier, int srcStage, int dstStage), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanImage, CreateImageView, void*, (void* inDevice, void* image, VkImageViewCreateInfo* info), Yonai.Graphics.Backends.Vulkan)
 {
-	VkImageMemoryBarrier* barrier = (VkImageMemoryBarrier*)inBarrier;
-	barrier->sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	info->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
-	vkCmdPipelineBarrier(
-		(VkCommandBuffer)handle,
-		(VkPipelineStageFlags)srcStage,
-		(VkPipelineStageFlags)dstStage,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, barrier
-	);
+	VkImageView imageView;
+	VkResult result = vkCreateImageView((VkDevice)inDevice, info, nullptr, &imageView);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create image view", result);
+		return nullptr;
+	}
+
+	return imageView;
 }
 
-ADD_MANAGED_METHOD(VulkanCommandBuffer, CopyBufferToImage, void, (void* handle, void* inRegion, void* buffer, void* image), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanImage, DestroyImageView, void, (void* device, void* imageView), Yonai.Graphics.Backends.Vulkan)
 {
-	VkBufferImageCopy* region = (VkBufferImageCopy*)inRegion;
-
-	vkCmdCopyBufferToImage(
-		(VkCommandBuffer)handle,
-		(VkBuffer)buffer,
-		(VkImage)image,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		region
-	);
+	vkDestroyImageView((VkDevice)device, (VkImageView)imageView, nullptr);
 }
 
-ADD_MANAGED_METHOD(VulkanDevice, GetPhysicalDeviceLimits, void, (void* physicalDevice, VkPhysicalDeviceLimits* output), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanRenderPass, Create, void*,
+	(void* device, int attachmentCount, void* attachments,
+		int subpassCount, void* subpasses, int dependencyCount, void* dependencies),
+	Yonai.Graphics.Backends.Vulkan)
 {
-	VkPhysicalDeviceProperties properties;
-	vkGetPhysicalDeviceProperties((VkPhysicalDevice)physicalDevice, &properties);
-	*output = properties.limits;
+	VkRenderPassCreateInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = (unsigned int)attachmentCount;
+	renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments;
+	renderPassInfo.subpassCount = (unsigned int)subpassCount;
+	renderPassInfo.pSubpasses = (VkSubpassDescription*)subpasses;
+	renderPassInfo.dependencyCount = dependencyCount;
+	renderPassInfo.pDependencies = (VkSubpassDependency*)dependencies;
+
+	VkRenderPass renderPass;
+	VkResult result = vkCreateRenderPass((VkDevice)device, &renderPassInfo, nullptr, &renderPass);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create render pass", result);
+		return nullptr;
+	}
+	return renderPass;
 }
 
 ADD_MANAGED_METHOD(VulkanImage, CreateSampler, int, (void* device, VkSamplerCreateInfo* info, void** output), Yonai.Graphics.Backends.Vulkan)

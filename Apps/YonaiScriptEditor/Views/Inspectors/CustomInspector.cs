@@ -269,25 +269,6 @@ namespace YonaiEditor
 			return value;
 		}
 
-		private RenderTexture Draw(string label, RenderTexture value, float previewSize = 125) => Draw(label, value, new Vector2(50, 50), previewSize);
-		private RenderTexture Draw(string label, RenderTexture value, Vector2 textureDrawSize, float previewSize = 125)
-		{
-			if (value != null)
-				ImGUI.Image(value, textureDrawSize);
-			else
-				ImGUI.Image(EditorUIService.MissingTexture, textureDrawSize);
-
-			if (value != null && ImGUI.IsItemHovered() && ImGUI.BeginTooltip())
-			{
-				float aspectRatio = value.Resolution.x / (float)value.Resolution.y;
-				ImGUI.Image(value,
-					new Vector2(previewSize * aspectRatio, previewSize));
-				ImGUI.EndTooltip();
-			}
-
-			return value;
-		}
-
 		private T DrawEnum<T>(string label, T value) where T : Enum => (T)DrawEnum(label, typeof(T), value);
 
 		private object DrawEnum(string label, Type type, object value)
@@ -331,7 +312,7 @@ namespace YonaiEditor
 				{
 					string path = Clipboard.GetText();
 					if (!string.IsNullOrEmpty(path) && (Resource.Exists(path) || VFS.Exists(path)))
-						resource = Resource.Load(Resource.GetID(path), path, type);
+						resource = Resource.LoadFromUUID(Resource.GetID(path), path, type);
 				}
 				ImGUI.EndPopup();
 			}
@@ -523,7 +504,6 @@ namespace YonaiEditor
 			else if (t == typeof(Vector4)) return Draw(label, (Vector4)value);
 			else if (t == typeof(Texture)) return Draw(label, (Texture)value);
 			else if (t == typeof(Quaternion)) return Draw(label, (Quaternion)value);
-			else if (t == typeof(RenderTexture)) return Draw(label, (RenderTexture)value);
 			else if (t == typeof(UUID))
 			{
 				UUID uuid = (UUID)value;

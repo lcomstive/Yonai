@@ -9,7 +9,6 @@ namespace YonaiEditor.Views
 	{
 		private static World m_World = null;
 		private static Camera m_Camera = null;
-		private static RenderTexture m_Target = null;
 
 		private bool m_IsFocused = false;
 		private World m_ActiveWorld = null;
@@ -45,12 +44,9 @@ namespace YonaiEditor.Views
 
 			m_World = Resource.Load<World>("editor://SceneView.world");
 
-			m_Target = new RenderTexture(new IVector2(1920, 1080));
-
 			Entity entity = m_World.CreateEntity();
 			entity.AddComponent<NameComponent>().Name = "Scene Camera";
 			m_Camera = entity.AddComponent<Camera>();
-			m_Camera.RenderTarget = m_Target;
 
 			// Transform
 			Transform transform = entity.AddComponent<Transform>();
@@ -73,9 +69,6 @@ namespace YonaiEditor.Views
 
 		protected override void Closed()
 		{
-			m_Target.Dispose();
-			m_Camera.RenderTarget = null;
-
 			// m_World.Destroy();
 			Resource.SaveToDisk(m_World);
 			Resource.Unload(m_World);
@@ -98,6 +91,7 @@ namespace YonaiEditor.Views
 
 				IVector2 viewportSize = (IVector2)ImGUI.ContentRegionAvailable;
 
+				/*
 				// Draw to camera render target
 				IRenderPipeline pipeline = Renderer.Pipeline;
 				pipeline.Resolution = viewportSize;
@@ -107,6 +101,7 @@ namespace YonaiEditor.Views
 
 				// ImGUI.Image(pipeline.Output?.ColourAttachments[0] ?? null, viewportSize);
 				ImGUI.Image(m_Target, viewportSize);
+				*/
 
 				if(m_ActiveWorld)
 					HierarchyView.HandleDragDrop(m_ActiveWorld);
@@ -174,7 +169,7 @@ namespace YonaiEditor.Views
 				));
 			}
 
-			ImGUI.Gizmo.Manipulate(m_Camera, target, size, m_GizmoMode, m_GizmoModeLocal, snapping);
+			// ImGUI.Gizmo.Manipulate(m_Camera, target, size, m_GizmoMode, m_GizmoModeLocal, snapping);
 		}
 
 		private void DrawHeaderOperationSelector(string label, ImGUI.ManipulateOperation operation)

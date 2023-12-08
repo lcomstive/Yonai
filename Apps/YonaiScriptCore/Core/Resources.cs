@@ -108,7 +108,7 @@ namespace Yonai
 			=> Load<T>(path, null, saveToDisk);
 
 
-		internal static ResourceBase Load(UUID resourceID, string path, Type type)
+		public static ResourceBase LoadFromUUID(UUID resourceID, string path, Type type)
 		{
 			// Ensure type inherits from ResourceBase
 			if(!typeof(ResourceBase).IsAssignableFrom(type))
@@ -278,7 +278,7 @@ namespace Yonai
 				string typeName = resource["Type"].Value<string>();
 				Type type = Type.GetType(typeName);
 
-				ResourceBase instance = Load(id, resourcePath, type);
+				ResourceBase instance = LoadFromUUID(id, resourcePath, type);
 				if(instance is ISerializable && !LoadFromDisk(instance))
 					Unload(id); // If failed to load from disk, *most* likely will be in a call to Load with the correct import settings
 			}

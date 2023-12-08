@@ -46,7 +46,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void Dispose()
 		{
 			foreach (VulkanImage image in Images)
-				image.Dispose();
+			{
+				image.DestroySampler();
+				image.DestroyImageView();
+			}
 
 			_Destroy(m_Device.Device, Handle);
 		}

@@ -1544,10 +1544,6 @@ namespace YonaiEditor
 		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ImageDefaultBorder);
 		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref border);
 
-		public static void Image(RenderTexture texture, Vector2 size) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
-		public static void Image(RenderTexture texture, Vector2 size, Colour tint) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref s_ImageDefaultBorder);
-		public static void Image(RenderTexture texture, Vector2 size, Colour tint, Colour border) => _ImageRenderTexture(texture?.Handle ?? IntPtr.Zero, ref size, ref tint, ref border);
-
 		public static bool ButtonImage(ulong textureID, Vector2 size) => _ImageButton(textureID, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint) => _ImageButton(textureID, ref size, ref tint, ref s_ButtonImageDefaultBackground);
 		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(textureID, ref size, ref tint, ref backgroundColour);
@@ -2141,11 +2137,13 @@ namespace YonaiEditor
 
 			public static void Enable(bool enable = true) => Gizmo_Enable(enable);
 
+			/*
 			public static void Manipulate(Camera viewPoint, Transform target, Vector2 drawRegion, ManipulateOperation operation, bool isLocalSpace = true, float snapping = 0)
 			{
 				if (viewPoint != null && target != null)
 					_Gizmo_Manipulate(viewPoint.Handle, target.Handle, ref drawRegion, (uint)operation, isLocalSpace, snapping);
 			}
+			*/
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool Gizmo_IsOver();

@@ -63,6 +63,7 @@ namespace YonaiEditor.Views
 
 			IVector2 viewportSize = (IVector2)ImGUI.ContentRegionAvailable;
 
+			/*
 			if (!camera.RenderTarget)
 				camera.RenderTarget = new RenderTexture(viewportSize);
 			else
@@ -75,6 +76,7 @@ namespace YonaiEditor.Views
 			pipeline.Draw(camera);
 
 			ImGUI.Image(camera.RenderTarget, viewportSize);
+			*/
 		}
 	}
 }
