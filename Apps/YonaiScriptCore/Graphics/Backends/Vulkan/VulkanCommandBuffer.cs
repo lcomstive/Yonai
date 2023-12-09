@@ -29,7 +29,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void DrawIndexed(uint indexCount, uint instanceCount = 1, uint firstIndex = 0, int vertexOffset = 0, uint firstInstance = 0) =>
 			_DrawIndexed(Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 
-		public void BindPipeline(VulkanGraphicsPipeline pipeline, VkPipelineBindPoint bindPoint) =>
+		public void BindPipeline(VulkanPipeline pipeline, VkPipelineBindPoint bindPoint) =>
 			_BindPipeline(Handle, (int)bindPoint, pipeline.Handle);
 
 		public void SetViewport(VkViewport viewport, int index = 0) =>
@@ -69,7 +69,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void CopyBuffer(VulkanBuffer src, VulkanBuffer dst, int srcOffset, int dstOffset, int size) =>
 			_CopyBuffer(Handle, src.BufferHandle, dst.BufferHandle, srcOffset, dstOffset, size);
 
-		public void BindDescriptorSets(VulkanGraphicsPipeline pipeline, uint firstSet, VulkanDescriptorSet[] descriptorSets)
+		public void BindDescriptorSets(VulkanPipeline pipeline, VkPipelineBindPoint bindPoint, VulkanDescriptorSet descriptorSet) =>
+			BindDescriptorSets(pipeline, bindPoint, 0, new VulkanDescriptorSet[] { descriptorSet });
+
+		public void BindDescriptorSets(VulkanPipeline pipeline, VkPipelineBindPoint bindPoint, uint firstSet, VulkanDescriptorSet[] descriptorSets)
 		{
 			IntPtr[] nativeSets = new IntPtr[descriptorSets.Length];
 			for (int i = 0; i < nativeSets.Length; i++)
@@ -77,7 +80,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 			_BindDescriptorSets(
 				Handle,
-				(int)VkPipelineBindPoint.Graphics,
+				(int)bindPoint,
 				pipeline.PipelineLayout,
 				firstSet,
 				nativeSets
@@ -146,6 +149,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			VkImageBlit[] regions, VkFilter filter) =>
 			_BlitImage(Handle, srcImage.Image, (int)srcLayout, dstImage.Image, (int)dstLayout, regions, filter);
 
+		public void Dispatch(uint groupCountX, uint groupCountY, uint groupCountZ) =>
+			_Dispatch(Handle, groupCountX, groupCountY, groupCountZ);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -210,6 +216,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _ClearColorImage(IntPtr handle, IntPtr image, int imageLayout, ref Colour colour, VkImageSubresourceRange[] ranges);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _Dispatch(IntPtr handle, uint x, uint y, uint z);
+
 		#endregion
 	}
 }

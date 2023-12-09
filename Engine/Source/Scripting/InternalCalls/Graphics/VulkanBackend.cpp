@@ -614,7 +614,7 @@ ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Create, int, (void* device, void* 
 ADD_MANAGED_METHOD(VulkanDescriptorSetLayout, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyDescriptorSetLayout((VkDevice)device, (VkDescriptorSetLayout)handle, nullptr); }
 
-ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, MonoArray* inPoolSizes, unsigned int descriptorCount, unsigned int maxDescriptorSets, void** output), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, MonoArray* inPoolSizes, unsigned int maxDescriptorSets, void** output), Yonai.Graphics.Backends.Vulkan)
 {
 	vector<VkDescriptorPoolSize> poolSizes;
 	poolSizes.resize(mono_array_length(inPoolSizes));
@@ -636,6 +636,9 @@ ADD_MANAGED_METHOD(VulkanDescriptorPool, Create, int, (void* device, MonoArray* 
 
 ADD_MANAGED_METHOD(VulkanDescriptorPool, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyDescriptorPool((VkDevice)device, (VkDescriptorPool)handle, nullptr); }
+
+ADD_MANAGED_METHOD(VulkanDescriptorPool, Reset, void, (VkDevice device, VkDescriptorPool handle), Yonai.Graphics.Backends.Vulkan)
+{ vkResetDescriptorPool(device, handle, 0); }
 
 ADD_MANAGED_METHOD(VulkanDescriptorPool, AllocateDescriptorSets, int, (
 	void* inDevice,
@@ -972,6 +975,66 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Destroy, void, (void* device, void* h
 	vkDestroyPipeline((VkDevice)device, (VkPipeline)handle, nullptr);
 }
 
+struct VkComputePipelineCreateInfoManaged
+{
+	VkPipelineCreateFlagBits Flags;
+	VkShaderModule Shader;
+
+	unsigned int DescriptorSetLayoutCount;
+	VkDescriptorSetLayout* DescriptorSetLayouts;
+
+	VkPipeline BasePipeline;
+};
+
+ADD_MANAGED_METHOD(VulkanComputePipeline, Create, void*, (VkDevice device, void* inPipelineInfo, VkPipelineLayout* outPipelineLayout), Yonai.Graphics.Backends.Vulkan)
+{
+	VkComputePipelineCreateInfoManaged* managed = (VkComputePipelineCreateInfoManaged*)inPipelineInfo;
+
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = managed->DescriptorSetLayoutCount;
+	pipelineLayoutInfo.pSetLayouts = managed->DescriptorSetLayouts;
+
+	VkPipelineLayout pipelineLayout;
+	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create pipeline layout", result);
+		return nullptr;
+	}
+
+	VkPipelineShaderStageCreateInfo stageInfo = {};
+	stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	stageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	stageInfo.module = managed->Shader;
+	stageInfo.pName = "main";
+
+	VkComputePipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineInfo.layout = pipelineLayout;
+	pipelineInfo.stage = stageInfo;
+	pipelineInfo.flags = managed->Flags;
+
+	pipelineInfo.basePipelineIndex = 0;
+	pipelineInfo.basePipelineHandle = managed->BasePipeline;
+
+	VkPipeline pipeline;
+	result = vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
+	if (result != VK_SUCCESS)
+	{
+		LogCriticalError("Failed to create compute pipeline", result);
+		return nullptr;
+	}
+	*outPipelineLayout = pipelineLayout;
+	return pipeline;
+}
+
+ADD_MANAGED_METHOD(VulkanComputePipeline, Destroy, void, (VkDevice device, VkPipeline handle, VkPipelineLayout layout), Yonai.Graphics.Backends.Vulkan)
+{
+	vkDestroyPipelineLayout(device, layout, nullptr);
+	vkDestroyPipeline(device, handle, nullptr);
+}
+
 ADD_MANAGED_METHOD(VulkanCommandPool, Create, void*, (void* device, unsigned int graphicsQueueIndex, int flag), Yonai.Graphics.Backends.Vulkan)
 {
 	VkCommandPoolCreateInfo poolInfo = {};
@@ -1211,6 +1274,9 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, ClearColorImage, void, (VkCommandBuffer 
 	VkClearColorValue clearValue = { { inColour->r, inColour->g, inColour->b, inColour->a } };
 	vkCmdClearColorImage(handle, image, layout, &clearValue, (unsigned int)ranges.size(), ranges.data());
 }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, Dispatch, void, (VkCommandBuffer handle, unsigned int x, unsigned int y, unsigned int z), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdDispatch(handle, x, y, z); }
 
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
 {

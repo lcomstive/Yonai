@@ -34,6 +34,7 @@ namespace YonaiEditor.Inspectors
 
 			SetupTable();
 
+			/*
 			if (DrawFilepath("Vertex", m_Settings.VertexPath, out VFSFile vertexPath, ".vert", ".vertex"))
 				m_Settings.VertexPath = vertexPath;
 			if (DrawFilepath("Fragment", m_Settings.FragmentPath, out VFSFile fragmentPath, ".frag", ".fragment"))
@@ -42,6 +43,7 @@ namespace YonaiEditor.Inspectors
 				m_Settings.ComputePath = computePath;
 			if (DrawFilepath("Geometry", m_Settings.GeometryPath, out VFSFile geometryPath, ".geo", ".geometry"))
 				m_Settings.GeometryPath = geometryPath;
+			*/
 
 			ImGUI.EndTable();
 
@@ -62,9 +64,13 @@ namespace YonaiEditor.Inspectors
 			}
 		}
 
-		private bool PendingChanges() => m_Settings.VertexPath != m_Target.ShaderStages.VertexPath ||
+
+		private bool PendingChanges() => false;
+		/*
+			m_Settings.VertexPath != m_Target.ShaderStages.VertexPath ||
 											m_Settings.FragmentPath != m_Target.ShaderStages.FragmentPath ||
 											m_Settings.ComputePath != m_Target.ShaderStages.ComputePath ||
 											m_Settings.GeometryPath != m_Target.ShaderStages.GeometryPath;
+		*/
 	}
 }

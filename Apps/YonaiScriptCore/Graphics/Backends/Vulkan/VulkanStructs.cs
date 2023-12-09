@@ -518,6 +518,40 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 	}
 
+	public struct VkComputePipelineCreateInfo
+	{
+		public VkPipelineCreateFlags Flags;
+		public VulkanShaderModule Shader;
+		public VulkanComputePipeline BasePipeline;
+		public VulkanDescriptorSetLayout[] DescriptorSetLayouts;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	internal struct VkComputePipelineCreateInfoNative : IDisposable
+	{
+		public VkPipelineCreateFlags Flags;
+		public IntPtr ShaderHandle;
+		public uint DescriptorSetLayoutCount;
+		public IntPtr DescriptorSetLayouts;
+		public IntPtr BasePipelineHandle;
+
+		public VkComputePipelineCreateInfoNative(VkComputePipelineCreateInfo info)
+		{
+			Flags = info.Flags;
+			ShaderHandle = info.Shader?.Handle ?? IntPtr.Zero;
+			BasePipelineHandle = info.BasePipeline?.Handle ?? IntPtr.Zero;
+
+			DescriptorSetLayoutCount = (uint)(info.DescriptorSetLayouts?.Length ?? 0);
+			IntPtr[] descriptorHandles = new IntPtr[DescriptorSetLayoutCount];
+			for (int i = 0; i < DescriptorSetLayoutCount; i++)
+				descriptorHandles[i] = info.DescriptorSetLayouts[i].Handle;
+			DescriptorSetLayouts = DescriptorSetLayoutCount > 0 ?
+				InteropUtils.CreateNativeHandle(descriptorHandles) : IntPtr.Zero;
+		}
+
+		public void Dispose() => Marshal.FreeHGlobal(DescriptorSetLayouts);
+	}
+
 	public struct VkDescriptorSetLayoutBinding
 	{
 		public uint Binding;

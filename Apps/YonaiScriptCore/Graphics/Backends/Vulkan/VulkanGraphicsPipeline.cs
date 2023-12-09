@@ -1,13 +1,16 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanGraphicsPipeline : IDisposable
+	public class VulkanGraphicsPipeline : VulkanPipeline, IDisposable
 	{
-		internal IntPtr Handle;
-		internal IntPtr PipelineLayout;
+		private IntPtr m_Handle;
+		internal override IntPtr Handle => m_Handle;
+
+		private IntPtr m_PipelineLayout;
+		internal override IntPtr PipelineLayout => m_PipelineLayout;
+
 		internal VulkanRenderPass RenderPass;
 		private VulkanDevice Device => RenderPass.Device;
 
@@ -29,7 +32,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			PipelineCreateInfo = pipelineInfo;
 
 			VkGraphicsPipelineCreateInfoNative native = new VkGraphicsPipelineCreateInfoNative(RenderPass, Subpass, PipelineCreateInfo);
-			Handle = _Create(Device.Device, ref native, out PipelineLayout);
+			m_Handle = _Create(Device.Device, ref native, out m_PipelineLayout);
 			native.Dispose();
 		}
 

@@ -6,6 +6,7 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai
 {
@@ -310,20 +311,26 @@ namespace Yonai
 			Load<Texture>("assets://Textures/Grid.png");
 
 			// Materials //
-			Load<Material>("assets://Materials/Default3D.material", new MaterialImportSettings()
+			Load<Material>("assets://Materials/Default3D.material", new MaterialImportSettings
 			{
-				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings()
+				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings
 				{
-					VertexPath = "assets://Shaders/Lit.vert",
-					FragmentPath = "assets://Shaders/Lit.frag"
+					StagePaths = new Dictionary<VkShaderStage, VFSFile>()
+					{
+						{ VkShaderStage.Vertex, "assets://Shaders/Lit.vert" },
+						{ VkShaderStage.Fragment, "assets://Shaders/Lit.frag" },
+					}
 				})
 			});
-			Load<Material>("assets://Materials/Default2D.material", new MaterialImportSettings()
+			Load<Material>("assets://Materials/Default2D.material", new MaterialImportSettings
 			{
-				Shader = Load<Shader>("assets://Shaders/Default2D.shader", new ShaderImportSettings()
+				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings
 				{
-					VertexPath = "assets://Shaders/Sprite.vert",
-					FragmentPath = "assets://Shaders/Sprite.frag"
+					StagePaths = new Dictionary<VkShaderStage, VFSFile>()
+					{
+						{ VkShaderStage.Vertex, "assets://Shaders/Sprite.vert" },
+						{ VkShaderStage.Fragment, "assets://Shaders/Sprite.frag" },
+					}
 				})
 			});
 		}

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanShaderModule : IDisposable
+	public class VulkanShaderModule : IShaderModule, IDisposable
 	{
 		internal IntPtr Handle;
 		internal VulkanDevice Device;

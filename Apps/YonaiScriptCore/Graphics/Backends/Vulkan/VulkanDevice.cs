@@ -84,6 +84,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 			VulkanBuffer source = (VulkanBuffer)srcBuffer;
 			source.CopyTo(m_Backend.CommandPool, (VulkanBuffer)dstBuffer, source.BufferSize);
 		}
+
+		public IShaderModule CreateShaderModule(byte[] data) =>
+			new VulkanShaderModule(this, data);
 		#endregion
 
 		public void Dispose()

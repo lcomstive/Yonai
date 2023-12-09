@@ -25,5 +25,7 @@ namespace Yonai.Graphics
 		IBuffer CreateBuffer(int bufferSize, BufferUsage usage, BufferType typeFlags = BufferType.None);
 
 		void CopyBuffer(IBuffer srcBuffer, IBuffer dstBuffer);
+
+		IShaderModule CreateShaderModule(byte[] data);
 	}
 }
