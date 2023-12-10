@@ -1,9 +1,7 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-
 using Yonai.IO;
 using Yonai.Graphics.RenderPaths;
+using System.Runtime.CompilerServices;
+using System;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -15,19 +13,23 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public string[] AvailableExtensions { get; private set; }
 
-		private FunctionQueue DeletionQueue = new FunctionQueue();
-
 		public const int MaxFramesInFlight = 2;
 		public VulkanSwapchain Swapchain { get; private set; } = null;
 		public VulkanDevice SelectedDevice { get; private set; } = null;
 		public VulkanCommandPool CommandPool { get; private set; } = null;
 
-		public IRenderPath RenderPath { get; private set; }
+		public IRenderPath RenderPath { get; set; }
 
-		// Offscreen buffer
 		public VkSampleCount MSAASamples { get; private set; } = VkSampleCount._1;
 
 		private bool m_FramebufferResized = false;
+		private FunctionQueue DeletionQueue = new FunctionQueue();
+
+		#region Immediate Mode Submission
+		private VulkanFence m_ImmediateFence;
+		private VulkanCommandBuffer m_ImmediateCmdBuffer;
+		private VulkanCommandPool m_ImmediateCmdPool;
+		#endregion
 
 		public Model TestModel { get; private set; }
 		public VulkanImage TestModelTexture { get; private set; }
@@ -50,6 +52,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Log.Trace("Creating vulkan graphics backend");
 
 			Instance = new VulkanInstance("Yonai Application", new Version(0, 0, 1));
+			DeletionQueue.Enqueue(() => Instance.Dispose());
 
 			AvailableExtensions = _GetAvailableExtensions();
 			Log.Debug($"Available extensions: ({AvailableExtensions.Length})");
@@ -61,10 +64,14 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Log.Debug("\n\nChoosing first device - " + SelectedDevice.Name);
 
 			Swapchain = SelectedDevice.CreateSwapchain();
+			DeletionQueue.Enqueue(() => Swapchain.Dispose());
+
 			CommandPool = new VulkanCommandPool(SelectedDevice);
+			DeletionQueue.Enqueue(() => CommandPool.Dispose());
 
 			CreateTestModel();
 
+			#region Frame data
 			m_Frames = new FrameData[MaxFramesInFlight];
 			for (int i = 0; i < MaxFramesInFlight; i++)
 			{
@@ -77,14 +84,39 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 					CommandPool = new VulkanCommandPool(SelectedDevice)
 				};
-				m_Frames[i].MainCommandBuffer = m_Frames[i].CommandPool.CreateCommandBuffer(VkCommandBufferLevel.Primary);
+				m_Frames[i].MainCommandBuffer = m_Frames[i].CommandPool.CreateCommandBuffer();
 			}
 
-			RenderPath = new ForwardRenderPath();
-			RenderPath.OnResized(Window.Resolution);
+			DeletionQueue.Enqueue(() =>
+			{
+				for(int i = 0; i < m_Frames.Length; i++)
+				{
+					m_Frames[i].RenderSemaphore.Dispose();
+					m_Frames[i].SwapchainSemaphore.Dispose();
+					m_Frames[i].RenderFence.Dispose();
+					m_Frames[i].CommandPool.Dispose();
+				}
+			});
+			#endregion
+
+			#region Render Path
+			if (RenderPath == null)
+			{
+				RenderPath = new ForwardRenderPath();
+				DeletionQueue.Enqueue(() => RenderPath.Dispose());
+			}
+			#endregion
+
+			#region Immediate submission resources
+			m_ImmediateCmdPool = new VulkanCommandPool(SelectedDevice);
+			m_ImmediateCmdBuffer = m_ImmediateCmdPool.CreateCommandBuffer();
+			DeletionQueue.Enqueue(() => m_ImmediateCmdPool.Dispose());
+
+			m_ImmediateFence = new VulkanFence(SelectedDevice);
+			DeletionQueue.Enqueue(() => m_ImmediateFence.Dispose());
+			#endregion
 
 			Window.Resized += OnWindowResized;
-
 			Log.Debug("Finished creating C# Vulkan backend");
 		}
 
@@ -190,6 +222,29 @@ namespace Yonai.Graphics.Backends.Vulkan
 			CurrentFrame = (CurrentFrame + 1) % MaxFramesInFlight;
 		}
 
+		public void ImmediateSubmit(Action<VulkanCommandBuffer> callback)
+		{
+			m_ImmediateFence.Reset();
+			VulkanCommandBuffer cmd = m_ImmediateCmdBuffer;
+
+			cmd.Reset();
+			cmd.Begin(VkCommandBufferUsage.OneTimeSubmit);
+
+			callback?.Invoke(cmd);
+
+			cmd.End();
+			
+			SelectedDevice.GraphicsQueue.Submit(
+				buffers: new VulkanCommandBuffer[] { cmd },
+				fence: m_ImmediateFence,
+				waitSemaphores: null,
+				signalSemaphores: null,
+				stageMask: null
+			);
+
+			m_ImmediateFence.Wait();
+		}
+
 		/// <summary>
 		/// Handles window resizing, or swapchain becoming out of date
 		/// </summary>
@@ -260,28 +315,10 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			Log.Trace("Destroying vulkan graphics backend");
 
-			#region Temp
-			DeletionQueue.Flush();
-
 			TestModelTexture.Dispose();
 
-			for (int i = 0; i < MaxFramesInFlight; i++)
-			{
-				m_Frames[i].RenderFence.Dispose();
-				m_Frames[i].RenderSemaphore.Dispose();
-				m_Frames[i].SwapchainSemaphore.Dispose();
-
-				m_Frames[i].MainCommandBuffer.Dispose();
-				m_Frames[i].CommandPool.Dispose();
-			}
-
-			Swapchain.Dispose();
-			CommandPool.Dispose();
-
+			DeletionQueue.Flush();
 			SelectedDevice = null;
-			#endregion
-
-			Instance?.Dispose();
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

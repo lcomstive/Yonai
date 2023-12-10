@@ -24,6 +24,8 @@ namespace Yonai.Graphics.RenderPaths
 
 			InitDescriptors();
 			CreatePipeline();
+
+			OnResized(Window.Resolution);
 		}
 
 		public void Draw(VulkanCommandBuffer cmd, Camera camera)
@@ -56,7 +58,7 @@ namespace Yonai.Graphics.RenderPaths
 
 		public void OnResized(IVector2 resolution)
 		{
-			GenerateColourOutput();
+			GenerateColourOutput(resolution);
 			UpdateDescriptors();
 		}
 
@@ -66,13 +68,13 @@ namespace Yonai.Graphics.RenderPaths
 			m_Pipeline?.Dispose();
 		}
 
-		private void GenerateColourOutput()
+		private void GenerateColourOutput(IVector2 resolution)
 		{
 			ColourOutput?.Dispose();
 
 			VkImageCreateInfo createInfo = VkImageCreateInfo.Default;
 			createInfo.Format = VkFormat.R16G16B16A16_SFLOAT;
-			createInfo.Extent = new Extents3D(Window.Resolution);
+			createInfo.Extent = new Extents3D(resolution);
 			createInfo.Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Storage;
 
 			VkImageViewCreateInfo imageViewInfo = VkImageViewCreateInfo.Default;

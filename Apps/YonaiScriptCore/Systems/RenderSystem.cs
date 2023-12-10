@@ -56,5 +56,8 @@ namespace Yonai.Systems
 			try { Backend?.Create(); }
 			catch(Exception e) { Log.Exception(e); }
 		}
+
+		// Called from C++ to get the selected graphics API
+		private static GraphicsAPI GetGraphicsAPI() => API;
 	}
 }

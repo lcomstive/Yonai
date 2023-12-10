@@ -1085,6 +1085,74 @@ namespace Yonai.Graphics.Backends.Vulkan
 				m_DstOffset1 = value?.Length > 1 ? value[1] : IVector3.Zero;
 			}
 		}
-
 	}
+
+	public struct VkRenderingInfo
+	{
+		public uint ViewMask;
+		public uint LayerCount;
+		public VkRect2D RenderArea;
+		public VkRenderingAttachmentInfo[] ColorAttachments;
+		public VkRenderingAttachmentInfo? DepthAttachment;
+		public VkRenderingAttachmentInfo? StencilAttachment;
+	}
+
+	public struct VkRenderingAttachmentInfo
+	{
+		public VulkanImage Image;
+		public VkImageLayout ImageLayout;
+		public VkResolveModeFlagBits ResolveMode;
+		public VulkanImage ResolveImage;
+		public VkImageLayout ResolveImageLayout;
+		public VkAttachmentLoadOp LoadOp;
+		public VkAttachmentStoreOp StoreOp;
+		public VkClearValue? ClearValue;
+
+		public VkRenderingAttachmentInfo(VulkanImage image, VkImageLayout layout, VkClearValue? clearValue = null)
+		{
+			Image = image;
+			ImageLayout = layout;
+			ResolveMode = VkResolveModeFlagBits.NONE;
+			ResolveImage = null;
+			ResolveImageLayout = 0;
+			LoadOp = clearValue.HasValue ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load;
+			StoreOp = VkAttachmentStoreOp.Store;
+
+			if (clearValue.HasValue)
+				ClearValue = clearValue.Value;
+			else
+				ClearValue = null;
+		}
+	};
+	
+	internal struct VkRenderingAttachmentInfoNative : IDisposable
+	{
+		public IntPtr ImageView;
+		public VkImageLayout ImageLayout;
+		public VkResolveModeFlagBits ResolveMode;
+		public IntPtr ResolveImageView;
+		public VkImageLayout ResolveImageLayout;
+		public VkAttachmentLoadOp LoadOp;
+		public VkAttachmentStoreOp StoreOp;
+		public IntPtr ClearValue;
+
+		public VkRenderingAttachmentInfoNative(VkRenderingAttachmentInfo info)
+		{
+			ImageView = info.Image?.ImageView ?? IntPtr.Zero;
+			ImageLayout = info.ImageLayout;
+			ResolveMode = info.ResolveMode;
+			ResolveImageView = info.ResolveImage?.ImageView ?? IntPtr.Zero;
+			ResolveImageLayout = info.ResolveImageLayout;
+			LoadOp = info.LoadOp;
+			StoreOp = info.StoreOp;
+			ClearValue = info.ClearValue.HasValue ?
+				InteropUtils.CreateNativeHandle(new VkClearValueNative(info.ClearValue.Value)) : IntPtr.Zero;
+		}
+
+		public void Dispose()
+		{
+			if(ClearValue != IntPtr.Zero)
+				Marshal.FreeHGlobal(ClearValue);
+		}
+	};
 }

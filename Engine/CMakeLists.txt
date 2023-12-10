@@ -40,6 +40,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${YONAI_DEPENDENCY_LIBS})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${YONAI_DEFINES})
 
 if(NOT WIN32)
 	include(GNUInstallDirs)

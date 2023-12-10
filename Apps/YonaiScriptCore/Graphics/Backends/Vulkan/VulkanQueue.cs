@@ -5,8 +5,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 {
 	public class VulkanQueue
 	{
-		internal IntPtr Handle;
-		internal uint Index;
+		public IntPtr Handle { get; private set; }
+		public uint Index { get; private set; }
 
 		public const uint Ignored = (~0u);
 

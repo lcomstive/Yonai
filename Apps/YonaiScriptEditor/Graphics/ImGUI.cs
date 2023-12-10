@@ -3,6 +3,7 @@ using Yonai.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Runtime.CompilerServices;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace YonaiEditor
 {
@@ -1142,6 +1143,48 @@ namespace YonaiEditor
 		public static void SetDisplayFramebufferScale(Vector2 scale) => SetDisplayFramebufferScale(scale.x, scale.y);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetDisplayFramebufferScale(float scaleX, float scaleY);
+
+		#region Setup Vulkan
+		internal struct ImGui_ImplVulkan_InitInfo
+		{
+			public IntPtr Instance;
+			public IntPtr PhysicalDevice;
+			public IntPtr LogicalDevice;
+			public uint QueueFamily;
+			public IntPtr Queue;
+			public IntPtr PipelineCache;
+			public IntPtr DescriptorPool;
+			public uint Subpass;
+			public uint MinImageCount;          // >= 2
+			public uint ImageCount;             // >= MinImageCount
+			public VkSampleCount MSAASamples;            // >= VK_SAMPLE_COUNT_1_BIT (0 -> default to VK_SAMPLE_COUNT_1_BIT)
+
+			// Dynamic Rendering (Optional)
+			public bool UseDynamicRendering;    // Need to explicitly enable VK_KHR_dynamic_rendering extension to use this, even for Vulkan 1.3.
+			public VkFormat ColorAttachmentFormat;  // Required for dynamic rendering
+		};
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void VulkanInit(ref ImGui_ImplVulkan_InitInfo info);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void VulkanCreateFontsTexture(IntPtr commandBuffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void VulkanDestroyFontUploadObjects();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void VulkanShutdown();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void VulkanNewFrame();
+
+		public static void VulkanRender(VulkanCommandBuffer commandBuffer) =>
+			_VulkanRender(commandBuffer.Handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _VulkanRender(IntPtr commandBuffer);
+		#endregion
 
 		#region Font
 		[MethodImpl(MethodImplOptions.InternalCall)]

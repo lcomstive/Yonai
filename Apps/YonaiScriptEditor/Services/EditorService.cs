@@ -75,7 +75,7 @@ namespace YonaiEditor
 				RenderSystem.ChangeBackend(graphicsAPI);
 			}
 
-			// InitImGUI();
+			InitImGUI();
 
 			/*
 			if (!string.IsNullOrEmpty(projectPath))

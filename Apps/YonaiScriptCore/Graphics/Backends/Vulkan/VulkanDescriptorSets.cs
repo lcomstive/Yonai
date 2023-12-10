@@ -29,7 +29,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public class VulkanDescriptorPool : IDisposable
 	{
-		internal IntPtr Handle;
+		public IntPtr Handle { get; private set; }
 		private VulkanDevice m_Device;
 
 		public VulkanDescriptorPool(VulkanDevice device, VkDescriptorPoolSize[] poolSizes, int maxDescriptorSets) :
@@ -38,7 +38,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanDescriptorPool(VulkanDevice device, VkDescriptorPoolSize[] poolSizes, uint maxDescriptorSets)
 		{
 			m_Device = device;
-			VkResult result = (VkResult)_Create(device.Device, poolSizes, maxDescriptorSets, out Handle);
+			VkResult result = (VkResult)_Create(device.Device, poolSizes, maxDescriptorSets, out IntPtr handle);
+			Handle = handle;
 			result.CheckForSuccess("Descriptor pool creation");
 		}
 

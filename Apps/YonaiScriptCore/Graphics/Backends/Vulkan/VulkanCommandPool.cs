@@ -16,7 +16,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void Dispose() => _Destroy(Device.Device, Handle);
 
-		public VulkanCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level)
+		public VulkanCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level = VkCommandBufferLevel.Primary)
 		{
 			_CreateCommandBuffers(Device.Device, Handle, 1u, (int)level, out IntPtr[] handles);
 			return new VulkanCommandBuffer(handles[0], this);

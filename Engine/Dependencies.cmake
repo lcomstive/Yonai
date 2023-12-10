@@ -156,7 +156,3 @@ if(APPLE)
 		list(APPEND YONAI_DEPENDENCY_LIBS "-framework UIKit")
 	endif()
 endif()
-
-foreach(DEFINE IN LISTS YONAI_DEFINES)
-	add_definitions(-D${DEFINE})
-endforeach()

@@ -57,11 +57,16 @@ const vector<const char*> ValidationLayers =
 const vector<const char*> DeviceExtensions =
 {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+	VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+	VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
 
 #if defined(YONAI_PLATFORM_APPLE)
 	"VK_KHR_portability_subset"
 #endif
 };
+
+PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR_;
+PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR_;
 
 struct QueueFamilyIndices
 {
@@ -534,6 +539,9 @@ ADD_MANAGED_METHOD(VulkanDevice, CreateDevice, void*, (void* physicalDevice, uns
 		LogCriticalError("Failed to create logical device", result);
 		return nullptr;
 	}
+
+	vkCmdBeginRenderingKHR_ = (PFN_vkCmdBeginRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
+	vkCmdEndRenderingKHR_ = (PFN_vkCmdEndRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
 
 	return device;
 }
@@ -1293,6 +1301,101 @@ ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.
 	}
 	return fence;
 }
+
+struct VkRenderingInfoManaged
+{
+	VkRenderingFlags                    flags;
+	VkRect2D                            renderArea;
+	uint32_t                            layerCount;
+	uint32_t                            viewMask;
+};
+
+struct VkRenderingAttachmentInfoManaged
+{
+	VkImageView              imageView;
+	VkImageLayout            imageLayout;
+	VkResolveModeFlagBits    resolveMode;
+	VkImageView              resolveImageView;
+	VkImageLayout            resolveImageLayout;
+	VkAttachmentLoadOp       loadOp;
+	VkAttachmentStoreOp      storeOp;
+	VkClearValueManaged*     clearValue;
+};
+
+VkRenderingAttachmentInfo ParseManagedRenderingAttachment(VkRenderingAttachmentInfoManaged managed)
+{
+	VkRenderingAttachmentInfo attachmentInfo = {};
+	attachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	attachmentInfo.imageView = managed.imageView;
+	attachmentInfo.imageLayout = managed.imageLayout;
+	attachmentInfo.resolveMode = managed.resolveMode;
+	attachmentInfo.resolveImageView = managed.resolveImageView;
+	attachmentInfo.resolveImageLayout = managed.resolveImageLayout;
+	attachmentInfo.loadOp = managed.loadOp;
+	attachmentInfo.storeOp = managed.storeOp;
+
+	if (managed.clearValue && managed.clearValue->UseColour)
+	{
+		attachmentInfo.clearValue.color =
+		{
+			managed.clearValue->ColourR,
+			managed.clearValue->ColourG,
+			managed.clearValue->ColourB,
+			managed.clearValue->ColourA
+		};
+	}
+	else if(managed.clearValue)
+		attachmentInfo.clearValue.depthStencil = managed.clearValue->DepthStencil;
+
+	return attachmentInfo;
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, BeginRendering, void, (
+	VkCommandBuffer cmd,
+	VkRect2D* renderArea,
+	unsigned int layerCount,
+	unsigned int viewMask,
+	MonoArray* inColourAttachments,
+	void* inDepthAttachment,
+	void* inStencilAttachment
+), Yonai.Graphics.Backends.Vulkan)
+{
+	VkRenderingAttachmentInfo depthAttachment;
+	VkRenderingAttachmentInfo stencilAttachment;
+	vector<VkRenderingAttachmentInfo> colourAttachments;
+
+	colourAttachments.resize(mono_array_length(inColourAttachments));
+	for (size_t i = 0; i < colourAttachments.size(); i++)
+	{
+		VkRenderingAttachmentInfoManaged managed = mono_array_get(inColourAttachments, VkRenderingAttachmentInfoManaged, i);
+		colourAttachments[i] = ParseManagedRenderingAttachment(managed);
+	}
+
+	VkRenderingInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	info.colorAttachmentCount = (unsigned int)colourAttachments.size();
+	info.pColorAttachments = colourAttachments.data();
+	info.renderArea = *renderArea;
+	info.layerCount = layerCount;
+	info.viewMask = viewMask;
+
+	if (inDepthAttachment)
+	{
+		depthAttachment = ParseManagedRenderingAttachment(*(VkRenderingAttachmentInfoManaged*)inDepthAttachment);
+		info.pDepthAttachment = &depthAttachment;
+	}
+
+	if (inStencilAttachment)
+	{
+		stencilAttachment = ParseManagedRenderingAttachment(*(VkRenderingAttachmentInfoManaged*)inStencilAttachment);
+		info.pStencilAttachment = &stencilAttachment;
+	}
+
+	vkCmdBeginRenderingKHR_(cmd, &info);
+}
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, EndRendering, void, (VkCommandBuffer cmd), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdEndRenderingKHR_(cmd); }
 
 ADD_MANAGED_METHOD(VulkanFence, Destroy, void, (void* device, void* handle), Yonai.Graphics.Backends.Vulkan)
 { vkDestroyFence((VkDevice)device, (VkFence)handle, nullptr); }

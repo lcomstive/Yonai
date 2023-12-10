@@ -1,12 +1,13 @@
 using System;
 using System.Runtime.CompilerServices;
+using Yonai._Internal;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
 	public class VulkanCommandBuffer : IDisposable
 	{
-		internal IntPtr Handle;
+		public IntPtr Handle { get; private set; }
 		private VulkanCommandPool m_Pool;
 
 		internal VulkanCommandBuffer(IntPtr handle, VulkanCommandPool pool)
@@ -152,6 +153,47 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void Dispatch(uint groupCountX, uint groupCountY, uint groupCountZ) =>
 			_Dispatch(Handle, groupCountX, groupCountY, groupCountZ);
 
+		public void BeginRendering(VkRenderingInfo info)
+		{
+			VkRenderingAttachmentInfoNative[] colourAttachments = new VkRenderingAttachmentInfoNative[info.ColorAttachments.Length];
+			for(int i = 0; i < colourAttachments.Length; i++)
+				colourAttachments[i] = new VkRenderingAttachmentInfoNative(info.ColorAttachments[i]);
+
+			VkRenderingAttachmentInfoNative depthNative = new VkRenderingAttachmentInfoNative();
+			VkRenderingAttachmentInfoNative stencilNative = new VkRenderingAttachmentInfoNative();
+			IntPtr depthAttachment = IntPtr.Zero, stencilAttachment = IntPtr.Zero;
+
+			if (info.DepthAttachment.HasValue)
+			{
+				depthNative = new VkRenderingAttachmentInfoNative(info.DepthAttachment.Value);
+				depthAttachment = InteropUtils.CreateNativeHandle(depthNative);
+			}
+			if (info.StencilAttachment.HasValue)
+			{
+				stencilNative = new VkRenderingAttachmentInfoNative(info.StencilAttachment.Value);
+				stencilAttachment = InteropUtils.CreateNativeHandle(stencilNative);
+			}
+
+			_BeginRendering(
+				Handle,
+				ref info.RenderArea,
+				info.LayerCount,
+				info.ViewMask,
+				colourAttachments,
+				depthAttachment,
+				stencilAttachment
+			);
+
+			// Handle cleanup
+			depthNative.Dispose();
+			stencilNative.Dispose();
+
+			for (int i = 0; i < colourAttachments.Length; i++)
+				colourAttachments[i].Dispose();
+		}
+
+		public void EndRendering() => _EndRendering(Handle);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -220,6 +262,19 @@ namespace Yonai.Graphics.Backends.Vulkan
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Dispatch(IntPtr handle, uint x, uint y, uint z);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _BeginRendering(
+			IntPtr handle,
+			ref VkRect2D renderArea,
+			uint layerCount,
+			uint viewMask,
+			VkRenderingAttachmentInfoNative[] colourAttachments,
+			IntPtr depthAttachment,
+			IntPtr stencilAttachment
+		);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _EndRendering(IntPtr handle);
 		#endregion
 	}
 }

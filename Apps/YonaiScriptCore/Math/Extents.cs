@@ -30,6 +30,9 @@ namespace Yonai
 			Width  = (uint)size.x;
 			Height = (uint)size.y;
 		}
+
+		public static implicit operator IVector2(Extents extents) => new IVector2((int)extents.Width, (int)extents.Height);
+		public static implicit operator Extents(IVector2 size) => new Extents((uint)size.x, (uint)size.y);
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

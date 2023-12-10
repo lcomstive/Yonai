@@ -26,7 +26,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Handle = _Create(
 				m_Device.PhysicalDevice,
 				m_Device.Device,
-				m_Instance.m_Surface,
+				m_Instance.Surface,
 				IntPtr.Zero,
 				out int imageFormat,
 				out uint extentsWidth,

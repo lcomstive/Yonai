@@ -14,11 +14,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 			public bool IsComplete => GraphicsFamily != null && PresentFamily != 0;
 		}
 
-		internal IntPtr Device = IntPtr.Zero;
-		internal IntPtr PhysicalDevice = IntPtr.Zero;
-		internal VulkanQueue GraphicsQueue = null;
-		internal VulkanQueue PresentQueue = null;
-		internal IntPtr Allocator = IntPtr.Zero;
+		public IntPtr Device { get; private set; } = IntPtr.Zero;
+		public IntPtr PhysicalDevice { get; private set; } = IntPtr.Zero;
+		public VulkanQueue GraphicsQueue { get; private set; } = null;
+		public VulkanQueue PresentQueue { get; private set; } = null;
+		public IntPtr Allocator { get; private set; } = IntPtr.Zero;
 
 		private VulkanInstance m_Instance;
 		private VulkanGraphicsBackend m_Backend;
@@ -53,7 +53,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			_GetPhysicalDeviceLimits(PhysicalDevice, out VkPhysicalDeviceLimits limits);
 			Limits = limits;
 
-			Allocator = _CreateAllocator(PhysicalDevice, Device, m_Instance.m_Handle);
+			Allocator = _CreateAllocator(PhysicalDevice, Device, m_Instance.Handle);
 
 			Log.Debug($"Device: {Name} [{ID}][Driver {DriverVersion}][{Enum.GetName(typeof(VkPhysicalDeviceType), Type)}]");
 		}
@@ -118,7 +118,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			return indices;
 		}
 
-		public bool GetSurfaceSupport(uint queueFamilyIndex) => _GetPhysicalDeviceSurfaceSupport(PhysicalDevice, queueFamilyIndex, m_Instance.m_Surface);
+		public bool GetSurfaceSupport(uint queueFamilyIndex) => _GetPhysicalDeviceSurfaceSupport(PhysicalDevice, queueFamilyIndex, m_Instance.Surface);
 
 		public void WaitIdle() => _WaitIdle(Device);
 

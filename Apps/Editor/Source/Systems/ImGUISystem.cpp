@@ -17,7 +17,10 @@ using namespace YonaiEditor::Systems;
 enum class GraphicsAPI : int
 {
 	None = 0,
+
+#if defined(YONAI_GRAPHICS_VULKAN)
 	Vulkan
+#endif
 };
 // Gets currently used API from C#
 GraphicsAPI GetGraphicsAPI();
@@ -81,8 +84,32 @@ void ImGUISystem::OnEnabled()
 
 			ImGui_ImplVulkan_Init();
 			*/
+
+			VkDescriptorPoolSize poolSizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
+
+			VkDescriptorPoolCreateInfo poolInfo = {};
+			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+			poolInfo.maxSets = 1000;
+			poolInfo.poolSizeCount = (unsigned int)std::size(poolSizes);
+			poolInfo.pPoolSizes = poolSizes;
+
+			VkDescriptorPool imguiPool;
+			// vkCreateDescriptorPool()
 			break;
 		}
+
+		ImGui_ImplVulkan_InitInfo info;
 
 		StartFrame();
 
@@ -165,3 +192,7 @@ GraphicsAPI GetGraphicsAPI()
 	int graphicsAPI = *(int*)mono_object_unbox (output);
 	return (GraphicsAPI)graphicsAPI;
 }
+
+#if defined(YONAI_GRAPHICS_VULKAN)
+
+#endif

@@ -6,11 +6,17 @@
 #include <ImGuizmo.h>
 #include <glm/glm.hpp>
 #include <Yonai/Utils.hpp>
+#include <Yonai/Window.hpp>
 #include <Yonai/Resource.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
+#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
+
+#if defined(YONAI_GRAPHICS_VULKAN)
+#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_Vulkan.hpp>
+#endif
 
 using namespace std;
 using namespace glm;
@@ -23,6 +29,55 @@ ImVec2 ToVec2(glm::vec2* value) { return ImVec2(value->x, value->y); }
 ImVec2 ToVec2(glm::ivec2* value) { return ImVec2(value->x, value->y); }
 ImVec4 ToVec4(glm::vec4* value) { return ImVec4(value->x, value->y, value->z, value->w); }
 ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z, value->w); }
+
+#pragma region Setup Vulkan
+#if defined(YONAI_GRAPHICS_VULKAN)
+ADD_MANAGED_METHOD(ImGUI, VulkanInit, void, (void* inInfo), YonaiEditor)
+{
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForVulkan(Window::GetNativeHandle(), true);
+
+	ImGui_ImplVulkan_InitInfo* info = (ImGui_ImplVulkan_InitInfo*)inInfo;
+	info->Allocator = nullptr;
+	info->CheckVkResultFn = [](VkResult err)
+		{
+			if(err != VK_SUCCESS)
+				spdlog::error("[ImGUI] Vulkan error [{}]", (int)err);
+		};
+	ImGui_ImplVulkan_Init(info, VK_NULL_HANDLE);
+}
+
+ADD_MANAGED_METHOD(ImGUI, VulkanCreateFontsTexture, void, (VkCommandBuffer cmd), YonaiEditor)
+{ ImGui_ImplVulkan_CreateFontsTexture(cmd); }
+
+ADD_MANAGED_METHOD(ImGUI, VulkanDestroyFontUploadObjects, void, (), YonaiEditor)
+{ ImGui_ImplVulkan_DestroyFontUploadObjects(); }
+
+ADD_MANAGED_METHOD(ImGUI, VulkanShutdown, void, (), YonaiEditor)
+{ ImGui_ImplVulkan_Shutdown(); }
+
+ADD_MANAGED_METHOD(ImGUI, VulkanNewFrame, void, (), YonaiEditor)
+{
+	ImGui_ImplVulkan_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::ShowDemoWindow();
+}
+
+ADD_MANAGED_METHOD(ImGUI, _VulkanRender, void, (VkCommandBuffer cmd), YonaiEditor)
+{
+	ImGui::Render();
+
+	ImDrawData* drawData = ImGui::GetDrawData();
+	const bool minimised = (drawData->DisplaySize.x <= 0 || drawData->DisplaySize.y <= 0);
+	if (minimised)
+		return;
+
+	ImGui_ImplVulkan_RenderDrawData(drawData, cmd);
+}
+#endif
+#pragma endregion
 
 ADD_MANAGED_METHOD(ImGUI, SetCurrentContext, void, (), YonaiEditor)
 { ImGui::SetCurrentContext(SystemManager::Global()->Get<ImGUISystem>()->GetContext()); }

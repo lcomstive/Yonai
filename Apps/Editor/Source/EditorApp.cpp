@@ -44,10 +44,7 @@ void EditorApp::Setup()
 	SystemManager::Global()->Add<AudioSystem>();
 
 	if (!HasArg("build"))
-	{
-		// m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
 		SystemManager::Global()->Add<SceneSystem>();
-	}
 		
 	LaunchEditorService();
 }

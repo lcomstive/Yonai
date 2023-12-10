@@ -13,7 +13,7 @@ namespace Yonai.Graphics
 		void Draw(VulkanCommandBuffer commandBuffer, Camera camera);
 
 		/// <summary>
-		/// Called when window has been resized, also immediately after creation.
+		/// Called when window has been resized
 		/// </summary>
 		void OnResized(IVector2 resolution);
 	}
