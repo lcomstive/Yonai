@@ -123,13 +123,14 @@ namespace YonaiEditor.Systems
 				};
 				cmd.BeginRendering(renderInfo);
 
-				ImGUI.VulkanNewFrame();
 				ImGUI.VulkanRender(cmd);
 
 				cmd.EndRendering();
 				
 				// Transition image into transferrable state
 				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.GENERAL, VkImageLayout.TRANSFER_SRC_OPTIMAL);
+		
+				ImGUI.VulkanNewFrame();
 			}
 
 			public void OnResized(IVector2 resolution) => GenerateColourOutput(resolution);

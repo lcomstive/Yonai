@@ -11,17 +11,15 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
-#include <YonaiEditor/Systems/ImGUISystem.hpp>
-#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
+#include <YonaiEditor/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
 
 #if defined(YONAI_GRAPHICS_VULKAN)
-#include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_Vulkan.hpp>
+#include <YonaiEditor/ImGUISystemBackend/ImGUIBackend_Vulkan.hpp>
 #endif
 
 using namespace std;
 using namespace glm;
 using namespace Yonai;
-using namespace YonaiEditor::Systems;
 
 // Helper Functions //
 ImU32 ToU32(glm::vec4* colour) { return ImGui::ColorConvertFloat4ToU32(ImVec4(colour->x, colour->y, colour->z, colour->w)); }
@@ -36,6 +34,8 @@ ADD_MANAGED_METHOD(ImGUI, VulkanInit, void, (void* inInfo), YonaiEditor)
 {
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForVulkan(Window::GetNativeHandle(), true);
+
+	ImGui::GetIO().IniFilename = nullptr; // Disable automatic saving/loading of ImGUI config
 
 	ImGui_ImplVulkan_InitInfo* info = (ImGui_ImplVulkan_InitInfo*)inInfo;
 	info->Allocator = nullptr;
@@ -79,22 +79,11 @@ ADD_MANAGED_METHOD(ImGUI, _VulkanRender, void, (VkCommandBuffer cmd), YonaiEdito
 #endif
 #pragma endregion
 
-ADD_MANAGED_METHOD(ImGUI, SetCurrentContext, void, (), YonaiEditor)
-{ ImGui::SetCurrentContext(SystemManager::Global()->Get<ImGUISystem>()->GetContext()); }
+ADD_MANAGED_METHOD(ImGUI, GetConfigFlags, int, (), YonaiEditor)
+{ return ImGui::GetIO().ConfigFlags; }
 
-ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), YonaiEditor)
-{
-	ImGUISystem* imguiSystem = SystemManager::Global()->Get<ImGUISystem>();
-	if (!imguiSystem)
-	{
-		spdlog::warn("ImGUI IniFilename not set - ImGUISystem not found in global systems");
-		return;
-	}
-	char* name = mono_string_to_utf8(pathRaw);
-	imguiSystem->m_IniFilepath = string(name);
-	spdlog::trace("ImGUI IniFilename set to '{}'", name);
-	mono_free(name);
-}
+ADD_MANAGED_METHOD(ImGUI, SetConfigFlags, void, (int flags), YonaiEditor)
+{ ImGui::GetIO().ConfigFlags = flags; }
 
 ADD_MANAGED_METHOD(ImGUI, SetDisplayFramebufferScale, void, (float scaleX, float scaleY), YonaiEditor)
 { ImGui::GetIO().DisplayFramebufferScale = { scaleX, scaleY }; }

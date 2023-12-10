@@ -8,7 +8,6 @@
 #include <Yonai/Platform/FixDLLBoundaries.hpp>
 
 // Systems //
-#include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
 #include <Yonai/Systems/Global/AudioSystem.hpp>
 
@@ -22,7 +21,6 @@ using namespace glm;
 using namespace YonaiEditor;
 using namespace Yonai;
 using namespace Yonai::IO;
-using namespace YonaiEditor::Systems;
 using namespace Yonai::Systems;
 using namespace Yonai::Scripting;
 using namespace Yonai::Components;

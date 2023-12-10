@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "ID": "3402234622615563215",
+    "Path": "app://TestModel/viking_room.obj",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "6545616091595724224",
+    "Path": "project://Assets/Scenes/Test World.world",
+    "Type": "Yonai.World"
+  }
+]

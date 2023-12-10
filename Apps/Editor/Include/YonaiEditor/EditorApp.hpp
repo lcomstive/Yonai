@@ -8,7 +8,6 @@
 #include <Yonai/Application.hpp>
 #include <YonaiEditor/ProjectInfo.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
-#include <YonaiEditor/Systems/ImGUISystem.hpp>
 
 namespace YonaiEditor
 {
@@ -16,7 +15,6 @@ namespace YonaiEditor
 	{
 		ProjectInfo m_ProjectInfo = {};
 		std::filesystem::path m_ProjectPath;
-		Systems::ImGUISystem* m_ImGUISystem = nullptr;
 
 		void Draw();
 

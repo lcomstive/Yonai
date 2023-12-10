@@ -77,16 +77,16 @@ namespace YonaiEditor
 
 			InitImGUI();
 
-			/*
 			if (!string.IsNullOrEmpty(projectPath))
 				ProjectHubService.SelectProject(projectPath);
 			else
 				Add<ProjectHubService>();
-			*/
 		}
 
 		protected override void Disabled()
 		{
+			ImGUI.SaveIniSettingsToDisk(VFS.ExpandPath(ImGUIFile));
+
 			if (Application.HasArg("build"))
 				return; // Nothing below was loaded as we just built a project
 
@@ -119,10 +119,18 @@ namespace YonaiEditor
 
 		private void InitImGUI()
 		{
-			// Settings save/load location
-			ImGUI.SetIniFilename(VFS.ExpandPath(ImGUIFile));
-
 			Add<ImGUISystem>()?.Enable(true);
+
+			ImGUI.ConfigFlags configFlags = ImGUI.GetConfigFlags();
+			configFlags |= ImGUI.ConfigFlags.DockingEnable |
+							ImGUI.ConfigFlags.NavEnableKeyboard |
+							ImGUI.ConfigFlags.ViewportsEnable;
+			ImGUI.SetConfigFlags(configFlags);
+
+			// Settings save/load location
+			ImGUI.LoadIniSettingsFromDisk(VFS.ExpandPath(ImGUIFile));
+
+			ImGUI.VulkanNewFrame();
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);

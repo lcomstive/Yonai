@@ -36,7 +36,7 @@ namespace YonaiEditor.Systems
 
 			try
 			{
-				Icons.Load();
+				// Icons.Load();
 				CompileMenuItems();
 				InspectorView.GetCustomInspectors();
 				SetupShortcuts();
