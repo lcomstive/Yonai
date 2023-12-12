@@ -69,7 +69,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			CommandPool = new VulkanCommandPool(SelectedDevice);
 			DeletionQueue.Enqueue(() => CommandPool.Dispose());
 
-			CreateTestModel();
+			// CreateTestModel();
 
 			#region Frame data
 			m_Frames = new FrameData[MaxFramesInFlight];
@@ -267,8 +267,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private void CreateTestModel()
 		{
-			TestModel = Resource.Load<Model>("app://TestModel/viking_room.obj");
-			TestModelTexture = Resource.Load<Texture>("app://TestModel/viking_room.png");
+			TestModel = Resource.Load<Model>("project://Assets/Models/Viking Room/viking_room.obj");
+			TestModelTexture = Resource.Load<Texture>("project://Assets/Models/Viking Room/viking_room.png");
 		}
 
 		public void Destroy()

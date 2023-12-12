@@ -74,6 +74,7 @@
     <Compile Include="Core\Application.cs" />
     <Compile Include="Core\BaseGameLauncher.cs" />
     <Compile Include="Core\Entity.cs" />
+    <Compile Include="Core\FunctionQueue.cs" />
     <Compile Include="Core\IImportSettings.cs" />
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\InteropUtils.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Graphics\Backends\Vulkan\VulkanBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandBuffer.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanCommandPool.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanComputePipeline.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanDescriptorSets.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanDevice.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanEnums.cs" />
@@ -98,6 +100,7 @@
     <Compile Include="Graphics\Backends\Vulkan\VulkanGraphicsPipeline.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanImage.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanInstance.cs" />
+    <Compile Include="Graphics\Backends\Vulkan\VulkanPipeline.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanQueue.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanRenderPass.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanShader.cs" />
@@ -111,19 +114,17 @@
     <Compile Include="Graphics\Backends\ICommandBuffer.cs" />
     <Compile Include="Graphics\Backends\IDevice.cs" />
     <Compile Include="Graphics\Backends\IGraphicsBackend.cs" />
+    <Compile Include="Graphics\Backends\IPipeline.cs" />
+    <Compile Include="Graphics\Backends\IShaderModule.cs" />
     <Compile Include="Graphics\Backends\ITexture.cs" />
 
-    <Compile Include="Graphics\Pipelines\ForwardRenderPipeline.cs" />
-    <Compile Include="Graphics\Pipelines\IRenderPipeline.cs" />
-    <Compile Include="Graphics\Pipelines\NativeRenderPipeline.cs" />
+    <Compile Include="Graphics\RenderPaths\ForwardRenderPath.cs" />
+    <Compile Include="Graphics\RenderPaths\IRenderPath.cs" />
 
-    <Compile Include="Graphics\Framebuffer.cs" />
     <Compile Include="Graphics\GraphicsAPI.cs" />
     <Compile Include="Graphics\Material.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\Model.cs" />
-    <Compile Include="Graphics\Renderer.cs" />
-    <Compile Include="Graphics\RenderTexture.cs" />
     <Compile Include="Graphics\Screen.cs" />
     <Compile Include="Graphics\Shader.cs" />
     <Compile Include="Graphics\Texture.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="Math\IVector3.cs" />
     <Compile Include="Math\IVector4.cs" />
     <Compile Include="Math\MathUtils.cs" />
+    <Compile Include="Math\Matrix4.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector4.cs" />
@@ -156,7 +158,6 @@
     <Compile Include="Systems\RenderSystem.cs" />
     <Compile Include="Systems\SceneManager.cs" />
     <Compile Include="Systems\System.cs" />
-    <Compile Include="Math\Matrix4.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

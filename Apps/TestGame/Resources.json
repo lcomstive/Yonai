@@ -1,28 +1,8 @@
 [
   {
-    "ID": "18068257987334090514",
-    "Path": "app://TestModel/viking_room.obj",
-    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
-  },
-  {
-    "ID": "5231434248406557168",
-    "Path": "app://TestModel/viking_room.png",
-    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
-  },
-  {
     "ID": "2098665672197473040",
     "Path": "project://Assets/Scenes/Test World.world",
     "Type": "Yonai.World"
-  },
-  {
-    "ID": "6258295905521074142",
-    "Path": "assets://Textures/Grid.png",
-    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
-  },
-  {
-    "ID": "11203167067706825901",
-    "Path": "assets://Shaders/Default3D.shader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
     "ID": "8151995805060846353",
@@ -35,18 +15,38 @@
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "13290399135037941640",
+    "ID": "2011670844125663034",
+    "Path": "assets://Textures/Grid.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "2573569244656845246",
+    "Path": "assets://Shaders/Default3D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "3481134794948525738",
     "Path": "assets://Models/Quad.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "13052653297172166207",
+    "ID": "16529199662930632800",
     "Path": "assets://Models/Cube.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "5129632365541106040",
+    "ID": "13748677096972471749",
     "Path": "assets://Models/Sphere.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "8551137530241029048",
+    "Path": "project://Assets/Textures/texture_09.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "12400996165814012649",
+    "Path": "project://Assets/Textures/Aqua.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   }
 ]
