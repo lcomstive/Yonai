@@ -3,6 +3,7 @@ using System;
 using Yonai.Graphics;
 using System.Runtime.CompilerServices;
 using Yonai.Graphics.Backends.Vulkan;
+using YonaiEditor.Systems;
 
 namespace YonaiEditor
 {
@@ -1211,8 +1212,8 @@ namespace YonaiEditor
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void VulkanNewFrame();
 
-		public static void VulkanRender(VulkanCommandBuffer commandBuffer) =>
-			_VulkanRender(commandBuffer.Handle);
+		public static void VulkanRender(VulkanCommandBuffer cmd) =>
+			_VulkanRender(cmd.Handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _VulkanRender(IntPtr commandBuffer);
@@ -1609,30 +1610,28 @@ namespace YonaiEditor
 		private static Colour s_ImageDefaultBorder = new Colour(0, 0, 0, 0);
 		private static Colour s_ButtonImageDefaultBackground = new Colour(0, 0, 0, 0);
 
-		public static void Image(ulong textureID, Vector2 size) => _Image(textureID, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
-		public static void Image(ulong textureID, Vector2 size, Colour tint) => _Image(textureID, ref size, ref tint, ref s_ImageDefaultBorder);
-		public static void Image(ulong textureID, Vector2 size, Colour tint, Colour border) => _Image(textureID, ref size, ref tint, ref border);
+		public static void Image(Texture texture, Vector2 size) =>
+			Image(texture, size, s_ImageDefaultColour, s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint) =>
+			Image(texture, size, tint, s_ImageDefaultBorder);
+		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) =>
+			_Image(ImGUISystem.GetTextureHandle(texture), ref size, ref tint, ref border);
 
-		public static void Image(Texture texture, Vector2 size) => _Image(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ImageDefaultBorder);
-		public static void Image(Texture texture, Vector2 size, Colour tint) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ImageDefaultBorder);
-		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) => _Image(texture?.ResourceID ?? 0, ref size, ref tint, ref border);
+		public static bool ButtonImage(Texture texture, Vector2 size) =>
+			ButtonImage(texture, size, s_ImageDefaultColour, s_ButtonImageDefaultBackground);
 
-		public static bool ButtonImage(ulong textureID, Vector2 size) => _ImageButton(textureID, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint) => _ImageButton(textureID, ref size, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(ulong textureID, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(textureID, ref size, ref tint, ref backgroundColour);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint) =>
+			ButtonImage(texture, size, tint, s_ButtonImageDefaultBackground);
 
-		public static bool ButtonImage(Texture texture, Vector2 size) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref s_ImageDefaultColour, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref s_ButtonImageDefaultBackground);
-		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour) => _ImageButton(texture?.ResourceID ?? 0, ref size, ref tint, ref backgroundColour);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _Image(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour borderTint);
+		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour) =>
+			_ImageButton(ImGUISystem.GetTextureHandle(texture), "##ButtonImage_" + texture?.ResourceID,
+				ref size, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _ImageRenderTexture(IntPtr handle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
+		private static extern void _Image(IntPtr textureHandle, ref Vector2 size, ref Colour tint, ref Colour borderTint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool _ImageButton(ulong textureID, ref Vector2 size, ref Colour tint, ref Colour backgroundColour);
+		private static extern bool _ImageButton(IntPtr textureHandle, string label, ref Vector2 size, ref Colour tint, ref Colour backgroundColour);
 		#endregion
 
 		#region Drag

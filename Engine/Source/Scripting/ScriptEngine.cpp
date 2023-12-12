@@ -223,6 +223,17 @@ Assembly* ScriptEngine::LoadAssembly(string& path, bool isCoreAssembly, bool sho
 	return instance;
 }
 
+MonoClass* ScriptEngine::TryGetClass(const char* _namespace, const char* _class, bool useClassCache)
+{
+	for (size_t i = 0; i < s_Assemblies.size(); i++)
+	{
+		MonoClass* result = s_Assemblies[i]->GetClassFromName(_namespace, _class, useClassCache);
+		if (result)
+			return result;
+	}
+	return nullptr;
+}
+
 Assembly* ScriptEngine::LoadAssembly(vector<unsigned char>& data, const char* friendlyName)
 {
 	if (data.empty())

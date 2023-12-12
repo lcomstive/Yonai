@@ -2,6 +2,7 @@
 using Yonai._Internal;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using Yonai.Systems;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
@@ -90,7 +91,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 	public class VulkanDescriptorSet
 	{
-		internal IntPtr Handle;
+		public IntPtr Handle { get; private set; }
 		private VulkanDevice m_Device;
 
 		internal VulkanDescriptorSet(VulkanDevice device, IntPtr handle)
@@ -98,6 +99,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			m_Device = device;
 			Handle = handle;
 		}
+
+		public static VulkanDescriptorSet FromHandle(IntPtr handle) =>
+			new VulkanDescriptorSet((VulkanDevice)RenderSystem.Backend.Device, handle);
+
+		public static VulkanDescriptorSet FromHandle(VulkanDevice device, IntPtr handle) =>
+			new VulkanDescriptorSet(device, handle);
 
 		public void Update(VkWriteDescriptorSet[] sets)
 		{

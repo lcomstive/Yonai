@@ -10,6 +10,7 @@
 #include <Yonai/Resource.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <Yonai/Scripting/ScriptEngine.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 #include <YonaiEditor/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
 
@@ -66,14 +67,16 @@ ADD_MANAGED_METHOD(ImGUI, VulkanNewFrame, void, (), YonaiEditor)
 ADD_MANAGED_METHOD(ImGUI, _VulkanRender, void, (VkCommandBuffer cmd), YonaiEditor)
 {
 	ImGui::Render();
-
-	ImDrawData* drawData = ImGui::GetDrawData();
-	const bool minimised = (drawData->DisplaySize.x <= 0 || drawData->DisplaySize.y <= 0);
-	if (minimised)
-		return;
-
-	ImGui_ImplVulkan_RenderDrawData(drawData, cmd);
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 }
+
+ADD_MANAGED_METHOD(
+	ImGUISystem,
+	VulkanGenerateDescriptorSet,
+	void*,
+	(VkSampler sampler, VkImageView imageView, VkImageLayout layout),
+	YonaiEditor.Systems)
+{ return ImGui_ImplVulkan_AddTexture(sampler, imageView, layout); }
 #endif
 #pragma endregion
 
@@ -333,67 +336,56 @@ ADD_MANAGED_METHOD(ImGUI, _TextColoured, void, (MonoString* labelRaw, glm::vec4*
 	mono_free(label);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _Image, void, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _Image, void, (void* textureHandle, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), YonaiEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
 
-	// TODO: Implement ImGUI images
-	/*
-	Texture* texture = Resource::Get<Texture>(textureID);
-	ImGui::Image(
-		(ImTextureID)(texture ? texture->GetID() : 0),
-		imSize,
-		ImVec2(0, 1), // UV0
-		ImVec2(1, 0), // UV1
-		imTint,
-		imBorder
-	);
-	*/
+	if (textureHandle)
+	{
+		ImGui::Image(
+			textureHandle,
+			imSize,
+			ImVec2(0, 1), // UV0
+			ImVec2(1, 0), // UV1
+			imTint,
+			imBorder
+		);
+	}
+	else
+	{
+		ImGui::BeginDisabled();
+		ImGui::Button("##EmptyTexture", imSize);
+		ImGui::EndDisabled();
+	}
 }
 
-ADD_MANAGED_METHOD(ImGUI, _ImageRenderTexture, void, (void* handle, glm::vec2* size, glm::vec4* tint, glm::vec4* borderCol), YonaiEditor)
-{
-	ImVec2 imSize(size->x, size->y);
-	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
-	ImVec4 imBorder(borderCol->x, borderCol->g, borderCol->b, borderCol->a);
-
-	// TODO: Implement ImGUI render texture
-	/*
-	RenderTexture* texture = (RenderTexture*)handle;
-	ImGui::Image(
-		(ImTextureID)(texture ? texture->GetID() : 0),
-		imSize,
-		ImVec2(0, 1), // UV0
-		ImVec2(1, 0), // UV1
-		imTint,
-		imBorder
-	);
-	*/
-}
-
-ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (uint64_t textureID, glm::vec2* size, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _ImageButton, bool, (void* textureHandle, MonoString* id, glm::vec2* size, glm::vec4* tint, glm::vec4* bgCol), YonaiEditor)
 {
 	ImVec2 imSize(size->x, size->y);
 	ImVec4 imTint(tint->x, tint->g, tint->b, tint->a);
 	ImVec4 imBackground(bgCol->x, bgCol->g, bgCol->b, bgCol->a);
 
-	// TODO: Implement ImGUI images
-	/*
-	Texture* texture = Resource::Get<Texture>(textureID);
-	string id = "ImageButton_" + to_string(textureID);
-	return ImGui::ImageButton(
-		id.c_str(),
-		(ImTextureID)(texture ? texture->GetID() : 0),
-		imSize,
-		ImVec2(0, 1), // UV0
-		ImVec2(1, 0), // UV1
-		imBackground,
-		imTint
-	);
-	*/
-	return false;
+	char* imguiID = mono_string_to_utf8(id);
+	bool result = false;
+	if (textureHandle)
+	{
+		result = ImGui::ImageButton(
+			imguiID,
+			textureHandle,
+			imSize,
+			ImVec2(0, 1), // UV0
+			ImVec2(1, 0), // UV1
+			imBackground,
+			imTint
+		);
+	}
+	else
+		result = ImGui::Button(imguiID, imSize);
+
+	mono_free(imguiID);
+	return result;
 }
 
 char* GetInput(MonoString* valueRaw, int maxCharacters)

@@ -27,7 +27,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void Draw(uint vertexCount, uint instanceCount = 1, uint firstVertex = 0, uint firstInstance = 0) =>
 			_Draw(Handle, vertexCount, instanceCount, firstVertex, firstInstance);
 
-		public void DrawIndexed(uint indexCount, uint instanceCount = 1, uint firstIndex = 0, int vertexOffset = 0, uint firstInstance = 0) =>
+		public void DrawIndexed(uint indexCount, uint instanceCount = 1, uint firstIndex = 0, uint vertexOffset = 0, uint firstInstance = 0) =>
 			_DrawIndexed(Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 
 		public void BindPipeline(VulkanPipeline pipeline, VkPipelineBindPoint bindPoint) =>
@@ -207,7 +207,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _BindPipeline(IntPtr handle, int bindPoint, IntPtr pipeline);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Draw(IntPtr handle, uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DrawIndexed(IntPtr handle, uint indexCount, uint instanceCount, uint firstIndex, int vertexOffset, uint firstInstance);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _DrawIndexed(IntPtr handle, uint indexCount, uint instanceCount, uint firstIndex, uint vertexOffset, uint firstInstance);
 
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetViewport(IntPtr handle, ref VkViewport viewport, int index);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetScissor(IntPtr handle, ref VkRect2D scissor, int index);

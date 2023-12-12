@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 
 	// Find all internal methods in C++ source files
 	smatch matches;
-	regex methodRegex("ADD_MANAGED_METHOD\\((\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]*)\\)(,\\s*([\\w\\._]+))?)?)?");
+	regex methodRegex("ADD_MANAGED_METHOD\\(\\s*(\\w+),\\s*(\\w+)(,\\s*([_ A-Za-z\\*:0-9]+)(,\\s*\\(([\\w\\*\\s_,:]*)\\)(,\\s*([\\w\\._]+))?)?)?");
 	regex propertyRegex("ADD_MANAGED_(GET|SET|GET_SET)\\((\\w+),\\s*(\\w+)(,\\s*(([_ A-Za-z\\*:0-9]+)(,\\s*([\\w\\._]+))?))?");
 	for (fs::recursive_directory_iterator it(sourceDirectory), end; it != end; it++)
 	{

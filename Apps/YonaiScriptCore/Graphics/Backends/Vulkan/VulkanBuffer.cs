@@ -7,8 +7,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		public int BufferSize { get; private set; }
 
-		internal IntPtr BufferHandle;
-		internal IntPtr MemoryHandle;
+		public IntPtr BufferHandle { get; private set; }
+		public IntPtr MemoryHandle { get; private set; }
 		private VulkanDevice m_Device;
 
 		public VulkanBuffer(
@@ -28,9 +28,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 				(int)usage,
 				(int)properties,
 				(int)sharingMode,
-				out BufferHandle,
-				out MemoryHandle
+				out IntPtr bufferHandle,
+				out IntPtr memoryHandle
 			);
+			BufferHandle = bufferHandle;
+			MemoryHandle = memoryHandle;
 			result.CheckForSuccess("Buffer creation");
 
 			if(result != VkResult.Success)

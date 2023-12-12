@@ -39,7 +39,7 @@ namespace Yonai::Scripting
 		// Callback 
 		static void OnAssemblyFileChanged(const std::string& path, IO::FileWatchStatus status);
 
-		// Loads AquaScriptCore from <see cref="s_CoreDLLPath"/>
+		// Loads YonaiScriptCore from <see cref="s_CoreDLLPath"/>
 		static void LoadCoreAssembly();
 		
 		/// <summary>
@@ -52,7 +52,7 @@ namespace Yonai::Scripting
 		/// <summary>
 		/// Begins the scripting engine and loads the core assembly
 		/// </summary>
-		/// <param name="assembliesPath">The path containing AquaScriptCore.dll and Mono .dlls</param>
+		/// <param name="assembliesPath">The path containing YonaiScriptCore.dll and Mono .dlls</param>
 		/// <param name="allowDebugging">Should a debugger for managed code be setup?</param>
 		YonaiAPI static void Init(std::string assembliesPath, bool allowDebugging = false);
 
@@ -88,12 +88,18 @@ namespace Yonai::Scripting
 		/// <param name="friendlyName">Name for debugging, warnings and errors</param>
 		YonaiAPI static Assembly* LoadAssembly(std::vector<unsigned char>& assemblyData, const char* friendlyName);
 
-
 		/// <returns>All assemblies currently loaded</summary>
 		YonaiAPI static std::vector<Assembly*>& GetAssemblies();
 
-		/// <returns>The assembly containing AquaScriptCore</returns>
+		/// <returns>The assembly containing YonaiScriptCore</returns>
 		YonaiAPI static Assembly* GetCoreAssembly();
+
+		/// <summary>
+		/// Tries to find a matching class across all currently loaded assemblies
+		/// </summary>
+		/// <param name="useClassCache">When true, uses the hash of the namespace and class to check against all cached types</param>
+		/// <returns>Found class, or nullptr if not found</returns>
+		YonaiAPI static MonoClass* TryGetClass(const char* _namespace, const char* _class, bool useClassCache = true);
 
 		/// <returns>
 		/// The currently loaded app domain,

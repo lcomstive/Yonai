@@ -9,10 +9,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IVector2 Resolution { get; private set; }
 		public uint MipLevels { get; private set; }
 
-		internal IntPtr Image;
-		internal IntPtr Sampler;
-		internal IntPtr ImageView;
-		internal IntPtr ImageMemory;
+		public IntPtr Image { get; private set; }
+		public IntPtr Sampler { get; private set; }
+		public IntPtr ImageView { get; private set; }
+		public IntPtr ImageMemory { get; private set; }
+
 		private VulkanDevice m_Device;
 
 		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat)
@@ -56,16 +57,20 @@ namespace Yonai.Graphics.Backends.Vulkan
 				m_Device.Device,
 				m_Device.Allocator,
 				ref imageInfo,
-				out Image,
-				out ImageMemory
+				out IntPtr image,
+				out IntPtr imageMemory
 			);
 			result.CheckForSuccess("Image creation");
+
+			Image = image;
+			ImageMemory = imageMemory;
 
 			imageViewInfo.m_Image = Image;
 			ImageView = _CreateImageView(m_Device.Device, Image, ref imageViewInfo);
 			MipLevels = imageInfo.MipLevels;
 
-			_CreateSampler(m_Device.Device, ref samplerInfo, out Sampler);
+			_CreateSampler(m_Device.Device, ref samplerInfo, out IntPtr sampler);
+			Sampler = sampler;
 		}
 
 		public void Dispose()

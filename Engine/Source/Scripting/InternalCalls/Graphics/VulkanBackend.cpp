@@ -1120,7 +1120,8 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, Draw, void,
 { vkCmdDraw((VkCommandBuffer)handle, vertexCount, instanceCount, firstVertex, firstInstance); }
 
 ADD_MANAGED_METHOD(VulkanCommandBuffer, DrawIndexed, void,
-	(void* handle, unsigned int indexCount, unsigned int instanceCount, unsigned int firstIndex, int vertexOffset, unsigned int firstInstance),
+	(void* handle, unsigned int indexCount, unsigned int instanceCount,
+	unsigned int firstIndex, unsigned int vertexOffset, unsigned int firstInstance),
 	Yonai.Graphics.Backends.Vulkan)
 { vkCmdDrawIndexed((VkCommandBuffer)handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance); }
 

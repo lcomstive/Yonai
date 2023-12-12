@@ -55,6 +55,8 @@ namespace Yonai.Graphics
 			}
 		}
 
+		public ITexture InternalData => m_Data;
+
 		private ITexture m_Data;
 		private IGraphicsDevice m_GraphicsDevice;
 		private TextureImportSettings m_ImportSettings => (TextureImportSettings)ImportSettings;

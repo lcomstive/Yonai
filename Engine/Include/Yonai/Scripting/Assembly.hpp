@@ -65,7 +65,7 @@ namespace Yonai::Scripting
 		MonoImage* Image;
 		MonoAssembly* Handle;
 
-		YonaiAPI MonoClass* GetClassFromName(const char* namespaceName, const char* className);
+		YonaiAPI MonoClass* GetClassFromName(const char* namespaceName, const char* className, bool useClassCache = true);
 		YonaiAPI MonoType* GetTypeFromClassName(const char* namespaceName, const char* className);
 
 		YonaiAPI std::unique_ptr<Class> InstantiateClass(const char* namespaceName, const char* className);

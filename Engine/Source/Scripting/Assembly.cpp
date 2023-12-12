@@ -40,9 +40,11 @@ SystemMethodInitialiseFn SystemMethodInitialise = nullptr;
 Assembly::Assembly(MonoAssembly* handle, bool isCoreAssembly) : Handle(handle), Image(mono_assembly_get_image(handle))
 { CacheTypes(isCoreAssembly); }
 
-MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className)
-// { return mono_class_from_name(Image, namespaceName, className); }
+MonoClass* Assembly::GetClassFromName(const char* namespaceName, const char* className, bool useClassCache)
 {
+	if(!useClassCache)
+		return mono_class_from_name(Image, namespaceName, className);
+	
 	// Get type hash
 	string fullName = strlen(namespaceName) == 0 ? className : fmt::format("{}.{}", namespaceName, className);
 	size_t hash = std::hash<std::string>{}(fullName);

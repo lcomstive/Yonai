@@ -1,17 +1,23 @@
 using Yonai;
-using System;
 using Yonai.Systems;
 using Yonai.Graphics;
 using Yonai.Graphics.Backends.Vulkan;
+using System.Collections.Generic;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace YonaiEditor.Systems
 {
 	public class ImGUISystem : YonaiSystem
 	{
-		private GraphicsAPI m_API = GraphicsAPI.None;
+		private static GraphicsAPI m_API = GraphicsAPI.None;
+
+		private VulkanDevice m_Device;
 		private FunctionQueue m_DeletionQueue = new FunctionQueue();
 		private IRenderPath m_PreviousRenderPath = null;
 		private ImGUIRenderPath m_RenderPath;
+
+		private static Dictionary<UUID, VulkanDescriptorSet> m_TextureDescriptors = new Dictionary<UUID, VulkanDescriptorSet>();
 
 		protected override void Start()
 		{
@@ -41,13 +47,43 @@ namespace YonaiEditor.Systems
 			m_PreviousRenderPath = null;
 		}
 
+		internal static IntPtr GetTextureHandle(Texture texture)
+		{
+			if (!texture) return IntPtr.Zero;
+
+			switch(m_API)
+			{
+				default:
+				case GraphicsAPI.None: return IntPtr.Zero;
+				case GraphicsAPI.Vulkan:
+					{
+						if (!m_TextureDescriptors.ContainsKey(texture.ResourceID))
+						{
+							VulkanImage image = texture.InternalData as VulkanImage;
+							if (image == null)
+								return IntPtr.Zero; // No internal data has been generated
+
+							IntPtr handle = VulkanGenerateDescriptorSet(
+								image.Sampler,
+								image.ImageView,
+								VkImageLayout.SHADER_READ_ONLY_OPTIMAL
+							);
+							VulkanDescriptorSet descriptorSet = VulkanDescriptorSet.FromHandle(handle);
+							m_TextureDescriptors.Add(texture.ResourceID, descriptorSet);
+						}
+
+						return m_TextureDescriptors[texture.ResourceID].Handle;
+					}
+			}
+		}
+
 		#region Vulkan
 		private VulkanDescriptorPool m_VulkanPool;
 
 		private void VulkanInit()
 		{
 			VulkanGraphicsBackend backend = RenderSystem.Backend as VulkanGraphicsBackend;
-			VulkanDevice device = backend.SelectedDevice;
+			m_Device = backend.SelectedDevice;
 
 			VkDescriptorPoolSize[] poolSizes = new VkDescriptorPoolSize[]
 			{
@@ -63,14 +99,14 @@ namespace YonaiEditor.Systems
 				new VkDescriptorPoolSize { Type = VkDescriptorType.INPUT_ATTACHMENT, DescriptorCount = 1000 },
 			};
 
-			m_VulkanPool = new VulkanDescriptorPool(device, poolSizes, 1000);
+			m_VulkanPool = new VulkanDescriptorPool(m_Device, poolSizes, 1000);
 
 			ImGUI.ImGui_ImplVulkan_InitInfo info = new ImGUI.ImGui_ImplVulkan_InitInfo
 			{
 				Instance = backend.Instance.Handle,
-				PhysicalDevice = device.PhysicalDevice,
-				LogicalDevice = device.Device,
-				Queue = device.GraphicsQueue.Handle,
+				PhysicalDevice = m_Device.PhysicalDevice,
+				LogicalDevice = m_Device.Device,
+				Queue = m_Device.GraphicsQueue.Handle,
 				DescriptorPool = m_VulkanPool.Handle,
 				MinImageCount = 3,
 				ImageCount = 3,
@@ -90,6 +126,9 @@ namespace YonaiEditor.Systems
 				ImGUI.VulkanShutdown();
 			});
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr VulkanGenerateDescriptorSet(IntPtr sampler, IntPtr imageView, VkImageLayout layout);
 		#endregion
 
 		#region Render Path
@@ -122,14 +161,12 @@ namespace YonaiEditor.Systems
 					ColorAttachments = new VkRenderingAttachmentInfo[] { attachmentInfo }
 				};
 				cmd.BeginRendering(renderInfo);
-
 				ImGUI.VulkanRender(cmd);
-
 				cmd.EndRendering();
-				
+
 				// Transition image into transferrable state
 				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.GENERAL, VkImageLayout.TRANSFER_SRC_OPTIMAL);
-		
+
 				ImGUI.VulkanNewFrame();
 			}
 
