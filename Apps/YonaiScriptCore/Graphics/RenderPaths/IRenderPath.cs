@@ -8,9 +8,9 @@ namespace Yonai.Graphics
 		VulkanImage ColourOutput { get; }
 
 		/// <summary>
-		/// Draw the scene from <paramref name="camera"/>'s perspective
+		/// Draw the scene into <see cref="ColourOutput"/>
 		/// </summary>
-		void Draw(VulkanCommandBuffer commandBuffer, Camera camera);
+		void Draw(VulkanCommandBuffer commandBuffer);
 
 		/// <summary>
 		/// Called when window has been resized

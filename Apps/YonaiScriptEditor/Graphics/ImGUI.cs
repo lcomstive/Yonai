@@ -1616,6 +1616,13 @@ namespace YonaiEditor
 			Image(texture, size, tint, s_ImageDefaultBorder);
 		public static void Image(Texture texture, Vector2 size, Colour tint, Colour border) =>
 			_Image(ImGUISystem.GetTextureHandle(texture), ref size, ref tint, ref border);
+		
+		public static void Image(ITexture texture, Vector2 size) =>
+			Image(texture, size, s_ImageDefaultColour, s_ImageDefaultBorder);
+		public static void Image(ITexture texture, Vector2 size, Colour tint) =>
+			Image(texture, size, tint, s_ImageDefaultBorder);
+		public static void Image(ITexture texture, Vector2 size, Colour tint, Colour border) =>
+			_Image(ImGUISystem.GetTextureHandle(texture), ref size, ref tint, ref border);
 
 		public static bool ButtonImage(Texture texture, Vector2 size) =>
 			ButtonImage(texture, size, s_ImageDefaultColour, s_ButtonImageDefaultBackground);
@@ -1625,6 +1632,16 @@ namespace YonaiEditor
 
 		public static bool ButtonImage(Texture texture, Vector2 size, Colour tint, Colour backgroundColour) =>
 			_ImageButton(ImGUISystem.GetTextureHandle(texture), "##ButtonImage_" + texture?.ResourceID,
+				ref size, ref tint, ref backgroundColour);
+		
+		public static bool ButtonImage(ITexture texture, Vector2 size) =>
+			ButtonImage(texture, size, s_ImageDefaultColour, s_ButtonImageDefaultBackground);
+
+		public static bool ButtonImage(ITexture texture, Vector2 size, Colour tint) =>
+			ButtonImage(texture, size, tint, s_ButtonImageDefaultBackground);
+
+		public static bool ButtonImage(ITexture texture, Vector2 size, Colour tint, Colour backgroundColour) =>
+			_ImageButton(ImGUISystem.GetTextureHandle(texture), "##ButtonImage_" + texture?.Resolution,
 				ref size, ref tint, ref backgroundColour);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2168,13 +2185,17 @@ namespace YonaiEditor
 			_AddBezierQuadratic(ref p1, ref p2, ref p3, ref colour, thickness, segments);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddBezierQuadratic(ref Vector2 p1, ref Vector2 p2, ref Vector2 p3, ref Colour colour, float thickness, int segments);
 
-		public static void AddImage(UUID textureID, Vector2 min, Vector2 max, Colour colour) =>
-			_AddImage(textureID, ref min, ref max, ref colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImage(ulong textureID, ref Vector2 min, ref Vector2 max, ref Colour colour);
+		public static void AddImage(Texture texture, Vector2 min, Vector2 max, Colour colour) =>
+			_AddImage(ImGUISystem.GetTextureHandle(texture), ref min, ref max, ref colour);
+		public static void AddImage(ITexture texture, Vector2 min, Vector2 max, Colour colour) =>
+			_AddImage(ImGUISystem.GetTextureHandle(texture), ref min, ref max, ref colour);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImage(IntPtr textureHandle, ref Vector2 min, ref Vector2 max, ref Colour colour);
 
-		public static void AddImageRounded(UUID textureID, Vector2 min, Vector2 max, Colour colour, float rounding, DrawFlags flags = DrawFlags.None) =>
-			_AddImageRounded(textureID, ref min, ref max, ref colour, rounding, (int)flags);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImageRounded(ulong textureID, ref Vector2 min, ref Vector2 max, ref Colour colour, float rounding, int flags);
+		public static void AddImageRounded(Texture texture, Vector2 min, Vector2 max, Colour colour, float rounding, DrawFlags flags = DrawFlags.None) =>
+			_AddImageRounded(ImGUISystem.GetTextureHandle(texture), ref min, ref max, ref colour, rounding, (int)flags);
+		public static void AddImageRounded(ITexture texture, Vector2 min, Vector2 max, Colour colour, float rounding, DrawFlags flags = DrawFlags.None) =>
+			_AddImageRounded(ImGUISystem.GetTextureHandle(texture), ref min, ref max, ref colour, rounding, (int)flags);
+		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _AddImageRounded(IntPtr textureHandle, ref Vector2 min, ref Vector2 max, ref Colour colour, float rounding, int flags);
 		#endregion
 
 		#region Drag and Drop

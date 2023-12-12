@@ -1,4 +1,5 @@
 ﻿using System;
+using Yonai.Graphics;
 
 namespace Yonai
 {
@@ -33,6 +34,8 @@ namespace Yonai
 		/// Size of the orthographic view
 		/// </summary>
 		public float OrthographicSize { get; set; }
+
+		public ITexture RenderTarget { get; set; }
 
 		public Matrix4 ViewMatrix
 		{

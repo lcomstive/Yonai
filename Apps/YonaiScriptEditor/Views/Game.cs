@@ -1,5 +1,6 @@
 using Yonai;
 using Yonai.Graphics;
+using Yonai.Systems;
 using YonaiEditor.Systems;
 
 namespace YonaiEditor.Views
@@ -77,6 +78,15 @@ namespace YonaiEditor.Views
 
 			ImGUI.Image(camera.RenderTarget, viewportSize);
 			*/
+
+			// TODO: Move this to graphics backend or render path?
+			if (camera.RenderTarget == null || camera.RenderTarget.Resolution != viewportSize)
+			{
+				camera.RenderTarget?.Dispose();
+				camera.RenderTarget = RenderSystem.Backend.Device.CreateTexture(Yonai.Graphics.Backends.Vulkan.VkFormat.R8G8B8A8_SRGB, viewportSize, 1, false);
+			}
+
+			ImGUI.Image(Camera.Main.RenderTarget, viewportSize);
 		}
 	}
 }

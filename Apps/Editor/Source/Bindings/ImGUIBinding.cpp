@@ -1124,18 +1124,24 @@ ADD_MANAGED_METHOD(ImGUI, _AddBezierCurve, void, (glm::vec2* p1, glm::vec2* p2, 
 ADD_MANAGED_METHOD(ImGUI, _AddBezierQuadratic, void, (glm::vec2* p1, glm::vec2* p2, glm::vec2* p3, glm::vec4* colour, float thickness, int segments), YonaiEditor)
 { GetDrawList()->AddBezierQuadratic(ToVec2(p1), ToVec2(p2), ToVec2(p3), ToU32(colour), thickness, segments); }
 
-ADD_MANAGED_METHOD(ImGUI, _AddImage, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _AddImage, void, (void* textureHandle, glm::vec2* min, glm::vec2* max, glm::vec4* colour), YonaiEditor)
 {
-	// TODO: Implement ImGUI images
-	// Texture* texture = Resource::Get<Texture>(textureID);
-	// GetDrawList()->AddImage((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour));
+	ImVec2 imMin = ToVec2(min), imMax = ToVec2(max);
+	ImU32 imColour = ToU32(colour);
+	if (textureHandle)
+		GetDrawList()->AddImage(textureHandle, imMin, imMax, ImVec2(), ImVec2(1, 1), imColour);
+	else
+		GetDrawList()->AddRectFilled(imMin, imMax, imColour);
 }
 
-ADD_MANAGED_METHOD(ImGUI, _AddImageRounded, void, (uint64_t textureID, glm::vec2* min, glm::vec2* max, glm::vec4* colour, float rounding, int flags), YonaiEditor)
+ADD_MANAGED_METHOD(ImGUI, _AddImageRounded, void, (void* textureHandle, glm::vec2* min, glm::vec2* max, glm::vec4* colour, float rounding, int flags), YonaiEditor)
 {
-	// TODO: Implement ImGUI images
-	// Texture* texture = Resource::Get<Texture>(textureID);
-	// GetDrawList()->AddImageRounded((ImTextureID)(texture ? texture->GetID() : 0), ToVec2(min), ToVec2(max), ImVec2(), ImVec2(1, 1), ToU32(colour), rounding, flags);
+	ImVec2 imMin = ToVec2(min), imMax = ToVec2(max);
+	ImU32 imColour = ToU32(colour);
+	if (textureHandle)
+		GetDrawList()->AddImageRounded(textureHandle, imMin, imMax, ImVec2(), ImVec2(1, 1), imColour, rounding, flags);
+	else
+		GetDrawList()->AddRectFilled(imMin, imMax, imColour, rounding, flags);
 }
 
 ADD_MANAGED_METHOD(ImGUI, _PushClipRect, void, (glm::vec2* p1, glm::vec2* p2, bool intersectWithCurrentClipRect), YonaiEditor)

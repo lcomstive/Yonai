@@ -14,10 +14,10 @@ namespace YonaiEditor.Systems
 
 		private VulkanDevice m_Device;
 		private FunctionQueue m_DeletionQueue = new FunctionQueue();
-		private IRenderPath m_PreviousRenderPath = null;
+		internal IRenderPath m_PreviousRenderPath = null;
 		private ImGUIRenderPath m_RenderPath;
 
-		private static Dictionary<UUID, VulkanDescriptorSet> m_TextureDescriptors = new Dictionary<UUID, VulkanDescriptorSet>();
+		private static Dictionary<ITexture, VulkanDescriptorSet> m_TextureDescriptors = new Dictionary<ITexture, VulkanDescriptorSet>();
 
 		protected override void Start()
 		{
@@ -30,8 +30,8 @@ namespace YonaiEditor.Systems
 				case GraphicsAPI.Vulkan: VulkanInit(); break;
 			}
 
-			m_RenderPath = new ImGUIRenderPath();
 			m_PreviousRenderPath = RenderSystem.Backend.RenderPath;
+			m_RenderPath = new ImGUIRenderPath(m_PreviousRenderPath);
 			RenderSystem.Backend.RenderPath = m_RenderPath;
 
 			m_DeletionQueue.Enqueue(() => m_RenderPath.Dispose());
@@ -47,9 +47,12 @@ namespace YonaiEditor.Systems
 			m_PreviousRenderPath = null;
 		}
 
-		internal static IntPtr GetTextureHandle(Texture texture)
+		internal static IntPtr GetTextureHandle(Texture texture) =>
+			texture ? GetTextureHandle(texture.InternalData) : IntPtr.Zero;
+
+		internal static IntPtr GetTextureHandle(ITexture texture)
 		{
-			if (!texture) return IntPtr.Zero;
+			if (texture == null) return IntPtr.Zero;
 
 			switch(m_API)
 			{
@@ -57,22 +60,22 @@ namespace YonaiEditor.Systems
 				case GraphicsAPI.None: return IntPtr.Zero;
 				case GraphicsAPI.Vulkan:
 					{
-						if (!m_TextureDescriptors.ContainsKey(texture.ResourceID))
-						{
-							VulkanImage image = texture.InternalData as VulkanImage;
-							if (image == null)
-								return IntPtr.Zero; // No internal data has been generated
+						VulkanImage image = texture as VulkanImage;
+						if(image == null)
+							return IntPtr.Zero;
 
+						if (!m_TextureDescriptors.ContainsKey(image))
+						{
 							IntPtr handle = VulkanGenerateDescriptorSet(
 								image.Sampler,
 								image.ImageView,
 								VkImageLayout.SHADER_READ_ONLY_OPTIMAL
 							);
 							VulkanDescriptorSet descriptorSet = VulkanDescriptorSet.FromHandle(handle);
-							m_TextureDescriptors.Add(texture.ResourceID, descriptorSet);
+							m_TextureDescriptors.Add(image, descriptorSet);
 						}
 
-						return m_TextureDescriptors[texture.ResourceID].Handle;
+						return m_TextureDescriptors[image].Handle;
 					}
 			}
 		}
@@ -136,15 +139,18 @@ namespace YonaiEditor.Systems
 		{
 			public VulkanImage ColourOutput { get; private set; }
 
+			private IRenderPath m_RenderPath;
 			private VulkanDevice m_Device;
 
-			public ImGUIRenderPath()
+			public ImGUIRenderPath(IRenderPath renderPath)
 			{
 				m_Device = RenderSystem.Backend.Device as VulkanDevice;
+				m_RenderPath = renderPath;
+
 				OnResized(Window.Resolution);
 			}
 
-			public void Draw(VulkanCommandBuffer cmd, Camera _)
+			public void Draw(VulkanCommandBuffer cmd)
 			{
 				// Transition image into drawable state
 				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.GENERAL);
@@ -168,6 +174,8 @@ namespace YonaiEditor.Systems
 				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.GENERAL, VkImageLayout.TRANSFER_SRC_OPTIMAL);
 
 				ImGUI.VulkanNewFrame();
+
+				m_RenderPath.Draw(cmd);
 			}
 
 			public void OnResized(IVector2 resolution) => GenerateColourOutput(resolution);

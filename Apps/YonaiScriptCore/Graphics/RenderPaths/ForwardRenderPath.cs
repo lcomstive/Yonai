@@ -28,7 +28,7 @@ namespace Yonai.Graphics.RenderPaths
 			OnResized(Window.Resolution);
 		}
 
-		public void Draw(VulkanCommandBuffer cmd, Camera camera)
+		public void Draw(VulkanCommandBuffer cmd)
 		{
 			// Transition image into drawable state
 			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.GENERAL);
@@ -54,6 +54,47 @@ namespace Yonai.Graphics.RenderPaths
 
 			// Transition image into transferrable state
 			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.GENERAL, VkImageLayout.TRANSFER_SRC_OPTIMAL);
+
+			CopyOutputToRenderTarget(cmd, Camera.Main?.RenderTarget as VulkanImage);
+		}
+
+		private void CopyOutputToRenderTarget(VulkanCommandBuffer cmd, VulkanImage target)
+		{
+			if (target == null)
+				return;
+
+			VkImageBlit blit = new VkImageBlit
+			{
+				SrcOffsets = new IVector3[] { IVector3.Zero, new IVector3(ColourOutput.Resolution, 1) },
+				SrcSubresource = new VkImageSubresourceLayers
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					MipLevel = 0,
+					BaseArrayLayer = 0,
+					LayerCount = 1
+				},
+
+				DstOffsets = new IVector3[] { IVector3.Zero, new IVector3(target.Resolution, 1) },
+				DstSubresource = new VkImageSubresourceLayers
+				{
+					AspectMask = VkImageAspectFlags.Color,
+					MipLevel = 0,
+					BaseArrayLayer = 0,
+					LayerCount = 1
+				}
+			};
+			
+			cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+
+			// Copy render path output to swapchain image
+			cmd.BlitImage(
+				ColourOutput, VkImageLayout.TRANSFER_SRC_OPTIMAL,
+				target, VkImageLayout.TRANSFER_DST_OPTIMAL,
+				new VkImageBlit[] { blit }, VkFilter.Nearest
+			);
+
+			// Transition target image to readable state
+			cmd.TransitionImageLayout(target, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 		}
 
 		public void OnResized(IVector2 resolution)

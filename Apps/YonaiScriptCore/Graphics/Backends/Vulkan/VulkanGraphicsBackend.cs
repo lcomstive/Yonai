@@ -155,7 +155,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				return;
 			}
 
-			RenderPath.Draw(cmd, null);
+			RenderPath.Draw(cmd);
 
 			// Copy RenderPath.ColourOutput to swapchain image
 			cmd.TransitionImageLayout(Swapchain.Images[imageIndex], VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
