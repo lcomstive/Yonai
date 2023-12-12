@@ -136,7 +136,8 @@ namespace YonaiEditor.Systems
 				}
 			}
 
-			// Resource.LoadDatabase();
+			try { Resource.LoadDatabase(); }
+			catch(System.Exception e) { Log.Exception(e); }
 
 			// Add global systems
 			Add<EditorUIService>();

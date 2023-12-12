@@ -1,6 +1,4 @@
 ﻿using System;
-using Yonai.Graphics;
-using System.Runtime.CompilerServices;
 
 namespace Yonai
 {
@@ -14,54 +12,40 @@ namespace Yonai
 		/// <summary>
 		/// Field of view
 		/// </summary>
-		public float FOV
-		{
-			get => _GetFieldOfView(Handle);
-			set => _SetFieldOfView(Handle, value);
-		}
-		
+		public float FOV { get; set; }
+
 		/// <summary>
 		/// Near clipping plane
 		/// </summary>
-		public float Near
-		{
-			get => _GetNear(Handle);
-			set => _SetNear(Handle, value);
-		}
+		public float Near { get; set; }
 
 		/// <summary>
 		/// Far clipping plane
 		/// </summary>
-		public float Far
-		{
-			get => _GetFar(Handle);
-			set => _SetFar(Handle, value);
-		}
+		public float Far { get; set; }
 
 		/// <summary>
 		/// Is the camera in orthographic mode, or perspective?
 		/// </summary>
-		public bool Orthographic
-		{
-			get => _GetOrthographic(Handle);
-			set => _SetOrthographic(Handle, value);
-		}
+		public bool Orthographic { get; set; }
 
 		/// <summary>
 		/// Size of the orthographic view
 		/// </summary>
-		public float OrthographicSize
-		{
-			get => _GetOrthographicSize(Handle);
-			set => _SetOrthographicSize(Handle, value);
-		}
+		public float OrthographicSize { get; set; }
 
 		public Matrix4 ViewMatrix
 		{
 			get
 			{
-				_ViewMatrix(Handle, out Matrix4 output);
-				return output;
+				Transform transform = GetComponent<Transform>();
+				if (!transform) return Matrix4.Identity;
+
+				return Matrix4.LookAt(
+					transform.Position,
+					transform.Position + transform.Forward,
+					transform.Up
+				);
 			}
 		}
 
@@ -91,36 +75,7 @@ namespace Yonai
 		}
 
 		public Matrix4 GetProjectionMatrix(IVector2 resolution) => GetProjectionMatrix(resolution.x, resolution.y);
-		public Matrix4 GetProjectionMatrix(int width, int height)
-		{
-			_ProjectionMatrix(Handle, width, height, out Matrix4 output);
-			return output;
-		}
-
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFieldOfView(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFieldOfView(IntPtr handle, float value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetNear(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetNear(IntPtr handle, float value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetFar(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetFar(IntPtr handle, float value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern IntPtr _GetRenderTarget(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetRenderTarget(IntPtr handle, IntPtr renderTarget);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetOrthographic(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographic(IntPtr handle, bool value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetOrthographicSize(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetOrthographicSize(IntPtr handle, float value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _ViewMatrix(IntPtr handle, out Matrix4 output);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _ProjectionMatrix(IntPtr handle, int width, int height, out Matrix4 output);
-		#endregion
+		public Matrix4 GetProjectionMatrix(int width, int height) =>
+			Matrix4.Perspective(FOV, width / (float)height, Near, Far);
 	}
 }

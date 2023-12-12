@@ -69,9 +69,6 @@ void EditorApp::LaunchEditorService()
 		, true);
 	MonoType* editorService = assembly->GetTypeFromClassName("YonaiEditor", "EditorService");
 
-	// Let managed code add & remove native ImGUISystem
-	// assembly->BindManagedSystem<Systems::ImGUISystem>("YonaiEditor.Systems", "ImGUISystem");
-
 	SystemManager::Global()->Add(editorService);
 }
 

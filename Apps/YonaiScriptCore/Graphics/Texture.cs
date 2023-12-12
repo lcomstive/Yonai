@@ -2,6 +2,8 @@ using System;
 using Yonai.IO;
 using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
+using Yonai.Systems;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai.Graphics
 {
@@ -32,38 +34,34 @@ namespace Yonai.Graphics
 	}
 
 	[SerializeFileOptions(SaveSeparateFile = true)]
-	public class Texture : NativeResourceBase, ISerializable
+	public class Texture : ResourceBase, ISerializable
 	{
 		public bool HDR => m_ImportSettings.HDR;
 
-		public IVector2 Resolution
-		{
-			get
-			{
-				_GetResolution(Handle, out IVector2 result);
-				return result;
-			}
-		}
+		public IVector2 Resolution => m_Data.Resolution;
 
 		public TextureFiltering Filter => m_ImportSettings.Filtering;
 
+		private VkFormat m_Format = VkFormat.R8G8B8A8_SRGB;
+		public VkFormat Format
+		{
+			get => m_Format;
+			set 
+			{
+				if (m_Format == value) return;
+
+				m_Format = value;
+				GenerateInternalData();
+			}
+		}
+
+		private ITexture m_Data;
+		private IGraphicsDevice m_GraphicsDevice;
 		private TextureImportSettings m_ImportSettings => (TextureImportSettings)ImportSettings;
 
-		protected override void OnLoad()
-		{
-			ulong resourceID = ResourceID;
-			IntPtr handle;
+		protected override void OnLoad() => m_GraphicsDevice = RenderSystem.Backend.Device;
 
-			_Load(ResourcePath, out resourceID, out handle);
-			ResourceID = resourceID;
-			Handle = handle;
-
-			ImportSettings = new TextureImportSettings()
-			{
-				HDR = _GetHDR(Handle),
-				Filtering = (TextureFiltering)_GetFilter(Handle)
-			};
-		}
+		protected override void OnUnload() => m_Data?.Dispose();
 
 		protected override void OnImported()
 		{
@@ -71,13 +69,19 @@ namespace Yonai.Graphics
 				ImportSettings = importSettings;
 			else
 				ImportSettings = new TextureImportSettings(TextureFiltering.Linear);
-			Upload(VFS.Read(ResourcePath), (TextureImportSettings)ImportSettings);
+
+			GenerateInternalData();
 		}
 
-		public void Bind(uint index = 0) => _Bind(Handle, index);
+		private void GenerateInternalData()
+		{
+			m_Data?.Dispose();
 
-		public void Upload(byte[] data, TextureImportSettings settings) =>
-			_Upload(Handle, data, settings.HDR, (int)Filter);
+			DecodedTexture decoded = Decode(ResourcePath, m_ImportSettings.HDR, 4);
+			m_Data = m_GraphicsDevice.CreateTexture(decoded.Data, Format, decoded.Resolution, 1.0f, false);
+		}
+
+		public void Upload(byte[] data) => m_Data?.Upload(data);
 
 		public JObject OnSerialize() =>
 			new JObject(
@@ -105,17 +109,14 @@ namespace Yonai.Graphics
 			};
 		}
 
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Upload(IntPtr handle, byte[] data, bool hdr, int filter);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Bind(IntPtr handle, uint index);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern string _GetPath(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetHDR(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern int _GetFilter(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetResolution(IntPtr handle, out IVector2 resolution);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Decode(byte[] fileData, bool hdr, int expectedChannels, out byte[] output, out IVector2 resolution, out int channelCount);
-		#endregion
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _Decode(
+			byte[] fileData,
+			bool hdr,
+			int expectedChannels,
+			out byte[] output,
+			out IVector2 resolution,
+			out int channelCount
+		);
 	}
 }

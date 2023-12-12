@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Yonai.Systems;
 
 namespace Yonai.Graphics.Backends.Vulkan
@@ -21,7 +22,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public IntPtr Allocator { get; private set; } = IntPtr.Zero;
 
 		private VulkanInstance m_Instance;
-		private VulkanGraphicsBackend m_Backend;
+		internal VulkanGraphicsBackend m_Backend;
 
 		public uint ID { get; private set; }
 		public string Name { get; private set; }
@@ -87,6 +88,40 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public IShaderModule CreateShaderModule(byte[] data) =>
 			new VulkanShaderModule(this, data);
+
+		public ITexture CreateTexture(byte[] data, VkFormat format, IVector2 resolution, float maxAnisotropy = 1.0f, bool generateMipmaps = true)
+		{
+			VulkanCommandPool cmdPool = m_Backend.CommandPool;
+
+			VulkanImage image = (VulkanImage)CreateTexture(format, resolution, maxAnisotropy, generateMipmaps);
+
+			image.Upload(data, cmdPool, generateMipmaps ? VkImageLayout.TRANSFER_DST_OPTIMAL : VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+
+			if (generateMipmaps)
+				image.GenerateMipmaps(cmdPool);
+
+			return image;
+		}
+
+		public ITexture CreateTexture(VkFormat format, IVector2 resolution, float maxAnisotropy = 1.0f, bool generateMipmaps = true)
+		{
+			VkImageCreateInfo imageInfo = VkImageCreateInfo.Default;
+			imageInfo.Format = format;
+			imageInfo.Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Sampled;
+			imageInfo.Extent = new Extents3D(resolution);
+			imageInfo.MipLevels = generateMipmaps ? VulkanImage.CalculateMipLevels(resolution) : 1;
+
+			VkImageViewCreateInfo imageViewInfo = VkImageViewCreateInfo.Default;
+			imageViewInfo.SubresourceRange.LevelCount = imageInfo.MipLevels;
+			imageViewInfo.Format = imageInfo.Format;
+
+			VkSamplerCreateInfo samplerInfo = VkSamplerCreateInfo.Default;
+			samplerInfo.AnisotropyEnable = maxAnisotropy > 1.0f;
+			samplerInfo.MaxAnisotropy = maxAnisotropy;
+			samplerInfo.MaxLod = imageInfo.MipLevels;
+
+			return new VulkanImage(this, imageInfo, imageViewInfo, samplerInfo);
+		}
 		#endregion
 
 		public void Dispose()

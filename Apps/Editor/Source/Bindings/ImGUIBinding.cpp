@@ -61,8 +61,6 @@ ADD_MANAGED_METHOD(ImGUI, VulkanNewFrame, void, (), YonaiEditor)
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-
-	ImGui::ShowDemoWindow();
 }
 
 ADD_MANAGED_METHOD(ImGUI, _VulkanRender, void, (VkCommandBuffer cmd), YonaiEditor)

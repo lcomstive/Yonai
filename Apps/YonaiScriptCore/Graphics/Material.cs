@@ -3,6 +3,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Yonai.Graphics.Backends.Vulkan;
+using Yonai.Systems;
 
 namespace Yonai.Graphics
 {
@@ -24,7 +26,7 @@ namespace Yonai.Graphics
 		}
 	}
 
-	public class Material : NativeResourceBase, ISerializable
+	public class Material : ResourceBase, ISerializable
 	{
 		public bool SerializeAsCache => false;
 		
@@ -40,7 +42,7 @@ namespace Yonai.Graphics
 					return; // No change
 
 				m_Settings.Shader = value?.ResourceID ?? 0;
-				_SetShader(Handle, (m_Shader = value)?.ResourceID ?? UUID.Invalid);
+				// TODO: Recompile pipeline
 			}
 		}
 
@@ -53,7 +55,7 @@ namespace Yonai.Graphics
 				if (m_Settings.Albedo == value)
 					return;
 				m_Settings.Albedo = value;
-				_SetAlbedo(Handle, ref m_Settings.Albedo);
+				// TODO: Update shader variable
 			}
 		}
 
@@ -67,7 +69,7 @@ namespace Yonai.Graphics
 					return; // No change
 
 				m_Settings.AlbedoMap = value?.ResourceID ?? 0;
-				_SetAlbedoMap(Handle, (m_AlbedoMap = value)?.ResourceID ?? UUID.Invalid);
+				// TODO: Update shader variable
 			}
 		}
 
@@ -77,8 +79,10 @@ namespace Yonai.Graphics
 			set
 			{
 				// Check for change
-				if(m_Settings.AlphaClipping != value)
-					_SetAlphaClipping(Handle, m_Settings.AlphaClipping = value);
+				if (m_Settings.AlphaClipping == value)
+					return;
+				m_Settings.AlphaClipping = value;
+				// TODO: Update shader variable
 			}
 		}
 
@@ -88,19 +92,19 @@ namespace Yonai.Graphics
 			set
 			{
 				// Check for change
-				if(m_Settings.AlphaThreshold != value)
-					_SetAlphaClipThreshold(Handle, m_Settings.AlphaThreshold = value);
+				if (m_Settings.AlphaThreshold == value) return;
+				
+				m_Settings.AlphaThreshold = value;
+				// TODO: Update shader variable
 			}
 		}
 
-		protected override void OnLoad()
-		{
-			ulong resourceID = ResourceID;
-			_Load(ResourcePath, out resourceID, out IntPtr handle);
+		private VulkanDevice m_Device;
+		internal VulkanGraphicsPipeline m_Pipeline;
 
-			Handle = handle;
-			ResourceID = resourceID;
-		}
+		protected override void OnLoad() => m_Device = (VulkanDevice)RenderSystem.Backend.Device;
+
+		protected override void OnUnload() => m_Pipeline?.Dispose();
 
 		protected override void OnImported()
 		{
@@ -110,6 +114,9 @@ namespace Yonai.Graphics
 
 			m_Shader = Resource.Get<Shader>(m_Settings.Shader);
 			m_AlbedoMap = Resource.Get<Texture>(m_Settings.AlbedoMap);
+
+			// TODO: Create pipeline
+			// TODO: Update shader variable
 		}
 
 		public JObject OnSerialize() =>
@@ -135,22 +142,16 @@ namespace Yonai.Graphics
 			Import(settings);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Load(string path, out ulong resourceID, out IntPtr handle);
+		private void GeneratePipeline()
+		{
+			m_Pipeline?.Dispose();
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetShader(IntPtr handle, ulong value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _GetAlbedo(IntPtr handle, out Colour value);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedo(IntPtr handle, ref Colour value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetAlbedoMap(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlbedoMap(IntPtr handle, ulong value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _GetAlphaClipping(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlphaClipping(IntPtr handle, bool value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern float _GetAlphaClipThreshold(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetAlphaClipThreshold(IntPtr handle, float value);
+			VkGraphicsPipelineCreateInfo info = new VkGraphicsPipelineCreateInfo
+			{
+				
+			};
+			m_Pipeline = null; // new VulkanGraphicsPipeline(m_Device, info);
+		}
 	}
 }
 

@@ -1,4 +1,5 @@
 using System;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai.Graphics
 {
@@ -27,5 +28,8 @@ namespace Yonai.Graphics
 		void CopyBuffer(IBuffer srcBuffer, IBuffer dstBuffer);
 
 		IShaderModule CreateShaderModule(byte[] data);
+
+		ITexture CreateTexture(VkFormat format, IVector2 resolution, float maxAnisotropy = 1.0f, bool generateMipmaps = true);
+		ITexture CreateTexture(byte[] data, VkFormat format, IVector2 resolution, float maxAnisotropy = 1.0f, bool generateMipmaps = true);
 	}
 }

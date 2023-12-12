@@ -46,41 +46,45 @@ namespace YonaiEditor
 
 		protected override void Enabled()
 		{
-			Log.Debug("Launched editor service");
-
-			InitialiseVFS();
-
-			if (Application.HasArg("build"))
+			try
 			{
-				DoBuildAndExit();
-				return;
+				Log.Debug("Launched editor service");
+
+				InitialiseVFS();
+
+				if (Application.HasArg("build"))
+				{
+					DoBuildAndExit();
+					return;
+				}
+
+				string projectPath = VFS.HasMount("project://") ? (VFS.ExpandPath("project://")?.FullPath as string) : Application.GetArg("projectpath", null);
+				Log.Debug($"Project path: {projectPath}");
+
+				Add<RenderSystem>();
+
+				if (!Scripting.IsAssemblyReloading())
+				{
+					GraphicsAPI graphicsAPI = GraphicsAPI.Vulkan;
+					if (Application.HasArg("GraphicsAPI"))
+						Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI);
+
+					EditorWindow.InitContext();
+					EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
+					EditorWindow.Create();
+					EditorWindow.Show();
+
+					RenderSystem.ChangeBackend(graphicsAPI);
+				}
+
+				InitImGUI();
+
+				if (!string.IsNullOrEmpty(projectPath))
+					ProjectHubService.SelectProject(projectPath);
+				else
+					Add<ProjectHubService>();
 			}
-
-			string projectPath = VFS.HasMount("project://") ? (VFS.ExpandPath("project://")?.FullPath as string) : Application.GetArg("projectpath", null);
-			Log.Debug($"Project path: {projectPath}");
-
-			Add<RenderSystem>();
-
-			if (!Scripting.IsAssemblyReloading())
-			{
-				GraphicsAPI graphicsAPI = GraphicsAPI.Vulkan;
-				if (Application.HasArg("GraphicsAPI"))
-					Enum.TryParse(Application.GetArg("GraphicsAPI"), out graphicsAPI);
-
-				EditorWindow.InitContext();
-				EditorWindow.CreationHint(WindowHint.Visible, false); // Hide by default
-				EditorWindow.Create();
-				EditorWindow.Show();
-
-				RenderSystem.ChangeBackend(graphicsAPI);
-			}
-
-			InitImGUI();
-
-			if (!string.IsNullOrEmpty(projectPath))
-				ProjectHubService.SelectProject(projectPath);
-			else
-				Add<ProjectHubService>();
+			catch(Exception e) { Log.Exception(e); }
 		}
 
 		protected override void Disabled()

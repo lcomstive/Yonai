@@ -1,6 +1,0 @@
-{
-  "Vertex": "",
-  "Fragment": "",
-  "Compute": "",
-  "Geometry": ""
-}

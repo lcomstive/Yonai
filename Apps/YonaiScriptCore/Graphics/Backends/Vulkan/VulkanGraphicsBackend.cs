@@ -32,7 +32,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		#endregion
 
 		public Model TestModel { get; private set; }
-		public VulkanImage TestModelTexture { get; private set; }
+		public Texture TestModelTexture { get; private set; }
 
 		private class FrameData
 		{
@@ -268,54 +268,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private void CreateTestModel()
 		{
 			TestModel = Resource.Load<Model>("app://TestModel/viking_room.obj");
-			TestModelTexture = CreateTexture("app://TestModel/viking_room.png");
-		}
-
-		private VulkanImage CreateTexture(VFSFile filepath)
-		{
-			// Colour texture
-			DecodedTexture decoded = Texture.Decode(filepath, false, 4);
-			VulkanBuffer stagingBuffer = new VulkanBuffer(
-				SelectedDevice,
-				decoded.Data.Length,
-				VkBufferUsage.TransferSource,
-				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
-			);
-			stagingBuffer.Upload(decoded.Data);
-
-			VkImageCreateInfo imageInfo = VkImageCreateInfo.Default;
-			imageInfo.Format = VkFormat.R8G8B8A8_SRGB;
-			imageInfo.Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Sampled;
-			imageInfo.Extent = new Extents3D(decoded.Resolution);
-			imageInfo.MipLevels = VulkanImage.CalculateMipLevels(decoded.Resolution);
-
-			VkImageViewCreateInfo imageViewInfo = VkImageViewCreateInfo.Default;
-			imageViewInfo.SubresourceRange.LevelCount = imageInfo.MipLevels;
-			imageViewInfo.Format = imageInfo.Format;
-
-			VkSamplerCreateInfo samplerInfo = VkSamplerCreateInfo.Default;
-			samplerInfo.AnisotropyEnable = true;
-			samplerInfo.MaxAnisotropy = SelectedDevice.Limits.MaxSamplerAnisotropy;
-			samplerInfo.MaxLod = imageInfo.MipLevels;
-			
-			VulkanImage image = new VulkanImage(SelectedDevice, imageInfo, imageViewInfo, samplerInfo);
-
-			CommandPool.TransitionImageLayout(image, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
-			CommandPool.CopyBufferToImage(stagingBuffer, image, decoded.Resolution);
-			// CommandPool.TransitionImageLayout(image, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
-
-			image.GenerateMipmaps(CommandPool);
-
-			stagingBuffer.Dispose();
-
-			return image;
+			TestModelTexture = Resource.Load<Texture>("app://TestModel/viking_room.png");
 		}
 
 		public void Destroy()
 		{
 			Log.Trace("Destroying vulkan graphics backend");
-
-			TestModelTexture.Dispose();
 
 			DeletionQueue.Flush();
 			SelectedDevice = null;

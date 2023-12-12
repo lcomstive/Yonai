@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {
-	public class VulkanImage : IDisposable
+	public class VulkanImage : ITexture
 	{
 		public VkFormat Format { get; private set; }
 		public IVector2 Resolution { get; private set; }
@@ -89,8 +89,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			ImageView = IntPtr.Zero;
 		}
 
+		public void GenerateMipmaps() => GenerateMipmaps(m_Device.m_Backend.CommandPool);
+
 		public void GenerateMipmaps(VulkanCommandPool commandPool)
 		{
+			commandPool.TransitionImageLayout(this, VkImageLayout.SHADER_READ_ONLY_OPTIMAL, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			
 			VulkanCommandBuffer cmd = commandPool.BeginSingleTimeCommand();
 
 			VkImageMemoryBarrier barrier = new VkImageMemoryBarrier
@@ -172,6 +176,28 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public static uint CalculateMipLevels(IVector2 resolution) =>
 			(uint)Math.Floor(Math.Log(Math.Max(resolution.x, resolution.y), 2)) + 1;
 
+		public void Upload(byte[] data) => Upload(data, m_Device.m_Backend.CommandPool);
+
+		public void Upload(byte[] data, VulkanCommandPool commandPool, VkImageLayout outputLayout = VkImageLayout.SHADER_READ_ONLY_OPTIMAL)
+		{
+			VulkanBuffer stagingBuffer = new VulkanBuffer(
+				m_Device,
+				data.Length,
+				VkBufferUsage.TransferSource,
+				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+			);
+			stagingBuffer.Upload(data);
+
+			commandPool.TransitionImageLayout(this, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			commandPool.CopyBufferToImage(stagingBuffer, this, Resolution);
+
+			if(outputLayout != VkImageLayout.TRANSFER_DST_OPTIMAL)
+				commandPool.TransitionImageLayout(this, VkImageLayout.TRANSFER_DST_OPTIMAL, outputLayout);
+
+			stagingBuffer.Dispose();
+		}
+
+		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Create(
 			IntPtr device,
@@ -195,5 +221,6 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _DestroySampler(IntPtr device, IntPtr sampler);
+		#endregion
 	}
 }

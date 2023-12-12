@@ -12,12 +12,22 @@ namespace Yonai.Graphics.Backends.Vulkan
 		internal override IntPtr PipelineLayout => m_PipelineLayout;
 
 		internal VulkanRenderPass RenderPass;
-		private VulkanDevice Device => RenderPass.Device;
+		private VulkanDevice m_Device;
 
 		public VkGraphicsPipelineCreateInfo PipelineCreateInfo { get; private set; }
 		public uint Subpass { get; private set; }
 
-		public VulkanGraphicsPipeline(VkGraphicsPipelineCreateInfo info)
+		/// <summary>
+		/// Creates a graphics pipeline object, using the <see cref="VulkanDevice"/>
+		/// that created <see cref="VkGraphicsPipelineCreateInfo.RenderPass"/>
+		/// </summary>
+		public VulkanGraphicsPipeline(VkGraphicsPipelineCreateInfo info) :
+			this(info.RenderPass?.Device, info) {}
+
+		/// <summary>
+		/// Creates a graphics pipeline object, with a manually specified <see cref="VulkanDevice"/>
+		/// </summary>
+		public VulkanGraphicsPipeline(VulkanDevice device, VkGraphicsPipelineCreateInfo info)
 		{
 			RenderPass = info.RenderPass;
 			Subpass = info.Subpass;
@@ -32,7 +42,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 			PipelineCreateInfo = pipelineInfo;
 
 			VkGraphicsPipelineCreateInfoNative native = new VkGraphicsPipelineCreateInfoNative(RenderPass, Subpass, PipelineCreateInfo);
-			m_Handle = _Create(Device.Device, ref native, out m_PipelineLayout);
+			m_Handle = _Create(m_Device.Device, ref native, out m_PipelineLayout);
 			native.Dispose();
 		}
 
