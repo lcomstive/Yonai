@@ -1,7 +1,6 @@
 using System;
-using System.Runtime.CompilerServices;
-using System.Text;
 using Yonai.Systems;
+using System.Runtime.CompilerServices;
 
 namespace Yonai.Graphics.Backends.Vulkan
 {

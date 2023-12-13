@@ -1,17 +1,21 @@
 using Yonai;
-using Yonai.Graphics;
 using Yonai.Systems;
 using YonaiEditor.Systems;
+using Yonai.Graphics.Backends.Vulkan;
+using Yonai.Graphics;
 
 namespace YonaiEditor.Views
 {
 	public class GameView : View
 	{
+		private IGraphicsDevice m_Device;
+
 		[MenuItem("Window/Game")]
 		private static void MenuCallback() => EditorUIService.Open<GameView>();
 
 		protected override void Opened()
 		{
+			m_Device = RenderSystem.Backend.Device;
 			EditorService.StateChanged += OnEditorStateChanged;
 		}
 
@@ -79,14 +83,15 @@ namespace YonaiEditor.Views
 			ImGUI.Image(camera.RenderTarget, viewportSize);
 			*/
 
-			// TODO: Move this to graphics backend or render path?
 			if (camera.RenderTarget == null || camera.RenderTarget.Resolution != viewportSize)
 			{
+				((VulkanDevice)m_Device).WaitIdle();
 				camera.RenderTarget?.Dispose();
-				camera.RenderTarget = RenderSystem.Backend.Device.CreateTexture(Yonai.Graphics.Backends.Vulkan.VkFormat.R8G8B8A8_SRGB, viewportSize, 1, false);
+				camera.RenderTarget = m_Device.CreateTexture(VkFormat.R8G8B8A8_SRGB, viewportSize, 1, false);
+				((VulkanImage)camera.RenderTarget).TransitionImageLayout(VkImageLayout.Undefined, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 			}
 
-			ImGUI.Image(Camera.Main.RenderTarget, viewportSize);
+			ImGUI.Image(camera.RenderTarget, viewportSize);
 		}
 	}
 }

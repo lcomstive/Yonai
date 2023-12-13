@@ -160,32 +160,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 			// Copy RenderPath.ColourOutput to swapchain image
 			cmd.TransitionImageLayout(Swapchain.Images[imageIndex], VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
 
-			VkImageBlit blit = new VkImageBlit
-			{
-				SrcOffsets = new IVector3[] { IVector3.Zero, new IVector3(RenderPath.ColourOutput.Resolution, 1) },
-				SrcSubresource = new VkImageSubresourceLayers
-				{
-					AspectMask = VkImageAspectFlags.Color,
-					MipLevel = 0,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				},
-
-				DstOffsets = new IVector3[] { IVector3.Zero, new IVector3(Swapchain.Resolution, 1) },
-				DstSubresource = new VkImageSubresourceLayers
-				{
-					AspectMask = VkImageAspectFlags.Color,
-					MipLevel = 0,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				}
-			};
-
-			// Copy render path output to swapchain image
-			cmd.BlitImage(
-				RenderPath.ColourOutput, VkImageLayout.TRANSFER_SRC_OPTIMAL,
-				Swapchain.Images[imageIndex], VkImageLayout.TRANSFER_DST_OPTIMAL,
-				new VkImageBlit[] { blit }, VkFilter.Nearest
+			cmd.CopyImageTo(
+				RenderPath.ColourOutput,
+				VkImageLayout.TRANSFER_SRC_OPTIMAL,
+				Swapchain.Images[imageIndex],
+				VkImageLayout.TRANSFER_DST_OPTIMAL
 			);
 
 			// Transition swapchain image to presentable state

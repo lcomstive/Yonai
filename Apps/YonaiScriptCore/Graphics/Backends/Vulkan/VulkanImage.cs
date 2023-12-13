@@ -16,11 +16,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		private VulkanDevice m_Device;
 
-		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat)
+		internal VulkanImage(VulkanDevice device, IntPtr handle, int imageFormat, IVector2 resolution)
 		{
 			Image = handle;
-			Format = (VkFormat)imageFormat;
 			m_Device = device;
+			Resolution = resolution;
+			Format = (VkFormat)imageFormat;
 
 			VkImageViewCreateInfo imageViewInfo = new VkImageViewCreateInfo
 			{
@@ -180,6 +181,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public static uint CalculateMipLevels(IVector2 resolution) =>
 			(uint)Math.Floor(Math.Log(Math.Max(resolution.x, resolution.y), 2)) + 1;
+
+		public void TransitionImageLayout(VkImageLayout from, VkImageLayout to) =>
+			m_Device.m_Backend.CommandPool.TransitionImageLayout(this, from, to);
 
 		public void Upload(byte[] data) => Upload(data, m_Device.m_Backend.CommandPool);
 

@@ -35,7 +35,15 @@ namespace Yonai
 		/// </summary>
 		public float OrthographicSize { get; set; }
 
+		/// <summary>
+		/// Texture to render camera output to
+		/// </summary>
 		public ITexture RenderTarget { get; set; }
+
+		/// <summary>
+		/// Checks if this camera is set as the main camera
+		/// </summary>
+		public bool IsMain => this == Main;
 
 		public Matrix4 ViewMatrix
 		{

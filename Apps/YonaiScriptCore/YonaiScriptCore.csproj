@@ -107,7 +107,6 @@
     <Compile Include="Graphics\Backends\Vulkan\VulkanStructs.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanSwapchain.cs" />
     <Compile Include="Graphics\Backends\Vulkan\VulkanSyncObjects.cs" />
-    <Compile Include="Graphics\Backends\Vulkan\VulkanTexture.cs" />
 
     <!-- Graphics -->
     <Compile Include="Graphics\Backends\IBuffer.cs" />

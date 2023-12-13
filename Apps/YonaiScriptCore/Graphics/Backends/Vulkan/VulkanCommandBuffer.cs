@@ -150,6 +150,43 @@ namespace Yonai.Graphics.Backends.Vulkan
 			VkImageBlit[] regions, VkFilter filter) =>
 			_BlitImage(Handle, srcImage.Image, (int)srcLayout, dstImage.Image, (int)dstLayout, regions, filter);
 
+		public void CopyImageTo(
+			VulkanImage srcImage, VkImageLayout srcLayout,
+			VulkanImage dstImage, VkImageLayout dstLayout,
+			VkFilter filter = VkFilter.Linear,
+			VkImageAspectFlags aspect = VkImageAspectFlags.Color)
+		{
+			VkImageBlit blit = new VkImageBlit
+			{
+				SrcOffsets = new IVector3[] { IVector3.Zero, new IVector3(srcImage.Resolution, 1) },
+				SrcSubresource = new VkImageSubresourceLayers
+				{
+					AspectMask = aspect,
+					MipLevel = 0,
+					BaseArrayLayer = 0,
+					LayerCount = 1
+				},
+
+				DstOffsets = new IVector3[] { IVector3.Zero, new IVector3(dstImage.Resolution, 1) },
+				DstSubresource = new VkImageSubresourceLayers
+				{
+					AspectMask = aspect,
+					MipLevel = 0,
+					BaseArrayLayer = 0,
+					LayerCount = 1
+				}
+			};
+
+			BlitImage(
+				srcImage,
+				srcLayout,
+				dstImage,
+				dstLayout,
+				new VkImageBlit[] { blit },
+				filter
+			);
+		}
+
 		public void Dispatch(uint groupCountX, uint groupCountY, uint groupCountZ) =>
 			_Dispatch(Handle, groupCountX, groupCountY, groupCountZ);
 

@@ -14,7 +14,7 @@ namespace YonaiEditor.Systems
 
 		private VulkanDevice m_Device;
 		private FunctionQueue m_DeletionQueue = new FunctionQueue();
-		internal IRenderPath m_PreviousRenderPath = null;
+		internal static IRenderPath m_PreviousRenderPath = null;
 		private ImGUIRenderPath m_RenderPath;
 
 		private static Dictionary<ITexture, VulkanDescriptorSet> m_TextureDescriptors = new Dictionary<ITexture, VulkanDescriptorSet>();
@@ -175,7 +175,8 @@ namespace YonaiEditor.Systems
 
 				ImGUI.VulkanNewFrame();
 
-				m_RenderPath.Draw(cmd);
+				// Render into camera render textures
+				m_PreviousRenderPath.Draw(cmd);
 			}
 
 			public void OnResized(IVector2 resolution) => GenerateColourOutput(resolution);

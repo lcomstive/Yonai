@@ -30,71 +30,67 @@ namespace Yonai.Graphics.RenderPaths
 
 		public void Draw(VulkanCommandBuffer cmd)
 		{
-			// Transition image into drawable state
-			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.GENERAL);
-
-			VkImageSubresourceRange clearRange = new VkImageSubresourceRange
+			World[] worlds = SceneManager.GetActiveScenes();
+			foreach(World world in worlds)
 			{
-				AspectMask = VkImageAspectFlags.Color,
-				BaseArrayLayer = 0,
-				BaseMipLevel = 0,
-				LayerCount = 1,
-				LevelCount = 1
-			};
+				(Transform[] transforms, Camera[] cameras) = world.GetComponents<Transform, Camera>();
+				for (int i = 0; i < transforms.Length; i++)
+					Draw(cmd, transforms[i], cameras[i]);
+			}
+		}
+
+		private void Draw(VulkanCommandBuffer cmd, Transform camTransform, Camera camera)
+		{
+			VulkanImage target = null;
+			if (camera.RenderTarget != null)
+				target = (VulkanImage)camera.RenderTarget;
+			else if (camera.IsMain)
+				target = ColourOutput;
+
+			if (target == null) return; // No valid target found
 
 			/*
-			Colour clearColour = Colour.Black;
-			clearColour.b = (float)Math.Abs(Math.Sin(Time.TimeSinceLaunch));
-			cmd.ClearColorImage(ColourOutput, VkImageLayout.GENERAL, clearColour, clearRange);
-			*/
+			// Transition image into drawable state
+			cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.GENERAL);
 
 			cmd.BindPipeline(m_Pipeline, VkPipelineBindPoint.Compute);
 			cmd.BindDescriptorSets(m_Pipeline, VkPipelineBindPoint.Compute, m_DrawDescriptors);
-			cmd.Dispatch((uint)Math.Ceiling(ColourOutput.Resolution.x / 16.0f), (uint)Math.Ceiling(ColourOutput.Resolution.y / 16.0f), 1);
+			cmd.Dispatch((uint)Math.Ceiling(target.Resolution.x / 16.0f), (uint)Math.Ceiling(target.Resolution.y / 16.0f), 1);
 
 			// Transition image into transferrable state
-			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.GENERAL, VkImageLayout.TRANSFER_SRC_OPTIMAL);
-
-			CopyOutputToRenderTarget(cmd, Camera.Main?.RenderTarget as VulkanImage);
-		}
-
-		private void CopyOutputToRenderTarget(VulkanCommandBuffer cmd, VulkanImage target)
-		{
-			if (target == null)
-				return;
-
-			VkImageBlit blit = new VkImageBlit
+			if (camera.IsMain && camera.RenderTarget != null)
 			{
-				SrcOffsets = new IVector3[] { IVector3.Zero, new IVector3(ColourOutput.Resolution, 1) },
-				SrcSubresource = new VkImageSubresourceLayers
-				{
-					AspectMask = VkImageAspectFlags.Color,
-					MipLevel = 0,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				},
+				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
+				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+				
+				cmd.CopyImageTo(target, VkImageLayout.TRANSFER_SRC_OPTIMAL, ColourOutput, VkImageLayout.TRANSFER_DST_OPTIMAL);
 
-				DstOffsets = new IVector3[] { IVector3.Zero, new IVector3(target.Resolution, 1) },
-				DstSubresource = new VkImageSubresourceLayers
-				{
-					AspectMask = VkImageAspectFlags.Color,
-					MipLevel = 0,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				}
-			};
+				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
+			}
 			
-			cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+			if(target != ColourOutput)
+				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+			*/
 
-			// Copy render path output to swapchain image
-			cmd.BlitImage(
-				ColourOutput, VkImageLayout.TRANSFER_SRC_OPTIMAL,
-				target, VkImageLayout.TRANSFER_DST_OPTIMAL,
-				new VkImageBlit[] { blit }, VkFilter.Nearest
-			);
+			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.GENERAL);
 
-			// Transition target image to readable state
-			cmd.TransitionImageLayout(target, VkImageLayout.TRANSFER_DST_OPTIMAL, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+			cmd.BindPipeline(m_Pipeline, VkPipelineBindPoint.Compute);
+			cmd.BindDescriptorSets(m_Pipeline, VkPipelineBindPoint.Compute, m_DrawDescriptors);
+			cmd.Dispatch(
+				(uint)Math.Ceiling(ColourOutput.Resolution.x / 16.0f),
+				(uint)Math.Ceiling(ColourOutput.Resolution.y / 16.0f),
+				1);
+
+			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
+
+			if(camera.RenderTarget != null)
+			{
+				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
+
+				cmd.CopyImageTo(ColourOutput, VkImageLayout.TRANSFER_SRC_OPTIMAL, target, VkImageLayout.TRANSFER_DST_OPTIMAL);
+
+				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
+			}
 		}
 
 		public void OnResized(IVector2 resolution)
@@ -122,6 +118,7 @@ namespace Yonai.Graphics.RenderPaths
 			imageViewInfo.Format = createInfo.Format;
 
 			ColourOutput = new VulkanImage(m_Device, createInfo, imageViewInfo, VkSamplerCreateInfo.Default);
+			ColourOutput.TransitionImageLayout(VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
 		}
 
 		private void InitDescriptors()
