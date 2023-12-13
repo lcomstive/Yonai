@@ -18,8 +18,8 @@ void main()
 	if(texelCoord.x >= size.x || texelCoord.y >= size.y)
 		return;
 
-	vec4 topColour = PushConstants.data1;
-	vec4 bottomColour = PushConstants.data2;
+	vec4 topColour = PushConstants.data2;
+	vec4 bottomColour = PushConstants.data1;
 
 	float blend = float(texelCoord.y) / size.y;
 

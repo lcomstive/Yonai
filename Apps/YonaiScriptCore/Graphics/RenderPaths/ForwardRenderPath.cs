@@ -17,11 +17,16 @@ namespace Yonai.Graphics.RenderPaths
 		private VulkanDevice m_Device;
 		private VulkanComputePipeline m_Pipeline;
 
-		private struct PushConstants
+		public struct PushConstants
 		{
 			public Colour Data1;
 			public Colour Data2;
 		}
+		public PushConstants m_Constants = new PushConstants
+		{
+			Data1 = Colour.Green,
+			Data2 = Colour.Blue
+		};
 
 		public ForwardRenderPath()
 		{
@@ -60,12 +65,7 @@ namespace Yonai.Graphics.RenderPaths
 			cmd.BindPipeline(m_Pipeline, VkPipelineBindPoint.Compute);
 			cmd.BindDescriptorSets(m_Pipeline, VkPipelineBindPoint.Compute, m_DrawDescriptors);
 
-			PushConstants constants = new PushConstants
-			{
-				Data1 = Colour.Green,
-				Data2 = Colour.Blue
-			};
-			cmd.PushConstants(m_Pipeline, VkShaderStage.Compute, 0, sizeof(float) * 8, constants);
+			cmd.PushConstants(m_Pipeline, VkShaderStage.Compute, 0, sizeof(float) * 8, m_Constants);
 
 			cmd.Dispatch(
 				(uint)Math.Ceiling(ColourOutput.Resolution.x / 16.0f),

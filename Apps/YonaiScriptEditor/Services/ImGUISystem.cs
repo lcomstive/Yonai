@@ -5,6 +5,7 @@ using Yonai.Graphics.Backends.Vulkan;
 using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
+using Yonai.Graphics.RenderPaths;
 
 namespace YonaiEditor.Systems
 {

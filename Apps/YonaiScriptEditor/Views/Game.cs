@@ -3,6 +3,7 @@ using Yonai.Systems;
 using YonaiEditor.Systems;
 using Yonai.Graphics.Backends.Vulkan;
 using Yonai.Graphics;
+using Yonai.Graphics.RenderPaths;
 
 namespace YonaiEditor.Views
 {
@@ -32,7 +33,16 @@ namespace YonaiEditor.Views
 			ImGUI.PushStyleVar(ImGUI.StyleVar.WindowPadding, Vector2.Zero);
 			ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, Colour.Black);
 			if (ImGUI.Begin("Game", ref isOpen))
+			{
+				Vector2 cursorPos = ImGUI.GetCursorPos();
+
 				DrawScene();
+
+				ImGUI.SetCursorPos(cursorPos);
+				ForwardRenderPath renderPath = (ForwardRenderPath)ImGUISystem.m_PreviousRenderPath;
+				ImGUI.ColourEdit3("Colour 1", ref renderPath.m_Constants.Data1);
+				ImGUI.ColourEdit3("Colour 2", ref renderPath.m_Constants.Data2);
+			}
 			ImGUI.End();
 			ImGUI.PopStyleVar();
 			ImGUI.PopStyleColour();
