@@ -1,5 +1,7 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Yonai._Internal;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -231,6 +233,26 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public void EndRendering() => _EndRendering(Handle);
 
+		public void PushConstants<T>(VulkanPipeline pipeline, VkShaderStage stage, uint offset, uint size, T data) where T : struct
+		{
+			IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));
+
+			Marshal.StructureToPtr(data, ptr, false);
+			PushConstants(pipeline, stage, offset, size, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+
+		public void PushConstants<T>(VulkanPipeline pipeline, VkShaderStage stage, uint offset, uint size, T[] data) where T : struct
+		{
+			IntPtr ptr = InteropUtils.CreateNativeHandle(data);
+			PushConstants(pipeline, stage, offset, size, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+
+
+		public void PushConstants(VulkanPipeline pipeline, VkShaderStage stage, uint offset, uint size, IntPtr data) =>
+			_PushConstants(Handle, pipeline.PipelineLayout, (int)stage, offset, size, data);
+
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int _Reset(IntPtr handle, int flag);
@@ -312,6 +334,16 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _EndRendering(IntPtr handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _PushConstants(
+			IntPtr handle,
+			IntPtr pipelineLayout,
+			int stageFlags,
+			uint offset,
+			uint size,
+			IntPtr values
+		);
 		#endregion
 	}
 }

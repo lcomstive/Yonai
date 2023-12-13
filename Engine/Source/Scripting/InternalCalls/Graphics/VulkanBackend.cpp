@@ -991,6 +991,9 @@ struct VkComputePipelineCreateInfoManaged
 	unsigned int DescriptorSetLayoutCount;
 	VkDescriptorSetLayout* DescriptorSetLayouts;
 
+	unsigned int PushConstantRangeCount;
+	VkPushConstantRange* PushConstantRanges;
+
 	VkPipeline BasePipeline;
 };
 
@@ -1002,6 +1005,9 @@ ADD_MANAGED_METHOD(VulkanComputePipeline, Create, void*, (VkDevice device, void*
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = managed->DescriptorSetLayoutCount;
 	pipelineLayoutInfo.pSetLayouts = managed->DescriptorSetLayouts;
+
+	pipelineLayoutInfo.pPushConstantRanges = managed->PushConstantRanges;
+	pipelineLayoutInfo.pushConstantRangeCount = managed->PushConstantRangeCount;
 
 	VkPipelineLayout pipelineLayout;
 	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);
@@ -1286,6 +1292,16 @@ ADD_MANAGED_METHOD(VulkanCommandBuffer, ClearColorImage, void, (VkCommandBuffer 
 
 ADD_MANAGED_METHOD(VulkanCommandBuffer, Dispatch, void, (VkCommandBuffer handle, unsigned int x, unsigned int y, unsigned int z), Yonai.Graphics.Backends.Vulkan)
 { vkCmdDispatch(handle, x, y, z); }
+
+ADD_MANAGED_METHOD(VulkanCommandBuffer, PushConstants, void, (
+	VkCommandBuffer handle,
+	VkPipelineLayout pipelineLayout,
+	VkShaderStageFlags stageFlags,
+	unsigned int offset,
+	unsigned int size,
+	void* values
+), Yonai.Graphics.Backends.Vulkan)
+{ vkCmdPushConstants(handle, pipelineLayout, stageFlags, offset, size, values);}
 
 ADD_MANAGED_METHOD(VulkanFence, Create, void*, (void* device, int flags), Yonai.Graphics.Backends.Vulkan)
 {

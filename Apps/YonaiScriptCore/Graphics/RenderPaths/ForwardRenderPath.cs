@@ -17,6 +17,12 @@ namespace Yonai.Graphics.RenderPaths
 		private VulkanDevice m_Device;
 		private VulkanComputePipeline m_Pipeline;
 
+		private struct PushConstants
+		{
+			public Colour Data1;
+			public Colour Data2;
+		}
+
 		public ForwardRenderPath()
 		{
 			m_Device = RenderSystem.Backend.Device as VulkanDevice;
@@ -49,33 +55,18 @@ namespace Yonai.Graphics.RenderPaths
 
 			if (target == null) return; // No valid target found
 
-			/*
-			// Transition image into drawable state
-			cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.GENERAL);
-
-			cmd.BindPipeline(m_Pipeline, VkPipelineBindPoint.Compute);
-			cmd.BindDescriptorSets(m_Pipeline, VkPipelineBindPoint.Compute, m_DrawDescriptors);
-			cmd.Dispatch((uint)Math.Ceiling(target.Resolution.x / 16.0f), (uint)Math.Ceiling(target.Resolution.y / 16.0f), 1);
-
-			// Transition image into transferrable state
-			if (camera.IsMain && camera.RenderTarget != null)
-			{
-				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
-				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_DST_OPTIMAL);
-				
-				cmd.CopyImageTo(target, VkImageLayout.TRANSFER_SRC_OPTIMAL, ColourOutput, VkImageLayout.TRANSFER_DST_OPTIMAL);
-
-				cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
-			}
-			
-			if(target != ColourOutput)
-				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
-			*/
-
 			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.GENERAL);
 
 			cmd.BindPipeline(m_Pipeline, VkPipelineBindPoint.Compute);
 			cmd.BindDescriptorSets(m_Pipeline, VkPipelineBindPoint.Compute, m_DrawDescriptors);
+
+			PushConstants constants = new PushConstants
+			{
+				Data1 = Colour.Green,
+				Data2 = Colour.Blue
+			};
+			cmd.PushConstants(m_Pipeline, VkShaderStage.Compute, 0, sizeof(float) * 8, constants);
+
 			cmd.Dispatch(
 				(uint)Math.Ceiling(ColourOutput.Resolution.x / 16.0f),
 				(uint)Math.Ceiling(ColourOutput.Resolution.y / 16.0f),
@@ -170,7 +161,16 @@ namespace Yonai.Graphics.RenderPaths
 			VkComputePipelineCreateInfo info = new VkComputePipelineCreateInfo
 			{
 				DescriptorSetLayouts = new VulkanDescriptorSetLayout[] { m_DrawDescriptorLayout },
-				Shader = shaderModule
+				Shader = shaderModule,
+				PushConstantRanges = new VkPushConstantRange[]
+				{
+					new VkPushConstantRange
+					{
+						Offset = 0,
+						Stage = VkShaderStage.Compute,
+						Size = sizeof(float) * 8 // Vector4 * 2
+					}
+				}
 			};
 			m_Pipeline = new VulkanComputePipeline(m_Device, info);
 		}
