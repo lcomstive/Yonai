@@ -30,7 +30,7 @@ EmptyMethodFn ComponentMethodDestroyed = nullptr;
 ComponentMethodEnabledFn ComponentMethodEnabled = nullptr;
 ComponentMethodInitialiseFn ComponentMethodInitialise = nullptr;
 
-EmptyMethodFn SystemMethodDraw = nullptr;
+EmptyMethodFn SystemMethod_Draw = nullptr;
 EmptyMethodFn SystemMethodStart = nullptr;
 EmptyMethodFn SystemMethodUpdate = nullptr;
 EmptyMethodFn SystemMethodDestroyed = nullptr;
@@ -263,7 +263,7 @@ void Assembly::LoadScriptCoreTypes()
 	method = mono_class_get_method_from_name(system, "_Enable", 1);
 	SystemMethodEnabled = method ? (void(*)(MonoObject*, bool, MonoException**))mono_method_get_unmanaged_thunk(method) : nullptr;
 
-	AddSystemMethod(Draw)
+	AddSystemMethod(_Draw)
 	AddSystemMethod(Start)
 	AddSystemMethod(Update)
 	AddSystemMethod(Destroyed)

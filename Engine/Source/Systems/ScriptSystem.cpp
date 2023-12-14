@@ -6,7 +6,7 @@ using namespace Yonai;
 using namespace Yonai::Systems;
 using namespace Yonai::Scripting;
 
-extern EmptyMethodFn SystemMethodDraw;
+extern EmptyMethodFn SystemMethod_Draw;
 extern EmptyMethodFn SystemMethodStart;
 extern EmptyMethodFn SystemMethodUpdate;
 extern EmptyMethodFn SystemMethodDestroyed;
@@ -104,7 +104,7 @@ void ScriptSystem::Draw()
 		return;
 
 	MonoException* exception = nullptr;
-	SystemMethodDraw(ManagedData.GetInstance(), &exception);
+	SystemMethod_Draw(ManagedData.GetInstance(), &exception);
 	if (exception)
 	{
 		TRACE_SYSTEM("Exception in Draw() for");

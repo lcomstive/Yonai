@@ -29,6 +29,13 @@ namespace Yonai
 		/// </summary>
 		protected virtual void Draw() { }
 
+		// Called from C++
+		private void _Draw()
+		{
+			try { Draw(); } 
+			catch(Exception e) { Log.Exception(e); }
+		}
+
 		/// <summary>
 		/// Called when this system is created (before <see cref="OnEnabled"/>)
 		/// </summary>
