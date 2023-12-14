@@ -20,7 +20,8 @@ namespace YonaiEditor.Inspectors
 			}
 			else // Is Material object
 				m_Target = Target as Material;
-			m_Settings = (MaterialImportSettings)m_Target.ImportSettings;
+			if(m_Target != null) 
+				m_Settings = (MaterialImportSettings)m_Target.ImportSettings;
 		}
 
 		public override void DrawInspector()

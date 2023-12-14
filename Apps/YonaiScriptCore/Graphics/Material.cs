@@ -1,10 +1,7 @@
 ﻿using Yonai.IO;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using Yonai.Graphics.Backends.Vulkan;
 using Yonai.Systems;
+using Newtonsoft.Json.Linq;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai.Graphics
 {
@@ -27,9 +24,7 @@ namespace Yonai.Graphics
 	}
 
 	public class Material : ResourceBase, ISerializable
-	{
-		public bool SerializeAsCache => false;
-		
+	{		
 		private MaterialImportSettings m_Settings;
 
 		private Shader m_Shader = null;
@@ -42,7 +37,7 @@ namespace Yonai.Graphics
 					return; // No change
 
 				m_Settings.Shader = value?.ResourceID ?? 0;
-				// TODO: Recompile pipeline
+				GeneratePipeline();
 			}
 		}
 
@@ -99,12 +94,13 @@ namespace Yonai.Graphics
 			}
 		}
 
+		public VulkanGraphicsPipeline Pipeline { get; private set; }
+
 		private VulkanDevice m_Device;
-		internal VulkanGraphicsPipeline m_Pipeline;
 
 		protected override void OnLoad() => m_Device = (VulkanDevice)RenderSystem.Backend.Device;
 
-		protected override void OnUnload() => m_Pipeline?.Dispose();
+		protected override void OnUnload() => Pipeline?.Dispose();
 
 		protected override void OnImported()
 		{
@@ -115,8 +111,8 @@ namespace Yonai.Graphics
 			m_Shader = Resource.Get<Shader>(m_Settings.Shader);
 			m_AlbedoMap = Resource.Get<Texture>(m_Settings.AlbedoMap);
 
-			// TODO: Create pipeline
-			// TODO: Update shader variable
+			GeneratePipeline();
+			// TODO: Update shader variables
 		}
 
 		public JObject OnSerialize() =>
@@ -144,13 +140,31 @@ namespace Yonai.Graphics
 
 		private void GeneratePipeline()
 		{
-			m_Pipeline?.Dispose();
+			Pipeline?.Dispose();
 
-			VkGraphicsPipelineCreateInfo info = new VkGraphicsPipelineCreateInfo
+			if(Shader == null || Shader.Modules?.Count == 0)
 			{
-				
-			};
-			m_Pipeline = null; // new VulkanGraphicsPipeline(m_Device, info);
+				Log.Warning("No valid shader found for material");
+				return;
+			}
+
+			VulkanGraphicsPipelineBuilder builder = new VulkanGraphicsPipelineBuilder()
+				.SetInputTopology(VkPrimitiveTopology.TRIANGLE_LIST)
+				.SetPolygonMode(VkPolygonMode.Fill)
+				.SetCullMode(VkCullMode.NONE, VkFrontFace.Clockwise)
+				.SetMultisamplingNone()
+				.DisableBlending()
+				.DisableDepthTest()
+				.AddColourAttachmentFormat(VkFormat.R8G8B8A8_SRGB)
+				.SetDepthFormat(VkFormat.Undefined);
+
+			if (Shader && Shader.Modules.Count > 0)
+			{
+				foreach (var pair in Shader.Modules)
+					builder.AddShader(pair.Value, pair.Key);
+			}
+
+			Pipeline = builder.Build(m_Device);
 		}
 	}
 }

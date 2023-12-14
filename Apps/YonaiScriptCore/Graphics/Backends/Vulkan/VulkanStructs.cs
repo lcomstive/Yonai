@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Yonai._Internal;
 
@@ -442,6 +443,8 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public uint Subpass;
 		public VulkanRenderPass RenderPass;
 
+		public VkPipelineRenderingCreateInfo? RenderingInfo;
+
 		public VulkanDescriptorSetLayout[] DescriptorSetLayouts;
 	}
 
@@ -469,21 +472,25 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public uint DescriptorSetLayoutCount;
 		public IntPtr DescriptorSetLayouts;
 
+		public IntPtr RenderingInfo;
+
+		private VkPipelineRenderingCreateInfoNative? RenderingInfoNative { get; set; }
+
 		public VkGraphicsPipelineCreateInfoNative(VulkanRenderPass renderPass, uint subpass, VkGraphicsPipelineCreateInfo info)
 		{
-			StageCount = (uint)info.Stages.Length;
-			Stages = InteropUtils.CreateNativeHandle(info.Stages);
+			StageCount = (uint)(info.Stages?.Length ?? 0);
+			Stages = info.Stages != null ? InteropUtils.CreateNativeHandle(info.Stages) : IntPtr.Zero;
 			InputState = new VkPipelineVertexInputStateNative(info.InputState);
 			InputAssembly = info.InputAssembly;
-			ViewportsCount = (uint)info.Viewports.Length;
-			Viewports = InteropUtils.CreateNativeHandle(info.Viewports);
-			ScissorsCount = (uint)info.Scissors.Length;
-			Scissors = InteropUtils.CreateNativeHandle(info.Scissors);
+			ViewportsCount = (uint)(info.Viewports?.Length ?? 0);
+			Viewports = info.Viewports != null ? InteropUtils.CreateNativeHandle(info.Viewports) : IntPtr.Zero;
+			ScissorsCount = (uint)(info.Scissors?.Length ?? 0);
+			Scissors = info.Scissors != null ? InteropUtils.CreateNativeHandle(info.Scissors) : IntPtr.Zero;
 			Rasterization = new VkPipelineRasterizationStateNative(info.Rasterization);
 			Multisample = info.Multisample;
 			ColorBlendState = new VkPipelineColorBlendStateNative(info.ColorBlendState);
-			DynamicStatesCount = (uint)info.DynamicStates.Length;
-			RenderPass = renderPass.Handle;
+			DynamicStatesCount = (uint)(info.DynamicStates?.Length ?? 0);
+			RenderPass = renderPass?.Handle ?? IntPtr.Zero;
 			Subpass = subpass;
 
 			DynamicStates = Marshal.AllocHGlobal(sizeof(int) * info.DynamicStates.Length);
@@ -502,6 +509,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 				descriptorHandles[i] = info.DescriptorSetLayouts[i].Handle;
 			DescriptorSetLayouts = DescriptorSetLayoutCount > 0 ?
 				InteropUtils.CreateNativeHandle(descriptorHandles) : IntPtr.Zero;
+
+			if(info.RenderingInfo.HasValue)
+			{
+				RenderingInfoNative = new VkPipelineRenderingCreateInfoNative(info.RenderingInfo.Value);
+				RenderingInfo = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VkPipelineRenderingCreateInfoNative)));
+				Marshal.StructureToPtr(RenderingInfoNative, RenderingInfo, false);
+			}
+			else
+			{
+				RenderingInfoNative = null;
+				RenderingInfo = IntPtr.Zero;
+			}
 		}
 
 		public void Dispose()
@@ -513,9 +532,58 @@ namespace Yonai.Graphics.Backends.Vulkan
 			Marshal.FreeHGlobal(DepthStencilState);
 			Marshal.FreeHGlobal(DescriptorSetLayouts);
 
+			if(RenderingInfo != IntPtr.Zero)
+				Marshal.FreeHGlobal(RenderingInfo);
+
+			RenderingInfoNative?.Dispose();
 			InputState.Dispose();
 			ColorBlendState.Dispose();
 		}
+	}
+
+	public struct VkPipelineRenderingCreateInfo
+	{
+		public uint ViewMask;
+		public VkFormat[] ColorAttachmentFormats;
+		public VkFormat DepthAttachmentFormat;
+		public VkFormat StencilAttachmentFormat;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	internal struct VkPipelineRenderingCreateInfoNative : IDisposable
+	{
+		private int _sType;
+		private IntPtr _pNext;
+
+		public uint ViewMask;
+		public uint ColorAttachmentCount;
+		public IntPtr ColorAttachmentFormats; // VkFormat[]
+		public VkFormat DepthAttachmentFormat;
+		public VkFormat StencilAttachmentFormat;
+
+		public VkPipelineRenderingCreateInfoNative(VkPipelineRenderingCreateInfo info)
+		{
+			_sType = 1000044002; // VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO
+			_pNext = IntPtr.Zero;
+
+			ViewMask = info.ViewMask;
+			ColorAttachmentCount = (uint)(info.ColorAttachmentFormats?.Length ?? 0);
+			DepthAttachmentFormat = info.DepthAttachmentFormat;
+			StencilAttachmentFormat = info.StencilAttachmentFormat;
+
+			ColorAttachmentFormats = ColorAttachmentCount > 0 ?
+				Marshal.AllocHGlobal(sizeof(int) * (int)ColorAttachmentCount) : IntPtr.Zero;
+
+			if(ColorAttachmentCount > 0)
+			{ 
+				int[] attachmentFormats = new int[ColorAttachmentCount];
+				for (int i = 0; i < attachmentFormats.Length; i++)
+					attachmentFormats[i] = (int)info.ColorAttachmentFormats[i];
+				Marshal.Copy(attachmentFormats, 0, ColorAttachmentFormats, attachmentFormats.Length);
+			}
+		}
+
+		public void Dispose() => Marshal.FreeHGlobal(ColorAttachmentFormats);
 	}
 
 	public struct VkPushConstantRange

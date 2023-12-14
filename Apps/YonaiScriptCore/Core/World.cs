@@ -33,7 +33,7 @@ namespace Yonai
 			{
 				ulong[] entityIDs = _GetEntities(ID);
 				if (entityIDs == null)
-					return null;
+					return new Entity[0];
 
 				// Get all entities from IDs
 				Entity[] entities = new Entity[entityIDs.Length];

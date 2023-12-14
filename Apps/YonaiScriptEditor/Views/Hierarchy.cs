@@ -1,9 +1,10 @@
 using Yonai;
 using System;
-using Yonai.Graphics;
 using Yonai.IO;
+using Yonai.Graphics;
 using YonaiEditor.Systems;
 using System.Collections.Generic;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace YonaiEditor.Views
 {
@@ -192,8 +193,21 @@ namespace YonaiEditor.Views
 		private void CreatePrimitive(World world, UUID meshID, string name)
 		{
 			MeshRenderer meshRenderer = CreateEntity(world, name).AddComponent<MeshRenderer>();
-			meshRenderer.Mesh = meshID;
-			meshRenderer.Material = Resource.Get<Material>("Materials/Default3D");
+			meshRenderer.MeshID = meshID;
+
+			Shader shader = Resource.Load<Shader>("assets://Shaders/Vulkan/Default3D.shader", new ShaderImportSettings
+			{
+				StagePaths = new Dictionary<VkShaderStage, VFSFile>
+				{
+					{ VkShaderStage.Vertex, "assets://Shaders/Vulkan/vert.spv" },
+					{ VkShaderStage.Fragment, "assets://Shaders/Vulkan/frag.spv" },
+				}
+			});
+
+			meshRenderer.Material = Resource.Load<Material>("assets://Materials/Default3D.material", new MaterialImportSettings
+			{
+				Shader = shader
+			});
 		}
 
 		private void CreateSprite(World world)

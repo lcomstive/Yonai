@@ -67,10 +67,14 @@ namespace Yonai.Graphics.RenderPaths
 
 			cmd.PushConstants(m_Pipeline, VkShaderStage.Compute, 0, sizeof(float) * 8, m_Constants);
 
+			/*
 			cmd.Dispatch(
 				(uint)Math.Ceiling(ColourOutput.Resolution.x / 16.0f),
 				(uint)Math.Ceiling(ColourOutput.Resolution.y / 16.0f),
 				1);
+			*/
+
+			DrawGeometry(cmd, camera.World);
 
 			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
 
@@ -82,6 +86,51 @@ namespace Yonai.Graphics.RenderPaths
 
 				cmd.TransitionImageLayout(target, VkImageLayout.Undefined, VkImageLayout.SHADER_READ_ONLY_OPTIMAL);
 			}
+		}
+
+		private void DrawGeometry(VulkanCommandBuffer cmd, World world)
+		{
+			VkRenderingAttachmentInfo colorAttachment = new VkRenderingAttachmentInfo
+			{
+				Image = ColourOutput,
+				ImageLayout = VkImageLayout.GENERAL
+			};
+			VkRenderingInfo renderInfo = new VkRenderingInfo
+			{
+				ColorAttachments = new VkRenderingAttachmentInfo[] { colorAttachment },
+				RenderArea = new VkRect2D(IVector2.Zero, ColourOutput.Resolution),
+				LayerCount = 1
+			};
+			cmd.BeginRendering(renderInfo);
+
+			(Transform[] transforms, MeshRenderer[] meshRenderers) = world.GetComponents<Transform, MeshRenderer>();
+
+			for(int i = 0; i < transforms.Length; i++)
+			{
+				Mesh mesh = meshRenderers[i].Mesh;
+				Material material = meshRenderers[i].Material;
+
+				/*
+				if (!mesh) Log.Warning("No mesh");
+				if (!material) Log.Warning("No material");
+				if (material?.Pipeline == null) Log.Warning("No material pipeline");
+				*/
+
+				if (!material || !mesh || material.Pipeline == null) continue;
+
+				Log.Debug("Made it past");
+
+				cmd.BindPipeline(material.Pipeline, VkPipelineBindPoint.Graphics);
+
+				cmd.BindVertexBuffer((VulkanBuffer)mesh.VertexBuffer);
+				cmd.BindIndexBuffer((VulkanBuffer)mesh.IndexBuffer);
+
+				cmd.DrawIndexed((uint)mesh.Indices.Length);
+
+				// Log.Debug("DRAW MESH RENDERER " + meshRenderers[i].Entity.ID);
+			}
+
+			cmd.EndRendering();
 		}
 
 		public void OnResized(IVector2 resolution)
@@ -103,7 +152,10 @@ namespace Yonai.Graphics.RenderPaths
 			VkImageCreateInfo createInfo = VkImageCreateInfo.Default;
 			createInfo.Format = VkFormat.R16G16B16A16_SFLOAT;
 			createInfo.Extent = new Extents3D(resolution);
-			createInfo.Usage = VkImageUsage.TransferSrc | VkImageUsage.TransferDst | VkImageUsage.Storage;
+			createInfo.Usage = VkImageUsage.TransferSrc |
+								VkImageUsage.TransferDst |
+								VkImageUsage.Storage |
+								VkImageUsage.ColorAttachment;
 
 			VkImageViewCreateInfo imageViewInfo = VkImageViewCreateInfo.Default;
 			imageViewInfo.Format = createInfo.Format;

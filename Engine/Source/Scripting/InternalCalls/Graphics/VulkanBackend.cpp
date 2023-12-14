@@ -895,6 +895,8 @@ struct VkGraphicsPipelineCreateInfoManaged
 
 	unsigned int DescriptorSetLayoutCount;
 	VkDescriptorSetLayout* DescriptorSetLayouts;
+
+	VkPipelineRenderingCreateInfo* RenderingInfo;
 };
 
 ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void* inPipelineInfo, void** outPipelineLayout), Yonai.Graphics.Backends.Vulkan)
@@ -965,6 +967,9 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void*
 	pipelineInfo.renderPass = managed->RenderPass;
 	pipelineInfo.subpass = managed->Subpass;
 	pipelineInfo.pDepthStencilState = managed->DepthStencil;
+
+	if (managed->RenderingInfo)
+		pipelineInfo.pNext = managed->RenderingInfo;
 
 	VkPipeline pipeline;
 	result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
