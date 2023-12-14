@@ -30,7 +30,8 @@ namespace fs = std::filesystem;
 string ImGuiIniFilename = "";
 string ProjectPathArg = "projectpath";
 string AssembliesDirectory = "/Assets/Mono";
-string YonaiScriptEditorPath = AssembliesDirectory + "/YonaiScriptEditor.dll";
+string YonaiScriptCorePath = "/YonaiScriptCore.dll";
+string YonaiScriptEditorPath = "/YonaiScriptEditor.dll";
 
 void EditorApp::Setup()
 {
@@ -65,8 +66,10 @@ void EditorApp::OnUpdate()
 
 void EditorApp::LaunchEditorService()
 {
-	Assembly* assembly = ScriptEngine::LoadAssembly(GetExecutableDirectory().string() + YonaiScriptEditorPath
-		, true);
+	Assembly* assembly = ScriptEngine::LoadAssembly(
+		GetExecutableDirectory().string() + YonaiScriptEditorPath,
+		true
+	);
 	MonoType* editorService = assembly->GetTypeFromClassName("YonaiEditor", "EditorService");
 
 	SystemManager::Global()->Add(editorService);
@@ -74,7 +77,10 @@ void EditorApp::LaunchEditorService()
 
 void EditorApp::InitialiseScripting()
 {
-	ScriptEngine::Init(GetExecutableDirectory().string() + AssembliesDirectory,
+	string cwd = GetExecutableDirectory().string();
+	ScriptEngine::Init(
+		cwd + YonaiScriptCorePath,
+		cwd + AssembliesDirectory,
 		// Allow debugging in debug builds
 		true);
 

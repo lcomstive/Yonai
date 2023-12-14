@@ -1,47 +1,42 @@
 [
   {
-    "ID": "2497431202279936721",
-    "Path": "assets://Textures/Grid.png",
-    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
-  },
-  {
-    "ID": "1390398289581312468",
-    "Path": "assets://Shaders/Default3D.shader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
-  },
-  {
-    "ID": "1042050081001384043",
-    "Path": "assets://Materials/Default3D.material",
-    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
-  },
-  {
-    "ID": "7803280779966768950",
-    "Path": "assets://Materials/Default2D.material",
-    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
-  },
-  {
-    "ID": "9669135186338321276",
-    "Path": "project://Assets/Scenes/Test World.world",
-    "Type": "Yonai.World"
-  },
-  {
-    "ID": "9822497623091795982",
-    "Path": "assets://Shaders/Vulkan/Default3D.shader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
-  },
-  {
-    "ID": "9903293684909627036",
+    "ID": "7272394433573427586",
     "Path": "assets://Models/Quad.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "16023139415708847701",
+    "ID": "14591255351010580847",
     "Path": "assets://Models/Cube.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "3441720508591492672",
+    "ID": "4483570875256698259",
     "Path": "assets://Models/Sphere.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
+  },
+  {
+    "ID": "11307750426661044868",
+    "Path": "assets://Textures/Grid.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "7506896746711955443",
+    "Path": "assets://Shaders/Default3D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "6963820300786244757",
+    "Path": "assets://Materials/Default3D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "4581286657851891921",
+    "Path": "assets://Shaders/Default2D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "416020391496750774",
+    "Path": "assets://Materials/Default2D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   }
 ]

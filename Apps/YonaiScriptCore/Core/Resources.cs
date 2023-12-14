@@ -319,14 +319,14 @@ namespace Yonai
 				{
 					StagePaths = new Dictionary<VkShaderStage, VFSFile>()
 					{
-						{ VkShaderStage.Vertex, "assets://Shaders/Lit.vert" },
-						{ VkShaderStage.Fragment, "assets://Shaders/Lit.frag" },
+						{ VkShaderStage.Vertex, "assets://Shaders/Vulkan/vert.spv" },
+						{ VkShaderStage.Fragment, "assets://Shaders/Vulkan/frag.spv" },
 					}
 				})
 			});
 			Load<Material>("assets://Materials/Default2D.material", new MaterialImportSettings
 			{
-				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings
+				Shader = Load<Shader>("assets://Shaders/Default2D.shader", new ShaderImportSettings
 				{
 					StagePaths = new Dictionary<VkShaderStage, VFSFile>()
 					{

@@ -11,6 +11,7 @@ using namespace Yonai::IO;
 using namespace Yonai::Systems;
 using namespace Yonai::Scripting;
 
+string ScriptCorePath = "/YonaiScriptCore.dll";
 string AssembliesPath = "/Assets/Editor/Mono";
 
 bool LoadAssembly(MonoArray*, MonoString*);
@@ -37,7 +38,10 @@ void BaseGame::Setup()
 
 void BaseGame::InitialiseScripting()
 {
-	ScriptEngine::Init(GetExecutableDirectory().string() + AssembliesPath,
+	string cwd = GetExecutableDirectory().string();
+	ScriptEngine::Init(
+		cwd + ScriptCorePath,
+		cwd + AssembliesPath,
 // #ifndef NDEBUG // Allow debugging in debug builds
 		true
 /*

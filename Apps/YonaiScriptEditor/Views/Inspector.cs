@@ -96,10 +96,18 @@ namespace YonaiEditor.Views
 			bool isOpen = true;
 			if (ImGUI.Begin("Inspector", ref isOpen))
 			{
-				if (Target != null && s_CurrentInspector != null)
-					s_CurrentInspector.DrawInspector();
-				else if (Target != null)
-					ImGUI.Text("No inspector found", Colour.Grey);
+				try
+				{
+					if (Target != null && s_CurrentInspector != null)
+						s_CurrentInspector.DrawInspector();
+					else if (Target != null)
+						ImGUI.Text("No inspector found", Colour.Grey);
+				}
+				catch(Exception e)
+				{
+					Log.Exception(e, "Failed to draw inspector");
+					ImGUI.Text($"Failed to display inspector - {e.Message}\n\n{e.StackTrace}");
+				}
 			}
 
 			ImGUI.End();

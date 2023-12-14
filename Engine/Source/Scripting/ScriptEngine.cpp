@@ -28,7 +28,6 @@ namespace fs = std::filesystem;
 
 const char* MonoDebugLogPath = "MonoDebugger.log";
 const char* AppDomainName = "YonaiEngineAppDomain";
-const char* ScriptCoreFilename = "YonaiScriptCore.dll";
 
 string ScriptEngine::s_CoreDLLPath = "";
 bool ScriptEngine::s_IsReloading = false;
@@ -77,9 +76,9 @@ bool TryLoadDebugSymbols(MonoImage* image, fs::path& path)
 	return true;
 }
 
-void ScriptEngine::Init(std::string assembliesPath, bool allowDebugging)
+void ScriptEngine::Init(string coreAssemblyPath, string assembliesPath, bool allowDebugging)
 {
-	s_CoreDLLPath = assembliesPath + "/" + ScriptCoreFilename;
+	s_CoreDLLPath = coreAssemblyPath;
 	if (s_RootDomain)
 		return; // Already initialised
 

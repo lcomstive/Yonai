@@ -54,7 +54,7 @@ namespace Yonai::Scripting
 		/// </summary>
 		/// <param name="assembliesPath">The path containing YonaiScriptCore.dll and Mono .dlls</param>
 		/// <param name="allowDebugging">Should a debugger for managed code be setup?</param>
-		YonaiAPI static void Init(std::string assembliesPath, bool allowDebugging = false);
+		YonaiAPI static void Init(std::string coreAssemblyPath, std::string assembliesPath, bool allowDebugging = false);
 
 		YonaiAPI static void AddInternalCall(const char* name, const void* fn);
 		YonaiAPI static void AddInternalCalls(const std::vector<std::pair<const char*, const void*>>& methods);
