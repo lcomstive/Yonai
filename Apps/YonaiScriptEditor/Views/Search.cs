@@ -91,7 +91,7 @@ namespace YonaiEditor.Views
 				ImGUI.SetCursorPosY(ImGUI.GetCursorPosY() + (InputPadding * 2));
 				ImGUI.HorizontalSpace(InputPadding);
 				ImGUI.SetNextItemWidth(contentRegion.x - (InputPadding * 2));
-				if(ImGUI.Input(string.Empty, ref m_SearchInput, 256))
+				if(ImGUI.Input("##SearchInput", ref m_SearchInput, 256))
 					DoSearch(m_SearchInput);
 
 				ImGUI.PopStyleColour();
