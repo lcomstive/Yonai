@@ -7,5 +7,6 @@ layout(binding = 1) uniform sampler2D texSampler;
 
 void main()
 {
-	outColour = texture(texSampler, texCoords);
+	// outColour = texture(texSampler, texCoords);
+	outColour = vec4(1.0);
 }
