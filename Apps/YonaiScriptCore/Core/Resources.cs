@@ -40,8 +40,8 @@ namespace Yonai
 		public static bool Exists(UUID resourceID) => s_Instances.ContainsKey(resourceID) || _Exists(resourceID);
 
 		/// <returns>True if resource path is found matching <paramref name="path"/></returns>
-		public static bool Exists(string path) => s_Paths.ContainsKey(path);
-		public static bool Exists(VFSFile file) => s_Paths.ContainsKey(file.FullPath);
+		public static bool Exists(string path) => s_Paths.ContainsKey(path) && s_Instances.ContainsKey(s_Paths[path]);
+		public static bool Exists(VFSFile file) => Exists(file.FullPath);
 
 		/// <summary>
 		/// Loads a new resource with virtual path <paramref name="path"/>.
@@ -87,7 +87,9 @@ namespace Yonai
 			{
 				// Add found unmanaged resource, cache in s_Instances
 				LoadExistingUnmanagedResource(instance, resourceID);
-				s_Paths.Add(path, resourceID);
+
+				if(!s_Paths.ContainsKey(path))
+					s_Paths.Add(path, resourceID);
 			}
 
 			if(saveToDisk)
@@ -401,8 +403,23 @@ namespace Yonai
 			return true;
 		}
 
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _CreateID();
+        /// <summary>
+        /// Presets an ID for a specified path, without loading the resource.
+        /// When the resource has been loaded in using <see cref="Load{T}(string, IImportSettings, bool)"/>,
+        /// it will use the provided ID instead of generating a random one.
+        /// This is overriden when loading from resource database.
+        /// </summary>
+        public static void SetIDForPath(string resourcePath, UUID resourceID)
+        {
+			if (!s_Paths.ContainsKey(resourcePath))
+			{
+				s_Paths.Add(resourcePath, resourceID);
+				Log.Debug($"Preset for '{resourcePath}' [{resourceID}]");
+			}
+        }
+
+        #region Internal Calls
+        [MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _CreateID();
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetID(string path);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _Unload(ulong resourceID);
 		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _Exists(ulong resourceID);

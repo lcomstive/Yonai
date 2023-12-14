@@ -46,18 +46,39 @@ namespace Yonai.Graphics
 
 			Meshes = new Mesh[meshData.Length];
 			for (int i = 0; i < meshData.Length; i++)
-				Meshes[i] = Resource.Load<Mesh>($"{ResourcePath}/Mesh_{i}", new MeshImportSettings()
+			{
+				Meshes[i] = Resource.Load<Mesh>(GetMeshPath(i), new MeshImportSettings()
 				{
 					Vertices = meshData[i].Vertices,
 					Indices = meshData[i].Indices
 				});
+			}
 		}
 
-		public JObject OnSerialize() => new JObject(
-				new JProperty("ImportMaterials", ImportMaterials)
-			);
+		public JObject OnSerialize()
+		{
+			JArray meshIDs = new JArray();
+			foreach (Mesh mesh in Meshes)
+				meshIDs.Add(mesh.ResourceID.ToString());
 
-		public void OnDeserialize(JObject json) => Import(new ModelImportSettings(json["ImportMaterials"].Value<bool>()));
+			return new JObject(
+				new JProperty("ImportMaterials", ImportMaterials),
+				new JProperty("MeshIDs", meshIDs)
+			);
+		}
+
+		public void OnDeserialize(JObject json)
+		{
+			// Pre-set IDs for child meshes
+			JArray meshIDs = json["MeshIDs"].Value<JArray>();
+			for (int i = 0; i < meshIDs.Count; i++)
+				Resource.SetIDForPath(GetMeshPath(i), ulong.Parse(meshIDs[i].Value<string>()));
+
+			// Load model
+			Import(new ModelImportSettings(json["ImportMaterials"].Value<bool>()));
+		}
+
+		private string GetMeshPath(int meshIndex) => $"{ResourcePath}/Mesh_{meshIndex}";
 
 		#region Internal Calls
 		[MethodImpl(MethodImplOptions.InternalCall)]

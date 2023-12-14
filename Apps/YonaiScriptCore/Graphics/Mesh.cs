@@ -149,18 +149,14 @@ namespace Yonai.Graphics
 
 		private static Mesh LoadPrimitive(string name)
 		{
-			Model model = Resource.Load<Model>($"assets://Models/{name}.fbx", new ModelImportSettings(false));
+			Log.Debug($"Loading primitive {name}");
+            Model model = Resource.Load<Model>($"assets://Models/{name}.fbx", new ModelImportSettings(false));
 			if (!model || model.Meshes == null || model.Meshes.Length == 0)
 			{
 				Log.Warning($"Failed to load primitive '{name}'");
 				return null;
 			}
-			Log.Debug($"Loading mesh from {name}");
-			return Resource.Load<Mesh>($"Meshes/{name}", new MeshImportSettings()
-			{
-				Vertices = model.Meshes[0].Vertices,
-				Indices = model.Meshes[0].Indices
-			});
+			return model.Meshes[0];
 		}
 
 		internal static void LoadPrimitives()

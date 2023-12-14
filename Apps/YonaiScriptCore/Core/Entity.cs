@@ -144,7 +144,10 @@ namespace Yonai
 		public Component AddComponent(Type componentType)
 		{
 			if (!componentType.IsSubclassOf(typeof(Component)))
-				throw new Exception("AddComponent but componentType does not inherit from AquaEngine.Component");
+			{
+				Log.Error("AddComponent but componentType does not inherit from Yonai.Component");
+				return null;
+			}
 
 			if (HasComponent(componentType))
 				return m_Components[componentType];
