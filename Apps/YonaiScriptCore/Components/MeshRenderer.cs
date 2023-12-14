@@ -1,39 +1,26 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using Yonai.Graphics;
 
 namespace Yonai
 {
 	public class MeshRenderer : Component
 	{
-		private UUID m_Mesh = uint.MaxValue;
-		public UUID Mesh
+		public UUID MeshID { get; set; } = UUID.Invalid;
+
+		[Serialize(false)]
+		public Mesh Mesh
 		{
-			get => m_Mesh;
-			set
-			{
-				if(m_Mesh != value) // Check for change
-					_SetMesh(Handle, (m_Mesh = value));
-			}
+			get => Resource.Get<Mesh>(MeshID, false);
+			set => MeshID = value?.ResourceID ?? UUID.Invalid;
 		}
 
-		private UUID m_Material = UUID.Invalid;
-		public UUID Material
+		public UUID MaterialID { get; set; } = UUID.Invalid;
+
+		[Serialize(false)]
+		public Material Material
 		{
-			get => m_Material;
-			set
-			{
-				if(m_Material != value) // Check for change
-					_SetMaterial(Handle, (m_Material = value));
-			}
+			get => Resource.Get<Material>(MaterialID, false);
+			set => MaterialID = value?.ResourceID ?? UUID.Invalid;
 		}
-
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetMesh(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMesh(IntPtr handle, ulong mesh);
-
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern uint _GetMaterial(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void _SetMaterial(IntPtr handle, ulong material);
-		#endregion
 	}
 }
 

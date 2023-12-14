@@ -1,6 +1,4 @@
-﻿using System;
-using Yonai.Graphics;
-using System.Runtime.CompilerServices;
+﻿using Yonai.Graphics;
 
 namespace Yonai
 {
@@ -13,7 +11,7 @@ namespace Yonai
 		[Serialize(false)]
 		public Texture Sprite
 		{
-			get => Resource.Get<Texture>(SpriteID);
+			get => Resource.Get<Texture>(SpriteID, false);
 			set => SpriteID = value?.ResourceID ?? UUID.Invalid;
 		}
 
@@ -35,7 +33,7 @@ namespace Yonai
 		[Serialize(false)]
 		public Shader Shader
 		{
-			get => Resource.Get<Shader>(ShaderID);
+			get => Resource.Get<Shader>(ShaderID, false);
 			set => ShaderID = value?.ResourceID ?? UUID.Invalid;
 		}
 
