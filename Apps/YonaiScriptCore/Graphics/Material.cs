@@ -155,7 +155,7 @@ namespace Yonai.Graphics
 				.SetMultisamplingNone()
 				.DisableBlending()
 				.DisableDepthTest()
-				.AddColourAttachmentFormat(VkFormat.R8G8B8A8_SRGB)
+				// .AddColourAttachmentFormat(VkFormat.R8G8B8A8_SRGB)
 				.SetDepthFormat(VkFormat.Undefined);
 
 			if (Shader && Shader.Modules.Count > 0)

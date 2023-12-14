@@ -20,6 +20,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			MaxDepth = maxDepth;
 		}
 
+		public VkViewport(Vector2 size) :
+			this(Vector2.Zero, size, new Vector2(0, 1)) { }
+
+		public VkViewport(Vector2 offset, Vector2 size) :
+			this(offset, size, new Vector2(0, 1)) { }
+		
 		public VkViewport(Vector2 offset, Vector2 size, Vector2 depthRange)
 		{
 			x = offset.x;
@@ -36,6 +42,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 	{
 		public IVector2 Offset;
 		public Extents Extent;
+
+		public VkRect2D(Extents extent) :
+			this(IVector2.Zero, extent) { }
 
 		public VkRect2D(IVector2 offset, Extents extent)
 		{

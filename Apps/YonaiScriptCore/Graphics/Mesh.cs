@@ -77,8 +77,6 @@ namespace Yonai.Graphics
 		public IBuffer VertexBuffer { get; private set; }
 		public IBuffer IndexBuffer { get; private set; }
 
-		protected override void OnLoad() => GenerateBuffers();
-
 		protected override void OnUnload()
 		{
 			VertexBuffer?.Dispose();
@@ -87,13 +85,21 @@ namespace Yonai.Graphics
 
 		protected override void OnImported()
 		{
-			if (!TryGetImportSettings(out m_Settings))
-				// Set to default values if invalid import settings
-				m_Settings = new MeshImportSettings();
+			Log.Debug("Mesh import");
+			try
+			{
+				if (!TryGetImportSettings(out m_Settings))
+					// Set to default values if invalid import settings
+					m_Settings = new MeshImportSettings();
+
+				GenerateBuffers();
+			} catch(Exception e) { Log.Exception(e); }
 		}
 
 		private void GenerateBuffers()
 		{
+			if (Vertices == null) return;
+
 			VertexBuffer?.Dispose();
 			IndexBuffer?.Dispose();
 

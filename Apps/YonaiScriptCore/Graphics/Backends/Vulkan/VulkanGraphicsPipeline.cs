@@ -93,6 +93,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public VulkanGraphicsPipeline Build(VulkanDevice device)
 		{
+			// Insert some default viewport and scissor info.
+			// These can be set later as they are dynamic
+			m_Info.Viewports = new VkViewport[1];
+			m_Info.Scissors = new VkRect2D[1];
+
 			m_Info.RenderingInfo = m_RenderInfo;
 			return new VulkanGraphicsPipeline(device, m_Info);
 		}

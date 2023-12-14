@@ -56,7 +56,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public void EndRenderPass() => _EndRenderPass(Handle);
 
 		public void BindVertexBuffer(VulkanBuffer buffer, int offset = 0) =>
-			_BindVertexBuffers(Handle, new IntPtr[] { buffer.BufferHandle }, new int[] { offset });
+			_BindVertexBuffers(Handle, new IntPtr[] { buffer?.BufferHandle ?? IntPtr.Zero }, new int[] { offset });
 
 		public void BindVertexBuffers(VulkanBuffer[] buffers, int[] offsets)
 		{
@@ -67,7 +67,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 
 		public void BindIndexBuffer(VulkanBuffer buffer, int offset = 0, VkIndexType indexType = VkIndexType.UINT32) =>
-			_BindIndexBuffer(Handle, buffer.BufferHandle, offset, (int)indexType);
+			_BindIndexBuffer(Handle, buffer?.BufferHandle ?? IntPtr.Zero, offset, (int)indexType);
 
 		public void CopyBuffer(VulkanBuffer src, VulkanBuffer dst, int srcOffset, int dstOffset, int size) =>
 			_CopyBuffer(Handle, src.BufferHandle, dst.BufferHandle, srcOffset, dstOffset, size);

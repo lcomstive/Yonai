@@ -47,7 +47,8 @@ namespace Yonai.Graphics
 			Meshes = new Mesh[meshData.Length];
 			for (int i = 0; i < meshData.Length; i++)
 			{
-				Meshes[i] = Resource.Load<Mesh>(GetMeshPath(i), new MeshImportSettings()
+				Meshes[i] = Resource.Load<Mesh>(GetMeshPath(i));
+				Meshes[i].Import(new MeshImportSettings()
 				{
 					Vertices = meshData[i].Vertices,
 					Indices = meshData[i].Indices
