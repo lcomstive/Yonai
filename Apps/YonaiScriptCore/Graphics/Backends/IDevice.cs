@@ -3,13 +3,6 @@ using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai.Graphics
 {
-	public enum BufferUsage
-	{
-		NoCPU,
-		CPUWrite,
-		CPURead
-	}
-
 	[Flags]
 	public enum BufferType
 	{
@@ -23,7 +16,7 @@ namespace Yonai.Graphics
 
 	public interface IGraphicsDevice : IDisposable
 	{
-		IBuffer CreateBuffer(int bufferSize, BufferUsage usage, BufferType typeFlags = BufferType.None);
+		IBuffer CreateBuffer(int bufferSize, VmaMemoryUsage usage, BufferType typeFlags = BufferType.None);
 
 		void CopyBuffer(IBuffer srcBuffer, IBuffer dstBuffer);
 

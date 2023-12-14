@@ -193,7 +193,7 @@ namespace Yonai.Graphics.Backends.Vulkan
 				m_Device,
 				data.Length,
 				VkBufferUsage.TransferSource,
-				VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent
+				VmaMemoryUsage.CPU_ONLY
 			);
 			stagingBuffer.Upload(data);
 

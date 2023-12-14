@@ -27,6 +27,7 @@ namespace YonaiEditor.Views
 				ImGUI.SetWindowFocus("Game");
 		}
 
+		private Vector2 m_WindowSize;
 		protected override void Draw()
 		{
 			bool isOpen = true;
@@ -34,11 +35,18 @@ namespace YonaiEditor.Views
 			ImGUI.PushStyleColour(ImGUI.StyleColour.WindowBg, Colour.Black);
 			if (ImGUI.Begin("Game", ref isOpen))
 			{
-				Vector2 cursorPos = ImGUI.GetCursorPos();
+                Vector2 cursorPos = ImGUI.GetCursorPos();
+                Vector2 resolution = ImGUI.ContentRegionAvailable;
+
+				if (m_WindowSize != resolution)
+					ImGUISystem.m_PreviousRenderPath.OnResized((IVector2)(m_WindowSize = resolution));
 
 				DrawScene();
 
 				ImGUI.SetCursorPos(cursorPos);
+
+				ImGUI.Text(resolution);
+
 				ForwardRenderPath renderPath = (ForwardRenderPath)ImGUISystem.m_PreviousRenderPath;
 				ImGUI.ColourEdit3("Colour 1", ref renderPath.m_Constants.Data1);
 				ImGUI.ColourEdit3("Colour 2", ref renderPath.m_Constants.Data2);

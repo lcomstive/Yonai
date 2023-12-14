@@ -59,24 +59,15 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 
 		#region Testing Interface
-		public IBuffer CreateBuffer(int bufferSize, BufferUsage usage, BufferType type)
+		public IBuffer CreateBuffer(int bufferSize, VmaMemoryUsage memoryUsage, BufferType type)
 		{
-			VkMemoryProperty vkMemory = 0;
-			switch(usage)
-			{
-				default:
-				case BufferUsage.NoCPU: vkMemory |= VkMemoryProperty.DeviceLocal; break;
-				case BufferUsage.CPURead:
-				case BufferUsage.CPUWrite: vkMemory |= VkMemoryProperty.HostVisible | VkMemoryProperty.HostCoherent; break;
-			}
-
 			VkBufferUsage vkUsage = VkBufferUsage.TransferSource | VkBufferUsage.TransferDestination;
 			if (type.HasFlag(BufferType.Vertex)) vkUsage |= VkBufferUsage.Vertex;
 			if (type.HasFlag(BufferType.Index)) vkUsage |= VkBufferUsage.Index;
 			if (type.HasFlag(BufferType.Uniform)) vkUsage |= VkBufferUsage.Uniform;
 			if (type.HasFlag(BufferType.Indirect)) vkUsage |= VkBufferUsage.Indirect;
 
-			return new VulkanBuffer(this, bufferSize, vkUsage, vkMemory);
+			return new VulkanBuffer(this, bufferSize, vkUsage, memoryUsage);
 		}
 
 		public void CopyBuffer(IBuffer srcBuffer, IBuffer dstBuffer)

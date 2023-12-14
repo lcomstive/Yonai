@@ -1,5 +1,6 @@
 ﻿using System;
 using Yonai.Systems;
+using Yonai.Graphics.Backends.Vulkan;
 
 namespace Yonai.Graphics
 {
@@ -115,11 +116,11 @@ namespace Yonai.Graphics
 			int bufferSize = sizeof(float) * 8 * Vertices.Length;
 
 			// Upload data from CPU to GPU memory
-			IBuffer stagingBuffer = device.CreateBuffer(bufferSize, BufferUsage.CPUWrite);
+			IBuffer stagingBuffer = device.CreateBuffer(bufferSize, VmaMemoryUsage.CPU_ONLY);
 			stagingBuffer.Upload(Vertices.ToByteArray());
 
 			// Copy staging buffer data into vertex buffer, which is GPU-only (so cannot upload directly from CPU)
-			VertexBuffer = device.CreateBuffer(bufferSize, BufferUsage.NoCPU, BufferType.Vertex);
+			VertexBuffer = device.CreateBuffer(bufferSize, VmaMemoryUsage.GPU_ONLY, BufferType.Vertex);
 			device.CopyBuffer(stagingBuffer, VertexBuffer);
 
 			stagingBuffer.Dispose();
@@ -133,11 +134,11 @@ namespace Yonai.Graphics
 				byte[] indicesData = new byte[bufferSize];
 				Buffer.BlockCopy(Indices, 0, indicesData, 0, bufferSize);
 
-				stagingBuffer = device.CreateBuffer(bufferSize, BufferUsage.CPUWrite);
+				stagingBuffer = device.CreateBuffer(bufferSize, VmaMemoryUsage.CPU_ONLY);
 				stagingBuffer.Upload(indicesData);
 
 				// Copy staging buffer data into index buffer, which is GPU-only (so cannot upload directly from CPU)
-				IndexBuffer = device.CreateBuffer(bufferSize, BufferUsage.NoCPU, BufferType.Index);
+				IndexBuffer = device.CreateBuffer(bufferSize, VmaMemoryUsage.GPU_ONLY, BufferType.Index);
 				device.CopyBuffer(stagingBuffer, IndexBuffer);
 
 				stagingBuffer.Dispose();

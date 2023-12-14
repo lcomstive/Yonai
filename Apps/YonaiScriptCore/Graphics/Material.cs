@@ -155,8 +155,16 @@ namespace Yonai.Graphics
 				.SetMultisamplingNone()
 				.DisableBlending()
 				.DisableDepthTest()
+				.AddPushConstant(sizeof(float) * 16 * 3 /* MVP Matrices */, VkShaderStage.Vertex)
 				// .AddColourAttachmentFormat(VkFormat.R8G8B8A8_SRGB)
-				.SetDepthFormat(VkFormat.Undefined);
+				.SetDepthFormat(VkFormat.Undefined)
+
+				.AddVertexAttribute(0, 0, VkFormat.R32G32B32_SFLOAT, 0)
+				.AddVertexAttribute(0, 1, VkFormat.R32G32B32_SFLOAT, sizeof(float) * 3)
+				.AddVertexAttribute(0, 2, VkFormat.R32G32_SFLOAT, sizeof(float) * 6)
+
+				.AddVertexBinding(0, sizeof(float) * (3 + 3 + 2))
+			;
 
 			if (Shader && Shader.Modules.Count > 0)
 			{

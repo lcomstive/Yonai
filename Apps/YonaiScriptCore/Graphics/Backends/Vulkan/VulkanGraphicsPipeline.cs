@@ -64,9 +64,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 		private VkPipelineRenderingCreateInfo m_RenderInfo = new VkPipelineRenderingCreateInfo();
 
 		private List<VkFormat> m_ColourAttachmentFormats = new List<VkFormat>();
+		private List<VkPushConstantRange> m_PushConstants = new List<VkPushConstantRange>();
 		private List<VkPipelineShaderStage> m_ShaderStages = new List<VkPipelineShaderStage>();
+        private List<VkVertexInputBindingDescription> m_VertexBindings = new List<VkVertexInputBindingDescription>();
+        private List<VkVertexInputAttributeDescription> m_VertexAttributes = new List<VkVertexInputAttributeDescription>();
 
-		private static readonly VkGraphicsPipelineCreateInfo Default = new VkGraphicsPipelineCreateInfo
+        private static readonly VkGraphicsPipelineCreateInfo Default = new VkGraphicsPipelineCreateInfo
 		{
 			Subpass = 0,
 			Stages = null,
@@ -87,6 +90,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Info = Default;
 			m_ShaderStages.Clear();
+			m_PushConstants.Clear();
+			m_VertexBindings.Clear();
+			m_VertexAttributes.Clear();
 			m_ColourAttachmentFormats.Clear();
 			m_RenderInfo = new VkPipelineRenderingCreateInfo();
 		}
@@ -119,6 +125,33 @@ namespace Yonai.Graphics.Backends.Vulkan
 		{
 			m_Info.InputAssembly.Topology = topology;
 			m_Info.InputAssembly.PrimitiveRestartEnable = false;
+			return this;
+		}
+
+        public VulkanGraphicsPipelineBuilder AddVertexBinding(uint binding, uint stride, VkVertexInputRate inputRate = VkVertexInputRate.Vertex)
+		{
+			m_VertexBindings.Add(new VkVertexInputBindingDescription
+			{
+				Binding = binding,
+				Stride = stride,
+				InputRate = inputRate
+			});
+			m_Info.InputState.Bindings = m_VertexBindings.ToArray();
+
+			return this;
+		}
+
+        public VulkanGraphicsPipelineBuilder AddVertexAttribute(uint binding, uint location, VkFormat format, uint offset)
+		{
+			m_VertexAttributes.Add(new VkVertexInputAttributeDescription
+			{
+				Location = location,
+				Binding = binding,
+				Format = format,
+				Offset = offset
+			});
+			m_Info.InputState.Attributes = m_VertexAttributes.ToArray();
+
 			return this;
 		}
 
@@ -180,6 +213,18 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VulkanGraphicsPipelineBuilder SetStencilFormat(VkFormat format)
 		{
 			m_RenderInfo.StencilAttachmentFormat = format;
+			return this;
+		}
+
+		public VulkanGraphicsPipelineBuilder AddPushConstant(uint size, VkShaderStage stage, uint offset = 0)
+		{
+			m_PushConstants.Add(new VkPushConstantRange
+			{
+				Stage = stage,
+				Size = size,
+				Offset = offset
+			});
+			m_Info.PushConstantRanges = m_PushConstants.ToArray();
 			return this;
 		}
 

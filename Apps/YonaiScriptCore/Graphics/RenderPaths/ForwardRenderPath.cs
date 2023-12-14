@@ -28,6 +28,13 @@ namespace Yonai.Graphics.RenderPaths
 			Data2 = Colour.Blue
 		};
 
+		public struct GraphicsPushConstants
+		{
+			public Matrix4 Model;
+			public Matrix4 View;
+			public Matrix4 Projection;
+		}
+
 		public ForwardRenderPath()
 		{
 			m_Device = RenderSystem.Backend.Device as VulkanDevice;
@@ -72,7 +79,7 @@ namespace Yonai.Graphics.RenderPaths
 				(uint)Math.Ceiling(ColourOutput.Resolution.y / 16.0f),
 				1);
 
-			DrawGeometry(cmd, camera.World);
+			DrawGeometry(cmd, camera);
 
 			cmd.TransitionImageLayout(ColourOutput, VkImageLayout.Undefined, VkImageLayout.TRANSFER_SRC_OPTIMAL);
 
@@ -86,7 +93,7 @@ namespace Yonai.Graphics.RenderPaths
 			}
 		}
 
-		private void DrawGeometry(VulkanCommandBuffer cmd, World world)
+		private void DrawGeometry(VulkanCommandBuffer cmd, Camera camera)
 		{
 			IVector2 resolution = ColourOutput.Resolution;
             
@@ -106,7 +113,13 @@ namespace Yonai.Graphics.RenderPaths
 			cmd.SetViewport(new VkViewport(resolution));
 			cmd.SetScissor(new VkRect2D(resolution));
 
-			(Transform[] transforms, MeshRenderer[] meshRenderers) = world.GetComponents<Transform, MeshRenderer>();
+			GraphicsPushConstants pushConstants = new GraphicsPushConstants
+			{
+				View = camera.ViewMatrix,
+				Projection = camera.GetProjectionMatrix(resolution)
+			};
+
+			(Transform[] transforms, MeshRenderer[] meshRenderers) = camera.World.GetComponents<Transform, MeshRenderer>();
 
 			for(int i = 0; i < transforms.Length; i++)
 			{
@@ -116,6 +129,11 @@ namespace Yonai.Graphics.RenderPaths
 				if (!material || !mesh || material.Pipeline == null) continue;
 
 				cmd.BindPipeline(material.Pipeline, VkPipelineBindPoint.Graphics);
+
+				pushConstants.Model = Matrix4.Translate(transforms[i].Position) *
+										transforms[i].Rotation.ToMat4 *
+										Matrix4.Scale(transforms[i].Scale);
+				cmd.PushConstants(material.Pipeline, VkShaderStage.Vertex, 0, sizeof(float) * 16 * 3, pushConstants);
 
 				if (mesh.VertexBuffer == null) Log.Warning("Vertex buffer is null?");
 

@@ -8,31 +8,29 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public int BufferSize { get; private set; }
 
 		public IntPtr BufferHandle { get; private set; }
-		public IntPtr MemoryHandle { get; private set; }
+		public IntPtr Allocation { get; private set; }
+
 		private VulkanDevice m_Device;
 
 		public VulkanBuffer(
 			VulkanDevice device,
 			int bufferSize,
 			VkBufferUsage usage,
-			VkMemoryProperty properties,
-			VkSharingMode sharingMode = VkSharingMode.Exclusive)
+			VmaMemoryUsage memoryUsage)
 		{
 			m_Device = device;
 			BufferSize = bufferSize;
 
 			VkResult result = (VkResult)_Create(
-				m_Device.Device,
-				m_Device.PhysicalDevice,
+				m_Device.Allocator,
 				bufferSize,
 				(int)usage,
-				(int)properties,
-				(int)sharingMode,
+				(int)memoryUsage,
 				out IntPtr bufferHandle,
-				out IntPtr memoryHandle
+				out IntPtr allocation
 			);
 			BufferHandle = bufferHandle;
-			MemoryHandle = memoryHandle;
+			Allocation = allocation;
 			result.CheckForSuccess("Buffer creation");
 
 			if(result != VkResult.Success)
@@ -43,13 +41,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 			}
 		}
 
-		public void Dispose() => _Destroy(m_Device.Device, BufferHandle, MemoryHandle);
+		public void Dispose() => _Destroy(m_Device.Allocator, BufferHandle, Allocation);
 
 		public void Upload(byte[] data) =>
-			_Upload(m_Device.Device, MemoryHandle, data);
+			_Upload(Allocation, data);
 
-		public IntPtr MapMemory(int size, int offset = 0) => _MapMemory(m_Device.Device, MemoryHandle, offset, size);
-		public void UnmapMemory() => _UnmapMemory(m_Device.Device, MemoryHandle);
+		public IntPtr MapMemory(int size, int offset = 0) => _MapMemory(m_Device.Device, Allocation, offset, size);
+		public void UnmapMemory() => _UnmapMemory(m_Device.Device, Allocation);
 
 		/// <param name="size">Size, in bytes, of data to copy</param>
 		public void CopyTo(VulkanCommandPool commandPool, VulkanBuffer other, int size)
@@ -68,13 +66,13 @@ namespace Yonai.Graphics.Backends.Vulkan
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int _Create(IntPtr device, IntPtr physicalDevice, int bufferSize, int usage, int properties, int sharingMode, out IntPtr bufferHandle, out IntPtr memoryHandle);
+		private static extern int _Create(IntPtr allocator, int size, int usage, int vmaUsage, out IntPtr bufferHandle, out IntPtr allocation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _Destroy(IntPtr device, IntPtr bufferHandle, IntPtr memoryHandle);
+		private static extern void _Destroy(IntPtr allocator, IntPtr bufferHandle, IntPtr allocation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void _Upload(IntPtr device, IntPtr memoryHandle, byte[] data);
+		private static extern void _Upload(IntPtr allocation, byte[] data);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr _MapMemory(IntPtr device, IntPtr memoryHandle, int offset, int size);

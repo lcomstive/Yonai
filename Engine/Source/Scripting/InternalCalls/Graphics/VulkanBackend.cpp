@@ -896,6 +896,9 @@ struct VkGraphicsPipelineCreateInfoManaged
 	unsigned int DescriptorSetLayoutCount;
 	VkDescriptorSetLayout* DescriptorSetLayouts;
 
+	unsigned int PushConstantRangeCount;
+	VkPushConstantRange* PushConstantRanges;
+
 	VkPipelineRenderingCreateInfo* RenderingInfo;
 };
 
@@ -943,6 +946,9 @@ ADD_MANAGED_METHOD(VulkanGraphicsPipeline, Create, void*, (void* inDevice, void*
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = managed->DescriptorSetLayoutCount;
 	pipelineLayoutInfo.pSetLayouts = managed->DescriptorSetLayouts;
+
+	pipelineLayoutInfo.pPushConstantRanges = managed->PushConstantRanges;
+	pipelineLayoutInfo.pushConstantRangeCount = managed->PushConstantRangeCount;
 
 	VkPipelineLayout pipelineLayout;
 	VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);
@@ -1554,62 +1560,41 @@ unsigned int FindMemoryType(VkPhysicalDevice device, unsigned int typeFilter, Vk
 	return UINT_MAX;
 }
 
-ADD_MANAGED_METHOD(VulkanBuffer, Create, int, (void* device, void* physicalDevice, int bufferSize, int usage, int properties, int sharingMode, void** outputBuffer, void** outputMemory), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanBuffer, Create, int, (void* allocator, int bufferSize, VkBufferUsageFlags usage, int memoryUsage, VkBuffer* outputBuffer, void** outputAllocation), Yonai.Graphics.Backends.Vulkan)
 {
-	VkBuffer buffer;
-	VkDeviceMemory memory;
-
 	VkBufferCreateInfo bufferInfo = {};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.size = bufferSize;
 	bufferInfo.usage = usage;
-	bufferInfo.sharingMode = (VkSharingMode)sharingMode;
+
+	VmaAllocationCreateInfo vmaInfo = {};
+	vmaInfo.usage = (VmaMemoryUsage)memoryUsage;
+	vmaInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 	
-	VkResult result = vkCreateBuffer((VkDevice)device, &bufferInfo, nullptr, &buffer);
-	
-	if(result != VK_SUCCESS)
-		return result;
-
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements((VkDevice)device, buffer, &memRequirements);
-
-	VkMemoryAllocateInfo allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType((VkPhysicalDevice)physicalDevice, memRequirements.memoryTypeBits, (VkMemoryPropertyFlags)properties);
-
-	result = vkAllocateMemory((VkDevice)device, &allocInfo, nullptr, &memory);
-	if(result != VK_SUCCESS)
-		return result;
-
-	vkBindBufferMemory((VkDevice)device, buffer, memory, 0);
-
-	*outputBuffer = buffer;
-	*outputMemory = memory;
+	VmaAllocationInfo allocInfo;
+	VkResult result = vmaCreateBuffer(
+		(VmaAllocator)allocator,
+		&bufferInfo,
+		&vmaInfo,
+		outputBuffer,
+		(VmaAllocation*)outputAllocation,
+		&allocInfo
+	);
 
 	return result;
 }
 
-ADD_MANAGED_METHOD(VulkanBuffer, Destroy, void, (void* device, void* buffer, void* memory), Yonai.Graphics.Backends.Vulkan)
-{
-	vkDestroyBuffer((VkDevice)device, (VkBuffer)buffer, nullptr);
-	vkFreeMemory((VkDevice)device, (VkDeviceMemory)memory, nullptr);
-}
+ADD_MANAGED_METHOD(VulkanBuffer, Destroy, void, (void* allocator, VkBuffer buffer, void* allocation), Yonai.Graphics.Backends.Vulkan)
+{ vmaDestroyBuffer((VmaAllocator)allocator, buffer, (VmaAllocation)allocation); }
 
-ADD_MANAGED_METHOD(VulkanBuffer, Upload, void, (void* inDevice, void* inBufferMemory, MonoArray* monoData), Yonai.Graphics.Backends.Vulkan)
+ADD_MANAGED_METHOD(VulkanBuffer, Upload, void, (void* allocation, MonoArray* monoData), Yonai.Graphics.Backends.Vulkan)
 {
-	VkDevice device = (VkDevice)inDevice;
-	VkDeviceMemory bufferMemory = (VkDeviceMemory)inBufferMemory;
-
 	vector<unsigned char> data;
 	data.resize(mono_array_length(monoData));
 	for(unsigned int i = 0; i < data.size(); i++)
 		data[i] = mono_array_get(monoData, unsigned char, i);
 
-	void* mapping;
-	vkMapMemory(device, bufferMemory, 0, data.size(), 0, &mapping);
-	memcpy(mapping, data.data(), data.size());
-	vkUnmapMemory(device, bufferMemory);
+	memcpy(((VmaAllocation)allocation)->GetMappedData(), data.data(), data.size());
 }
 
 ADD_MANAGED_METHOD(VulkanBuffer, MapMemory, void*, (void* device, void* bufferMemory, int offset, int size), Yonai.Graphics.Backends.Vulkan)

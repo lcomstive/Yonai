@@ -455,9 +455,11 @@ namespace Yonai.Graphics.Backends.Vulkan
 		public VkPipelineRenderingCreateInfo? RenderingInfo;
 
 		public VulkanDescriptorSetLayout[] DescriptorSetLayouts;
-	}
 
-	[StructLayout(LayoutKind.Sequential)]
+        public VkPushConstantRange[] PushConstantRanges;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
 	internal struct VkGraphicsPipelineCreateInfoNative : IDisposable
 	{
 		public uint StageCount;
@@ -480,6 +482,9 @@ namespace Yonai.Graphics.Backends.Vulkan
 
 		public uint DescriptorSetLayoutCount;
 		public IntPtr DescriptorSetLayouts;
+
+		public uint PushConstantRangeCount;
+		public IntPtr PushConstantRanges;
 
 		public IntPtr RenderingInfo;
 
@@ -519,7 +524,12 @@ namespace Yonai.Graphics.Backends.Vulkan
 			DescriptorSetLayouts = DescriptorSetLayoutCount > 0 ?
 				InteropUtils.CreateNativeHandle(descriptorHandles) : IntPtr.Zero;
 
-			if(info.RenderingInfo.HasValue)
+            // Push constants
+            PushConstantRangeCount = (uint)(info.PushConstantRanges?.Length ?? 0);
+            PushConstantRanges = PushConstantRangeCount > 0 ?
+                InteropUtils.CreateNativeHandle(info.PushConstantRanges) : IntPtr.Zero;
+
+            if (info.RenderingInfo.HasValue)
 			{
 				RenderingInfoNative = new VkPipelineRenderingCreateInfoNative(info.RenderingInfo.Value);
 				RenderingInfo = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VkPipelineRenderingCreateInfoNative)));
