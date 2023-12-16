@@ -40,6 +40,8 @@ namespace YonaiEditor.Systems
 
 		protected override void Destroyed()
 		{
+			m_Device.WaitIdle();
+
 			m_DeletionQueue.Flush();
 
 			if(RenderSystem.Backend.RenderPath is ImGUIRenderPath)

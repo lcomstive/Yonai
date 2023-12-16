@@ -39,7 +39,10 @@ namespace YonaiEditor.Views
                 Vector2 resolution = ImGUI.ContentRegionAvailable;
 
 				if (m_WindowSize != resolution)
+				{
+					((VulkanDevice)m_Device).WaitIdle();
 					ImGUISystem.m_PreviousRenderPath.OnResized((IVector2)(m_WindowSize = resolution));
+				}
 
 				DrawScene();
 

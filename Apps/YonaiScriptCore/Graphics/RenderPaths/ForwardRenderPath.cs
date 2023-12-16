@@ -28,13 +28,6 @@ namespace Yonai.Graphics.RenderPaths
 			Data2 = Colour.Blue
 		};
 
-		public struct GraphicsPushConstants
-		{
-			public Matrix4 Model;
-			public Matrix4 View;
-			public Matrix4 Projection;
-		}
-
 		public ForwardRenderPath()
 		{
 			m_Device = RenderSystem.Backend.Device as VulkanDevice;
@@ -113,11 +106,8 @@ namespace Yonai.Graphics.RenderPaths
 			cmd.SetViewport(new VkViewport(resolution));
 			cmd.SetScissor(new VkRect2D(resolution));
 
-			GraphicsPushConstants pushConstants = new GraphicsPushConstants
-			{
-				View = camera.ViewMatrix,
-				Projection = camera.GetProjectionMatrix(resolution)
-			};
+			Matrix4 viewMatrix = camera.ViewMatrix;
+			Matrix4 projectionMatrix = camera.GetProjectionMatrix(resolution);
 
 			(Transform[] transforms, MeshRenderer[] meshRenderers) = camera.World.GetComponents<Transform, MeshRenderer>();
 
@@ -130,10 +120,11 @@ namespace Yonai.Graphics.RenderPaths
 
 				cmd.BindPipeline(material.Pipeline, VkPipelineBindPoint.Graphics);
 
-				pushConstants.Model = Matrix4.Translate(transforms[i].Position) *
+				Matrix4 modelMatrix = Matrix4.Translate(transforms[i].Position) *
 										transforms[i].Rotation.ToMat4 *
 										Matrix4.Scale(transforms[i].Scale);
-				cmd.PushConstants(material.Pipeline, VkShaderStage.Vertex, 0, sizeof(float) * 16 * 3, pushConstants);
+				Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+				cmd.PushConstants(material.Pipeline, VkShaderStage.Vertex, 0, sizeof(float) * 16, mvp);
 
 				if (mesh.VertexBuffer == null) Log.Warning("Vertex buffer is null?");
 

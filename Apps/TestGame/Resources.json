@@ -25,11 +25,6 @@
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "6963820300786244757",
-    "Path": "assets://Materials/Default3D.material",
-    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
-  },
-  {
     "ID": "4581286657851891921",
     "Path": "assets://Shaders/Default2D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
@@ -38,5 +33,25 @@
     "ID": "416020391496750774",
     "Path": "assets://Materials/Default2D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "12340993539753955532",
+    "Path": "project://Assets/Scenes/Test World.world",
+    "Type": "Yonai.World"
+  },
+  {
+    "ID": "18072064695801704585",
+    "Path": "assets://Shaders/Vulkan/Default3D.shader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "14077915218054914149",
+    "Path": "assets://Materials/Default3D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "13387489381912506232",
+    "Path": "project://Assets/Models/Viking Room/viking_room.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   }
 ]

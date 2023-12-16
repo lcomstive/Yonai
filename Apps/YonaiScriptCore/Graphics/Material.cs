@@ -155,7 +155,7 @@ namespace Yonai.Graphics
 				.SetMultisamplingNone()
 				.DisableBlending()
 				.DisableDepthTest()
-				.AddPushConstant(sizeof(float) * 16 * 3 /* MVP Matrices */, VkShaderStage.Vertex)
+				.AddPushConstant(sizeof(float) * 16 /* MVP Matrix */, VkShaderStage.Vertex)
 				// .AddColourAttachmentFormat(VkFormat.R8G8B8A8_SRGB)
 				.SetDepthFormat(VkFormat.Undefined)
 

@@ -86,7 +86,12 @@ namespace Yonai
 		}
 
 		public Matrix4 GetProjectionMatrix(IVector2 resolution) => GetProjectionMatrix(resolution.x, resolution.y);
-		public Matrix4 GetProjectionMatrix(int width, int height) =>
-			Matrix4.Perspective(FOV, width / (float)height, Near, Far);
+		public Matrix4 GetProjectionMatrix(int width, int height)
+		{
+			if (Orthographic)
+				return Matrix4.Ortho(0, width, 0, height, Near, Far);
+			else
+				return Matrix4.Perspective(MathUtils.Deg2Rad(FOV), width / (float)height, Near, Far);
+		}
 	}
 }

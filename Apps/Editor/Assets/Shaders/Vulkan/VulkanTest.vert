@@ -11,13 +11,11 @@ layout(location = 0) out vec2 outTexCoords;
 
 layout(push_constant) uniform MVP
 {
-    mat4 Model;
-    mat4 View;
-    mat4 Proj;
+    mat4 MVP;
 } mvp;
 
 void main()
 {
-	gl_Position = mvp.Proj * mvp.View * mvp.Model * vec4(inPosition, 1.0);
+	gl_Position = mvp.MVP * vec4(inPosition, 1.0);
 	outTexCoords = inTexCoords;
 }

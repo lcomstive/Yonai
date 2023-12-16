@@ -1,4 +1,142 @@
 {
-  "Systems": {},
-  "Entities": []
+  "Systems": {
+    "TestGame.TestSystem, TestGame": {}
+  },
+  "Entities": [
+    {
+      "ID": "1124161111891064942",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Camera"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": -4.371139E-08,
+            "y": 0.0,
+            "z": 0.0,
+            "w": -1.0
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "Yonai.Camera",
+          "FOV": 45.0,
+          "Near": 0.1,
+          "Far": 100.0,
+          "Orthographic": false,
+          "OrthographicSize": 9.0
+        }
+      ]
+    },
+    {
+      "ID": "8773954142809985475",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Quad"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 5.0
+          },
+          "Rotation": {
+            "x": 5.208177E-05,
+            "y": -0.173648179,
+            "z": 9.183434E-06,
+            "w": 0.9848077
+          },
+          "Scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          }
+        },
+        {
+          "ComponentType": "Yonai.MeshRenderer",
+          "MeshID": "2113530797056916984",
+          "MaterialID": "14077915218054914149"
+        }
+      ]
+    },
+    {
+      "ID": "2191834343860962307",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Cube"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 1.0
+          },
+          "Rotation": {
+            "x": 0.126642138,
+            "y": 0.05771416,
+            "z": 0.410657465,
+            "w": 0.9011056
+          },
+          "Scale": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.1
+          }
+        },
+        {
+          "ComponentType": "Yonai.MeshRenderer",
+          "MeshID": "9737153359911782736",
+          "MaterialID": "14077915218054914149"
+        }
+      ]
+    },
+    {
+      "ID": "11468472760719647861",
+      "Components": [
+        {
+          "ComponentType": "Yonai.NameComponent",
+          "Name": "Sphere"
+        },
+        {
+          "ComponentType": "Yonai.Transform",
+          "Position": {
+            "x": -5.0,
+            "y": 0.0,
+            "z": 9.0
+          },
+          "Rotation": {
+            "x": 0.6412206,
+            "y": -0.312208772,
+            "z": 0.6302373,
+            "w": 0.306859463
+          },
+          "Scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "ComponentType": "Yonai.MeshRenderer",
+          "MeshID": "17852933707595606322",
+          "MaterialID": "14077915218054914149"
+        }
+      ]
+    }
+  ]
 }
