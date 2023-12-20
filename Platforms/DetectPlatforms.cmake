@@ -32,9 +32,9 @@ elseif(UNIX)
         set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     endif()
     
-	set(YONAI_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set(YONAI_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 else()
-	set(YONAI_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set(YONAI_RESOURCES_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/Platforms/Mac/Apple.cmake)
@@ -59,6 +59,8 @@ function (AddPlatformSpecifics)
         if(MSVC)
             # Enable multi-processor compilation for faster builds
             target_compile_options(${PROJECT_NAME} PRIVATE "/MP")
+
+            target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
         endif()
     endif()
 endfunction()
