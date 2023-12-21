@@ -1,6 +1,8 @@
-﻿namespace Yonai.Graphics
+﻿using System;
+
+namespace Yonai.Graphics
 {
-	public interface IRenderPipeline
+	public interface IRenderPipeline : IDisposable
 	{
 		IVector2 Resolution { get; set; }
 

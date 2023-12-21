@@ -242,7 +242,7 @@ ADD_MANAGED_METHOD(Framebuffer, Destroy, void, (void* handle), Yonai.Graphics)
 ADD_MANAGED_METHOD(Framebuffer, Bind, void, (void* handle), Yonai.Graphics)
 { ((Framebuffer*)handle)->Bind(); }
 
-ADD_MANAGED_METHOD(Framebuffer, Unind, void, (void* handle), Yonai.Graphics)
+ADD_MANAGED_METHOD(Framebuffer, Unbind, void, (void* handle), Yonai.Graphics)
 { ((Framebuffer*)handle)->Unbind(); }
 
 ADD_MANAGED_METHOD(Framebuffer, SetSamples, void, (void* handle, unsigned int samples), Yonai.Graphics)

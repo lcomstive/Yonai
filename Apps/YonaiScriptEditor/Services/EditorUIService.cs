@@ -1,12 +1,12 @@
 using Yonai;
 using System;
-using Yonai.IO;
 using System.Linq;
 using Yonai.Graphics;
 using YonaiEditor.Views;
 using System.Reflection;
 using YonaiEditor.EditorUI;
 using YonaiEditor.Commands;
+using Yonai.Graphics.Pipelines;
 using YonaiEditor.BuildProcess;
 using System.Collections.Generic;
 
@@ -50,6 +50,9 @@ namespace YonaiEditor.Systems
 
 				World world = Resource.Load<World>("project://Assets/Scenes/Test World.world");
 				SceneManager.Load(world, SceneAddType.Single, false);
+
+				// TODO: Change render pipeline type based on project settings
+				Renderer.SetPipeline(new ForwardRenderPipeline());
 
 				if (!Scripting.IsAssemblyReloading())
 				{

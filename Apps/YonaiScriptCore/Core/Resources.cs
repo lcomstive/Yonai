@@ -1,3 +1,5 @@
+// #define LOG_RESOURCES
+
 using System;
 using Yonai.IO;
 using Yonai.Graphics;
@@ -64,7 +66,9 @@ namespace Yonai
 			instance.ResourcePath = path;
 			instance.ResourceID = resourceID;
 
+#if LOG_RESOURCES
 			Log.Trace($"Loading '{path}' ({typeof(T).Name})");
+#endif
 
 			// Check if native instance exists
 			if(resourceID == UUID.Invalid)
@@ -152,7 +156,9 @@ namespace Yonai
 			if(s_Instances.ContainsKey(resourceID))
 			{
 				s_Instances[resourceID]._Unload();
+#if LOG_RESOURCES
 				Log.Trace($"Unloaded '{s_Instances[resourceID].ResourcePath}'");
+#endif
 				s_Instances.Remove(resourceID);
 			}
 
@@ -191,7 +197,10 @@ namespace Yonai
 			T instance = new T();
 			instance.ResourceID = resourceID;
 			instance.ResourcePath = _GetPath(resourceID);
+#if LOG_RESOURCES
 			Log.Trace($"Get<{typeof(T).Name}>({resourceID}) not cached, trying a native resource at '{instance.ResourcePath}'");
+#endif
+
 			LoadExistingUnmanagedResource(instance, resourceID);
 			return instance;
 		}
@@ -251,12 +260,13 @@ namespace Yonai
 		/// </summary>
 		public static void LoadDatabase(string database = DatabaseFilePath)
 		{
+			CreateDefaultResources();
+			Mesh.LoadPrimitives();
+
 			// Check that file exists
 			if (!VFS.Exists(database))
 			{
 				// Database does not exist, create it
-				Mesh.LoadPrimitives();
-				CreateDefaultResources();
 				SaveDatabase();
 				return;
 			}
@@ -279,9 +289,6 @@ namespace Yonai
 				if(instance is ISerializable && !LoadFromDisk(instance))
 					Unload(id); // If failed to load from disk, *most* likely will be in a call to Load with the correct import settings
 			}
-
-			CreateDefaultResources();
-			Mesh.LoadPrimitives();
 		}
 
 		private static void LoadExistingUnmanagedResource(ResourceBase instance, UUID resourceID)
@@ -342,7 +349,9 @@ namespace Yonai
 			if (serializeFileOptions != null)
 				path += ".cache";
 
+#if LOG_RESOURCES
 			Log.Trace($"Saving resource '{resource.ResourcePath}' " + (serializeFileOptions == null ? string.Empty : "[cache]"));
+#endif
 
 			VFSFile vfsFile = resource.ResourcePath;
 			VFSMapping mapping = VFS.GetMapping(resource.ResourcePath, false, FilePermissions.Write);
@@ -383,7 +392,9 @@ namespace Yonai
 				return false;
 			}
 
+#if LOG_RESOURCES
 			Log.Trace($"Loading resource '{path}' from disk...");
+#endif
 			resource._Load();
 
 			VFSMapping mapping = VFS.GetMapping(path);

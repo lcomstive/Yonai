@@ -6,6 +6,7 @@ using Yonai.Systems;
 using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using Yonai.Graphics;
 
 namespace Yonai
 {
@@ -39,6 +40,9 @@ namespace Yonai
 
 			if (JSON.ContainsKey("Scenes") && JSON["Scenes"].GetType() == typeof(JArray))
 				LoadInitialScene();
+
+			// TODO: Change render pipeline type based on project settings
+			Renderer.SetPipeline(new Graphics.Pipelines.ForwardRenderPipeline());
 		}
 
 		private static void LoadAssemblies()

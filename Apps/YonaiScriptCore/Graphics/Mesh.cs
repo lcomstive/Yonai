@@ -18,6 +18,13 @@ namespace Yonai.Graphics
 			public Vector3 Position;
 			public Vector3 Normal;
 			public Vector2 TexCoords;
+
+			public Vertex(Vector3 position, Vector3 normal, Vector2 texCoords)
+			{
+				Position = position;
+				Normal = normal;
+				TexCoords = texCoords;
+			}
 		}
 
 		private MeshImportSettings m_Settings;
@@ -141,7 +148,7 @@ namespace Yonai.Graphics
 			Log.Debug($"Loading mesh from {name}");
 			return Resource.Load<Mesh>($"Meshes/{name}", new MeshImportSettings()
 			{
-				DrawMode = DrawMode.Triangles,
+				DrawMode = DrawMode.TriangleFan,
 				Vertices = model.Meshes[0].Mesh.Vertices,
 				Indices = model.Meshes[0].Mesh.Indices
 			});

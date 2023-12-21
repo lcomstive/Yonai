@@ -5,6 +5,7 @@
 #include <YonaiEditor/Systems/ImGUISystem.hpp>
 #include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_GLFW3.hpp>
 #include <YonaiEditor/Systems/ImGUISystemBackend/ImGUIBackend_OpenGL3.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 using namespace glm;
@@ -76,8 +77,12 @@ void ImGUISystem::OnDisabled()
 
 void ImGUISystem::Draw()
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "ImGUI");
+
 	EndFrame();
 	StartFrame();
+
+	glPopDebugGroup();
 }
 
 void ImGUISystem::StartFrame()
