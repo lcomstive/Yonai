@@ -1,41 +1,41 @@
 [
   {
-    "ID": "9349035186447081813",
+    "ID": "12375143434308525162",
     "Path": "assets://Textures/Grid.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "1224384145192322079",
+    "ID": "2589619724281679219",
     "Path": "assets://Shaders/Default3D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "7350125327794139757",
+    "ID": "10158907790865722710",
     "Path": "assets://Materials/Default3D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "8930508006757923076",
+    "ID": "11830750199420240109",
     "Path": "assets://Shaders/Default2D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "17352441566731728748",
+    "ID": "8370247919306709066",
     "Path": "assets://Materials/Default2D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "10245351560101444003",
+    "ID": "12548619875869250730",
     "Path": "assets://Models/Quad.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "7734154996265316043",
+    "ID": "7469487120423803327",
     "Path": "assets://Models/Cube.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "10009788649173486395",
+    "ID": "8689584553136548577",
     "Path": "assets://Models/Sphere.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
@@ -545,8 +545,18 @@
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
+    "ID": "16145157880153423011",
+    "Path": "Materials/Survival_BackPack_2.fbx/DefaultMaterial",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
     "ID": "14709118232727641463",
     "Path": "assets://Shaders/NewSpriteShader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "16918938592977087859",
+    "Path": "editor://ModelPreview.world",
+    "Type": "Yonai.World"
   }
 ]

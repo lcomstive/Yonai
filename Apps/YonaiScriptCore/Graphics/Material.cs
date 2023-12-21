@@ -39,8 +39,9 @@ namespace Yonai.Graphics
 				if (m_Shader == value)
 					return; // No change
 
-				m_Settings.Shader = value?.ResourceID ?? 0;
-				_SetShader(Handle, (m_Shader = value)?.ResourceID ?? UUID.Invalid);
+				m_Shader = value;
+				m_Settings.Shader = m_Shader?.ResourceID ?? 0;
+				_SetShader(Handle, m_Shader?.ResourceID ?? UUID.Invalid);
 			}
 		}
 

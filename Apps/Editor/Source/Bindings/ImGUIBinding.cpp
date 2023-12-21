@@ -823,6 +823,7 @@ ADD_MANAGED_METHOD(ImGUI, _GetMouseDelta, void, (glm::vec2* output), YonaiEditor
 
 ADD_MANAGED_METHOD(ImGUI, GetMouseDeltaX, float, (), YonaiEditor) { return ImGui::GetIO().MouseDelta.x; }
 ADD_MANAGED_METHOD(ImGUI, GetMouseDeltaY, float, (), YonaiEditor) { return ImGui::GetIO().MouseDelta.y; }
+ADD_MANAGED_METHOD(ImGUI, GetMouseScrollDelta, float, (), YonaiEditor) { return ImGui::GetIO().MouseWheel; }
 
 // VIEWPORT //
 ADD_MANAGED_METHOD(ImGUI, _GetViewport, void,

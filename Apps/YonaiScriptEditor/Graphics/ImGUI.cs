@@ -1366,6 +1366,7 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetMouseDeltaX();
 		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetMouseDeltaY();
+		[MethodImpl(MethodImplOptions.InternalCall)] public static extern float GetMouseScrollDelta();
 
 		public static Vector2 GetMouseDelta()
 		{

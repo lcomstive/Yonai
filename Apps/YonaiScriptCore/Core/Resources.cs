@@ -314,22 +314,27 @@ namespace Yonai
 			Load<Texture>("assets://Textures/Grid.png");
 
 			// Materials //
-			Load<Material>("assets://Materials/Default3D.material", new MaterialImportSettings()
+			Shader default3DShader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings
 			{
-				Shader = Load<Shader>("assets://Shaders/Default3D.shader", new ShaderImportSettings()
-				{
-					VertexPath = "assets://Shaders/Lit.vert",
-					FragmentPath = "assets://Shaders/Lit.frag"
-				})
+				VertexPath = "assets://Shaders/Unlit.vert",
+				FragmentPath = "assets://Shaders/Unlit.frag"
 			});
-			Load<Material>("assets://Materials/Default2D.material", new MaterialImportSettings()
+			Material default3DMaterial = Load<Material>("assets://Materials/Default3D.material");
+			default3DMaterial.Albedo = Colour.White;
+			default3DMaterial.Shader = default3DShader;
+			SaveToDisk(default3DShader);
+			SaveToDisk(default3DMaterial);
+
+			Shader default2DShader = Load<Shader>("assets://Shaders/Default2D.shader", new ShaderImportSettings
 			{
-				Shader = Load<Shader>("assets://Shaders/Default2D.shader", new ShaderImportSettings()
-				{
-					VertexPath = "assets://Shaders/Sprite.vert",
-					FragmentPath = "assets://Shaders/Sprite.frag"
-				})
+				VertexPath = "assets://Shaders/Sprite.vert",
+				FragmentPath = "assets://Shaders/Sprite.frag"
 			});
+			Material default2DMaterial = Load<Material>("assets://Materials/Default2D.material");
+			default2DMaterial.Shader = default2DShader;
+			default2DMaterial.Albedo = Colour.White;
+			SaveToDisk(default2DShader);
+			SaveToDisk(default2DMaterial);
 		}
 
 		public static void SaveToDisk(ResourceBase resource, bool suppressWarnings = false)
