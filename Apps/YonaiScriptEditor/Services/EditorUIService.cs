@@ -65,6 +65,8 @@ namespace YonaiEditor.Systems
 		{
 			foreach (var view in m_ActiveViews.Values)
 				view._Close();
+
+			LocalProjectSettings.Save();
 		}
 
 		protected override void Update()
