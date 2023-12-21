@@ -31,7 +31,20 @@ jobs:
 
     # Get source
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
+    # Cache submodules
+    - name: Cache submodules
+      id: cache-submodules
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/Engine/Vendor
+        key: ${{ runner.os }}-submodules
+
+    # Get submodules
+    - name: Get submodules
+      if: steps.cache-submodules.outputs.cache-hit != 'true'
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
