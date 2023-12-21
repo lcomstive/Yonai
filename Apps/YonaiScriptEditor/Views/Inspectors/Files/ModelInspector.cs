@@ -18,7 +18,12 @@ namespace YonaiEditor.Inspectors
 		private Model m_Target;
 		private ModelImportSettings m_Settings;
 
+		// Preview
 		private Framebuffer m_PreviewFB;
+		private Material m_DefaultPreviewMaterial;
+		private World m_PreviewWorld;
+		private Camera m_PreviewCamera;
+		private Transform m_PreviewTransform;
 
 		public override void OnTargetChanged()
 		{
@@ -33,13 +38,25 @@ namespace YonaiEditor.Inspectors
 			m_Settings = (ModelImportSettings)m_Target.ImportSettings;
 		}
 
-		public override void Opened() =>
+		public override void Opened()
+		{
 			m_PreviewFB = new Framebuffer(new FramebufferSpec
 			{
 				Attachments = new TextureFormat[] { TextureFormat.RGBA8 },
 				Samples = 1,
 				Resolution = new IVector2(400, 400)
 			});
+
+			m_DefaultPreviewMaterial = Resource.Get<Material>("assets://Materials/Default3D.material");
+
+			m_PreviewWorld = Resource.Load<World>("editor://ModelPreview.world", false);
+			Entity camera = m_PreviewWorld.CreateEntity();
+			m_PreviewCamera = camera.AddComponent<Camera>();
+			camera.AddComponent<Transform>().Position = new Vector3(0, 0, -10);
+
+			m_PreviewTransform = m_PreviewWorld.CreateEntity().AddComponent<Transform>();
+			m_PreviewTransform.Position = new Vector3(0, 0, 10);
+		}
 
 		public override void Closed() => m_PreviewFB?.Dispose();
 
@@ -57,7 +74,7 @@ namespace YonaiEditor.Inspectors
 			}
 
 			// Import settings //
-			ImGUI.BeginChild("ModelInspectorSettings", new Vector2(0, region.y - m_PreviewHeight - SplitterWidth * 2));
+			ImGUI.BeginChild("ModelInspectorSettings", new Vector2(0, region.y - m_PreviewHeight - SplitterWidth * 2 - 10));
 			{
 				ImGUI.Text(m_Target.ResourcePath.Replace("project://Assets/", ""));
 
@@ -98,9 +115,51 @@ namespace YonaiEditor.Inspectors
 			return false;
 		}
 
+		private Vector3 m_ModelRotation = Vector3.Zero;
+		private const float ScrollSpeed = 3;
+		private const float ZoomSpeed = 5000;
+		private float m_DesiredFOV = 90;
 		private void DrawModelToPreview()
 		{
+			m_PreviewFB.Bind();
+			Renderer.ClearColour(Colour.Black);
+			Renderer.Clear(BufferFlags.Colour | BufferFlags.Depth);
+			Renderer.Enable(RenderFeature.DepthTest);
+			Renderer.CullFace(CullFace.Back);
 
+			#region Controls
+			if (ImGUI.IsMouseDragging(MouseButton.Left))
+			{
+				m_ModelRotation.y += ImGUI.GetMouseDeltaX();
+				m_ModelRotation.x += ImGUI.GetMouseDeltaY();
+			}
+
+			m_PreviewTransform.LocalRotation = Quaternion.FromEuler(m_ModelRotation);
+
+			if (ImGUI.IsWindowHovered())
+			{
+				// m_PreviewCamera.FOV = MathUtils.Clamp(m_PreviewCamera.FOV - ImGUI.GetMouseScrollDelta() * ScrollSpeed, 10, 120);
+				m_DesiredFOV = MathUtils.Clamp(m_DesiredFOV - ImGUI.GetMouseScrollDelta() * ScrollSpeed, 10, 120);
+				m_PreviewCamera.FOV = MathUtils.Lerp(m_PreviewCamera.FOV, m_DesiredFOV, Time.DeltaTime * ZoomSpeed);
+			}
+			#endregion
+
+			foreach (Model.MeshData mesh in m_Target.Meshes)
+			{
+				Material material = mesh.Material ?? m_DefaultPreviewMaterial;
+				Shader shader = material.Shader ?? m_DefaultPreviewMaterial.Shader;
+
+				shader.Bind();
+				shader.Set("resolution", m_PreviewFB.Resolution);
+
+				Renderer.UploadCamera(shader, m_PreviewCamera, m_PreviewFB.Resolution);
+				Renderer.UploadTransform(shader, m_PreviewTransform);
+				Renderer.DrawMesh(mesh.Mesh);
+
+				shader.Unbind();
+			}
+
+			m_PreviewFB.Unbind();
 		}
 	}
 }
