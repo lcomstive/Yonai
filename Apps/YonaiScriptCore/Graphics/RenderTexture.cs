@@ -50,6 +50,13 @@ namespace Yonai.Graphics
 
 		internal RenderTexture(IntPtr handle)
 		{
+			if(handle == IntPtr.Zero)
+			{
+				Log.Error("RenderTexture made with invalid handle");
+				Log.Trace(new System.Diagnostics.StackTrace().ToString());
+				return;
+			}
+
 			Handle = handle;
 			m_CreatedResource = false;
 

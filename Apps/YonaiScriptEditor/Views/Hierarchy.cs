@@ -207,7 +207,8 @@ namespace YonaiEditor.Views
 		private static readonly Dictionary<Type, Action<World, UUID>> DragDropFunctions = new Dictionary<Type, Action<World, UUID>>()
 		{
 			{ typeof(World), (world, resourceID) => SceneManager.Load(Resource.Get<World>(resourceID), SceneAddType.Additive) },
-			{ typeof(Texture), HandleDropTexture }
+			{ typeof(Texture), HandleDropTexture },
+			{ typeof(Model), HandleDropModel }
 		};
 
 		internal static void HandleDragDrop(World targetWorld)
@@ -243,6 +244,34 @@ namespace YonaiEditor.Views
 			SpriteRenderer renderer = entity.AddComponent<SpriteRenderer>();
 			renderer.SpriteID = resourceID;
 			renderer.Shader = Resource.Get<Shader>("assets://Shaders/Sprite.shader");
+		}
+
+		private static void AttachMeshToEntity(Entity e, Model.MeshData meshData)
+		{
+			MeshRenderer renderer = e.AddComponent<MeshRenderer>();
+			renderer.Mesh = meshData.Mesh;
+			renderer.Material = meshData.Material;
+		}
+
+		private static void HandleDropModel(World world, UUID resourceID)
+		{
+			Model model = Resource.Get<Model>(resourceID);
+
+			Entity entity = world.CreateEntity();
+			Transform parent = entity.AddComponent<Transform>();
+
+			if (model.Meshes.Length > 1)
+			{
+				foreach (Model.MeshData meshData in model.Meshes)
+				{
+					Entity meshEntity = world.CreateEntity();
+					meshEntity.AddComponent<Transform>().Parent = parent;
+
+					AttachMeshToEntity(meshEntity, meshData);
+				}
+			}
+			else if(model.Meshes.Length == 1)
+				AttachMeshToEntity(entity, model.Meshes[0]);
 		}
 		#endregion
 	}

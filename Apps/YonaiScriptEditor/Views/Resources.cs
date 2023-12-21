@@ -50,7 +50,7 @@ namespace YonaiEditor.Views
 			m_IconFolder = Resource.Get<Texture>("assets://Textures/Icons/Folder.png");
 			m_ThumbnailSize = LocalProjectSettings.Get(LocalSettingsThumbnailSizeName, 0.0f);
 
-			if(LocalProjectSettings.TryGet(LocalSettingsLastDirectoryName, out string lastDirectory) &&
+			if (LocalProjectSettings.TryGet(LocalSettingsLastDirectoryName, out string lastDirectory) &&
 				lastDirectory.StartsWith(RootDirectory) && VFS.Exists(lastDirectory))
 				OpenDirectory(lastDirectory);
 			else
@@ -87,7 +87,7 @@ namespace YonaiEditor.Views
 				DrawBottomBar();
 			}
 			ImGUI.End();
-			
+
 			NewFilePopup();
 
 			// Check if window requested to be closed
@@ -108,13 +108,13 @@ namespace YonaiEditor.Views
 				return;
 
 			object payload = ImGUI.AcceptDragDropPayload("ResourcePath", ImGUI.DragDropFlags.AcceptPeekOnly);
-			if(payload == null)
+			if (payload == null)
 				return;
 			VFSFile payloadFile = (VFSFile)payload;
 			if (payloadFile.ParentDirectory.Trim('/').CompareTo(directory) == 0)
 				return; // Don't drop into same directory
 			ImGUI.AcceptDragDropPayload("ResourcePath");
-			
+
 			if (ImGUI.DragDropPayloadIsDelivery())
 			{
 				VFS.Move(payloadFile.FullPath, $"{directory}/{payloadFile.FileName}");
@@ -171,22 +171,22 @@ namespace YonaiEditor.Views
 		/// </summary>
 		private static Dictionary<string, Func<VFSFile, Texture>> ImageExtensionImages = new Dictionary<string, Func<VFSFile, Texture>>()
 		{
-			{ ".png",		GetTexturePreview			},
-			{ ".jpg",		GetTexturePreview			},
-			{ ".jpeg",		GetTexturePreview			},
-			{ ".dds",		GetTexturePreview			},
-			{ ".mp3",		GetAudioPreview				},
-			{ ".ogg",		GetAudioPreview				},
-			{ ".wav",		GetAudioPreview             },
-			{ ".mixer",		(_) => Icons.Get("Mixer")	},
-			{ ".shader",	(_) => Icons.Get("Shader")	},
-			{ ".world",		(_) => Icons.Get("World")	},
-			{ ".material",	(_) => Icons.Get("Material")},
+			{ ".png",       GetTexturePreview           },
+			{ ".jpg",       GetTexturePreview           },
+			{ ".jpeg",      GetTexturePreview           },
+			{ ".dds",       GetTexturePreview           },
+			{ ".mp3",       GetAudioPreview             },
+			{ ".ogg",       GetAudioPreview             },
+			{ ".wav",       GetAudioPreview             },
+			{ ".mixer",     (_) => Icons.Get("Mixer")   },
+			{ ".shader",    (_) => Icons.Get("Shader")  },
+			{ ".world",     (_) => Icons.Get("World")   },
+			{ ".material",  (_) => Icons.Get("Material")},
 		};
 
 		private Texture ChooseImage(VFSFile file)
 		{
-			if(ImageExtensionImages.TryGetValue(file.Extension, out Func<VFSFile, Texture> imageFunc))
+			if (ImageExtensionImages.TryGetValue(file.Extension, out Func<VFSFile, Texture> imageFunc))
 				return imageFunc(file);
 			return Icons.Get("File");
 		}
@@ -207,7 +207,7 @@ namespace YonaiEditor.Views
 
 			foreach (VFSFile file in m_Files)
 			{
-				if(IgnoreFileExtensions.Contains(file.Extension))
+				if (IgnoreFileExtensions.Contains(file.Extension))
 					continue; // Ignore this file
 
 				bool selected = file.FullPath.Equals(m_SelectedPath);
@@ -248,7 +248,7 @@ namespace YonaiEditor.Views
 					ImGUI.EndDragDropSource();
 				}
 
-				if(file.IsDirectory && ImGUI.BeginDragDropTarget())
+				if (file.IsDirectory && ImGUI.BeginDragDropTarget())
 				{
 					object payload = ImGUI.AcceptDragDropPayload("ResourcePath");
 					if (payload != null && ImGUI.DragDropPayloadIsDelivery())
@@ -286,7 +286,7 @@ namespace YonaiEditor.Views
 			if (ImGUI.IsItemClicked())
 			{
 				m_SelectedPath = string.Empty;
-				if(ImGUI.IsMouseDoubleClicked(MouseButton.Left))
+				if (ImGUI.IsMouseDoubleClicked(MouseButton.Left))
 					InspectorView.Target = null;
 			}
 
@@ -308,7 +308,7 @@ namespace YonaiEditor.Views
 			{
 				VFSFile[] files = VFS.GetFiles(RootDirectory, true);
 				List<string> searchPaths = new List<string>();
-				foreach(VFSFile file in files)
+				foreach (VFSFile file in files)
 				{
 					if (file.Extension.Equals(".cache"))
 						continue; // Ignore cache files
@@ -384,7 +384,7 @@ namespace YonaiEditor.Views
 					m_NewNamePopupFinishAction = (materialName) => Resource.Load<Material>($"{m_CurrentDirectory}/{materialName}.material", new MaterialImportSettings());
 					m_NewNameModalOpen = true;
 				}
-				if(ImGUI.Selectable("Shader"))
+				if (ImGUI.Selectable("Shader"))
 				{
 					m_NewNamePopupFinishAction = (shaderName) => Resource.Load<Shader>($"{m_CurrentDirectory}/{shaderName}.shader", new ShaderImportSettings());
 					m_NewNameModalOpen = true;
@@ -422,7 +422,7 @@ namespace YonaiEditor.Views
 
 			ImGUI.EndPopup();
 		}
-		
+
 		private void NewFilePopup()
 		{
 			if (m_NewNameModalOpen)
@@ -434,9 +434,9 @@ namespace YonaiEditor.Views
 
 			ImGUI.Input("##ResourcesNewFileInput", ref m_NewFileName, 64);
 			ImGUI.SameLine();
-			if(ImGUI.Button("Submit"))
+			if (ImGUI.Button("Submit"))
 			{
-				if(!string.IsNullOrEmpty(m_NewFileName)) 
+				if (!string.IsNullOrEmpty(m_NewFileName))
 					m_NewNamePopupFinishAction?.Invoke(m_NewFileName);
 				m_NewFileName = string.Empty;
 				m_NewNameModalOpen = false;
@@ -456,6 +456,6 @@ namespace YonaiEditor.Views
 		}
 
 		private static Texture GetAudioPreview(VFSFile _) => Icons.Get("Audio");
-	#endregion
-}
+		#endregion
+	}
 }

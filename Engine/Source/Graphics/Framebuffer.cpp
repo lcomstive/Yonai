@@ -208,7 +208,8 @@ std::vector<RenderTexture*> Framebuffer::GetAttachments()
 {
 	vector<RenderTexture*> attachments;
 	attachments.insert(attachments.end(), m_ColourAttachments.begin(), m_ColourAttachments.end());
-	attachments.emplace_back(m_DepthAttachment);
+	if(m_DepthAttachment)
+		attachments.emplace_back(m_DepthAttachment);
 	return attachments;
 }
 
@@ -219,7 +220,7 @@ bool Framebuffer::HasDepthAttachment() { return m_DepthAttachment != nullptr; }
 FramebufferSpec& Framebuffer::GetSpecs() { return m_Specs; }
 
 #pragma region Internal Calls
-ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapchainTarget, unsigned int samples, MonoArray* attachments), Yonai.Grapghics)
+ADD_MANAGED_METHOD(Framebuffer, Load, void*, (glm::ivec2* resolution, bool swapchainTarget, unsigned int samples, MonoArray* attachments), Yonai.Graphics)
 {
 	FramebufferSpec spec =
 	{

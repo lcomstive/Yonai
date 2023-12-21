@@ -220,11 +220,6 @@
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "14335123054856209808",
-    "Path": "assets://Shaders/NewSpriteShader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
-  },
-  {
     "ID": "14403765927655061752",
     "Path": "project://Assets/Scenes/Test World.world",
     "Type": "Yonai.World"
@@ -543,5 +538,10 @@
     "ID": "15796141513249479350",
     "Path": "assets://Textures/Icons/Kenney/cross.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "10293012253894346084",
+    "Path": "project://Assets/Models/Backpack/Survival_BackPack_2.fbx",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   }
 ]

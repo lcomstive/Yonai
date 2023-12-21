@@ -55,13 +55,14 @@ namespace Yonai.Graphics
 			byte[] modelData = VFS.Read(ResourcePath);
 			_Import(Handle, ResourcePath, modelData, ImportMaterials = settings.ImportMaterials);
 
+			ImportSettings = settings;
+
 			// Get meshes
 			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
 
 			Meshes = new MeshData[meshIDs.Length];
 			for (int i = 0; i < meshIDs.Length; i++)
 				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
-
 		}
 
 		public JObject OnSerialize() => new JObject(
