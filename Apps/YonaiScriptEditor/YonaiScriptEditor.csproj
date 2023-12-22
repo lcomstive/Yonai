@@ -101,6 +101,7 @@
     <Compile Include="Views/Inspectors/Files/AudioDataInspector.cs" />
     <Compile Include="Views/Inspectors/Files/AudioMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/MaterialInspector.cs" />
+    <Compile Include="Views/Inspectors/Files/ModelInspector.cs" />
     <Compile Include="Views/Inspectors/Files/ShaderInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextInspector.cs" />
     <Compile Include="Views/Inspectors/Files/TextureInspector.cs" />
