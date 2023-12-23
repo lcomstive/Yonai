@@ -77,12 +77,16 @@ void ImGUISystem::OnDisabled()
 
 void ImGUISystem::Draw()
 {
+#if !defined(YONAI_PLATFORM_APPLE)
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "ImGUI");
+#endif
 
 	EndFrame();
 	StartFrame();
 
+#if !defined(YONAI_PLATFORM_APPLE)
 	glPopDebugGroup();
+#endif
 }
 
 void ImGUISystem::StartFrame()

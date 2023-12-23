@@ -39,13 +39,19 @@ ADD_MANAGED_METHOD(Renderer, CullFace, void, (unsigned int face), Yonai.Graphics
 
 ADD_MANAGED_METHOD(Renderer, BeginDebugGroup, void, (MonoString* name), Yonai.Graphics)
 {
+#if !defined(YONAI_PLATFORM_APPLE)
 	char* description = mono_string_to_utf8(name);
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, description);
 	mono_free(description);
+#endif
 }
 
 ADD_MANAGED_METHOD(Renderer, EndDebugGroup, void, (MonoString* name), Yonai.Graphics)
-{ glPopDebugGroup(); }
+{
+#if !defined(YONAI_PLATFORM_APPLE)
+	glPopDebugGroup();
+#endif
+}
 
 ADD_MANAGED_METHOD(Renderer, PolygonMode, void, (unsigned int mode), Yonai.Graphics)
 { glPolygonMode(GL_FRONT_AND_BACK, mode); }
