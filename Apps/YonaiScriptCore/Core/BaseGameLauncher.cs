@@ -72,6 +72,7 @@ namespace Yonai
 		private static void LoadBaseSystems()
 		{
 			YonaiSystem.Add<AudioSystem>();
+			YonaiSystem.Add<RenderSystem>();
 			YonaiSystem.Add<BehaviourSystem>();
 		}
 
@@ -89,6 +90,15 @@ namespace Yonai
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern bool _LoadAssembly(byte[] data, string friendlyName);
+		// Copy renderer output to window.
+		// Called from C++
+		private static void _PostDraw()
+		{
+			if(YonaiSystem.Has<RenderSystem>())
+				Renderer.Pipeline.Output.BlitTo(null);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool _LoadAssembly(byte[] data, string friendlyName);
 	}
 }

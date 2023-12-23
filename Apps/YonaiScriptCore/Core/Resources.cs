@@ -239,7 +239,7 @@ namespace Yonai
 
 				JObject resource = new JObject();
 				resource["ID"] = pair.Key.ToString();
-				resource["Path"] = pair.Value.ResourcePath;
+				resource["Path"] = pair.Value.ResourcePath.FullPath;
 
 				Type resourceType = pair.Value.GetType();
 				resource["Type"] = resourceType.FullName;

@@ -6,10 +6,7 @@
 #include <Yonai/SystemManager.hpp>
 
 namespace Yonai
-{
-	// Forward declaration
-	namespace Systems { struct RenderSystem; }
-		
+{		
 	/// <summary>
 	/// Base application class
 	/// </summary>
@@ -87,8 +84,6 @@ namespace Yonai
 	/// </summary>
 	class WindowedApplication : public Application
 	{
-		Systems::RenderSystem* m_RenderSystem = nullptr;
-
 		static void OnWindowResized(glm::ivec2 resolution);
 
 	public:
@@ -98,7 +93,6 @@ namespace Yonai
 	protected:
 		YonaiAPI virtual void OnPreDraw() { }
 		YonaiAPI virtual void OnPostDraw() { }
-		YonaiAPI Systems::RenderSystem* GetRenderSystem();
 
 	public:
 		YonaiAPI virtual void Setup() override;

@@ -258,6 +258,7 @@ namespace YonaiEditor.Views
 			Model model = Resource.Get<Model>(resourceID);
 
 			Entity entity = world.CreateEntity();
+			entity.AddComponent<NameComponent>().Name = model.ResourcePath.FileNameWithoutExtension;
 			Transform parent = entity.AddComponent<Transform>();
 
 			if (model.Meshes.Length > 1)
@@ -265,6 +266,7 @@ namespace YonaiEditor.Views
 				foreach (Model.MeshData meshData in model.Meshes)
 				{
 					Entity meshEntity = world.CreateEntity();
+					meshEntity.AddComponent<NameComponent>().Name = meshData.Mesh.ResourcePath.FileNameWithoutExtension;
 					meshEntity.AddComponent<Transform>().Parent = parent;
 
 					AttachMeshToEntity(meshEntity, meshData);

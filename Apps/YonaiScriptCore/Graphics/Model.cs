@@ -2,7 +2,6 @@
 using Yonai.IO;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
-using System.Net.Configuration;
 
 namespace Yonai.Graphics
 {

@@ -8,7 +8,6 @@
 #include <Yonai/Graphics/Texture.hpp>
 #include <Yonai/Components/Transform.hpp>
 #include <Yonai/Components/DebugName.hpp>
-#include <Yonai/Components/MeshRenderer.hpp>
 
 using namespace glm;
 using namespace std;

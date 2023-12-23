@@ -30,6 +30,11 @@ namespace Yonai
 		protected virtual void Draw() { }
 
 		/// <summary>
+		/// Called once per frame after all system's finish <see cref="Draw"/>
+		/// </summary>
+		protected virtual void PostDraw() { }
+
+		/// <summary>
 		/// Called when this system is created (before <see cref="OnEnabled"/>)
 		/// </summary>
 		protected virtual void Start() { Log.Trace("Start for " + GetType().Name); }

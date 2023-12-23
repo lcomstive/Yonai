@@ -21,24 +21,12 @@ namespace Yonai
 		/// Sets <see cref="Sprite"/>.
 		/// </summary>
 		[Serialize(false)]
-		public UUID SpriteID
-		{
-			get => _GetSprite(Handle);
-			set => _SetSprite(Handle, value);
-		}
+		public UUID SpriteID { get; set; }
 
 		/// <summary>
 		/// Tint to apply to drawn sprite
 		/// </summary>
-		public Colour Colour
-		{
-			get
-			{
-				_GetColour(Handle, out Colour colour);
-				return colour;
-			}
-			set => _SetColour(Handle, ref value);
-		}
+		public Colour Colour { get; set; }
 
 		/// <summary>
 		/// Shader used to draw sprite.
@@ -55,19 +43,6 @@ namespace Yonai
 		/// Sets <see cref="Shader"/>.
 		/// </summary>
 		[Serialize(false)]
-		public UUID ShaderID
-		{
-			get => _GetShader(Handle);
-			set => _SetShader(Handle, value);
-		}
-
-		#region Internal Calls
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetSprite(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetSprite(IntPtr handle, ulong position);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _GetColour(IntPtr handle, out Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetColour(IntPtr handle, ref Colour colour);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern ulong _GetShader(IntPtr handle);
-		[MethodImpl(MethodImplOptions.InternalCall)] private static extern void  _SetShader(IntPtr handle, ulong shader);
-		#endregion
+		public UUID ShaderID { get; set; }
 	}
 }

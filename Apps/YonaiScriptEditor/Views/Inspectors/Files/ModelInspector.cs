@@ -76,7 +76,7 @@ namespace YonaiEditor.Inspectors
 			// Import settings //
 			ImGUI.BeginChild("ModelInspectorSettings", new Vector2(0, region.y - m_PreviewHeight - SplitterWidth * 2 - 10));
 			{
-				ImGUI.Text(m_Target.ResourcePath.Replace("project://Assets/", ""));
+				ImGUI.Text(m_Target.ResourcePath.FullPath.Replace("project://Assets/", ""));
 
 				ImGUI.Space();
 				ImGUI.Separator();

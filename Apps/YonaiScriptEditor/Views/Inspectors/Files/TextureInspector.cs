@@ -37,7 +37,7 @@ namespace YonaiEditor.Inspectors
 			// Import settings //
 			ImGUI.BeginChild("TextureInspectorSettings", new Vector2(0, region.y - m_TexturePreviewHeight - SplitterWidth * 2));
 			{
-				ImGUI.Text(m_Target.ResourcePath.Replace("project://Assets/", ""));
+				ImGUI.Text(m_Target.ResourcePath.FullPath.Replace("project://Assets/", ""));
 				ImGUI.SameLine();
 				ImGUI.Text($"({m_Target.Resolution.x}x{m_Target.Resolution.y})", Colour.Grey);
 

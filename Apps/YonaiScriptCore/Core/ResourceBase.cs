@@ -1,11 +1,12 @@
 using System;
+using Yonai.IO;
 
 namespace Yonai
 {
 	public abstract class ResourceBase
 	{
 		public UUID ResourceID { get; internal set; } = UUID.Invalid;
-		public string ResourcePath { get; internal set; }
+		public VFSFile ResourcePath { get; internal set; }
 
 		public IImportSettings ImportSettings { get; internal set; }
 

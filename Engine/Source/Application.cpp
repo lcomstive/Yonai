@@ -12,7 +12,6 @@
 // Systems //
 #include <Yonai/SystemManager.hpp>
 #include <Yonai/Systems/Global/SceneSystem.hpp>
-#include <Yonai/Systems/Global/RenderSystem.hpp>
 
 // Platform Specific //
 #if defined(YONAI_PLATFORM_WINDOWS)
@@ -28,7 +27,6 @@
 
 using namespace std;
 using namespace Yonai;
-using namespace Yonai::IO;
 using namespace Yonai::Systems;
 
 namespace fs = std::filesystem;
@@ -234,27 +232,13 @@ void WindowedApplication::Setup()
 	Application::Setup();
 	SystemManager::Global()->Add<SceneSystem>();
 
-	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
-	m_RenderSystem->GetPipeline()->SetResolution(Window::GetFramebufferResolution());
-
 	Window::AddResizedCallback(OnWindowResized);
 }
 
 void WindowedApplication::Cleanup()
 {
 	Application::Cleanup();
-	SystemManager::Global()->Remove<RenderSystem>();
 	SystemManager::Global()->Remove<SceneSystem>();
-}
-
-RenderSystem* WindowedApplication::GetRenderSystem()
-{
-	if (!m_RenderSystem)
-	{
-		m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
-		spdlog::debug("No render system found in application, creating one");
-	}
-	return m_RenderSystem;
 }
 
 void WindowedApplication::Run()
@@ -294,7 +278,7 @@ void WindowedApplication::Run()
 		Window::DestroyContext();
 }
 
-void WindowedApplication::OnWindowResized(glm::ivec2 resolution) { ((WindowedApplication*)Application::Current())->m_RenderSystem->GetPipeline()->SetResolution(resolution); }
+void WindowedApplication::OnWindowResized(glm::ivec2 resolution) { }
 #pragma endregion
 
 #pragma region Managed Glue

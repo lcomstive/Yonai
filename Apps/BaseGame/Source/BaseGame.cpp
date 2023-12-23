@@ -1,7 +1,7 @@
 #include <BaseGame.hpp>
 #include <Yonai/Window.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
-#include <Yonai/Systems/Global/RenderSystem.hpp>
+#include <Yonai/Systems/Global/SceneSystem.hpp>
 
 #include <Yonai/Scripting/Class.hpp>
 
@@ -10,6 +10,9 @@ using namespace Yonai;
 using namespace Yonai::IO;
 using namespace Yonai::Systems;
 using namespace Yonai::Scripting;
+
+typedef void (*PostDrawFn)(MonoObject*, MonoException**);
+PostDrawFn PostDrawFunction;
 
 string AssembliesPath = "/Assets/Editor/Mono";
 
@@ -20,17 +23,16 @@ BaseGame::BaseGame(int argc, char** argv) : WindowedApplication(argc, argv)
 
 void BaseGame::Setup()
 {
+	// Add global systems
 	SystemManager::Global()->Add<SceneSystem>();
-	m_RenderSystem = SystemManager::Global()->Add<RenderSystem>();
 
-	glm::vec2 resolution = Window::GetResolution();
-	glm::vec2 scaling = Window::GetContentScaling();
-	resolution.x *= scaling.x;
-	resolution.y *= scaling.y;
-	m_RenderSystem->GetPipeline()->SetResolution(resolution);
+	Scripting::Class appClass(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "BaseGameLauncher"), nullptr);
+
+	// Get post draw thunk
+	MonoMethod* postDrawMethod = mono_class_get_method_from_name(appClass.Handle, "_PostDraw", 0);
+	PostDrawFunction = (PostDrawFn)mono_method_get_unmanaged_thunk(postDrawMethod);
 
 	// Launch BaseGameLauncher
-	Scripting::Class appClass(ScriptEngine::GetCoreAssembly()->GetClassFromName("Yonai", "BaseGameLauncher"), nullptr);
 	Method method = appClass.GetMethod("Launch", 0);
 	method.Invoke();
 }
@@ -48,18 +50,8 @@ void BaseGame::InitialiseScripting()
 	);
 }
 
-#include <vector>
-#include <Yonai/Components/Camera.hpp>
-#include <Yonai/Systems/Global/SceneSystem.hpp>
-using namespace Yonai::Systems;
-using namespace Yonai::Components;
 void BaseGame::OnPostDraw()
 {
-	// Blit output to default framebuffer
-	m_RenderSystem->GetPipeline()->GetOutput()->BlitTo();
-}
-
-void BaseGame::OnPreDraw()
-{
-	m_RenderSystem->GetPipeline()->SetResolution(Window::GetResolution());
+	MonoException* exception;
+	PostDrawFunction(nullptr, &exception);
 }
