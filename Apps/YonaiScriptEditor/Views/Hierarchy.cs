@@ -66,6 +66,7 @@ namespace YonaiEditor.Views
 			if (ImGUI.IsItemClicked() && ImGUI.IsWindowFocused())
 				InspectorView.Target = null;
 			HandleResourceDragDrop(worlds[worlds.Length - 1]);
+			HandleEntityDrop(worlds[worlds.Length - 1], null);
 
 			EndDrawing(isOpen);
 		}
@@ -95,9 +96,7 @@ namespace YonaiEditor.Views
 					InspectorView.Target = entity;
 
 				DrawContextMenu(entity);
-				if(HandleEntityDragDrop(entity, transform, nameComponent))
-					// Children may have been modified, re-fetch
-					children = transform?.GetChildren() ?? new Transform[0];
+				HandleEntityDragDrop(entity, transform, nameComponent);
 
 				foreach (Transform child in children)
 					DrawEntity(child.Entity, child);
@@ -236,7 +235,7 @@ namespace YonaiEditor.Views
 		}
 
 		private const string DragDropEntityName = "HierarchyEntity";
-		private static bool HandleEntityDragDrop(Entity entity, Transform transform, NameComponent nameComponent)
+		private static void HandleEntityDragDrop(Entity entity, Transform transform, NameComponent nameComponent)
 		{
 			ImGUI.DragDropFlags dragFlags = ImGUI.DragDropFlags.SourceNoDisableHover;
 			if (ImGUI.BeginDragDropSource(dragFlags))
@@ -246,22 +245,26 @@ namespace YonaiEditor.Views
 				ImGUI.EndDragDropSource();
 			}
 
+			HandleEntityDrop(entity.World, transform);
+		}
+
+		private static void HandleEntityDrop(World world, Transform transform)
+		{
 			if (!ImGUI.BeginDragDropTarget())
-				return false;
+				return;
 
 			Entity droppedEntity = ImGUI.AcceptDragDropPayload(DragDropEntityName, ImGUI.DragDropFlags.AcceptPeekOnly) as Entity;
-			if(!droppedEntity) return false; // Invalid entity
-			if (droppedEntity.World != entity.World) return false; // Restrict drops to being in the same world
+			if (!droppedEntity) return; // Invalid entity
+			if (droppedEntity.World != world) return; // Restrict drops to being in the same world
 
 			Transform droppedTransform = droppedEntity.GetComponent<Transform>();
-			if(!droppedTransform) return false; // Cannot parent entity without transform
+			if (!droppedTransform) return; // Cannot parent entity without transform
 
 			ImGUI.AcceptDragDropPayload(DragDropEntityName);
-			if(ImGUI.DragDropPayloadIsDelivery())
+			if (ImGUI.DragDropPayloadIsDelivery())
 				droppedTransform.Parent = transform;
 
 			ImGUI.EndDragDropTarget();
-			return true;
 		}
 
 		private static void HandleDropTexture(World world, UUID resourceID)
