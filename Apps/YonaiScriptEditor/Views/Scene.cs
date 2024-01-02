@@ -109,7 +109,7 @@ namespace YonaiEditor.Views
 				ImGUI.Image(m_Target, viewportSize);
 
 				if(m_ActiveWorld)
-					HierarchyView.HandleDragDrop(m_ActiveWorld);
+					HierarchyView.HandleResourceDragDrop(m_ActiveWorld);
 
 				DrawTransformGizmo();
 			}
