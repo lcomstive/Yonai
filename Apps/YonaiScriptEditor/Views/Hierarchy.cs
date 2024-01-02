@@ -55,7 +55,7 @@ namespace YonaiEditor.Views
 				ImGUI.TreePop();
 				ImGUI.EndGroup();
 
-				HandleDragDrop(world);
+				HandleResourceDragDrop(world);
 			}
 
 			Vector2 remainingSpace = ImGUI.ContentRegionAvailable;
@@ -65,7 +65,7 @@ namespace YonaiEditor.Views
 			// If selected empty space, deselect inspector
 			if (ImGUI.IsItemClicked() && ImGUI.IsWindowFocused())
 				InspectorView.Target = null;
-			HandleDragDrop(worlds[worlds.Length - 1]);
+			HandleResourceDragDrop(worlds[worlds.Length - 1]);
 
 			EndDrawing(isOpen);
 		}
@@ -83,13 +83,10 @@ namespace YonaiEditor.Views
 
 			bool isSelected = InspectorView.Target?.Equals(entity) ?? false;
 			ImGUI.TreeNodeFlags flags = ImGUI.TreeNodeFlags.OpenOnDoubleClick;
-			flags |= ImGUI.TreeNodeFlags.OpenOnArrow | ImGUI.TreeNodeFlags.SpanFullWidth;
-			if (isSelected)
-				flags |= ImGUI.TreeNodeFlags.Selected;
-			flags |= ImGUI.TreeNodeFlags.NavLeftJumpsBackHere;
-			flags |= ImGUI.TreeNodeFlags.OpenOnArrow;
-			if (children.Length == 0)
-				flags |= ImGUI.TreeNodeFlags.Leaf;
+			flags |= ImGUI.TreeNodeFlags.OpenOnArrow | ImGUI.TreeNodeFlags.SpanFullWidth |
+						ImGUI.TreeNodeFlags.NavLeftJumpsBackHere;
+			if (isSelected) flags |= ImGUI.TreeNodeFlags.Selected;
+			if (children.Length == 0) flags |= ImGUI.TreeNodeFlags.Leaf;
 
 			if(ImGUI.TreeNode($"{nameComponent.Name}##{entity.World.ID}:{entity.ID}", flags))
 			{
@@ -98,6 +95,9 @@ namespace YonaiEditor.Views
 					InspectorView.Target = entity;
 
 				DrawContextMenu(entity);
+				if(HandleEntityDragDrop(entity, transform, nameComponent))
+					// Children may have been modified, re-fetch
+					children = transform?.GetChildren() ?? new Transform[0];
 
 				foreach (Transform child in children)
 					DrawEntity(child.Entity, child);
@@ -211,7 +211,7 @@ namespace YonaiEditor.Views
 			{ typeof(Model), HandleDropModel }
 		};
 
-		internal static void HandleDragDrop(World targetWorld)
+		internal static void HandleResourceDragDrop(World targetWorld)
 		{
 			if (!ImGUI.BeginDragDropTarget())
 				return;
@@ -233,6 +233,35 @@ namespace YonaiEditor.Views
 			}
 
 			ImGUI.EndDragDropTarget();
+		}
+
+		private const string DragDropEntityName = "HierarchyEntity";
+		private static bool HandleEntityDragDrop(Entity entity, Transform transform, NameComponent nameComponent)
+		{
+			ImGUI.DragDropFlags dragFlags = ImGUI.DragDropFlags.SourceNoDisableHover;
+			if (ImGUI.BeginDragDropSource(dragFlags))
+			{
+				ImGUI.Text(nameComponent.Name);
+				ImGUI.SetDragDropPayload(DragDropEntityName, entity);
+				ImGUI.EndDragDropSource();
+			}
+
+			if (!ImGUI.BeginDragDropTarget())
+				return false;
+
+			Entity droppedEntity = ImGUI.AcceptDragDropPayload(DragDropEntityName, ImGUI.DragDropFlags.AcceptPeekOnly) as Entity;
+			if(!droppedEntity) return false; // Invalid entity
+			if (droppedEntity.World != entity.World) return false; // Restrict drops to being in the same world
+
+			Transform droppedTransform = droppedEntity.GetComponent<Transform>();
+			if(!droppedTransform) return false; // Cannot parent entity without transform
+
+			ImGUI.AcceptDragDropPayload(DragDropEntityName);
+			if(ImGUI.DragDropPayloadIsDelivery())
+				droppedTransform.Parent = transform;
+
+			ImGUI.EndDragDropTarget();
+			return true;
 		}
 
 		private static void HandleDropTexture(World world, UUID resourceID)
@@ -272,7 +301,7 @@ namespace YonaiEditor.Views
 					AttachMeshToEntity(meshEntity, meshData);
 				}
 			}
-			else if(model.Meshes.Length == 1)
+			else if (model.Meshes.Length == 1)
 				AttachMeshToEntity(entity, model.Meshes[0]);
 		}
 		#endregion
