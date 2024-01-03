@@ -93,7 +93,11 @@ namespace YonaiEditor.Views
 			{
 				if (ImGUI.IsItemHovered() &&
 					(m_IsArrowKeyDown || ImGUI.IsMouseClicked(MouseButton.Left))) // Mouse click
-					InspectorView.Target = entity;
+				{
+					// Get entity directly from world instead of passing `entity`,
+					//	as it becomes invalid once outside of this function's scope
+					InspectorView.Target = entity.World.GetEntity(entity.ID);
+				}
 
 				DrawContextMenu(entity);
 				HandleEntityDragDrop(entity, transform, nameComponent);
