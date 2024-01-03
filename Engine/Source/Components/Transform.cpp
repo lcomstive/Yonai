@@ -43,11 +43,29 @@ vec3 Transform::GlobalForward() { return vec3(0, 0, 1) * GetGlobalRotation(); }
 Transform* Transform::GetParent() { return m_Parent; }
 void Transform::SetParent(Transform* parent)
 {
+	// Preserve global values, modify local values
+	vec3 globalPos = GetGlobalPosition();
+	vec3 globalScale = GetGlobalScale();
+	quat globalRot = GetGlobalRotation();
+
 	if (m_Parent) m_Parent->RemoveChild(this);
 
 	m_Parent = parent;
 
-	if (m_Parent) m_Parent->AddChild(this);
+	if (m_Parent)
+	{
+		m_Parent->AddChild(this);
+
+		Position = m_Parent->InverseTransformPoint(globalPos);
+		Scale = globalScale / m_Parent->GetGlobalScale();
+		Rotation = inverse(m_Parent->GetGlobalRotation()) * globalRot;
+	}
+	else
+	{
+		Scale = globalScale;
+		Position = globalPos;
+		Rotation = globalRot;
+	}
 }
 
 void Transform::AddChild(Transform* child)
@@ -191,6 +209,12 @@ mat4 Transform::GetModelMatrix(bool global)
 	UpdateModelMatrices();
 	return global ? GlobalModelMatrix : ModelMatrix;
 }
+
+vec3 Transform::InverseTransformPoint(const vec3& point)
+{ return inverse(GetModelMatrix()) * vec4(point, 1); }
+
+vec3 Transform::InverseTransformDirection(const vec3& direction)
+{ return transpose(inverse(GetModelMatrix())) * vec4(direction, 1); }
 
 #pragma region Scripting
 #include <Yonai/Scripting/InternalCalls.hpp>

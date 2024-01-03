@@ -47,6 +47,16 @@ namespace Yonai::Components
 		YonaiAPI glm::mat4 GetModelMatrix(bool global = true);
 		YonaiAPI void SetModelMatrix(glm::mat4& matrix, bool global);
 
+		/// <summary>
+		/// Converts a world coordinate to local space, relative to this transform
+		/// </summary>
+		YonaiAPI glm::vec3 InverseTransformPoint(const glm::vec3& point);
+
+		/// <summary>
+		/// Converts a direction from world space to local space, relative to this transform
+		/// </summary>
+		YonaiAPI glm::vec3 InverseTransformDirection(const glm::vec3& direction);
+
 		#pragma region Getters
 		YonaiAPI glm::vec3 GetScale();
 		YonaiAPI glm::vec3 GetPosition();
