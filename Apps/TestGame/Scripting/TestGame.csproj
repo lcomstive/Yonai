@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Steamworks.NET">
+      <HintPath>..\Assets\Plugins\Steamworks\Windows-x64\Steamworks.NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,13 +44,12 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="YonaiScriptCore">
-	  <!-- Windows -->
+      <!-- Windows -->
       <HintPath>..\..\..\Build\bin\RelWithDebInfo\Assets\Mono\YonaiScriptCore.dll</HintPath>
       <HintPath>..\..\..\Build\bin\Release\Assets\Mono\YonaiScriptCore.dll</HintPath>
       <HintPath>..\..\..\Build\bin\Debug\Assets\Mono\YonaiScriptCore.dll</HintPath>
       <HintPath>..\..\..\Build\bin\MinSizeRel\Assets\Mono\YonaiScriptCore.dll</HintPath>
-
-	  <!-- Mac OS -->
+      <!-- Mac OS -->
       <HintPath>..\..\..\build\bin\Yonai Editor.app\Contents\Resources\Assets\Mono\YonaiScriptCore.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -60,6 +62,7 @@
     <Compile Include="RigidbodyTest.cs" />
     <Compile Include="Systems\DelayAudioSystem.cs" />
     <Compile Include="Systems\MoveAlongPathSystem.cs" />
+    <Compile Include="Systems\SteamSystem.cs" />
     <Compile Include="TestComponent.cs" />
     <Compile Include="TestSystem.cs" />
   </ItemGroup>

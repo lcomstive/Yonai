@@ -1,41 +1,41 @@
 [
   {
-    "ID": "14126441777097552486",
+    "ID": "14060605698271055994",
     "Path": "assets://Textures/Grid.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "14280357437017993248",
+    "ID": "16272223474119637005",
     "Path": "assets://Shaders/Default3D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "17908209940943529546",
+    "ID": "8787655448681844114",
     "Path": "assets://Materials/Default3D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "14752794101036265094",
+    "ID": "17269554719830388311",
     "Path": "assets://Shaders/Default2D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "1017494473085762112",
+    "ID": "2157618283382925979",
     "Path": "assets://Materials/Default2D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "3621460980196833214",
+    "ID": "9247822769134437769",
     "Path": "assets://Models/Quad.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "7563430161392765990",
+    "ID": "15922102287645393232",
     "Path": "assets://Models/Cube.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "4444677330267790188",
+    "ID": "16865557747872768151",
     "Path": "assets://Models/Sphere.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
@@ -540,18 +540,73 @@
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "10293012253894346084",
+    "ID": "14709118232727641463",
+    "Path": "assets://Shaders/NewSpriteShader",
+    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "11601931086266236362",
+    "Path": "project://Assets/Materials/Default3D.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "14017950206339023088",
     "Path": "project://Assets/Models/Backpack/Survival_BackPack_2.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "18150890654065451258",
-    "Path": "Materials/Survival_BackPack_2.fbx/DefaultMaterial",
+    "ID": "1786084564599229147",
+    "Path": "project://Assets/Models/Backpack/Materials/Survival_BackPack_2.fbx/DefaultMaterial",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "14709118232727641463",
-    "Path": "assets://Shaders/NewSpriteShader",
-    "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+    "ID": "17964454931835769871",
+    "Path": "project://Assets/Models/Presents/internal_ground_ao_texture.jpeg",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "12752834452643401140",
+    "Path": "project://Assets/Models/Presents/present01_Base_color.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "6529733465211671449",
+    "Path": "project://Assets/Models/Presents/present02_Base_color.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "16233636793793397385",
+    "Path": "project://Assets/Models/Presents/present03_Base_color.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "14889229156233234410",
+    "Path": "project://Assets/Models/Presents/present_Metallic.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "1008391234927806332",
+    "Path": "project://Assets/Models/Presents/present_Mixed_AO.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "4755523740298654029",
+    "Path": "project://Assets/Models/Presents/present_normalOpenGL.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "14679186557920007742",
+    "Path": "project://Assets/Models/Presents/present_Roughness.png",
+    "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
+  },
+  {
+    "ID": "5152608208752406834",
+    "Path": "project://Assets/Models/Presents/Presents.material",
+    "Type": "Yonai.Graphics.Material, YonaiScriptCore"
+  },
+  {
+    "ID": "13574926657852518511",
+    "Path": "project://Assets/Models/Presents/presents.fbx",
+    "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   }
 ]

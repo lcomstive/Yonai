@@ -25,6 +25,8 @@ namespace TestGame
 				Log.Debug("Main camera set to " + Camera.Main.GetComponent<NameComponent>().Name);
 			}
 
+			Add<SteamSystem>().Enable();
+
 			World.AddSystem<CameraControlSystem>();
 			World.AddSystem<DelayAudioSystem>();
 			World.AddSystem<MoveAlongPathSystem>();
@@ -46,6 +48,8 @@ namespace TestGame
 
 			m_SoundMixer = Resource.Load<AudioMixer>("assets://Audio/Mixers/SFX.mixer");
 		}
+
+		protected override void Destroyed() => Remove<SteamSystem>();
 
 		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
 

@@ -2,7 +2,8 @@
 	"Name": "TestGame",
 	"AssetDir": "Assets",
 	"Assemblies": [
-		"project://Scripting/bin/TestGame.dll"
+		"project://Scripting/bin/TestGame.dll",
+		"project://Assets/Plugins/Steamworks/Windows-x64/Steamworks.NET.dll"
 	],
 	"EditorAssemblies": []
 }
