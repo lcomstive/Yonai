@@ -195,7 +195,7 @@ namespace YonaiEditor.Views
 		private void CreatePrimitive(World world, UUID meshID, string name)
 		{
 			MeshRenderer meshRenderer = CreateEntity(world, name).AddComponent<MeshRenderer>();
-			meshRenderer.Mesh = meshID;
+			meshRenderer.MeshID = meshID;
 			meshRenderer.Material = Resource.Get<Material>("Materials/Default3D");
 		}
 
@@ -285,8 +285,8 @@ namespace YonaiEditor.Views
 		private static void AttachMeshToEntity(Entity e, Model.MeshData meshData)
 		{
 			MeshRenderer renderer = e.AddComponent<MeshRenderer>();
-			renderer.Mesh = meshData.Mesh;
-			renderer.Material = meshData.Material;
+			renderer.MeshID = meshData.Mesh;
+			renderer.MaterialID = meshData.Material;
 		}
 
 		private static void HandleDropModel(World world, UUID resourceID)

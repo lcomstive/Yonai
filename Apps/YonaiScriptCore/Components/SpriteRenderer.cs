@@ -1,6 +1,4 @@
-﻿using System;
-using Yonai.Graphics;
-using System.Runtime.CompilerServices;
+﻿using Yonai.Graphics;
 
 namespace Yonai
 {

@@ -56,12 +56,12 @@ namespace Yonai.Graphics.Pipelines
 				{
 					MeshRenderer renderer = renderers[i];
 
-					if(renderer.Material == UUID.Invalid ||
-						renderer.Mesh == UUID.Invalid)
+					if(renderer.MaterialID == UUID.Invalid ||
+						renderer.MeshID == UUID.Invalid)
 						continue;
 
-					Mesh mesh = Resource.Get<Mesh>(renderer.Mesh);
-					Material material = Resource.Get<Material>(renderer.Material);
+					Mesh mesh = Resource.Get<Mesh>(renderer.MeshID);
+					Material material = Resource.Get<Material>(renderer.MaterialID);
 
 					if(!mesh || !material || !material.Shader)
 						continue; // Invalid resources
