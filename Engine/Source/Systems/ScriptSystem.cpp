@@ -139,6 +139,11 @@ void ScriptSystem::OnScriptingReloadedAfter()
 	MonoException* exception = nullptr;
 
 	// Enable
+	SystemMethodInitialise(instance, GetWorldID(), &exception);
 	SystemMethodEnabled(instance, true, &exception);
 	// SystemMethodStart(instance, &exception);
+
+	// "Raising" the exception gets mono to print it to the console output
+	if (exception)
+		mono_raise_exception(exception);
 }
