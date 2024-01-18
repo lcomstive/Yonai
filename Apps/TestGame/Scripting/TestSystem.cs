@@ -25,7 +25,7 @@ namespace TestGame
 				Log.Debug("Main camera set to " + Camera.Main.GetComponent<NameComponent>().Name);
 			}
 
-			Add<SteamSystem>().Enable();
+			// Add<SteamSystem>().Enable();
 
 			World.AddSystem<CameraControlSystem>();
 			World.AddSystem<DelayAudioSystem>();

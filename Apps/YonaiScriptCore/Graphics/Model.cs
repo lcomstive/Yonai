@@ -43,6 +43,9 @@ namespace Yonai.Graphics
 
 			ResourceID = resourceID;
 			Handle = handle;
+
+			if(Handle != IntPtr.Zero)
+				RefreshMeshes();
 		}
 
 		protected override void OnNativeLoad() => OnLoad();
@@ -56,7 +59,12 @@ namespace Yonai.Graphics
 
 			ImportSettings = settings;
 
-			// Get meshes
+			RefreshMeshes();
+		}
+
+		private void RefreshMeshes()
+		{
+			// Get meshes from C++ code
 			_GetMeshes(Handle, out ulong[] meshIDs, out ulong[] materialIDs);
 
 			Meshes = new MeshData[meshIDs.Length];
