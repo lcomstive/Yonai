@@ -16,6 +16,10 @@ namespace YonaiEditor.Inspectors
 	{
 		private Entity m_Target;
 
+		/// Key:   Component type
+		/// Value: Component inspector
+		private Dictionary<Type, CustomInspector> m_ComponentInspectors = new Dictionary<Type, CustomInspector>();
+
 		private static List<Type> s_ComponentTypes = new List<Type>();
 
 		public override void Opened()
@@ -27,7 +31,22 @@ namespace YonaiEditor.Inspectors
 
 		public override void Closed() => SceneManager.WorldChanged -= OnWorldChanged;
 
-		public override void OnTargetChanged() => m_Target = Target as Entity;
+		public override void OnTargetChanged()
+		{
+			m_Target = Target as Entity;
+
+			m_ComponentInspectors.Clear();
+			Component[] components = m_Target.GetComponents();
+			foreach (Component component in components)
+			{
+				Type componentType = component.GetType();
+				CustomInspector inspector = InspectorView.CreateInspector(componentType);
+				if (inspector == null) continue;
+
+				inspector.Target = component;
+				m_ComponentInspectors.Add(componentType, inspector);
+			}
+		}
 
 		private void OnWorldChanged(World world, bool added)
 		{
@@ -88,9 +107,8 @@ namespace YonaiEditor.Inspectors
 				return; // Skip name component
 
 			Type type = component.GetType();
-			CustomInspector inspector = InspectorView.FindInspector(type);
-			if (inspector == null)
-				return; // Nothing to draw
+			if (!m_ComponentInspectors.TryGetValue(type, out CustomInspector inspector))
+				return;
 
 			bool foldout = ImGUI.Foldout(type.Name, true);
 			DrawComponentContextMenu(type, component);

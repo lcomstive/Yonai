@@ -9,64 +9,103 @@ namespace YonaiEditor.Views
 {
 	public class InspectorView : View
 	{
-		private static object m_Target = null;
-		private static CustomInspector s_CurrentInspector = null;
+		private object m_Target = null;
+		private CustomInspector m_CurrentInspector = null;
 
 		/// <summary>
 		/// Target object to show properties for
 		/// </summary>
 		public static object Target
 		{
-			get => m_Target;
-			set
-			{
-				if (m_Target == value) return; // No change
-				Type previousType = m_Target?.GetType();
-				Type newType = value?.GetType();
-
-				// Assign target
-				m_Target = value;
-
-				// Check for inspector type changes
-				if (previousType == newType && newType != typeof(VFSFile))
-				{
-					if(s_CurrentInspector != null)
-					{
-						s_CurrentInspector.Target = m_Target;
-						s_CurrentInspector.OnTargetChanged();
-					}
-					return; // Nothing further needs to be done
-				}
-
-				// Inform existing inspector of closure
-				s_CurrentInspector?.Closed();
-
-				if (newType == typeof(VFSFile))
-				{
-					VFSFile vfsFile = (VFSFile)value;
-					s_CurrentInspector = FindInspector(vfsFile);
-				}
-				else
-					s_CurrentInspector = FindInspector(newType);
-
-				if(s_CurrentInspector != null)
-				{
-					s_CurrentInspector.Target = m_Target;
-					s_CurrentInspector.Opened();
-					s_CurrentInspector.OnTargetChanged();
-				}
-			}
+			get => MainInstance?.m_Target;
+			set => MainInstance?.SetTarget(value);
 		}
 
 		private static CustomInspector s_DefaultInspector = new CustomInspector();
-		private static Dictionary<Type, CustomInspector> s_Inspectors = new Dictionary<Type, CustomInspector>();
-		private static Dictionary<string, CustomInspector> s_FileExtensions = new Dictionary<string, CustomInspector>();
+		private static Dictionary<Type, Type> s_Inspectors = new Dictionary<Type, Type>();
+		private static Dictionary<string, Type> s_FileExtensions = new Dictionary<string, Type>();
+
+		private static InspectorView MainInstance = null;
+		private static List<InspectorView> s_Instances = new List<InspectorView>();
 
 		[MenuItem("Window/Inspector")]
 		private static void MenuCallback() => EditorUIService.Open<InspectorView>();
 
-		protected override void Opened() => EditorService.StateChanged += OnEditorStateChanged;
-		protected override void Closed() => EditorService.StateChanged -= OnEditorStateChanged;
+		public void SetTarget(object value)
+		{
+			if (m_Target == value) return; // No change
+
+			Type previousType = m_Target?.GetType();
+			Type newType = value?.GetType();
+
+			// Assign target
+			m_Target = value;
+
+			// Check for inspector type changes
+			if (previousType == newType && newType != typeof(VFSFile))
+			{
+				if (m_CurrentInspector != null)
+				{
+					m_CurrentInspector.Target = m_Target;
+					m_CurrentInspector.OnTargetChanged();
+				}
+				return; // Nothing further needs to be done
+			}
+
+			// Inform existing inspector of closure
+			m_CurrentInspector?.Closed();
+
+			if (newType == typeof(VFSFile))
+			{
+				VFSFile vfsFile = (VFSFile)value;
+				m_CurrentInspector = CreateInspector(vfsFile);
+			}
+			else
+				m_CurrentInspector = CreateInspector(newType);
+
+			if (m_CurrentInspector != null)
+			{
+				m_CurrentInspector.Target = m_Target;
+				m_CurrentInspector.m_Inspector = this;
+				m_CurrentInspector.Opened();
+				m_CurrentInspector.OnTargetChanged();
+			}
+		}
+
+		protected override void Opened()
+		{
+			// This is the main instance, insert at beginning
+			MainInstance = this;
+			EditorService.StateChanged += OnEditorStateChanged;
+		}
+
+		protected override void Closed()
+		{
+			MainInstance = null;
+			EditorService.StateChanged -= OnEditorStateChanged;
+		}
+
+		/// <summary>
+		/// Creates a new inspector window, showing properties of <paramref name="target"/>
+		/// </summary>
+		/// <returns>
+		/// Instance of inspector window, can be used to change
+		/// the target (<see cref="SetTarget(object)"/>) or close
+		/// the window (<see cref="Close(InspectorView)"/>)
+		/// </returns>
+		public static InspectorView Open(object target)
+		{
+			InspectorView inspector = new InspectorView();
+			s_Instances.Add(inspector);
+			inspector.SetTarget(target);
+			return inspector;
+		}
+
+		public static void Close(InspectorView inspector)
+		{
+			if(s_Instances.Contains(inspector))
+				s_Instances.Remove(inspector);
+		}
 
 		private void OnEditorStateChanged(EditorState oldState, EditorState newState)
 		{
@@ -89,16 +128,21 @@ namespace YonaiEditor.Views
 					break;
 				}
 			}
+
+			if(this == MainInstance)
+				foreach(InspectorView instance in s_Instances)
+					instance.OnEditorStateChanged(oldState, newState);
 		}
 
 		protected override void Draw()
 		{
 			bool isOpen = true;
-			if (ImGUI.Begin("Inspector", ref isOpen))
+			int index = s_Instances.IndexOf(this);
+			if (ImGUI.Begin($"Inspector##{index}", ref isOpen))
 			{
-				if (Target != null && s_CurrentInspector != null)
-					s_CurrentInspector.DrawInspector();
-				else if (Target != null)
+				if (m_Target != null && m_CurrentInspector != null)
+					m_CurrentInspector.DrawInspector();
+				else if (m_Target != null)
 					ImGUI.Text("No inspector found", Colour.Grey);
 			}
 
@@ -106,7 +150,17 @@ namespace YonaiEditor.Views
 
 			// Check if window requested to be closed
 			if (!isOpen)
-				EditorUIService.Close<InspectorView>();
+			{
+				if (this == MainInstance)
+					EditorUIService.Close<InspectorView>();
+				else
+					Close(this);
+			}
+
+			// If this is the main inspector instance, call Draw() on the other inspectors
+			if(this == MainInstance)
+				for(int i = s_Instances.Count - 1; i >= 0; i--)
+					s_Instances[i].Draw();
 		}
 
 		internal static void GetCustomInspectors()
@@ -125,24 +179,18 @@ namespace YonaiEditor.Views
 					foreach (Type type in types)
 					{
 						CustomInspectorAttribute attribute = type.GetCustomAttribute<CustomInspectorAttribute>();
-						if (attribute == null)
-							continue;
-
-						CustomInspector instance = Activator.CreateInstance(type) as CustomInspector;
-						if (instance != null)
-							AddCustomInspector(attribute, instance);
-						else
-							Log.Warning($"CustomInspector attribute is on class '{type.Name}', but this class does not inherit YonaiEditor.CustomInspector");
+						if (attribute != null)
+							AddCustomInspector(attribute, type);
 					}
 				}
 				catch { }
 			}
 		}
 
-		private static void AddCustomInspector(CustomInspectorAttribute attribute, CustomInspector inspector)
+		private static void AddCustomInspector(CustomInspectorAttribute attribute, Type inspectorType)
 		{
 			if (attribute.TargetType != null)
-				s_Inspectors.Add(attribute.TargetType, inspector);
+				s_Inspectors.Add(attribute.TargetType, inspectorType);
 
 			if (attribute.FileExtensions == null)
 				return;
@@ -153,7 +201,7 @@ namespace YonaiEditor.Views
 				string finalExtension = extension.ToLower();
 				if (finalExtension[0] != '.')
 					finalExtension = $".{finalExtension}";
-				s_FileExtensions.Add(finalExtension, inspector);
+				s_FileExtensions.Add(finalExtension, inspectorType);
 			}
 		}
 
@@ -161,16 +209,16 @@ namespace YonaiEditor.Views
 		/// Checks for valid inspector in <see cref="s_Inspectors"/> by type.
 		/// Searches recursively down inheritance tree, from topmost down to base type
 		/// </summary>
-		internal static CustomInspector FindInspector(Type type)
+		internal static CustomInspector CreateInspector(Type targetType)
 		{
-			if (type == null) return s_DefaultInspector;
-			if(s_Inspectors.ContainsKey(type))
-				return s_Inspectors[type];
-			return FindInspector(type.BaseType);
+			if(targetType == null) return s_DefaultInspector;
+			if(s_Inspectors.TryGetValue(targetType, out Type inspectorType))
+				return Activator.CreateInstance(inspectorType) as CustomInspector;
+			return CreateInspector(targetType.BaseType);
 		}
 
-		internal static CustomInspector FindInspector(VFSFile file) =>
+		internal static CustomInspector CreateInspector(VFSFile file) =>
 			string.IsNullOrEmpty(file.Extension) || !s_FileExtensions.ContainsKey(file.Extension) ?
-				null : s_FileExtensions[file.Extension.ToLower()];
+			null : Activator.CreateInstance(s_FileExtensions[file.Extension.ToLower()]) as CustomInspector;
 	}
 }

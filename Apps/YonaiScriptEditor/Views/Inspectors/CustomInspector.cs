@@ -22,6 +22,9 @@ namespace YonaiEditor
 
 		public object Target { get; internal set; }
 
+		internal InspectorView m_Inspector;
+		protected InspectorView Inspector => m_Inspector;
+
 		/// <summary>
 		/// Called when this inspector is opened
 		/// </summary>

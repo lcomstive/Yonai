@@ -415,6 +415,10 @@ namespace YonaiEditor.Views
 			}
 
 			ImGUI.Separator();
+			if (ImGUI.Selectable("Inspect"))
+				InspectorView.Open(file);
+
+			ImGUI.Separator();
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ImGUI.Selectable("Show in Explorer"))
 				ShowInExplorer(file.IsDirectory ? file.FullPath : file.ParentDirectory);
 			else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ImGUI.Selectable("Show in Finder"))

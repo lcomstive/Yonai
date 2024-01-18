@@ -123,14 +123,17 @@ namespace YonaiEditor.Views
 		{
 			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{entity.World.ID}:{entity.ID}", ImGUI.PopupFlags.MouseButtonRight))
 				return;
-			InspectorView.Target = entity;
+			// InspectorView.Target = entity;
 
 			if (ImGUI.Selectable("Delete"))
 				entity.Destroy();
 
+			if (ImGUI.Selectable("Inspect"))
+				InspectorView.Open(entity.World.GetEntity(entity.ID)); // Pass copy of entity as target
+
 			ImGUI.Separator();
 
-			DrawContextMenuContents(entity.World);
+			DrawContextMenuContents(entity.World, true);
 
 			ImGUI.EndPopup();
 		}
@@ -145,7 +148,8 @@ namespace YonaiEditor.Views
 			ImGUI.EndPopup();
 		}
 
-		private void DrawContextMenuContents(World world)
+		/// <param name="entityMenu">When true, this menu has been created as a part of right-clicking an entity</param>
+		private void DrawContextMenuContents(World world, bool entityMenu = false)
 		{
 			if (ImGUI.BeginMenu("New"))
 			{
@@ -177,7 +181,10 @@ namespace YonaiEditor.Views
 				ImGUI.EndMenu();
 			}
 
-			if (SceneManager.MultipleScenesActive)
+			if (!entityMenu && ImGUI.Selectable("Inspect"))
+				InspectorView.Open(world);
+
+			if (!entityMenu && SceneManager.MultipleScenesActive)
 			{
 				ImGUI.Separator();
 				if (ImGUI.Selectable("Unload World"))
