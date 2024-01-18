@@ -134,11 +134,15 @@ namespace Yonai
 		// Called from C++
 		private void _Enable(bool enable)
 		{
-			m_Enabled = enable;
-			if (m_Enabled)
-				Enabled();
-			else
-				Disabled();
+			try
+			{
+				m_Enabled = enable;
+				if (m_Enabled)
+					Enabled();
+				else
+					Disabled();
+			}
+			catch(Exception e) { Log.Exception(e); }
 		}
 		#endregion
 	}
