@@ -158,9 +158,6 @@ ADD_MANAGED_METHOD(Entity, AddComponent, MonoObject*, (uint64_t worldID, uint64_
 	Component* component = nullptr;
 	Assembly::ManagedComponentData managedData = Assembly::GetManagedComponentData(typeHash);
 
-	const char* componentTypeName = mono_type_get_name(managedType);
-	spdlog::trace("AddComponent<{}>", componentTypeName);
-
 	if (!managedData.AddFn)
 		component = world->AddComponent(entityID, managedType);
 	else

@@ -89,24 +89,25 @@ namespace YonaiEditor.Views
 			if (isSelected) flags |= ImGUI.TreeNodeFlags.Selected;
 			if (children.Length == 0) flags |= ImGUI.TreeNodeFlags.Leaf;
 
-			if(ImGUI.TreeNode($"{nameComponent.Name}##{entity.World.ID}:{entity.ID}", flags))
+			bool nodeOpen = ImGUI.TreeNode($"{nameComponent.Name}##{entity.World.ID}:{entity.ID}", flags);
+
+			if (ImGUI.IsItemHovered() &&
+				(m_IsArrowKeyDown || ImGUI.IsMouseClicked(MouseButton.Left))) // Mouse click
 			{
-				if (ImGUI.IsItemHovered() &&
-					(m_IsArrowKeyDown || ImGUI.IsMouseClicked(MouseButton.Left))) // Mouse click
-				{
-					// Get entity directly from world instead of passing `entity`,
-					//	as it becomes invalid once outside of this function's scope
-					InspectorView.Target = entity.World.GetEntity(entity.ID);
-				}
-
-				DrawContextMenu(entity);
-				HandleEntityDragDrop(entity, transform, nameComponent);
-
-				foreach (Transform child in children)
-					DrawEntity(child.Entity, child);
-
-				ImGUI.TreePop();
+				// Get entity directly from world instead of passing `entity`,
+				//	as it becomes invalid once outside of this function's scope
+				InspectorView.Target = entity.World.GetEntity(entity.ID);
 			}
+
+			DrawContextMenu(entity);
+			HandleEntityDragDrop(entity, transform, nameComponent);
+
+			if (!nodeOpen) return;
+
+			foreach (Transform child in children)
+				DrawEntity(child.Entity, child);
+
+			ImGUI.TreePop();
 		}
 
 		private void EndDrawing(bool isOpen)
