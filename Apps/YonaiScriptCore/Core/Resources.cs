@@ -85,8 +85,10 @@ namespace Yonai
 				instance.Import(importSettings);
 
 				// Cache created resource
-				s_Instances.Add(instance.ResourceID, instance);
-				s_Paths.Add(path, instance.ResourceID);
+				if(!s_Instances.ContainsKey(instance.ResourceID))
+					s_Instances.Add(instance.ResourceID, instance);
+				if(!s_Paths.ContainsKey(path))
+					s_Paths.Add(path, instance.ResourceID);
 			}
 			else
 			{

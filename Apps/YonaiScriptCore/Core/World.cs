@@ -82,6 +82,12 @@ namespace Yonai
 				DestroyEntity(entity);
 		}
 
+		protected override void OnImported()
+		{
+			if(VFS.Exists(ResourcePath))
+				OnDeserialize(VFS.ReadJSON(ResourcePath));
+		}
+
 		public JObject OnSerialize()
 		{
 			JObject json = new JObject();

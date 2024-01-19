@@ -41,7 +41,9 @@ namespace Yonai
 			LoadInitialScene();
 
 			// TODO: Change render pipeline type based on project settings
-			Renderer.SetPipeline(new Graphics.Pipelines.ForwardRenderPipeline());
+			var pipeline = new Graphics.Pipelines.ForwardRenderPipeline();
+			pipeline.Resolution = Window.Resolution;
+			Renderer.SetPipeline(pipeline);
 		}
 
 		private static void LoadAssemblies()

@@ -13,8 +13,10 @@ namespace Yonai.Systems
 				Renderer.Pipeline.Resolution = resolution;
 		}
 
-		// Copy pipeline output to window
-		protected override void PostDraw() =>
-			Renderer.Pipeline?.Output.BlitTo(null);
+		protected override void Draw()
+		{
+			if(Camera.Main)
+				Renderer.Pipeline.Draw(Camera.Main);
+		}
 	}
 }
