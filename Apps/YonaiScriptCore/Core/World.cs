@@ -56,7 +56,13 @@ namespace Yonai
 
 		protected override void OnLoad()
 		{
-			Name = new VFSFile(ResourcePath).FileNameWithoutExtension;
+			try { Name = new VFSFile(ResourcePath).FileNameWithoutExtension; }
+			catch(Exception e)
+			{
+				Name = "World";
+				Log.Exception(e, $"Failed to get world name from '{ResourcePath}'");
+				Log.Trace(Environment.StackTrace);
+			}
 
 			ulong resourceID = ResourceID;
 			_Load(ResourcePath, out resourceID, out IntPtr handle);

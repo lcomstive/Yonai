@@ -1,8 +1,8 @@
-using System;
-using System.IO;
 using Yonai;
 using Yonai.IO;
+using System.IO;
 using Newtonsoft.Json;
+using YonaiEditor.Systems;
 using Newtonsoft.Json.Linq;
 
 namespace YonaiEditor.BuildProcess
@@ -94,15 +94,8 @@ namespace YonaiEditor.BuildProcess
 			*/
 			json["GlobalSystems"] = systems;
 
-			// Scenes
-			// NOTE: Currently just adds all .json files in project://Scenes
-			// TODO: Give user ability to re-order scenes and exclude scenes
-			JArray scenes = new JArray();
-			VFSFile[] sceneFiles = VFS.GetFiles("project://Assets/Scenes", true /* Recurse */);
-			foreach(VFSFile sceneFile in sceneFiles)
-				if(sceneFile.Extension == ".json")
-					scenes.Add(sceneFile.FullPath);
-			json["Scenes"] = scenes;
+			// Scene to load on startup
+			json["InitialScene"] = ProjectHubService.ActiveProject.InitialScene.FullPath;
 
 			// Save to output folder
 			VFS.WriteJSON("build://Assets/Launch.json", json, false /* Indent */);

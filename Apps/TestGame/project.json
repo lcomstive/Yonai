@@ -1,6 +1,7 @@
 {
 	"Name": "TestGame",
 	"AssetDir": "Assets",
+	"InitialScene": "build://ProjectFiles/Scenes/Test World.world",
 	"Assemblies": [
 		"project://Scripting/bin/TestGame.dll",
 		"project://Assets/Plugins/Steamworks/Windows-x64/Steamworks.NET.dll"

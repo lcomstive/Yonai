@@ -38,8 +38,7 @@ namespace Yonai
 			if (JSON.ContainsKey("GlobalSystems") && JSON["GlobalSystems"].GetType() == typeof(JArray))
 				LoadGlobalSystems();
 
-			if (JSON.ContainsKey("Scenes") && JSON["Scenes"].GetType() == typeof(JArray))
-				LoadInitialScene();
+			LoadInitialScene();
 
 			// TODO: Change render pipeline type based on project settings
 			Renderer.SetPipeline(new Graphics.Pipelines.ForwardRenderPipeline());
@@ -56,17 +55,28 @@ namespace Yonai
 
 		private static void LoadInitialScene()
 		{
-			string scenePath = JSON["Scenes"].Values<string>().FirstOrDefault();
-			/*
-			World initialWorld = World.Create(VFS.ReadJSON(scenePath));
-			if (initialWorld && initialWorld.ID != UUID.Invalid)
-				SceneManager.Load(initialWorld);
+			string scenePath = JSON["InitialScene"]?.Value<string>();
+			if(string.IsNullOrEmpty(scenePath))
+			{
+				Log.Error("No initial scene is available");
+				Application.Exit();
+				return;
+			}
 			else
-				Log.Warning($"Failed to load initial scene '{scenePath}'");
-			*/
+				Log.Trace($"Loading initial scene '{scenePath}'");
+
+			if(!VFS.Exists(scenePath))
+			{
+				Log.Error($"Initial scene '{scenePath}' could not be found in the filesystem");
+				Application.Exit();
+				return;
+			}
+
 			World world = Resource.Load<World>(scenePath);
-			if (world)
-				SceneManager.Load(world);
+			SceneManager.Load(world);
+
+			SpriteRenderer[] spriteRenderers = world.GetComponents<SpriteRenderer>();
+			Log.Warning("Sprite renderers: " + spriteRenderers.Length);
 		}
 
 		private static void LoadBaseSystems()
@@ -94,8 +104,17 @@ namespace Yonai
 		// Called from C++
 		private static void _PostDraw()
 		{
-			if(YonaiSystem.Has<RenderSystem>())
-				Renderer.Pipeline.Output.BlitTo(null);
+			if(!YonaiSystem.Has<RenderSystem>()) return;
+
+			IRenderPipeline renderPipeline = Renderer.Pipeline;
+			if(renderPipeline == null)
+			{
+				Log.Critical("Render system present but no render pipeline has been set?");
+				Application.Exit();
+				return;
+			}
+
+			renderPipeline.Output.BlitTo(null);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -14,6 +14,11 @@ namespace YonaiEditor
 
 		public VFSFile AssetDirectory { get; set; }
 
+		/// <summary>
+		/// Scene to first load when launching built game
+		/// </summary>
+		public VFSFile InitialScene { get; set; }
+
 		public string[] Assemblies { get; set; }
 
 		public string[] EditorAssemblies { get; set; }
@@ -23,6 +28,7 @@ namespace YonaiEditor
 			Name = name;
 			Path = "project://project.json";
 			AssetDirectory = "Assets";
+			InitialScene = string.Empty;
 			Assemblies = new string[0];
 			EditorAssemblies = new string[0];
 		}
@@ -46,15 +52,17 @@ namespace YonaiEditor
 
 		public void OnDeserialize(JObject json)
 		{
-			Name = json["Name"].Value<string>();
-			AssetDirectory = (VFSFile)json["AssetDir"].Value<string>();
-			Assemblies = json["Assemblies"].Values<string>().ToArray();
-			EditorAssemblies = json["EditorAssemblies"].Values<string>().ToArray();
+			Name = json["Name"]?.Value<string>() ?? "Project Name";
+			InitialScene = (VFSFile)(json["InitialScene"]?.Value<string>() ?? string.Empty);
+			AssetDirectory = (VFSFile)(json["AssetDir"]?.Value<string>() ?? "Assets");
+			Assemblies = json["Assemblies"]?.Values<string>().ToArray() ?? new string[0];
+			EditorAssemblies = json["EditorAssemblies"]?.Values<string>().ToArray() ?? new string[0];
 		}
 
 		public JObject OnSerialize() => new JObject(
 				new JProperty("Name", Name),
 				new JProperty("AssetDir", AssetDirectory.FullPath),
+				new JProperty("InitialScene", InitialScene.FullPath),
 				new JProperty("Assemblies", new JArray(Assemblies)),
 				new JProperty("EditorAssemblies", new JArray(EditorAssemblies))
 			);

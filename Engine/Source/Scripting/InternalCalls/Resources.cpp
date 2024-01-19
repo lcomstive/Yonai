@@ -14,7 +14,7 @@ ADD_MANAGED_METHOD(Resource, GetPath, MonoString*, (uint64_t id))
 }
 
 ADD_MANAGED_METHOD(Resource, GetID, uint64_t, (MonoString* path))
-{ return Resource::GetID(mono_string_to_utf8(path)); }
+{ return path ? Resource::GetID(mono_string_to_utf8(path)) : InvalidResourceID; }
 
 ADD_MANAGED_METHOD(Resource, CreateID, uint64_t, ())
 { return UUID(); }

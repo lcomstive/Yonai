@@ -11,7 +11,7 @@ using namespace Yonai::IO;
 using namespace Yonai::Systems;
 using namespace Yonai::Scripting;
 
-typedef void (*PostDrawFn)(MonoObject*, MonoException**);
+typedef void (*PostDrawFn)(MonoException**);
 PostDrawFn PostDrawFunction;
 
 string AssembliesPath = "/Assets/Editor/Mono";
@@ -52,6 +52,9 @@ void BaseGame::InitialiseScripting()
 
 void BaseGame::OnPostDraw()
 {
-	MonoException* exception;
-	PostDrawFunction(nullptr, &exception);
+	MonoException* exception = nullptr;
+	PostDrawFunction(&exception);
+
+	if(exception)
+		mono_raise_exception(exception);
 }

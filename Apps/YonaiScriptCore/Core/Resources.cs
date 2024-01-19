@@ -23,6 +23,8 @@ namespace Yonai
 		/// <returns>ID of found resource, or <see cref="UUID.Invalid"/> if not found</returns>
 		public static UUID GetID(string path)
 		{
+			if(string.IsNullOrEmpty(path)) return UUID.Invalid;
+
 			// Check native resourceIDs
 			UUID id = _GetID(path);
 			if(id != UUID.Invalid) return id;
@@ -41,7 +43,7 @@ namespace Yonai
 		public static bool Exists(UUID resourceID) => s_Instances.ContainsKey(resourceID) || _Exists(resourceID);
 
 		/// <returns>True if resource path is found matching <paramref name="path"/></returns>
-		public static bool Exists(string path) => s_Paths.ContainsKey(path);
+		public static bool Exists(string path) => !string.IsNullOrEmpty(path) ? s_Paths.ContainsKey(path) : false;
 		public static bool Exists(VFSFile file) => s_Paths.ContainsKey(file.FullPath);
 
 		/// <summary>
