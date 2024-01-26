@@ -82,12 +82,17 @@ namespace YonaiEditor.Inspectors
 					DrawInspector(system);
 					ImGUI.EndTable();
 
+					bool enabled = system.IsEnabled;
+					if (ImGUI.Checkbox("Enable", ref enabled))
+						system.Enable(enabled);
+					ImGUI.SameLine();
+
 					Vector2 buttonSize = new Vector2(15, 15);
 					ImGUI.SetCursorPosX(availableWidth - buttonSize.x * 4);
 					if (ImGUI.ButtonImage(Icons.Get("Return"), buttonSize))
 					{
 						m_Target.RemoveSystem(system.GetType());
-						m_Target.AddSystem(system.GetType());
+						m_Target.AddSystem(system.GetType()).Enable(enabled);
 					}
 					if (ImGUI.IsItemHovered()) ImGUI.SetTooltip("Reset to default values");
 

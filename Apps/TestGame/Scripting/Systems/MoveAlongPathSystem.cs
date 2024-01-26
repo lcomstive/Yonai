@@ -5,8 +5,13 @@ namespace TestGame.Systems
 {
 	public class MoveAlongPathSystem : YonaiSystem
 	{
+		[ShowInInspector]
+		private float m_Timer;
+
 		protected override void Update()
 		{
+			m_Timer += Time.DeltaTime;
+
 			(MoveAlongPath[] paths, Transform[] transforms) = World.GetComponents<MoveAlongPath, Transform>();
 			for(int i = 0; i < paths.Length; i++)
 			{
