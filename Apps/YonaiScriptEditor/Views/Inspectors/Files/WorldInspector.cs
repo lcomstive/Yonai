@@ -19,6 +19,26 @@ namespace YonaiEditor.Inspectors
 		{
 			if (s_SystemTypes.Count == 0)
 				CacheSystems();
+
+			EditorService.StateChanged += OnEditorStateChanged;
+		}
+
+		private void OnEditorStateChanged(EditorState oldState, EditorState newState)
+		{
+			if (oldState != EditorState.Edit && newState != EditorState.Edit)
+				return; // Not entering or exiting play mode
+
+			foreach(World world in SceneManager.GetActiveScenes())
+			{
+				// World is cloned when entering play mode.
+				// Update target to be cloned/original world instance
+				if (world.ResourcePath.FullPath.Replace(" (Clone)", "") !=
+					m_Target.ResourcePath.FullPath.Replace(" (Clone)", ""))
+					break;
+
+				Inspector.SetTarget(world);
+				break;
+			}
 		}
 
 		public override void OnTargetChanged()
@@ -40,6 +60,7 @@ namespace YonaiEditor.Inspectors
 		public override void DrawInspector()
 		{
 			ImGUI.Text(m_Target.ResourcePath, Colour.Grey);
+			ImGUI.Text($"[{m_Target.ID}]", Colour.Grey);
 			ImGUI.Text($"Entities: {m_Target.EntityCount}", Colour.Grey);
 			
 			ImGUI.BeginChild("WorldInspectorSystems");
