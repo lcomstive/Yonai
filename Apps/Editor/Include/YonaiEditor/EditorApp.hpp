@@ -6,19 +6,17 @@
 #include <unordered_map>
 #include <Yonai/World.hpp>
 #include <Yonai/Application.hpp>
+#include <Yonai/SystemManager.hpp>
 #include <YonaiEditor/ProjectInfo.hpp>
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Graphics/RenderTexture.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
-#include <YonaiEditor/Systems/ImGUISystem.hpp>
 
 namespace YonaiEditor
 {
 	class EditorApp : public Yonai::Application
 	{
-		ProjectInfo m_ProjectInfo = {};
-		std::filesystem::path m_ProjectPath;
-		Systems::ImGUISystem* m_ImGUISystem = nullptr;
+		static Yonai::SystemManager m_SystemManager;
 
 		void Draw();
 
@@ -30,8 +28,10 @@ namespace YonaiEditor
 		void LaunchEditorService();
 
 	public:
-		EditorApp() : Yonai::Application() {}
-		EditorApp(int argc, char** argv) : Yonai::Application(argc, argv) {}
+		EditorApp();
+		EditorApp(int argc, char** argv);
+
+		static Yonai::SystemManager& GetSystemManager();
 
 	protected:
 		void Setup() override;

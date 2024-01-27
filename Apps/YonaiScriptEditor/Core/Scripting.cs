@@ -21,5 +21,8 @@ namespace YonaiEditor
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool _DebuggingEnabled();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void _GlobalSystemManagerShouldUpdate(bool shouldUpdate);
 	}
 }

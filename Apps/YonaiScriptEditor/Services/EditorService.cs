@@ -20,7 +20,7 @@ namespace YonaiEditor
 		public static EditorState State
 		{
 			get => m_State;
-			set => Get<EditorService>().UpdateState(value);
+			set => EditorSystems.Get<EditorService>().UpdateState(value);
 		}
 
 		/// <summary>
@@ -85,7 +85,7 @@ namespace YonaiEditor
 
 			Log.Error("Disabled editor service");
 
-			Remove<EditorUIService>();
+			EditorSystems.Remove<EditorUIService>();
 			Remove<BehaviourSystem>();
 
 			Resource.SaveDatabase();
@@ -109,7 +109,7 @@ namespace YonaiEditor
 			// Settings save/load location
 			ImGUI.SetIniFilename(VFS.ExpandPath(ImGUIFile));
 
-			Add<ImGUISystem>()?.Enable(true);
+			EditorSystems.Enable<ImGUISystem>();
 
 			// Window set initial content scale and listen for change
 			OnWindowContentScaleChanged(Window.ContentScaling);
@@ -188,11 +188,15 @@ namespace YonaiEditor
 				m_ClonedWorlds[i].OnDeserialize(activeScenes[i].OnSerialize());
 				SceneManager.Load(m_ClonedWorlds[i], SceneAddType.Additive);
 			}
+
+			Scripting._GlobalSystemManagerShouldUpdate(true);
 		}
 
 		private void ExitPlayMode()
 		{
 			Log.Trace("Exiting play mode");
+			
+			Scripting._GlobalSystemManagerShouldUpdate(false);
 
 			SceneManager.UnloadAll();
 

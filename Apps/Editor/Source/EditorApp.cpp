@@ -34,10 +34,12 @@ using namespace Yonai::Components;
 
 namespace fs = std::filesystem;
 
-string ImGuiIniFilename = "";
-string ProjectPathArg = "projectpath";
 string AssembliesDirectory = "/Assets/Mono";
 string YonaiScriptEditorPath = AssembliesDirectory + "/YonaiScriptEditor.dll";
+SystemManager EditorApp::m_SystemManager = SystemManager(nullptr);
+
+EditorApp::EditorApp() : Yonai::Application() { }
+EditorApp::EditorApp(int argc, char** argv) : Yonai::Application(argc, argv) { }
 
 void EditorApp::Setup()
 {
@@ -46,21 +48,25 @@ void EditorApp::Setup()
 	InitialiseScripting();
 
 	// Add global systems
+	SystemManager::Global()->ShouldUpdate = false;
 	SystemManager::Global()->Add<AudioSystem>();
 
 	if (!HasArg("build"))
 	{
+		m_SystemManager.Add<ImGUISystem>(false /* Enable from C# side after setting INI filename and other settings */);
 		SystemManager::Global()->Add<SceneSystem>();
-		m_ImGUISystem = SystemManager::Global()->Add<ImGUISystem>(false);
 	}
-		
+	
 	LaunchEditorService();
+
+	m_SystemManager.Enable(true);
 }
 
 void EditorApp::Cleanup()
 {
 	Application::Cleanup();
 
+	m_SystemManager.Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<SceneSystem>();
 	SystemManager::Global()->Remove<AudioSystem>();
 }
@@ -69,6 +75,8 @@ void EditorApp::OnUpdate()
 {
 	if(ScriptEngine::AwaitingReload())
 		ScriptEngine::Reload();
+
+	m_SystemManager.Update();
 
 	Draw();
 }
@@ -82,7 +90,7 @@ void EditorApp::LaunchEditorService()
 	// Let managed code add & remove native ImGUISystem
 	assembly->BindManagedSystem<Systems::ImGUISystem>("YonaiEditor.Systems", "ImGUISystem");
 
-	SystemManager::Global()->Add(editorService);
+	m_SystemManager.Add(editorService);
 }
 
 void EditorApp::InitialiseScripting()
@@ -100,9 +108,10 @@ void EditorApp::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	SystemManager::Global()->Draw();
+	m_SystemManager.Draw();
 
 	Window::SwapBuffers();
 	Window::PollEvents();
-
-	Time::OnFrameEnd();
 }
+
+SystemManager& EditorApp::GetSystemManager() { return m_SystemManager; }

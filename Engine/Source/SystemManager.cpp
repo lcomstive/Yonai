@@ -63,6 +63,8 @@ SystemManager* SystemManager::Global()
 
 void SystemManager::Update()
 {
+	if (!ShouldUpdate) return;
+
 	for (auto& pair : m_Systems)
 		if (pair.second->IsEnabled())
 			pair.second->Update();
@@ -70,6 +72,8 @@ void SystemManager::Update()
 
 void SystemManager::Draw()
 {
+	if (!ShouldDraw) return;
+
 	for (auto& pair : m_Systems)
 		if (pair.second->IsEnabled())
 			pair.second->Draw();

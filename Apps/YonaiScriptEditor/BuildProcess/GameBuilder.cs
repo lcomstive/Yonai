@@ -96,7 +96,7 @@ namespace YonaiEditor.BuildProcess
 
 		internal static void ConstructBuildMenu()
 		{
-			EditorUIService editorUI = YonaiSystem.Get<EditorUIService>();
+			EditorUIService editorUI = EditorSystems.Get<EditorUIService>();
 			editorUI.AddMenuItemDirectory("Build");
 
 			foreach (Platform platform in AvailableBuildPlatforms)

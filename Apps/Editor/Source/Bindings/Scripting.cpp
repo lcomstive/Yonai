@@ -1,6 +1,8 @@
+#include <Yonai/SystemManager.hpp>
 #include <Yonai/Scripting/ScriptEngine.hpp>
 #include <Yonai/Scripting/InternalCalls.hpp>
 
+using namespace Yonai;
 using namespace Yonai::Scripting;
 
 ADD_MANAGED_METHOD(Scripting, Reload, void, (), YonaiEditor)
@@ -27,3 +29,6 @@ ADD_MANAGED_METHOD(Scripting, IsAssemblyLoaded, bool, (MonoString* pathRaw), Yon
 
 ADD_MANAGED_METHOD(Scripting, IsAssemblyReloading, bool, (), YonaiEditor)
 { return ScriptEngine::IsReloading(); }
+
+ADD_MANAGED_METHOD(Scripting, _GlobalSystemManagerShouldUpdate, void, (bool shouldUpdate), YonaiEditor)
+{ SystemManager::Global()->ShouldUpdate = shouldUpdate; }

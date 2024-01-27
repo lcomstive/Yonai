@@ -129,14 +129,14 @@ namespace YonaiEditor.Views
 
 			m_Controller.Update();
 
-			if (Input.IsKeyPressed(Key.G)) m_GizmoModeLocal = !m_GizmoModeLocal;
-			if (Input.IsKeyDown(Key.LeftShift) && Input.IsKeyPressed(Key.O))
+			if (ImGUI.IsKeyPressed(Key.G)) m_GizmoModeLocal = !m_GizmoModeLocal;
+			if (ImGUI.IsKeyDown(Key.LeftShift) && Input.IsKeyPressed(Key.O))
 				m_Camera.Orthographic = !m_Camera.Orthographic;
 
-			if (Input.IsKeyPressed(Key.Z)) m_GizmoMode = ImGUI.ManipulateOperation.Translate;
-			if (Input.IsKeyPressed(Key.X)) m_GizmoMode = ImGUI.ManipulateOperation.Rotate;
-			if (Input.IsKeyPressed(Key.C)) m_GizmoMode = ImGUI.ManipulateOperation.Scale;
-			if (Input.IsKeyPressed(Key.V)) m_GizmoMode = ImGUI.ManipulateOperation.Universal;
+			if (ImGUI.IsKeyPressed(Key.Z)) m_GizmoMode = ImGUI.ManipulateOperation.Translate;
+			if (ImGUI.IsKeyPressed(Key.X)) m_GizmoMode = ImGUI.ManipulateOperation.Rotate;
+			if (ImGUI.IsKeyPressed(Key.C)) m_GizmoMode = ImGUI.ManipulateOperation.Scale;
+			if (ImGUI.IsKeyPressed(Key.V)) m_GizmoMode = ImGUI.ManipulateOperation.Universal;
 		}
 
 		private void DrawTransformGizmo()

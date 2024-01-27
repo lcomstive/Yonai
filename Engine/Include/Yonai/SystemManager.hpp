@@ -24,6 +24,16 @@ namespace Yonai
 		YonaiAPI Scripting::ManagedData CreateManagedInstance(size_t typeHash);
 
 	public:
+		/// <summary>
+		/// When enabled, calls Draw() every frame
+		/// </summary>
+		YonaiAPI bool ShouldDraw = true;
+
+		/// <summary>
+		/// When enabled, calls Update() every frame
+		/// </summary>
+		YonaiAPI bool ShouldUpdate = true;
+
 		YonaiAPI SystemManager(World* owner);
 
 		YonaiAPI void Enable(bool enable = true);

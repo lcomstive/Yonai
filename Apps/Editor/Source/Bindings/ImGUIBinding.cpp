@@ -9,6 +9,7 @@
 #include <Yonai/Resource.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <YonaiEditor/EditorApp.hpp>
 #include <Yonai/Graphics/Texture.hpp>
 #include <Yonai/Components/Camera.hpp>
 #include <Yonai/Graphics/RenderTexture.hpp>
@@ -29,11 +30,11 @@ ImVec4 ToVec4(glm::vec4* value) { return ImVec4(value->x, value->y, value->z, va
 ImColor ToColor(glm::vec4* value) { return ImColor(value->x, value->y, value->z, value->w); }
 
 ADD_MANAGED_METHOD(ImGUI, SetCurrentContext, void, (), YonaiEditor)
-{ ImGui::SetCurrentContext(SystemManager::Global()->Get<ImGUISystem>()->GetContext()); }
+{ ImGui::SetCurrentContext(YonaiEditor::EditorApp::GetSystemManager().Get<ImGUISystem>()->GetContext()); }
 
 ADD_MANAGED_METHOD(ImGUI, SetIniFilename, void, (MonoString* pathRaw), YonaiEditor)
 {
-	ImGUISystem* imguiSystem = SystemManager::Global()->Get<ImGUISystem>();
+	ImGUISystem* imguiSystem = YonaiEditor::EditorApp::GetSystemManager().Get<ImGUISystem>();
 	if (!imguiSystem)
 	{
 		spdlog::warn("ImGUI IniFilename not set - ImGUISystem not found in global systems");
