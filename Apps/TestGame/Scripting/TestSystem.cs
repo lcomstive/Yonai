@@ -27,9 +27,11 @@ namespace TestGame
 
 			// Add<SteamSystem>().Enable();
 
+			/*
 			World.AddSystem<CameraControlSystem>();
 			World.AddSystem<DelayAudioSystem>();
 			World.AddSystem<MoveAlongPathSystem>();
+			*/
 
 			// Load test texture
 			m_Texture = Resource.Load<Texture>("assets://Textures/texture_09.png");

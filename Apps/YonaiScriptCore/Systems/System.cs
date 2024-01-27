@@ -13,7 +13,7 @@ namespace Yonai
 		public World World { get; private set; } = null;
 
 		private bool m_Enabled = false;
-		[HideInInspector]
+		[HideInInspector, Serialize]
 		public bool IsEnabled
 		{
 			get => m_Enabled;
