@@ -70,6 +70,7 @@
     <Compile Include="Components/SceneViewCameraController.cs" />
 
     <!-- Core -->
+    <Compile Include="Core/EditorSystems.cs" />
     <Compile Include="Core/FileDialog.cs" />
     <Compile Include="Core/Icons.cs" />
     <Compile Include="Core/LocalProjectSettings.cs" />
