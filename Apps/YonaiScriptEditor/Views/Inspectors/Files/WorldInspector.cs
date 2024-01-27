@@ -75,7 +75,8 @@ namespace YonaiEditor.Inspectors
 				{
 					YonaiSystem system = systems[i];
 
-					if (!ImGUI.Foldout(system.GetType().Name, true))
+					string systemName = system.GetType().Name;
+					if (!ImGUI.Foldout(systemName, true))
 						continue;
 
 					SetupTable();
@@ -83,7 +84,7 @@ namespace YonaiEditor.Inspectors
 					ImGUI.EndTable();
 
 					bool enabled = system.IsEnabled;
-					if (ImGUI.Checkbox("Enable", ref enabled))
+					if (ImGUI.Checkbox("Enable##" + systemName, ref enabled))
 						system.Enable(enabled);
 					ImGUI.SameLine();
 
