@@ -99,6 +99,7 @@
     <Compile Include="Views/Inspectors/Components/AudioListenerInspector.cs" />
     <Compile Include="Views/Inspectors/Components/AudioSourceInspector.cs" />
     <Compile Include="Views/Inspectors/Components/CameraInspector.cs" />
+    <Compile Include="Views/Inspectors/Components/TransformInspector.cs" />
     <Compile Include="Views/Inspectors/Files/AudioDataInspector.cs" />
     <Compile Include="Views/Inspectors/Files/AudioMixerInspector.cs" />
     <Compile Include="Views/Inspectors/Files/MaterialInspector.cs" />
