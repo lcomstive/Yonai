@@ -119,6 +119,8 @@ namespace Yonai
 			Entity[] previousEntities = Entities ?? new Entity[0];
 			foreach (Entity entity in previousEntities)
 			{
+				if (!HasEntity(entity.ID)) continue;
+
 				entity.Destroy();
 				_DestroyEntity(ID, entity.ID);
 			}

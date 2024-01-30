@@ -111,6 +111,20 @@ namespace Yonai
 		/// </summary>
 		public void Destroy()
 		{
+			// Destroy children if transform component exists
+			if (TryGetComponent(out Transform transform))
+			{
+				Transform[] children = transform.GetChildren();
+
+				for (int i = children.Length - 1; i >= 0; i--)
+				{
+					// Double check entity still exists
+					if (children[i]?.Entity != null && World.HasEntity(children[i].Entity.ID))
+						children[i]?.Entity.Destroy();
+				}
+			}
+
+			// Remove entity from world
 			if (World.HasEntity(ID))
 				World.RemoveEntity(ID);
 

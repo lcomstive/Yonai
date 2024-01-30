@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Yonai
 {
-	public class Transform : Component
+	public class Transform : Component, IDisposable
 	{
 		[Serialize(Label = "Position")]
 		public Vector3 LocalPosition
@@ -148,6 +148,12 @@ namespace Yonai
 				if(Parent == null)
 					Log.Warning("Parent transform not found while deserialising transform component");
 			}
+		}
+
+		public void Dispose()
+		{
+			// Tell parent to remove us from it's list of children
+			Parent?.RemoveChild(this);
 		}
 
 		#region Internal Calls

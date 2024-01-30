@@ -47,6 +47,10 @@ namespace YonaiEditor.Views
 
 				foreach (Entity entity in entities)
 				{
+					// Check that entity still exists in world, may have been removed
+					// (e.g. when destroying a transform's parent entity)
+					if(!world.HasEntity(entity.ID)) continue;
+
 					Transform transform = entity.GetComponent<Transform>();
 					if (!transform || transform.Parent == null)
 						DrawEntity(entity, transform);
@@ -99,10 +103,10 @@ namespace YonaiEditor.Views
 				InspectorView.Target = entity.World.GetEntity(entity.ID);
 			}
 
-			DrawContextMenu(entity);
+			bool entityModified = DrawContextMenu(entity);
 			HandleEntityDragDrop(entity, transform, nameComponent);
 
-			if (!nodeOpen) return;
+			if (!nodeOpen || entityModified) return;
 
 			foreach (Transform child in children)
 				DrawEntity(child.Entity, child);
@@ -119,14 +123,20 @@ namespace YonaiEditor.Views
 				EditorUIService.Close<HierarchyView>();
 		}
 
-		private void DrawContextMenu(Entity entity)
+		/// <returns>True if entity or it's transform has been modified</returns>
+		private bool DrawContextMenu(Entity entity)
 		{
+			bool modified = false;
 			if (!ImGUI.BeginPopupContextItem($"Hierarchy:{entity.World.ID}:{entity.ID}", ImGUI.PopupFlags.MouseButtonRight))
-				return;
+				return modified;
 			// InspectorView.Target = entity;
 
 			if (ImGUI.Selectable("Delete"))
-				entity.Destroy();
+			{
+				try { entity.Destroy(); }
+				catch(Exception e) { Log.Exception(e); }
+				modified = true;
+			}
 
 			if (ImGUI.Selectable("Inspect"))
 				InspectorView.Open(entity.World.GetEntity(entity.ID)); // Pass copy of entity as target
@@ -136,6 +146,8 @@ namespace YonaiEditor.Views
 			DrawContextMenuContents(entity.World, true);
 
 			ImGUI.EndPopup();
+
+			return modified;
 		}
 
 		private void DrawContextMenu(World world)
