@@ -27,3 +27,6 @@ ADD_MANAGED_METHOD(Log, NativeLog, void, (MonoString* rawMsg, int level))
 	}
 	mono_free(msg);
 }
+
+ADD_MANAGED_METHOD(Log, Flush)
+{ spdlog::default_logger()->flush(); }

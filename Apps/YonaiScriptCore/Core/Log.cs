@@ -30,6 +30,11 @@ namespace Yonai
 		public static void Error(string msg) => ProcessMessage(msg, LogLevel.Error);
 		public static void Critical(string msg) => ProcessMessage(msg, LogLevel.Critical);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void _Flush();
+
+		public static void Flush() => _Flush();
+
 		private static string FormatException(Exception e)
 		{
 			string msg = string.Empty;
