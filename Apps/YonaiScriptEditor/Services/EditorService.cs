@@ -177,7 +177,6 @@ namespace YonaiEditor
 			Log.Trace("Entering play mode");
 
 			World[] activeScenes = SceneManager.GetActiveScenes();
-			SceneManager.UnloadAll();
 
 			m_EditModeSceneIDs = new UUID[activeScenes.Length];
 			m_ClonedWorlds = new World[activeScenes.Length];
@@ -185,7 +184,11 @@ namespace YonaiEditor
 			{
 				m_EditModeSceneIDs[i] = activeScenes[i].ID;
 				m_ClonedWorlds[i] = Resource.Load<World>(activeScenes[i].ResourcePath + " (Clone)", saveToDisk: false);
+				Log.Debug($"Cloned world '{activeScenes[i].Name}' [{activeScenes[i].ID}] -> '{m_ClonedWorlds[i].Name}' [{m_ClonedWorlds[i].ID}]");
+
 				m_ClonedWorlds[i].OnDeserialize(activeScenes[i].OnSerialize());
+
+				SceneManager.Unload(activeScenes[i]);
 				SceneManager.Load(m_ClonedWorlds[i], SceneAddType.Additive);
 			}
 

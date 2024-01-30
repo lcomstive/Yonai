@@ -53,8 +53,6 @@ namespace TestGame
 
 		protected override void Destroyed() => Remove<SteamSystem>();
 
-		protected override void Disabled() => World.RemoveSystem<CameraControlSystem>();
-
 		protected override void Update()
 		{			
 			m_SpriteShader.Set("multiplier", Time.TimeSinceLaunch);

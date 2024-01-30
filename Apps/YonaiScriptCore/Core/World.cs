@@ -164,9 +164,9 @@ namespace Yonai
 						if (systemType != null && YonaiSystemType.IsAssignableFrom(systemType))
 						{
 							YonaiSystem system = AddSystem(systemType);
-							system.Enable(m_IsActive);
 							JObject value = systemJSON.Value.Value<JObject>();
 							system.OnDeserialize(value);
+							// system.Enable(system.IsEnabled);
 						}
 						else
 							Log.Warning($"Could not find YonaiSystem type '{systemJSON.Name}'");
@@ -210,7 +210,7 @@ namespace Yonai
 			// Handle systems
 			YonaiSystem[] systems = m_Systems.Values.ToArray();
 			foreach(YonaiSystem system in systems)
-				system.Enable(m_IsActive);
+				system.Enable(system.IsEnabled && m_IsActive);
 
 			StateChanged?.Invoke(m_IsActive);
 		}
