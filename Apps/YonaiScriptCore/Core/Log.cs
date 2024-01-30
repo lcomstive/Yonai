@@ -15,6 +15,11 @@ namespace Yonai
 
 	public static class Log
 	{
+		/// <summary>
+		/// When enabled, prints stack traces for all logged messages to the native log
+		/// </summary>
+		public static bool PrintStackTraces { get; set; } = false;
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _NativeLog(string msg, int level);
 
@@ -45,7 +50,11 @@ namespace Yonai
 
 		private static void ProcessMessage(string msg, LogLevel level)
 		{
-			_NativeLog(msg, (int)level);
+			string nativeMsg = msg;
+			if (PrintStackTraces)
+				nativeMsg += $"\n\t{new System.Diagnostics.StackTrace(2, true)}\n";
+			_NativeLog(nativeMsg, (int)level);
+
 			Message?.Invoke(msg, level);
 		}
 

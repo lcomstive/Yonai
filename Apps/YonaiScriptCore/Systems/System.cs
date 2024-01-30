@@ -21,7 +21,7 @@ namespace Yonai
 		}
 
 		[Serialize(false)]
-		public virtual bool IsGlobal { get; } = false;
+		public virtual bool IsGlobal => false;
 
 		/// <summary>
 		/// Called once per frame after <see cref="Update"/>,
@@ -64,10 +64,19 @@ namespace Yonai
 
 		public virtual JObject OnSerialize() => SerializableHelper.OnSerializeDefault(this);
 
-		public virtual void OnDeserialize(JObject json) => SerializableHelper.OnDeserializeDefault(this, json);
+		public virtual void OnDeserialize(JObject json)
+		{
+			if (json.TryGetValue("IsEnabled", out JToken isEnabledToken))
+				Log.Trace($"System '{GetType().Name}' is being deserialized. Enabled: " + isEnabledToken.Value<string>());
 
-		public void Enable(bool enable = true) =>
+			SerializableHelper.OnDeserializeDefault(this, json);
+		}
+
+		public void Enable(bool enable = true)
+		{
+			Log.Trace((enable ? "Enabling" : "Disabling") + $" '{GetType().Name}' system");
 			World._EnableSystem(World?.ID ?? GlobalWorldID, GetType(), enable);
+		}
 
 		#region Global Systems
 		private static UUID GlobalWorldID = UUID.Invalid;

@@ -69,6 +69,8 @@ void Application::InitLogger()
 	auto logger = make_shared<spdlog::logger>(spdlog::logger("Engine", { consoleSink, fileSink }));
 	logger->set_level(spdlog::level::trace);
 	spdlog::set_default_logger(logger);
+
+	spdlog::flush_every(5s);
 }
 
 Application::Application()
