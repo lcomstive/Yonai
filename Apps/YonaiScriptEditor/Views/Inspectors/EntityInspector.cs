@@ -111,7 +111,7 @@ namespace YonaiEditor.Inspectors
 				return;
 
 			bool foldout = ImGUI.Foldout(type.Name, true);
-			DrawComponentContextMenu(type, component);
+			DrawComponentContextMenu(type, component, inspector);
     
 			if (!foldout)
 	           return;
@@ -125,7 +125,7 @@ namespace YonaiEditor.Inspectors
 			ImGUI.Unindent();
 		}
 
-		private void DrawComponentContextMenu(Type type, Component component)
+		private void DrawComponentContextMenu(Type type, Component component, CustomInspector inspector)
 		{
 			if (ImGUI.BeginPopupContextItem($"Inspector:{m_Target.ID}:{type.FullName}", ImGUI.PopupFlags.MouseButtonRight))
 			{
@@ -141,8 +141,11 @@ namespace YonaiEditor.Inspectors
 				}
 				if (ImGUI.Selectable("Reset"))
 				{
-					m_Target.RemoveComponent(type);
-					m_Target.AddComponent(type);
+					if(!inspector.OnReset())
+					{
+						m_Target.RemoveComponent(type);
+						m_Target.AddComponent(type);
+					}
 				}
 				ImGUI.EndPopup();
 			}

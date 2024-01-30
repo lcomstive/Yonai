@@ -51,6 +51,12 @@ namespace YonaiEditor
 		}
 
 		/// <summary>
+		/// When resetting the target (used for components)
+		/// </summary>
+		/// <returns>True if handled, false if not</returns>
+		public virtual bool OnReset() => false;
+
+		/// <summary>
 		/// Sets up a 2-column table. Left for label, right for value.
 		/// <b>Don't forget to call <see cref="ImGUI.EndTable"/>.</b>
 		/// </summary>
