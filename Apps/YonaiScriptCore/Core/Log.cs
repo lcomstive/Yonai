@@ -30,6 +30,18 @@ namespace Yonai
 		public static void Error(string msg) => ProcessMessage(msg, LogLevel.Error);
 		public static void Critical(string msg) => ProcessMessage(msg, LogLevel.Critical);
 
+		/// <summary>
+		/// Prints the current stacktrace to the trace debug output
+		/// </summary>
+		/// <param name="additionalMsg">Message to output prior to the stacktrace</param>
+		public static void OutputStack(string additionalMsg = "")
+		{
+			bool stackTrace = PrintStackTraces;
+			PrintStackTraces = true;
+			ProcessMessage(additionalMsg, LogLevel.Trace);
+			PrintStackTraces = stackTrace;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _Flush();
 

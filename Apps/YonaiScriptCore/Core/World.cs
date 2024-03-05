@@ -77,9 +77,10 @@ namespace Yonai
 		{
 			SceneManager.Unload(this);
 
-			UUID[] keys = m_Entities.Keys.ToArray();
-			foreach (UUID entity in keys)
-				DestroyEntity(entity);
+			Entity[] entities = Entities;
+			for (int i = entities.Length - 1; i >= 0; i--)
+				if (HasEntity(entities[i].ID)) // Check still exists, may have been destroyed (e.g. transform child)
+					entities[i].Destroy();
 		}
 
 		protected override void OnImported()
