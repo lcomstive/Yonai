@@ -188,10 +188,18 @@ namespace YonaiEditor.Systems
 
 		private void AddProject(string directory)
 		{
-			ProjectFile? projectFile = ReadProjectFile(directory);
-			if (projectFile.HasValue && !m_Projects.ContainsKey(projectFile.Value.Path))
-				m_Projects.Add(projectFile.Value.Path, projectFile.Value);
-			SaveProjects();
+			try
+			{
+				ProjectFile? projectFile = ReadProjectFile(directory);
+				if(projectFile == null)
+					projectFile = CreateProject(directory);
+
+				if(projectFile.HasValue && !m_Projects.ContainsKey(projectFile.Value.Path))
+					m_Projects.Add(projectFile.Value.Path, projectFile.Value);
+
+				SaveProjects();
+			}
+			catch(System.Exception e) { Log.Exception(e); }
 		}
 
 		private static ProjectFile? ReadProjectFile(string directory)
@@ -206,6 +214,44 @@ namespace YonaiEditor.Systems
 			}
 
 			return ProjectFile.FromPath(jsonPath);
+		}
+
+		const string ProjectTemplatePath = "app://Assets/ProjectTemplate";
+		private static ProjectFile CreateProject(string directory)
+		{
+			directory = directory.TrimEnd('/');
+			Log.Debug($"Creating new project in directory '{directory}'");
+			string projectName = directory.Substring(directory.LastIndexOf('/') + 1);
+			Log.Debug($"Project name: " + projectName);
+
+			ProjectFile project = new ProjectFile(projectName);
+			project.Path = $"{directory}/Project.json";
+			project.Assemblies = new string[]
+			{
+				$"project://Scripting/bin/{projectName}.dll"
+			};
+
+			// Create assets
+			Log.Debug($"Copying project template from '{ProjectTemplatePath}'");
+			VFS.Copy(ProjectTemplatePath, directory);
+
+			Log.Debug($"Writing project file '{directory}/Project.json'");
+			VFS.Write($"{directory}/Project.json", project);
+
+			Log.Debug("Creating assets directory");
+			VFS.CreateDirectory($"{directory}/Assets/");
+
+			// Create C# project
+			Log.Debug($"Writing C# project file");
+			VFSFile csprojFile = $"{directory}/Scripting/{projectName}.csproj";
+			VFS.Move($"{directory}/Scripting/Project.csproj", csprojFile);
+			string csproj = VFS.ReadText(csprojFile);
+			csproj = csproj
+				.Replace("$<ProjectName>", projectName)
+				.Replace("$<EditorDir>", Application.ExecutableDirectory);
+			VFS.Write(csprojFile, csproj);
+
+			return project;
 		}
 	}
 }

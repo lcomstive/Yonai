@@ -61,13 +61,15 @@ namespace Yonai.IO
 				return;
 			}
 
+			bool isDirectory = Directory.Exists(ExpandPath(source.FullPath));
+
 			// Add filename if destination is directory.
 			// e.g. Copying "./Test.txt" to "./A/B/" writes to "./A/B/Test.txt"
-			if (!source.IsDirectory && destination.IsDirectory)
+			if (!isDirectory && destination.IsDirectory)
 				destination += source.FileName;
 
 			// Copy file
-			if (!source.IsDirectory)
+			if (!isDirectory)
 			{
 				destinationMapping.Write(destination, Read(source));
 				return;
@@ -110,7 +112,7 @@ namespace Yonai.IO
 		{
 			string targetDir = ExpandPath(target);
 			if(!targetDir.EndsWith("/"))
-				target += "/";
+				targetDir += "/";
 			return Directory.CreateDirectory(targetDir)?.Exists ?? false;
 		}
 
