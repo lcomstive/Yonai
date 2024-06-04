@@ -135,7 +135,7 @@ ResourceID Model::CreateMaterial(aiMaterial* aiMat)
 {
 	filesystem::path path(m_Path);
 	string currentDirectory = path.parent_path().string() + "/"; // Get directory of model path
-	string materialName = "Materials/" + path.filename().string() + "/" + aiMat->GetName().C_Str();
+	string materialName = currentDirectory + "Materials/" + aiMat->GetName().C_Str() + ".material";
 
 	ResourceID materialID = Resource::Load<Material>(materialName);
 	Material* material = Resource::Get<Material>(materialID);

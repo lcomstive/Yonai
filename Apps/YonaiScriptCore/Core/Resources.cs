@@ -115,7 +115,6 @@ namespace Yonai
 		public static T Load<T>(string path, bool saveToDisk) where T : ResourceBase, new()
 			=> Load<T>(path, null, saveToDisk);
 
-
 		internal static ResourceBase Load(UUID resourceID, string path, Type type)
 		{
 			// Ensure type inherits from ResourceBase
@@ -230,6 +229,40 @@ namespace Yonai
 		}
 
 		/// <summary>
+		/// Moves a resource's path
+		/// </summary>
+		/// <returns>True if moved, otherwise false</returns>
+		public static bool Move(UUID resourceID, VFSFile newPath)
+		{
+			if (!Exists(resourceID)) return false;
+			if (!VFS.Exists(newPath.ParentDirectory))
+			{
+				if (!VFS.CreateDirectory(newPath.ParentDirectory))
+				{
+					Log.Error($"Failed to move resource [{resourceID}] - could not create desination directory");
+					return false;
+				}
+			}
+
+
+			ResourceBase resource = Get(resourceID);
+			string oldPath = resource.ResourcePath;
+
+			// Update resource path
+			resource.ResourcePath = newPath;
+
+			// Update internally tracked path
+			s_Paths.Remove(resource.ResourcePath);
+			s_Paths.Add(newPath, resourceID);
+
+			// Move cache file
+			if (VFS.Exists(oldPath + ".cache"))
+				VFS.Move(oldPath + ".cache", newPath + ".cache");
+
+			return true;
+		}
+
+		/// <summary>
 		/// Saves all resources to a file
 		/// </summary>
 		public static void SaveDatabase(string database = DatabaseFilePath)
@@ -340,6 +373,9 @@ namespace Yonai
 			SaveToDisk(default2DShader);
 			SaveToDisk(default2DMaterial);
 		}
+
+		public static void SaveToDisk(UUID resourceID, bool suppressWarnings = false) =>
+			SaveToDisk(Resource.Get(resourceID), suppressWarnings);
 
 		public static void SaveToDisk(ResourceBase resource, bool suppressWarnings = false)
 		{

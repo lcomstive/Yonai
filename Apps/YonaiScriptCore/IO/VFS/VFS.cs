@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Yonai.IO
 {
@@ -34,6 +35,31 @@ namespace Yonai.IO
 
 		/// <returns><paramref name="file"/> as an absolute path on the device's filesystem</returns>
 		public static VFSFile? ExpandPath(VFSFile file, bool needExistingFile = false) => GetMapping(file, needExistingFile)?.ExpandPath(file) ?? null;
+
+		/// <summary>
+		/// Transforms an absolute path into a VFS filepath
+		/// </summary>
+		/// <returns>Shrunk filepath if valid mapping found, otherwise <paramref name="path"/></returns>
+		public static VFSFile AbsoluteToVFSPath(string path, bool needExistingFile = false)
+		{
+			VFSFile vfsPath = path.Replace('\\', '/');
+
+			foreach (List<VFSMapping> mappings in s_Mappings.Values)
+			{
+				foreach (VFSMapping mapping in mappings)
+				{
+					if (!vfsPath.ParentDirectory.Contains(mapping.MountPath) ||
+						string.IsNullOrEmpty(mapping.MountPoint))
+						continue;
+
+					Log.Debug($"AbsoluteToVFSPath using mount:\n\tPoint: {mapping.MountPoint}\n\t Path: {mapping.MountPath}");
+
+					vfsPath = path.Replace('\\', '/').Replace(mapping.MountPath, mapping.MountPoint);
+					Log.Debug($"Transformed to VFS path:\n\t{path}\n\t{vfsPath}");
+				}
+			}
+			return vfsPath;
+		}
 
 		#region Mounting and Mappings
 		public static bool HasMount(string mountPoint) => s_Mappings.ContainsKey(mountPoint);

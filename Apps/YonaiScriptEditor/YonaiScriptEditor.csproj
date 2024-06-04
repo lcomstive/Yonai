@@ -92,6 +92,7 @@
     <Compile Include="Services/EditorUIService.cs" />
     <Compile Include="Services/ImGUISystem.cs" />
     <Compile Include="Services/ProjectHub.cs" />
+    <Compile Include="Services/ResourceWatcher.cs" />
 
     <!-- Inspectors -->
     <Compile Include="Views/Inspectors/CustomInspector.cs" />

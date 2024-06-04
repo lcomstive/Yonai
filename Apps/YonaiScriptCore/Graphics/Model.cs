@@ -69,7 +69,12 @@ namespace Yonai.Graphics
 
 			Meshes = new MeshData[meshIDs.Length];
 			for (int i = 0; i < meshIDs.Length; i++)
+			{
 				Meshes[i] = new MeshData(meshIDs[i], materialIDs[i]);
+
+				if (materialIDs[i] != UUID.Invalid)
+					Resource.SaveToDisk(materialIDs[i]);
+			}
 		}
 
 		public JObject OnSerialize() => new JObject(

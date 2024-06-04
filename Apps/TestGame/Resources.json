@@ -1,41 +1,41 @@
 [
   {
-    "ID": "3772415245425134160",
+    "ID": "11220603760610491374",
     "Path": "assets://Textures/Grid.png",
     "Type": "Yonai.Graphics.Texture, YonaiScriptCore"
   },
   {
-    "ID": "5235540878020691345",
+    "ID": "7047850307047603178",
     "Path": "assets://Shaders/Default3D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "13590224710412028928",
+    "ID": "4660857580429812836",
     "Path": "assets://Materials/Default3D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "12714212892350021641",
+    "ID": "4093623488681293116",
     "Path": "assets://Shaders/Default2D.shader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
   },
   {
-    "ID": "9535833440936436931",
+    "ID": "10047505627185163164",
     "Path": "assets://Materials/Default2D.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
-    "ID": "4101184059039961157",
+    "ID": "9916682012850500108",
     "Path": "assets://Models/Quad.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "18212705742910020593",
+    "ID": "6453732752474319761",
     "Path": "assets://Models/Cube.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "16398794248892626764",
+    "ID": "15195891463851431599",
     "Path": "assets://Models/Sphere.fbx",
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
@@ -550,13 +550,18 @@
     "Type": "Yonai.Graphics.Model, YonaiScriptCore"
   },
   {
-    "ID": "14609016155530069684",
-    "Path": "Materials/Survival_BackPack_2.fbx/DefaultMaterial",
+    "ID": "6939701967425318740",
+    "Path": "project://Assets/Models/Backpack/Materials/DefaultMaterial.material",
     "Type": "Yonai.Graphics.Material, YonaiScriptCore"
   },
   {
     "ID": "4648672003108639857",
     "Path": "assets://Shaders/NewSpriteShader",
     "Type": "Yonai.Graphics.Shader, YonaiScriptCore"
+  },
+  {
+    "ID": "13824558038547770434",
+    "Path": "editor://SceneView.world",
+    "Type": "Yonai.World"
   }
 ]
