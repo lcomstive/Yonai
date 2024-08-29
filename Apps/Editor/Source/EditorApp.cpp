@@ -49,7 +49,6 @@ void EditorApp::Setup()
 
 	// Add global systems
 	SystemManager::Global()->ShouldUpdate = false;
-	SystemManager::Global()->Add<AudioSystem>();
 
 	if (!HasArg("build"))
 	{
@@ -68,7 +67,6 @@ void EditorApp::Cleanup()
 
 	m_SystemManager.Remove<ImGUISystem>();
 	SystemManager::Global()->Remove<SceneSystem>();
-	SystemManager::Global()->Remove<AudioSystem>();
 }
 
 void EditorApp::OnUpdate()

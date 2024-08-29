@@ -177,6 +177,7 @@ namespace YonaiEditor
 			Log.Trace("Entering play mode");
 
 			World[] activeScenes = SceneManager.GetActiveScenes();
+			YonaiSystem.Get<AudioSystem>()?.Enable();
 
 			m_EditModeSceneIDs = new UUID[activeScenes.Length];
 			m_ClonedWorlds = new World[activeScenes.Length];
@@ -198,7 +199,8 @@ namespace YonaiEditor
 		private void ExitPlayMode()
 		{
 			Log.Trace("Exiting play mode");
-			
+
+			YonaiSystem.Get<AudioSystem>()?.Enable(false);
 			Scripting._GlobalSystemManagerShouldUpdate(false);
 
 			SceneManager.UnloadAll();

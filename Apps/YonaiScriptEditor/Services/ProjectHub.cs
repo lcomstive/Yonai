@@ -141,7 +141,7 @@ namespace YonaiEditor.Systems
 			// Add global systems
 			EditorSystems.Add<EditorUIService>();
 			EditorSystems.Add<ResourceWatcherService>();
-			Add<AudioSystem>();
+			Add<AudioSystem>().Enable(false);
 
 			BehaviourSystem behaviourSystem = Add<BehaviourSystem>();
 			if(behaviourSystem)
